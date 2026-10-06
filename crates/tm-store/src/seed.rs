@@ -129,7 +129,15 @@ fn watchlist() -> Vec<NewPlace> {
         a("LAS", "Las Vegas", "US", 36.17, -115.14),
         a("BOS", "Boston", "US", 42.36, -71.06),
         a("ORD", "Chicago", "US", 41.88, -87.63),
-        c("WAS", "Washington", "US", 38.90, -77.04),
+        // "Washington" alone resolves to the state; DC's ID is known.
+        NewPlace::city(
+            "WAS",
+            "Washington",
+            "US",
+            Some("/m/0rh6k"),
+            38.90,
+            -77.04,
+        ),
         a("ATL", "Atlanta", "US", 33.75, -84.39),
         a("DFW", "Dallas", "US", 32.78, -96.80),
         a("IAH", "Houston", "US", 29.76, -95.37),
