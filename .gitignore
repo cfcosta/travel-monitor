@@ -1,0 +1,6 @@
+/target
+/result
+.hegel/
+*.db
+*.db-shm
+*.db-wal

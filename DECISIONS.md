@@ -1,0 +1,649 @@
+# Decisions
+
+Each decision is recorded once, in the order it was made. A later
+decision that changes an earlier one says so and links back to it.
+
+## 0001: Monitor travel prices departing from São Paulo
+
+- Date: 2026-10-05
+- Refined by [0035](#0035-origins-and-destinations-are-configured-in-the-app): SAO and this list are only the initial configuration.
+
+The tool watches prices for trips that depart from São Paulo (city code
+SAO). Which airports and destinations are included is decided separately.
+
+## 0002: Written in Rust
+
+- Date: 2026-10-05
+
+The project is a Rust workspace, following the layout and tooling of
+`../tau-agent` and `../vs1`.
+
+## 0003: The interface uses gpui-pre
+
+- Date: 2026-10-05
+
+The UI is built with `gpui = { package = "gpui-pre", version = "=0.3.7" }`,
+the same pin `../tau-agent` uses. When one of the two projects moves the
+pin, the other moves with it.
+
+## 0004: Browsing is driven by Jev over Chrome CDP
+
+- Date: 2026-10-05
+
+Prices are read from real pages in a Chrome/Chromium instance, controlled
+through the Chrome DevTools Protocol. Jev, a decision model, chooses each
+navigation step, as the proof of concept in `../vs1` (`vs1-browser`)
+does. That proof of concept already reaches Google Flights results from a
+natural-language goal (`../vs1/examples/flights.json`).
+
+## 0005: The origin is the whole SAO city code
+
+- Date: 2026-10-05
+- Refined by [0035](#0035-origins-and-destinations-are-configured-in-the-app): SAO and this list are only the initial configuration.
+
+Searches use SAO, so GRU, CGH and VCP all count. An observation records
+the airport the fare actually departs from.
+
+## 0006: A pinned watchlist plus an Explore sweep
+
+- Date: 2026-10-05
+- Refined by [0035](#0035-origins-and-destinations-are-configured-in-the-app): SAO and this list are only the initial configuration.
+
+Destinations come from two sources:
+
+1. **A pinned watchlist.** Each route is searched on its own. The first
+   list (codes are cities or airports):
+   - Brazil: RIO, BSB, SSA, REC, FOR, FLN, POA, NAT, MCZ, IGU
+   - South America: BUE, SCL, MVD, LIM, BOG, BRC
+   - North America and Caribbean: MIA, MCO, NYC, CUN, PUJ
+   - Europe: LIS, OPO, MAD, BCN, PAR, LON, ROM
+   - Long-haul: DXB, TYO
+2. **An Explore sweep.** Google Flights Explore from SAO, with
+   destination "anywhere", records the cheapest price shown for every
+   destination. It finds cheap fares outside the watchlist.
+
+The watchlist is data, not code, so routes can be added or removed
+without a rebuild.
+
+## 0007: Observations are round trips of fixed lengths
+
+- Date: 2026-10-05
+- Refined by [0042](#0042-both-legs-are-tracked-per-day-round-trips-where-they-differ).
+
+A price observation is a round trip with a fixed trip length, sampled at
+several departure dates. Because the length is fixed, prices for the same
+route can be compared over time. The lengths and the date horizon are
+decided separately.
+
+## 0008: Track economy, premium economy and business
+
+- Date: 2026-10-05
+
+All three cabins are tracked. Premium economy and business are only
+searched on routes where they exist; which routes those are is decided
+separately.
+
+## 0009: Seven-day trips, departing up to six months ahead
+
+- Date: 2026-10-05
+- Refined by [0042](#0042-both-legs-are-tracked-per-day-round-trips-where-they-differ).
+- Completes [0007](#0007-observations-are-round-trips-of-fixed-lengths).
+
+Every round trip is 7 days long, on every route. Departure dates cover
+the next six months.
+
+## 0010: Explore runs daily, the watchlist weekly
+
+- Date: 2026-10-05
+- Superseded by [0029](#0029-a-daily-budget-with-a-weekly-maximum-interval).
+
+The Explore sweep runs once a day. Each watchlist route is refreshed
+once a week. Routes are spread across the days of the week, so the
+daily load stays about even.
+
+## 0011: Prices come from Google Flights and airline sites
+
+- Date: 2026-10-05
+
+Google Flights is the main source. Airline sites are searched as well,
+because they sometimes sell fares that Google Flights does not show.
+Which airlines are included is decided separately.
+
+## 0012: Airline sites to search directly
+
+- Date: 2026-10-05
+- Completes [0011](#0011-prices-come-from-google-flights-and-airline-sites).
+
+- Brazilian carriers: LATAM, Azul, GOL.
+- Long-haul carriers that fly from GRU: TAP, Iberia, Air France/KLM,
+  American, United, Emirates, Qatar, Turkish.
+
+An airline site is searched only for the routes that airline flies.
+Each site is a separate integration, so they are added one at a time,
+after Google Flights works.
+
+## 0013: Departure dates come from Google's date grid
+
+- Date: 2026-10-05
+- Refined by [0042](#0042-both-legs-are-tracked-per-day-round-trips-where-they-differ).
+- Completes [0009](#0009-seven-day-trips-departing-up-to-six-months-ahead).
+
+For each route and cabin, the monitor reads Google Flights' date grid
+and price graph with the trip length fixed at 7 days. A few page loads
+cover six months of departures. A full search for one date is made only
+when that date needs more detail, for example to confirm a low price.
+
+## 0014: Jev learns a search once, then the URL is replayed
+
+- Date: 2026-10-05
+- Refined by [0041](#0041-google-flights-urls-are-generated-jev-handles-the-rest): for Google Flights, URLs are generated, not learned.
+
+The first time a search is needed, Jev drives the browser to the results
+page. The resulting URL (for Google Flights, the `tfs` parameter) is
+saved. Later runs load the saved URL directly and read the prices.
+Jev drives the browser again only when a replayed URL stops producing
+the expected page, for example after the site changes.
+
+## 0015: Our own Jev client, copied from tau-agent
+
+- Date: 2026-10-05
+
+The Jev client is a crate in this workspace, started as a copy of
+`../tau-agent/crates/plugins/tau-jev`. That crate is used instead of the
+`../vs1` client because its design is better: a `Jev` trait, a fake for
+tests, and strict checks on every answer. Its `tau-ai` dependency (used
+only for usage and cost types) is replaced with local types. There is no
+dependency on `../vs1` or `../tau-agent`.
+
+## 0016: The browser runtime is ported from vs1-browser
+
+- Date: 2026-10-05
+
+The CDP layer is a copy of `../vs1/crates/vs1-browser`, adapted to this
+project: its DOM snapshot, its action guards (fresh node identity,
+visibility and hit tests before input) and its Jev policy. It already
+reaches Google Flights results. Its decision calls go through our own
+Jev client ([0015](#0015-our-own-jev-client-copied-from-tau-agent)).
+Upstream attribution (Browser Use's MIT-licensed Jev Ultrafast) is kept.
+
+## 0017: A daemon collects prices; the gpui app shows them
+
+- Date: 2026-10-05
+
+There are two programs:
+
+- **A daemon**, run as a systemd user unit, follows the schedule
+  ([0010](#0010-explore-runs-daily-the-watchlist-weekly)), drives the
+  browser and writes observations to the database.
+- **A gpui app** reads the database, shows prices and deals, and can ask
+  the daemon to start a run now.
+
+Monitoring continues when the app is closed.
+
+## 0018: A deal is a price below the route's own history
+
+- Date: 2026-10-05
+
+A fare is a deal when it is well below the rolling median for the same
+route, cabin and trip length, or when it is the lowest price ever seen
+for them. There are no hand-set price targets. A route has no deals
+until it has enough history; the threshold and the window are decided
+separately.
+
+## 0019: Deals are shown in the app and as desktop notifications
+
+- Date: 2026-10-05
+- Refined by [0040](#0040-the-app-runs-on-the-same-box-and-raises-the-alerts): the app, not the daemon, raises the notification.
+
+The app has a deals view. When the daemon finds a new deal, it also
+sends a desktop notification. Nothing is sent off the machine.
+
+## 0020: Observations are stored in SQLite through sqlx
+
+- Date: 2026-10-05
+
+One SQLite file holds all data, using `sqlx` with checked queries and
+migrations, as `../tau-agent` does. The daemon writes to it and the app
+reads it. Observations are append-only: a price is never updated, a new
+observation is added, so the full history stays available for medians.
+
+## 0021: The daemon runs its own headless Chromium
+
+- Date: 2026-10-05
+
+The daemon starts a dedicated headless Chromium with its own profile
+directory and CDP port. It never attaches to the user's browser.
+
+## 0022: A deal is 20% under the 60-day median, or an all-time low
+
+- Date: 2026-10-05
+- Superseded by [0030](#0030-deal-baselines-are-per-days-to-departure-bucket).
+- Completes [0018](#0018-a-deal-is-a-price-below-the-routes-own-history).
+
+A fare is a deal when either holds, for the same route, cabin and trip
+length:
+
+- it is at least 20% below the median of the last 60 days, and that
+  route has at least 4 weeks of observations; or
+- it is lower than every earlier observation.
+
+## 0023: Award prices are tracked in Smiles, LATAM Pass and Azul Fidelidade
+
+- Date: 2026-10-05
+
+Besides cash fares in BRL, the monitor records award prices (miles or
+points, plus taxes in BRL) from Smiles, LATAM Pass and Azul Fidelidade.
+Award prices are a separate series and are never compared with cash
+fares. Each program needs a logged-in session; how logins are handled is
+decided separately.
+
+## 0024: Miles programs are logged in by hand, once
+
+- Date: 2026-10-05
+- Completes [0023](#0023-award-prices-are-tracked-in-smiles-latam-pass-and-azul-fidelidade).
+
+The app opens the daemon's Chromium profile
+([0021](#0021-the-daemon-runs-its-own-headless-chromium)) in a visible
+window, and the user logs in to each program by hand, including any 2FA.
+The session cookies stay in that profile. No password is stored. A
+Chromium profile can only be open in one process at a time, so the
+daemon pauses its headless browser while the login window is open. When
+a session expires, the daemon skips that program and the app asks the
+user to log in again.
+
+## 0025: The Explore sweep covers economy and business
+
+- Date: 2026-10-05
+- Refines [0006](#0006-a-pinned-watchlist-plus-an-explore-sweep).
+
+The daily Explore sweep runs twice: once for economy and once for
+business. Premium economy is only searched on the watchlist.
+
+## 0026: Premium cabins are searched on international routes only
+
+- Date: 2026-10-05
+- Completes [0008](#0008-track-economy-premium-economy-and-business).
+
+On the watchlist, premium economy and business are searched for every
+route outside Brazil. Domestic routes are searched in economy only.
+
+## 0027: Built with a Nix flake and versioned with jj
+
+- Date: 2026-10-05
+
+The repository follows `../tau-agent`: a `flake.nix` with the dev shell
+and packages (the daemon, the app and its systemd user unit), a nightly
+toolchain in `rust-toolchain.toml`, `clippy.toml` and `deny.toml`, and
+jj colocated with git.
+
+## 0028: The scheduler runs checks by a greedy value index
+
+- Date: 2026-10-05
+- Research: [docs/research/scheduling.md](docs/research/scheduling.md).
+
+The unit of work is a *query*: one page load, such as a Google Flights
+date grid, covering many cells (route × cabin × departure date ×
+source). Each *query family* (route × cabin × source) keeps a learned
+change rate, the probability that a change is a drop, a count of
+Explore hints since its last check, and a cost. Each tick the daemon
+scores every family:
+
+```
+q     = change rate × P(change is a drop)
+τe    = time since last check + n_hints · (−ln(1 − hint precision)) / q
+x     = q · τe
+score = weight · (1 − e^{−x}(1 + x)) / (q · cost)
+```
+
+It then runs the highest-scoring queries that fit the tick's share of
+the daily budget. This is the crawl value of Azar et al. (PNAS 2018),
+with Explore hints counted as extra elapsed time as in Busa-Fekete
+et al. (arXiv:2502.02430).
+
+Guards:
+
+- **Per-site rate limits:** Google Flights, each airline and each miles
+  program has its own.
+- **A minimum interval** between checks of the same family, so very
+  volatile entries are not chased.
+- **A maximum interval** after which a family is checked regardless of
+  its score.
+- **About 10% random checks**, marked as such, so change-rate estimates
+  stay unbiased.
+- **Fan-out:** when a query shows a drop, nearby dates, the other cabins
+  and the same route on other sources get a higher score.
+
+Change rates are learned per days-to-departure bucket. Every query
+records why it ran and the score it had, so the policy can be replayed
+and compared later.
+
+## 0029: A daily budget with a weekly maximum interval
+
+- Date: 2026-10-05
+- Replaces [0010](#0010-explore-runs-daily-the-watchlist-weekly).
+
+Fares change about once a day, and most low fares last about a day or
+more, so weekly checks would miss them. The watchlist shares a daily
+page-load budget, spent by the scheduler
+([0028](#0028-the-scheduler-runs-checks-by-a-greedy-value-index)).
+Every query family is still checked at least once a week: one week is
+the maximum interval. The Explore sweeps
+([0025](#0025-the-explore-sweep-covers-economy-and-business)) still
+run daily.
+
+## 0030: Deal baselines are per days-to-departure bucket
+
+- Date: 2026-10-05
+- Replaces [0022](#0022-a-deal-is-20-under-the-60-day-median-or-an-all-time-low).
+
+Fares rise steeply in the last 21 days and move little beyond about 90
+days, so a single median would label every far-out fare a deal and miss
+deals close to departure. A baseline is kept per route × cabin × trip
+length × days-to-departure bucket, with edges at 3, 7, 14, 21, 45, 90
+and 180 days. Departures near Brazilian holidays and in peak season have
+their own baselines.
+
+A fare is a deal when it is well below its bucket's median, measured by
+a robust spread (percentiles or median absolute deviation) over the last
+60 days, or when it is the lowest ever seen in that bucket. The exact
+cut-off is tuned on collected data. A bucket needs at least 4 weeks of
+observations before it can flag deals. Award prices have their own
+baselines.
+
+## 0031: A deal is confirmed before the alert
+
+- Date: 2026-10-05
+
+A deal candidate triggers an immediate second query, and a check on the
+airline's booking page when one exists. The notification is sent only
+if the price holds. Both queries are logged, so we learn how often
+first readings are wrong.
+
+## 0032: Google Flights prices are read from the page's own RPC responses
+
+- Date: 2026-10-05
+- Research: [docs/research/google-flights.md](docs/research/google-flights.md).
+
+The daemon loads a saved search URL, opens the price graph, and pages
+forward about six times to cover six months of 7-day trips. It reads
+the `GetCalendarGraph` responses the page itself makes, through CDP.
+Each response holds `[departure, return, price]` entries with integer
+prices. The date grid's cell aria-labels are the fallback when the RPC
+format changes.
+
+The daemon never calls these RPCs itself. They require a BotGuard token
+that only the page's scripts generate, and the project does not forge
+or replay it.
+
+## 0033: Several points of sale are tracked continuously
+
+- Date: 2026-10-05
+
+Each watchlist route × cabin is also searched under foreign points of
+sale, chosen with the `gl` URL parameter. The first set is BR (home),
+US, PT and IN, the four tested in the research; the set is data, not
+code. Each point of sale is a separate source in the scheduler
+([0028](#0028-the-scheduler-runs-checks-by-a-greedy-value-index)), so
+one that never beats Brazil is checked less and less.
+
+Foreign prices are compared as an effective BRL cost: the converted
+price plus IOF (3.5%) plus a configured card exchange spread. Baselines
+and deals ([0030](#0030-deal-baselines-are-per-days-to-departure-bucket))
+are per point of sale.
+
+A VPN is not needed for Google Flights, because `gl` sets the point of
+sale. Mullvad becomes relevant only if we check that an OTA honours its
+foreign price when opened from a Brazilian IP.
+
+## 0034: Record both the cheapest price and the airline's own price
+
+- Date: 2026-10-05
+
+The price graph gives the cheapest price from any seller, often a
+low-cost online agency. When a deal is confirmed
+([0031](#0031-a-deal-is-confirmed-before-the-alert)), the booking page
+is opened and every seller's price is recorded, including the
+airline's own. A deal alert shows both prices and names the seller.
+
+## 0035: Origins and destinations are configured in the app
+
+- Date: 2026-10-06
+- Refines [0001](#0001-monitor-travel-prices-departing-from-são-paulo),
+  [0005](#0005-the-origin-is-the-whole-sao-city-code) and
+  [0006](#0006-a-pinned-watchlist-plus-an-explore-sweep).
+
+Nothing about São Paulo is hard-coded. The configuration lives in the
+SQLite database ([0020](#0020-observations-are-stored-in-sqlite-through-sqlx)),
+and the gpui app is where it is edited:
+
+- **Origins:** a list. Each entry is a city code (such as SAO) or a
+  single airport (such as VCP).
+- **Destinations:** a list, each with an optional weight for the
+  scheduler.
+- **Points of sale:** the list from
+  [0033](#0033-several-points-of-sale-are-tracked-continuously).
+
+Every origin × destination pair is a route. Each origin gets its own
+daily Explore sweeps ([0025](#0025-the-explore-sweep-covers-economy-and-business)).
+Whether a route is domestic, which decides its cabins
+([0026](#0026-premium-cabins-are-searched-on-international-routes-only)),
+comes from the countries of its origin and destination, not from a
+fixed list.
+
+Removing a route stops new checks but keeps its history; adding it back
+continues the same series. The daemon picks up configuration changes
+without a restart. On first run, the database is seeded with SAO and
+the watchlist from 0006.
+
+## 0036: The passenger count is one global setting
+
+- Date: 2026-10-06
+
+All searches use the same passengers: a number of adults (and,
+if set, children and infants), configured once in the app, not per
+route. Prices are stored as returned for the whole party, together with
+the passenger count. Changing the count starts new series, because
+prices for different party sizes are not comparable.
+
+## 0037: The daemon runs on an always-on NixOS box, set up by a home-manager module
+
+- Date: 2026-10-06
+- Refines [0017](#0017-a-daemon-collects-prices-the-gpui-app-shows-them) and
+  [0027](#0027-built-with-a-nix-flake-and-versioned-with-jj).
+
+The flake exports a home-manager module. Enabling it installs the
+daemon and runs it as a systemd user service, with its own headless
+Chromium ([0021](#0021-the-daemon-runs-its-own-headless-chromium)). The
+service must keep running without a login session, so the module
+requires user lingering. Its options cover at least:
+
+- `enable` and `package`;
+- the database path;
+- the Chromium package and the CDP port;
+- the Jev API key, as a path to a file read at start-up (never a value
+  in the Nix store);
+- the daily page-load budget and per-site rate limits
+  ([0039](#0039-the-page-load-budget-starts-conservative-and-ramps-up));
+- the log level.
+
+## 0038: The card's exchange spread is a setting
+
+- Date: 2026-10-06
+- Completes [0033](#0033-several-points-of-sale-are-tracked-continuously).
+
+The effective BRL cost of a foreign-currency price is
+`price × exchange rate × (1 + IOF) × (1 + card spread)`. IOF (3.5%) and
+the card spread are both settings in the app, so either can change
+without a rebuild. Observations store the raw price and currency. The
+effective cost is computed when read, so changing a setting re-prices
+the whole history.
+
+## 0039: The page-load budget starts conservative and ramps up
+
+- Date: 2026-10-06
+
+The daemon starts at about 300 page loads a day, paced with random
+jitter between loads. While no CAPTCHA, "unusual traffic" page or block
+appears, the budget is raised step by step. When one appears, the
+daemon backs off for that site, lowers the budget, and logs the event.
+Every block is recorded with the load rate that preceded it, so the
+real limit is measured over time.
+
+## 0040: The app runs on the same box and raises the alerts
+
+- Date: 2026-10-06
+- Refines [0019](#0019-deals-are-shown-in-the-app-and-as-desktop-notifications)
+  and [0037](#0037-the-daemon-runs-on-an-always-on-nixos-box-set-up-by-a-home-manager-module).
+
+The always-on box has a desktop session, and the gpui app runs there.
+It opens the daemon's SQLite file directly, as in
+[0017](#0017-a-daemon-collects-prices-the-gpui-app-shows-them) and
+[0020](#0020-observations-are-stored-in-sqlite-through-sqlx). There is
+no network API.
+
+The daemon records each confirmed deal in the database. The app watches
+for new deals and shows a desktop notification for each one. Deals
+found while the app is closed are marked unread and shown when it next
+opens. The daemon never sends notifications itself.
+
+## 0041: Google Flights URLs are generated; Jev handles the rest
+
+- Date: 2026-10-06
+- Refines [0014](#0014-jev-learns-a-search-once-then-the-url-is-replayed).
+- Research: [docs/research/google-flights.md](docs/research/google-flights.md).
+
+Google Flights search URLs are built in code by encoding the `tfs`
+protobuf: legs, dates, origin and destination, cabin (1 economy,
+2 premium economy, 3 business, 4 first), and one entry per adult.
+Explore URLs use `q=` text, with "business class" for business. `gl`
+and `curr` set the point of sale and currency. No navigation is needed
+to reach a results page.
+
+City codes are stored with their Freebase ID (SAO is `/m/022pfm`). The
+ID is learned once, with a `q=` search, when an origin or destination
+is added in the app. Single airports use their IATA code.
+
+Jev drives the browser where no URL scheme exists: airline sites and
+miles programs. It is also the fallback when a generated Google Flights
+URL stops producing the expected page.
+
+Explore results are about one week long (6 to 9 days) with a single
+date pair per destination. They are hints for the scheduler
+([0028](#0028-the-scheduler-runs-checks-by-a-greedy-value-index)), not
+observations in the 7-day series.
+
+## 0042: Both legs are tracked per day; round trips where they differ
+
+- Date: 2026-10-06
+- Refines [0007](#0007-observations-are-round-trips-of-fixed-lengths),
+  [0009](#0009-seven-day-trips-departing-up-to-six-months-ahead) and
+  [0013](#0013-departure-dates-come-from-googles-date-grid).
+- Research: [docs/research/google-flights.md](docs/research/google-flights.md#round-trip-vs-two-one-ways).
+
+Measured on the same dates, a domestic round trip (SSA) cost exactly
+its two one-way legs. International round trips cost 6–21% less than
+their legs: BUE 10%, LIS 6% (21% nonstop), MIA 15%.
+
+Every route therefore tracks:
+
+- **Both legs, one way, per day:** the outbound (origin → destination)
+  and the return (destination → origin), each read from the one-way
+  price graph. About 14 calls cover six months for one route × cabin ×
+  point of sale. Any trip length can be priced from these.
+- **The round trip at 7 days**, on routes where it differs from the sum
+  of its legs. It is read from the round-trip price graph (about 7
+  calls). Each route learns its round-trip discount from pairs of
+  observations on the same dates.
+
+When a route's round trip has matched the sum of its legs for a
+configured number of checks (as on domestic routes), round-trip
+tracking stops for it. It resumes if a confirmation shows a gap.
+
+The price of a trip of length *n* departing on day *d* is estimated as
+`(outbound[d] + return[d + n]) × (1 − learned discount)`. An estimated
+deal is a hint for the scheduler
+([0028](#0028-the-scheduler-runs-checks-by-a-greedy-value-index)). It
+becomes an alert only after a real round-trip search for those exact
+dates confirms it ([0031](#0031-a-deal-is-confirmed-before-the-alert)).
+
+Baselines ([0030](#0030-deal-baselines-are-per-days-to-departure-bucket))
+are kept per leg and per round trip, by days-to-departure bucket.
+
+## 0043: Trips of 5 to 10 days
+
+- Date: 2026-10-06
+- Replaces the fixed length of [0009](#0009-seven-day-trips-departing-up-to-six-months-ahead).
+
+A trip is any outbound and return pair with 5 to 10 days between them,
+departing within the next six months. The range is a global setting in
+the app. A deal is reported for a specific date pair, and the app shows
+the departure × return grid around it, so a nearby pair can be chosen.
+
+## 0044: The app's main screen is a map with a list
+
+- Date: 2026-10-06
+- Design: "G · Map + list" on the layouts canvas.
+
+The main screen has a list of deals and routes on the left (filters for
+cabin and sort order) and a night map on the right. The map draws an
+arc from the origin to every watched destination, with deals
+highlighted. Selecting a row highlights its arc and opens a detail card
+over the map: price, dates, carrier, the cheapest seller per point of
+sale as effective BRL, and the airline's own price. Other screens
+(routes overview, route detail, activity, settings) follow the same
+look.
+
+## 0045: Crates are split by responsibility, with the `tm-` prefix
+
+- Date: 2026-10-06
+
+```
+crates/
+  tm-domain/     shared types, no I/O (see 0048)
+  tm-jev/        Jev client (copied from tau-jev)
+  tm-browser/    Chromium launch, CDP, page observation and Jev policy
+  tm-gflights/   tfs encoder, Google Flights URLs, RPC parsers
+  tm-store/      sqlx, migrations, configuration and observations
+  tm-scheduler/  scores, change rates, baselines, deal rules (no I/O)
+  tm-daemon/     binary `tmd`: the loop, budget, confirmations
+  tm-app/        binary `tm`: the gpui interface
+nix/
+  hm-module.nix  the home-manager module
+```
+
+Domain logic that needs no browser or database (`tm-gflights`,
+`tm-scheduler`) stays pure, so it is tested without either.
+
+## 0046: The app asks the daemon for work through a requests table
+
+- Date: 2026-10-06
+- Refines [0017](#0017-a-daemon-collects-prices-the-gpui-app-shows-them).
+
+"Check now" and similar actions insert a row in a `requests` table. The
+daemon polls the database (it already polls configuration,
+[0035](#0035-origins-and-destinations-are-configured-in-the-app)),
+runs the request ahead of the schedule, and marks it done. There is no
+socket. Requests survive restarts of either program.
+
+## 0047: The first implementation covers every decision so far
+
+- Date: 2026-10-06
+
+The first implementation is not a thin slice. It covers all accepted
+decisions: Google Flights legs, round trips and Explore, the
+scheduler, deals and confirmations, multiple points of sale, Jev
+recovery, airline and miles sources as integrations behind a common
+interface, the gpui app and the home-manager module. Airline and miles
+sites whose pages have not been studied yet get the interface and the
+Jev-driven navigation, with their extraction marked as unverified until
+probed.
+
+## 0048: Shared types live in `tm-domain`
+
+- Date: 2026-10-06
+- Refines [0045](#0045-crates-are-split-by-responsibility-with-the-tm-prefix).
+
+Routes, cabins, points of sale, money, observations, query families and
+settings are plain types in a `tm-domain` crate, with serde and no I/O.
+Every other crate depends on it, so `tm-scheduler` stays I/O-free and
+the store, daemon and app share one vocabulary.

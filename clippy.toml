@@ -1,0 +1,5 @@
+# The daemon and the app are async: nothing blocks a runtime thread.
+disallowed-methods = [
+  { path = "tokio::runtime::Runtime::block_on", reason = "await it instead, or run blocking work in spawn_blocking" },
+  { path = "tokio::runtime::Handle::block_on", reason = "await it instead, or run blocking work in spawn_blocking" },
+]
