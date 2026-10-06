@@ -1,6 +1,8 @@
 //! The SQLite database: configuration, query log, observations, deals
 //! and app requests (DECISIONS.md 0020, 0035, 0046).
 //!
+//! [`ChangeWatch`] tells the app when another program wrote (0057).
+//!
 //! One file, opened in WAL mode so the gpui app reads while the daemon
 //! writes (0040). Every query is checked at compile time by sqlx; the
 //! offline metadata in `.sqlx/` lets the crate build without a database
@@ -28,6 +30,7 @@ mod queries;
 mod records;
 mod requests;
 mod seed;
+mod watch;
 
 use std::{path::Path, str::FromStr, time::Duration};
 
@@ -36,6 +39,7 @@ pub use records::{
     AirlineSource,
     BlockRecord,
     BudgetState,
+    CheckInProgress,
     DealFilter,
     Destination,
     ExchangeRate,
@@ -65,6 +69,7 @@ use sqlx::{
         SqliteSynchronous,
     },
 };
+pub use watch::ChangeWatch;
 
 static MIGRATOR: Migrator = sqlx::migrate!("./migrations");
 

@@ -30,6 +30,7 @@ use tm_domain::{
 };
 use tm_store::{
     BudgetState,
+    CheckInProgress,
     DealFilter,
     Heartbeat,
     RequestKind,
@@ -708,6 +709,8 @@ async fn budget_blocks_rates_and_heartbeat() {
         updated_at: at(6, 12),
         state: "running".into(),
         next_check: Some("SAO→LIS economy in 4 min".into()),
+        next_check_at: Some(at(6, 13)),
+        check: None,
         loads_today: 12,
         budget: 300,
     };
@@ -715,6 +718,54 @@ async fn budget_blocks_rates_and_heartbeat() {
     let mut later = beat.clone();
     later.updated_at = at(6, 13);
     later.next_check = None;
+    later.next_check_at = None;
     store.write_heartbeat(&later).await.expect("writes");
     assert_eq!(store.heartbeat().await.expect("reads"), Some(later));
+}
+
+/// A check in progress is written with the heartbeat and cleared by the
+/// next one (0057).
+#[tokio::test]
+async fn heartbeat_carries_the_check_in_progress() {
+    let store = seeded().await;
+    let lis = outbound(&store, route(&store, "SAO", "LIS").await).await;
+    let query = store
+        .start_query(lis.id, &QueryReason::Manual, at(6, 12))
+        .await
+        .expect("starts");
+    let checking = Heartbeat {
+        pid: 7,
+        updated_at: at(6, 12),
+        state: "checking".into(),
+        next_check: None,
+        next_check_at: None,
+        check: Some(CheckInProgress {
+            family: lis.id,
+            query: Some(query),
+            reason: QueryReason::Scheduled {
+                score: 0.41,
+                runner_up: Some(0.2),
+            },
+            started_at: at(6, 12),
+        }),
+        loads_today: 3,
+        budget: 300,
+    };
+    store.write_heartbeat(&checking).await.expect("writes");
+    assert_eq!(
+        store.heartbeat().await.expect("reads"),
+        Some(checking.clone())
+    );
+
+    let idle = Heartbeat {
+        updated_at: at(6, 13),
+        state: "running".into(),
+        next_check_at: Some(at(6, 14)),
+        check: None,
+        ..checking
+    };
+    store.write_heartbeat(&idle).await.expect("writes");
+    let read = store.heartbeat().await.expect("reads").expect("a beat");
+    assert_eq!(read, idle);
+    assert_eq!(read.check, None);
 }

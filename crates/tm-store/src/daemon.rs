@@ -1,14 +1,21 @@
 //! Daemon bookkeeping: the page-load budget and blocks (DECISIONS.md
-//! 0039), exchange rates (0038) and the heartbeat the app shows.
+//! 0039), exchange rates (0038) and the heartbeat the app shows
+//! (0057).
 
 use chrono::{DateTime, NaiveDate, Utc};
-use tm_domain::Currency;
+use tm_domain::{Currency, FamilyId, QueryId};
 
 use crate::{
     Store,
     convert::count,
     error::{Result, StoreError},
-    records::{BlockRecord, BudgetState, ExchangeRate, Heartbeat},
+    records::{
+        BlockRecord,
+        BudgetState,
+        CheckInProgress,
+        ExchangeRate,
+        Heartbeat,
+    },
 };
 
 impl Store {
@@ -198,24 +205,44 @@ impl Store {
             .collect())
     }
 
+    /// Writes the heartbeat, replacing the last one. A check in
+    /// progress is written with it; `None` clears it (DECISIONS.md 0057).
     pub async fn write_heartbeat(&self, beat: &Heartbeat) -> Result<()> {
+        let check = beat.check.as_ref();
+        let family = check.map(|c| c.family.0);
+        let query = check.and_then(|c| c.query).map(|q| q.0);
+        let reason = check
+            .map(|c| serde_json::to_string(&c.reason))
+            .transpose()?;
+        let started_at = check.map(|c| c.started_at);
         sqlx::query!(
             "INSERT INTO heartbeat (id, pid, updated_at, state, next_check,
-                 loads_today, budget)
-             VALUES (1, ?1, ?2, ?3, ?4, ?5, ?6)
+                 loads_today, budget, next_check_at, check_family_id,
+                 check_query_id, check_reason_json, check_started_at)
+             VALUES (1, ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)
              ON CONFLICT (id) DO UPDATE SET
                  pid = excluded.pid,
                  updated_at = excluded.updated_at,
                  state = excluded.state,
                  next_check = excluded.next_check,
                  loads_today = excluded.loads_today,
-                 budget = excluded.budget",
+                 budget = excluded.budget,
+                 next_check_at = excluded.next_check_at,
+                 check_family_id = excluded.check_family_id,
+                 check_query_id = excluded.check_query_id,
+                 check_reason_json = excluded.check_reason_json,
+                 check_started_at = excluded.check_started_at",
             beat.pid,
             beat.updated_at,
             beat.state,
             beat.next_check,
             beat.loads_today,
-            beat.budget
+            beat.budget,
+            beat.next_check_at,
+            family,
+            query,
+            reason,
+            started_at
         )
         .execute(&self.pool)
         .await?;
@@ -225,17 +252,37 @@ impl Store {
     pub async fn heartbeat(&self) -> Result<Option<Heartbeat>> {
         let row = sqlx::query!(
             r#"SELECT pid, updated_at AS "updated_at: DateTime<Utc>", state,
-                      next_check, loads_today, budget
+                      next_check, loads_today, budget,
+                      next_check_at AS "next_check_at: DateTime<Utc>",
+                      check_family_id, check_query_id, check_reason_json,
+                      check_started_at AS "check_started_at: DateTime<Utc>"
                FROM heartbeat WHERE id = 1"#
         )
         .fetch_optional(&self.pool)
         .await?;
         row.map(|r| {
+            let check = match (
+                r.check_family_id,
+                r.check_reason_json,
+                r.check_started_at,
+            ) {
+                (Some(family), Some(reason), Some(started_at)) => {
+                    Some(CheckInProgress {
+                        family: FamilyId(family),
+                        query: r.check_query_id.map(QueryId),
+                        reason: serde_json::from_str(&reason)?,
+                        started_at,
+                    })
+                }
+                _ => None,
+            };
             Ok(Heartbeat {
                 pid: count("pid", r.pid)?,
                 updated_at: r.updated_at,
                 state: r.state,
                 next_check: r.next_check,
+                next_check_at: r.next_check_at,
+                check,
                 loads_today: count("loads_today", r.loads_today)?,
                 budget: count("budget", r.budget)?,
             })

@@ -349,17 +349,35 @@ pub struct ExchangeRate {
     pub at: DateTime<Utc>,
 }
 
-/// The daemon's status, for the app's status chip.
-#[derive(Debug, Clone, PartialEq, Eq)]
+/// The daemon's status, for the app's status chip. Written when a check
+/// starts and when it ends, and every 30 s otherwise (DECISIONS.md
+/// 0057).
+#[derive(Debug, Clone, PartialEq)]
 pub struct Heartbeat {
     pub pid: u32,
     pub updated_at: DateTime<Utc>,
-    /// Free text: `"running"`, `"paused for login"`, `"backing off"`.
+    /// Free text: `"running"`, `"checking"`, `"paused for login: …"`,
+    /// `"stopped"`.
     pub state: String,
     /// Free text describing the next check.
     pub next_check: Option<String>,
+    /// When the daemon looks for work again, if it knows.
+    pub next_check_at: Option<DateTime<Utc>>,
+    /// The check in progress, while `state` is `"checking"`.
+    pub check: Option<CheckInProgress>,
     pub loads_today: u32,
     pub budget: u32,
+}
+
+/// The check the daemon is running (DECISIONS.md 0057). The family
+/// gives the route, cabin, source, point of sale and kind.
+#[derive(Debug, Clone, PartialEq)]
+pub struct CheckInProgress {
+    pub family: tm_domain::FamilyId,
+    /// Its row in the query log.
+    pub query: Option<tm_domain::QueryId>,
+    pub reason: tm_domain::QueryReason,
+    pub started_at: DateTime<Utc>,
 }
 
 #[cfg(test)]
