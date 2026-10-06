@@ -917,3 +917,22 @@ the same check and says whether a session was found. Limits: a
 leftover preference cookie reads as logged in; a session ended
 server-side still counts until its cookie expires; a login held only in
 session cookies or local storage reads as logged out.
+
+## 0065: Fill in and refresh the oldest data first; Google Flights doubles again
+
+- Date: 2026-10-06
+- Refines [0028](#0028-the-scheduler-runs-checks-by-a-greedy-value-index),
+  [0049](#0049-bootstrap-core-families-first-starting-at-600-loads-a-day)
+  and [0060](#0060-each-website-has-its-own-daily-budget).
+
+- **New data first, oldest first.** Never-checked families still go
+  first in their bootstrap rank (core first, 0049); within a rank, the
+  families of routes added earlier are filled in before those of routes
+  added later (the route id stands for "when added").
+- **Then the stalest data.** After that, the scored slots go to the
+  family whose data is oldest; the value index of 0028 only breaks
+  ties. The index stays available as an option (`Order::Value`) and its
+  simulation still runs against it. Overdue families (past their
+  maximum interval) and the ~10% random checks are unchanged.
+- **Google Flights doubles again:** its daily budget starts at 4,800
+  page loads and may ramp to 12,000 (was 2,400 and 6,000).

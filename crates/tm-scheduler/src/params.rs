@@ -68,6 +68,10 @@ pub struct Params {
     /// up. Default: `0.2`.
     pub discount_alpha: f64,
 
+    /// How checked families compete for the scored slots: stalest data
+    /// first (DECISIONS.md 0065) or highest value index first (0028).
+    pub order: Order,
+
     // ---- budget (0039) ----
     pub daily_budget: u32,
     pub max_daily_budget: u32,
@@ -89,6 +93,17 @@ pub struct Params {
     // ---- effective cost (0038) ----
     pub iof: f64,
     pub card_spread: f64,
+}
+
+/// The order of the scored slots in [`crate::plan_tick`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Order {
+    /// Longest without a check first; the value index only breaks ties
+    /// (DECISIONS.md 0065).
+    #[default]
+    Stalest,
+    /// Highest value index first (0028), as in the research.
+    Value,
 }
 
 impl Params {
@@ -116,6 +131,7 @@ impl Params {
             additive_tolerance: 0.01,
             additive_checks_to_stop: settings.additive_checks_to_stop,
             discount_alpha: 0.2,
+            order: Order::Stalest,
             daily_budget: settings.daily_budget,
             max_daily_budget: settings
                 .max_daily_budget
@@ -160,7 +176,7 @@ mod tests {
         assert_eq!(p.min_interval, TimeDelta::hours(4));
         assert_eq!(p.max_interval, TimeDelta::hours(48));
         assert_eq!(p.random_share, 0.2);
-        assert_eq!(p.daily_budget, 2400);
+        assert_eq!(p.daily_budget, 4800);
         assert_eq!(p.min_history_weeks, 4.0);
     }
 

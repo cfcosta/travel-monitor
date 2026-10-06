@@ -22,6 +22,7 @@ use tm_scheduler::{
     Candidate,
     CheckSummary,
     FamilyState,
+    Order,
     Params,
     TickBudget,
     plan_tick,
@@ -111,7 +112,12 @@ fn caught(paths: &[Path], checks: &[Vec<f64>]) -> usize {
 }
 
 fn run_greedy(paths: &[Path], seed: u64) -> Vec<Vec<f64>> {
-    let params = Params::default();
+    // The research's value index (0028), not the default stalest-first
+    // order (0065): this test is about the index.
+    let params = Params {
+        order: Order::Value,
+        ..Params::default()
+    };
     let mut rng = StdRng::seed_from_u64(seed);
     let mut states: Vec<FamilyState> =
         (0..paths.len()).map(|_| fresh_state()).collect();
@@ -133,6 +139,7 @@ fn run_greedy(paths: &[Path], seed: u64) -> Vec<Vec<f64>> {
                 active: true,
                 bootstrap_rank: 0,
                 max_interval: None,
+                added: i as i64,
             })
             .collect();
         for pick in plan_tick(&candidates, now, &budget, &params, &mut rng) {
@@ -244,7 +251,12 @@ fn reasons_over_a_week() {
             Path::simulate(RATES_PER_DAY[i % RATES_PER_DAY.len()], &mut rng)
         })
         .collect();
-    let params = Params::default();
+    // The research's value index (0028), not the default stalest-first
+    // order (0065): this test is about the index.
+    let params = Params {
+        order: Order::Value,
+        ..Params::default()
+    };
     let mut states: Vec<FamilyState> =
         (0..FAMILIES).map(|_| fresh_state()).collect();
     let mut counts: BTreeMap<&'static str, usize> = BTreeMap::new();
@@ -265,6 +277,7 @@ fn reasons_over_a_week() {
                 active: true,
                 bootstrap_rank: 0,
                 max_interval: None,
+                added: i as i64,
             })
             .collect();
         for pick in plan_tick(&candidates, now, &budget, &params, &mut rng) {

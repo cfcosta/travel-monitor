@@ -42,7 +42,7 @@ pub use baseline::{Baseline, BaselineKey, DtdBucket, PricePoint, Season};
 pub use budget::{BudgetState, SiteBackoff};
 pub use deals::evaluate;
 pub use effective::FxTable;
-pub use params::Params;
+pub use params::{Order, Params};
 pub use plan::{Candidate, Pick, TickBudget, plan_tick};
 pub use state::FamilyState;
 pub use trips::{RoundTripDiscount, Trip};

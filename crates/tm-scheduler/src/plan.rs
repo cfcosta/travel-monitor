@@ -7,14 +7,18 @@
 //!    most overdue first.
 //!    first.
 //! 2. **Bootstrap**: never checked, lowest [`Candidate::bootstrap_rank`]
-//!    first (DECISIONS.md 0049), then highest weight. Ranks are taken
+//!    first (DECISIONS.md 0049), then the earliest added
+//!    ([`Candidate::added`], 0065), then highest weight. Ranks are taken
 //!    strictly in order: once a never-checked family does not fit, cheaper
 //!    ones of the same rank may still go, but no later rank is
 //!    bootstrapped this tick, and never-checked families do not compete
 //!    in the scored slots.
 //! 3. Every further slot is, with probability `random_share`, a uniformly
-//!    random eligible family (**Random**), otherwise the highest-scoring
-//!    one (**Scheduled**, with its score and the runner-up's).
+//!    random eligible family (**Random**), otherwise the next one in
+//!    [`Params::order`]: by default the one whose data is oldest, the
+//!    value index only breaking ties (0065); or the highest-scoring one
+//!    (0028). Either way it is **Scheduled**, with its score and the
+//!    runner-up's.
 //!
 //! Throughout, a family is eligible only when it is active and was not
 //! checked within `min_interval`, and a pick must fit both the tick's
@@ -30,7 +34,7 @@ use chrono::{DateTime, Utc};
 use rand::Rng;
 use tm_domain::{FamilyId, QueryReason};
 
-use crate::{Params, score, state::FamilyState};
+use crate::{Order, Params, score, state::FamilyState};
 
 /// One family the daemon could query.
 #[derive(Debug, Clone, PartialEq)]
@@ -49,6 +53,10 @@ pub struct Candidate {
     /// A tighter maximum interval for this family (core families are
     /// checked daily, DECISIONS.md 0056); `None` uses the global one.
     pub max_interval: Option<chrono::TimeDelta>,
+    /// When the family's route was added, as an increasing number (the
+    /// daemon uses the route id): never-checked families of earlier
+    /// routes are filled in first (0065).
+    pub added: i64,
 }
 
 /// What this tick may spend.
@@ -134,6 +142,7 @@ pub fn plan_tick<R: Rng + ?Sized>(
         let (ca, cb) = (&candidates[a], &candidates[b]);
         ca.bootstrap_rank
             .cmp(&cb.bootstrap_rank)
+            .then(ca.added.cmp(&cb.added))
             .then(finite(cb.weight).total_cmp(&finite(ca.weight)))
             .then(ca.family.cmp(&cb.family))
     });
@@ -170,10 +179,18 @@ pub fn plan_tick<R: Rng + ?Sized>(
             (i, score::score(&c.state, c.weight, now, params, rng))
         })
         .collect();
-    scored.sort_by(|a, b| {
+    let by_score = |a: &(usize, f64), b: &(usize, f64)| {
         b.1.total_cmp(&a.1)
             .then(candidates[a.0].family.cmp(&candidates[b.0].family))
-    });
+    };
+    match params.order {
+        Order::Value => scored.sort_by(by_score),
+        // Oldest check first (never-checked ones are not in the pool).
+        Order::Stalest => scored.sort_by(|a, b| {
+            let last = |i: usize| candidates[i].state.last_check;
+            last(a.0).cmp(&last(b.0)).then_with(|| by_score(a, b))
+        }),
+    }
 
     let share = if params.random_share.is_finite() {
         params.random_share.clamp(0.0, 1.0)
@@ -277,7 +294,38 @@ mod tests {
             active: true,
             bootstrap_rank: 0,
             max_interval: None,
+            added: id,
         }
+    }
+
+    #[test]
+    fn stalest_data_goes_first_and_older_routes_fill_in_first() {
+        // Two checked families: the one checked longer ago goes first,
+        // whatever their scores.
+        let fresh = cand(1, "gf", Some(10));
+        let stale = cand(2, "gf", Some(40));
+        let picks = plan_tick(
+            &[fresh, stale],
+            now(),
+            &budget(1),
+            &no_random(),
+            &mut StdRng::seed_from_u64(4),
+        );
+        assert_eq!(picks[0].family.0, 2);
+        // Never-checked ones of the same rank: the earliest added first.
+        let mut newer = cand(3, "gf", None);
+        newer.added = 50;
+        let mut older = cand(4, "gf", None);
+        older.added = 7;
+        let picks = plan_tick(
+            &[newer, older],
+            now(),
+            &budget(1),
+            &no_random(),
+            &mut StdRng::seed_from_u64(4),
+        );
+        assert_eq!(picks[0].family.0, 4);
+        assert_eq!(picks[0].reason, QueryReason::Bootstrap);
     }
 
     #[test]

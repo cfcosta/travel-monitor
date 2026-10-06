@@ -223,6 +223,8 @@ pub fn build(
                 active: true,
                 bootstrap_rank: bootstrap_rank(&f.key, cx.home_pos),
                 max_interval: core_interval(&f.key, cx.home_pos),
+                // Route ids grow as destinations are added (0065).
+                added: f.key.route.0,
             }),
             Err(skip) => *skipped.entry(skip).or_insert(0) += 1,
         }
