@@ -842,3 +842,21 @@ Jev-driven airline and miles sources, the `--jev-key-file` and
 `--jev-model` flags, and the home-manager module's `jev.*` options.
 Airline sources other than TAP and the miles programs stay configured
 but have no reader; they are skipped.
+
+## 0060: Each website has its own daily budget
+
+- Date: 2026-10-06
+- Refines [0039](#0039-the-page-load-budget-starts-conservative-and-ramps-up),
+  [0056](#0056-core-families-are-checked-every-day) and
+  [0058](#0058-the-daily-budget-doubles-to-2400-page-loads).
+
+A shared total makes no sense across sites: each site rate-limits on
+its own, so spending on one should not starve another. Every site
+(`Source::site()`: `google_flights`, `airline:TP`, …) has its own daily
+budget, its own count of loads today, its own +10%-a-day ramp and its
+own halving and cooldown on a block.
+
+Starting values: Google Flights (searches and Explore) 2,400, ramping
+to 6,000; TAP 300, ramping to 1,000 (about 30 leg families at about 8
+loads each need about 240 a day); any other site 300, ramping to 1,000,
+until set otherwise.
