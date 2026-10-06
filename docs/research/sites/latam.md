@@ -326,7 +326,84 @@ Risks:
 | `calendar-rt-gru-mia-2027-03-extended.json` | `calendar … isRoundTrip=true&extended=true` (Mar–Apr 2027, OUTBOUND + INBOUND), fetched from inside the page |
 | `request-headers.json` | header names the page sets; ids and tokens replaced |
 | `headless-access-denied.html` | the Akamai block page served to headless |
+| `headed-xvfb-search-error.png` | headed Chromium in Xvfb: the search error page after `offers/search` got 403 |
 
 `extraDetails` (per-session track ids) is replaced by `<scrubbed>` in
 every offers fixture. The fixtures contain no cookies, tokens or
 account data.
+
+## Headed Chromium in a virtual display (2026-10-06)
+
+Question: does a normal headed Chromium get through where headless did
+not?
+
+Setup:
+
+- Xvfb `:93`, screen 1440×1000×24, `-nolisten tcp`.
+- Chromium 151.0.7922.71 from the dev shell (`$TM_CHROMIUM`), started
+  with `DISPLAY=:93`, no `WAYLAND_DISPLAY`, `--ozone-platform=x11`,
+  `--remote-debugging-port`, a fresh temporary `--user-data-dir`,
+  `--window-size=1440,1000`, `--no-first-run`, `--password-store=basic`
+  and `--use-mock-keychain`. There was no `--headless`.
+- No user-agent override, no stealth or anti-detection flags, no
+  extensions and no fingerprint changes. The browser sent its stock
+  user agent, `Mozilla/5.0 (X11; Linux x86_64) … Chrome/151.0.0.0
+  Safari/537.36` (no `HeadlessChrome`).
+- `chrome-cdp` drove the browser. An XHR/fetch hook was installed with
+  `Page.addScriptToEvaluateOnNewDocument` before the navigation.
+- Load count: 1 page load (the GRU→LIS one-way URL from §1, at
+  18:36:50 UTC). No retry, no second load, no clicks.
+
+### Result: the page loads, but Akamai denies `offers/search`
+
+- **The edge let the page through.** The results page HTML loaded
+  (title "Seleção de voos | LATAM Airlines"). The Akamai sensor POSTs
+  (`/OeQB0y2…`, 201) and `/akam/13/pixel_…` (200) ran. reCAPTCHA
+  Enterprise loaded. No challenge page was shown. This is different
+  from headless, which got "Access Denied" on the first document
+  request.
+- `navigator.webdriver` was `false`. We did not change it.
+- The calendar calls succeeded:
+  - `GET /bff/air-offers/v2/calendar … month=10 … extended=true`: 200
+  - `GET … month=11 … extended=true`: 200
+  - `GET … month=11` without `extended`: 200, empty, the same as in
+    the user's Chrome
+  The date carousel showed the cached lowest price, R$ 2.001,41, for
+  2026-11-07 to 2026-11-11 (2026-11-10 included). This is the cached
+  calendar figure, not a live fare (see §3).
+- **`GET /bff/air-offers/v2/offers/search?…outFrom=2026-11-10…`
+  returned 403** with the Akamai "Access Denied" HTML ("For security
+  reasons, we cannot grant you access to our website at this moment",
+  `Reference Code: #0.9a601702.1791311814.d632f9c0`). This is the same
+  page that headless got for the document.
+- The app then went to its own error page:
+  `/br/pt/oferta-voos/erro/tempo-resultados-busca/?errorId=F.4e47a294-…`,
+  "A busca está demorando mais que o normal. Tivemos um problema com os
+  resultados. Tente novamente." The cookie banner was still open. See
+  `fixtures/latam/headed-xvfb-search-error.png`.
+- No itineraries and no live prices. No offers fixture was saved.
+
+Because the price call was blocked, we did not do the second load. The
+research rules allow no retries after a block. We stopped Chromium and
+Xvfb and deleted the temporary profile.
+
+### What this tells us
+
+- The document-level block on headless comes from something that
+  headed mode changes: the `HeadlessChrome` user agent or another
+  headless signal. A headed Chromium passes that first check.
+- The price endpoint has a stricter check. Akamai scores the sensor
+  data, and the page sends a reCAPTCHA token on `offers/search` (§5).
+  A fresh profile with a CDP debugging port, in a virtual display, with
+  no mouse or keyboard input before the call, failed that check on its
+  first try. We cannot tell from one load which signal failed: the
+  sensor behaviour score, the reCAPTCHA score, the new profile, or the
+  open debugging port.
+- So a headed browser alone does not make LATAM usable for the daemon.
+  The calendar endpoint is open to it, but the calendar is cached and
+  must not be recorded as an observation.
+
+Open question for the user: is it acceptable to test a headed browser
+with a persistent profile that the user has warmed up by hand in a
+normal session (cookies accepted, a few searches), or does that count
+as getting around the bot protection? We did not test it.
