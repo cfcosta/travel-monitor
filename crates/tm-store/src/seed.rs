@@ -48,6 +48,14 @@ fn watchlist() -> Vec<NewPlace> {
         a("MCZ", "Maceió", "BR", -9.67, -35.74),
         a("IGU", "Foz do Iguaçu", "BR", -25.55, -54.59),
         a("AJU", "Aracaju", "BR", -10.98, -37.07),
+        // Brazil's other main airports (0055)
+        a("CNF", "Belo Horizonte", "BR", -19.92, -43.94),
+        a("CWB", "Curitiba", "BR", -25.43, -49.27),
+        a("BEL", "Belém", "BR", -1.46, -48.49),
+        a("MAO", "Manaus", "BR", -3.12, -60.02),
+        a("GYN", "Goiânia", "BR", -16.69, -49.26),
+        a("VIX", "Vitória", "BR", -20.32, -40.34),
+        a("CGB", "Cuiabá", "BR", -15.60, -56.10),
         // South America
         c("BUE", "Buenos Aires", "AR", -34.60, -58.38),
         a("SCL", "Santiago", "CL", -33.45, -70.67),
@@ -58,6 +66,19 @@ fn watchlist() -> Vec<NewPlace> {
         // Antarctic gateways (0054)
         a("USH", "Ushuaia", "AR", -54.84, -68.30),
         a("PUQ", "Punta Arenas", "CL", -53.00, -70.85),
+        // South America's other main airports (0055)
+        a("MDE", "Medellín", "CO", 6.24, -75.58),
+        a("CTG", "Cartagena", "CO", 10.39, -75.48),
+        a("CLO", "Cali", "CO", 3.45, -76.53),
+        a("UIO", "Quito", "EC", -0.18, -78.47),
+        a("GYE", "Guayaquil", "EC", -2.17, -79.92),
+        a("CCS", "Caracas", "VE", 10.60, -66.99),
+        a("ASU", "Asunción", "PY", -25.26, -57.58),
+        a("VVI", "Santa Cruz de la Sierra", "BO", -17.78, -63.18),
+        a("LPB", "La Paz", "BO", -16.50, -68.15),
+        a("CUZ", "Cusco", "PE", -13.53, -71.97),
+        a("COR", "Córdoba", "AR", -31.42, -64.18),
+        a("MDZ", "Mendoza", "AR", -32.89, -68.83),
         // North America and Caribbean
         a("MIA", "Miami", "US", 25.76, -80.19),
         a("MCO", "Orlando", "US", 28.54, -81.38),
@@ -79,7 +100,8 @@ fn watchlist() -> Vec<NewPlace> {
 }
 
 const BRAZIL: &[&str] = &[
-    "RIO", "BSB", "SSA", "REC", "FOR", "FLN", "POA", "NAT", "MCZ", "IGU", "AJU",
+    "RIO", "BSB", "SSA", "REC", "FOR", "FLN", "POA", "NAT", "MCZ", "IGU",
+    "AJU", "CNF", "CWB", "BEL", "MAO", "GYN", "VIX", "CGB",
 ];
 const EUROPE: &[&str] = &["LIS", "OPO", "MAD", "BCN", "PAR", "LON", "ROM"];
 
