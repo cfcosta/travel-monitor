@@ -29,6 +29,7 @@ pin, the other moves with it.
 ## 0004: Browsing is driven by Jev over Chrome CDP
 
 - Date: 2026-10-05
+- Superseded in part by [0059](#0059-jev-is-removed): Jev is no longer used.
 
 Prices are read from real pages in a Chrome/Chromium instance, controlled
 through the Chrome DevTools Protocol. Jev, a decision model, chooses each
@@ -147,6 +148,7 @@ the expected page, for example after the site changes.
 ## 0015: Our own Jev client, copied from tau-agent
 
 - Date: 2026-10-05
+- Superseded in part by [0059](#0059-jev-is-removed): Jev is no longer used.
 
 The Jev client is a crate in this workspace, started as a copy of
 `../tau-agent/crates/plugins/tau-jev`. That crate is used instead of the
@@ -158,6 +160,7 @@ dependency on `../vs1` or `../tau-agent`.
 ## 0016: The browser runtime is ported from vs1-browser
 
 - Date: 2026-10-05
+- Superseded in part by [0059](#0059-jev-is-removed): Jev is no longer used.
 
 The CDP layer is a copy of `../vs1/crates/vs1-browser`, adapted to this
 project: its DOM snapshot, its action guards (fresh node identity,
@@ -509,6 +512,7 @@ opens. The daemon never sends notifications itself.
 ## 0041: Google Flights URLs are generated; Jev handles the rest
 
 - Date: 2026-10-06
+- Superseded in part by [0059](#0059-jev-is-removed): Jev is no longer used.
 - Refines [0014](#0014-jev-learns-a-search-once-then-the-url-is-replayed).
 - Research: [docs/research/google-flights.md](docs/research/google-flights.md).
 
@@ -814,3 +818,27 @@ double the rate. The core still needs about 850 loads a day; the rest
 lets premium cabins, round trips and foreign points of sale come round
 more often than weekly. Blocks still halve the budget and cool the
 site down (0039).
+
+## 0059: Jev is removed
+
+- Date: 2026-10-06
+- Supersedes the Jev parts of [0004](#0004-browsing-is-driven-by-jev-over-chrome-cdp),
+  [0014](#0014-jev-learns-a-search-once-then-the-url-is-replayed),
+  [0015](#0015-our-own-jev-client-copied-from-tau-agent),
+  [0016](#0016-the-browser-runtime-is-ported-from-vs1-browser),
+  [0037](#0037-the-daemon-runs-on-an-always-on-nixos-box-set-up-by-a-home-manager-module)
+  and [0041](#0041-google-flights-urls-are-generated-jev-handles-the-rest).
+
+A check either works or fails. When a generated Google Flights or TAP
+page does not produce what is expected, the check ends as
+`Unexpected` and the scheduler retries it later; nothing tries to
+navigate around the problem. Jev's only other use, driving airline and
+miles sites, had no site left to run on after
+[0052](#0052-sites-that-deny-the-daemons-browser-stay-off).
+
+So Jev goes entirely: the `tm-jev` crate, `tm-browser`'s Jev navigation
+agent (and anything only it used), the daemon's Jev recovery and
+Jev-driven airline and miles sources, the `--jev-key-file` and
+`--jev-model` flags, and the home-manager module's `jev.*` options.
+Airline sources other than TAP and the miles programs stay configured
+but have no reader; they are skipped.
