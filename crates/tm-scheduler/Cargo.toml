@@ -1,0 +1,18 @@
+[package]
+name = "tm-scheduler"
+description = "What to check next, change rates, baselines and deal rules. Pure logic, no I/O."
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+chrono.workspace = true
+rand.workspace = true
+serde.workspace = true
+tm-domain.workspace = true
+
+[dev-dependencies]
+hegeltest.workspace = true
+
+[lints]
+workspace = true
