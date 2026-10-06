@@ -120,7 +120,11 @@ async fn clicks_typing_and_keys() {
 
     page.click("#more").await.expect("click");
     page.click("#more").await.expect("click again");
-    assert_eq!(page.eval("window.count").await.expect("count"), 2);
+    // Input events land asynchronously; wait for both handlers to run
+    // rather than reading the count once (this was flaky under load).
+    page.wait_until("window.count === 2", LOAD, POLL)
+        .await
+        .expect("both clicks counted");
 
     // Below the fold: scrolled into view first.
     page.click("#far").await.expect("far click");
