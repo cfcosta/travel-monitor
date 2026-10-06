@@ -874,3 +874,24 @@ cheap trip that goes far ranks above an equally cheap short hop. Actual
 routings with stops are longer; the figure compares destinations, not
 itineraries. While that sort is active each row shows its value
 (`R$0.25/km`).
+
+## 0063: Sixty-two leisure and long-haul destinations join the watchlist
+
+- Date: 2026-10-06
+- Adds to [0055](#0055-south-americas-main-airports-join-the-watchlist).
+
+The watchlist grows from 52 to 114 destinations, in the live database
+and the first-run seed:
+
+- **Brazil leisure:** FEN, BPS, JPA, SLZ, JJD, IOS, NVT, CGR, BYO, STM,
+  PMW, THE.
+- **South America and the Caribbean:** FTE, PDP, GPS, IPC, CJC, UYU,
+  AQP, PMC, SMR, ADZ, PTY, SJO, AUA, CUR, HAV, MEX.
+- **North America:** LAX, SFO, LAS, BOS, ORD, WAS (city), ATL, DFW, IAH,
+  FLL, YYZ, YUL.
+- **Europe, Africa, Asia and Oceania:** MIL (city), FRA, MUC, AMS, ZRH,
+  VIE, PRG, ATH, IST, DUB, BER, CPT, JNB, RAK, DOH, SEL (city), BKK,
+  SIN, DPS, HKG, SYD, AKL.
+
+The daily core (0056) becomes about 228 leg families, roughly 1,830
+Google Flights page loads a day, within that site's 2,400 (0060).
