@@ -2,7 +2,7 @@
 
 use std::{
     collections::VecDeque,
-    path::PathBuf,
+    path::{Path, PathBuf},
     process::Stdio,
     time::Duration,
 };
@@ -27,6 +27,25 @@ const STARTUP_TIMEOUT: Duration = Duration::from_secs(30);
 
 /// How long a graceful shutdown may take before the process is killed.
 const SHUTDOWN_TIMEOUT: Duration = Duration::from_secs(5);
+
+/// The flags that decide how a profile stores its cookies and secrets.
+/// Every Chromium that opens the daemon's profile must pass all of them:
+/// the daemon's headless browser and the app's login window (0024).
+///
+/// `--password-store=basic` and `--use-mock-keychain` keep the cookie
+/// encryption key out of the desktop keyring. A Chromium started without
+/// them may encrypt cookies with a keyring key, and a Chromium started
+/// with them cannot decrypt those cookies and drops them: a login made
+/// in the window would never reach the daemon
+/// (docs/research/sites/latam-pass.md). `--disable-sync` keeps a Google
+/// account from syncing data into the profile in one and not the other.
+pub fn profile_args() -> &'static [&'static str] {
+    &[
+        "--password-store=basic",
+        "--use-mock-keychain",
+        "--disable-sync",
+    ]
+}
 
 /// How to start Chromium.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -80,11 +99,9 @@ impl ChromiumConfig {
             format!("--window-size={},{}", self.window.0, self.window.1),
             "--no-first-run".into(),
             "--no-default-browser-check".into(),
-            "--disable-sync".into(),
             "--disable-features=Translate,MediaRouter".into(),
-            "--password-store=basic".into(),
-            "--use-mock-keychain".into(),
         ];
+        args.extend(profile_args().iter().map(|&a| a.to_owned()));
         if self.headless {
             args.push("--headless=new".into());
         }
@@ -106,16 +123,22 @@ impl Chromium {
     /// Starts Chromium, waits for its DevTools endpoint and connects.
     pub async fn launch(config: ChromiumConfig) -> Result<Self> {
         std::fs::create_dir_all(&config.user_data_dir)?;
-        let mut child = Command::new(&config.binary)
-            .args(config.args())
+        Self::launch_with(&config.binary, config.args()).await
+    }
+
+    /// Starts `binary` with exactly `args`, which must ask for a
+    /// DevTools endpoint (`--remote-debugging-port`), and connects. For
+    /// command lines that [`ChromiumConfig`] does not build, such as the
+    /// login window's in tests.
+    pub async fn launch_with(binary: &Path, args: Vec<String>) -> Result<Self> {
+        let mut child = Command::new(binary)
+            .args(args)
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(Stdio::piped())
             .kill_on_drop(true)
             .spawn()
-            .map_err(|e| {
-                Error::Launch(format!("{}: {e}", config.binary.display()))
-            })?;
+            .map_err(|e| Error::Launch(format!("{}: {e}", binary.display())))?;
         let stderr = child
             .stderr
             .take()
@@ -257,5 +280,13 @@ mod tests {
         assert_eq!(args[args.len() - 2], "--lang=pt-BR");
         config.headless = false;
         assert!(!config.args().iter().any(|a| a.starts_with("--headless")));
+    }
+
+    #[test]
+    fn the_daemon_passes_every_profile_flag() {
+        let args = ChromiumConfig::new("/bin/chromium", "/tmp/p").args();
+        for flag in profile_args() {
+            assert!(args.iter().any(|a| a == flag), "{flag} missing");
+        }
     }
 }

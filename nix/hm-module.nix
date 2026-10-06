@@ -10,8 +10,6 @@
 #       --chromium <chromium.package>/bin/chromium
 #       [--headed]                      (when chromium.headless = false)
 #       --cdp-port <chromium.port>      (0: the daemon picks a free port)
-#       [--jev-key-file <jev.apiKeyFile>]
-#       --jev-model <jev.model>
 #       --budget <budget.daily>
 #       --max-budget <budget.max>
 #       <extraArgs...>
@@ -37,7 +35,6 @@ let
     mkIf
     mkOption
     optional
-    optionals
     types
     ;
 
@@ -63,14 +60,6 @@ let
   ++ [
     "--cdp-port"
     (toString cfg.chromium.port)
-  ]
-  ++ optionals (cfg.jev.apiKeyFile != null) [
-    "--jev-key-file"
-    cfg.jev.apiKeyFile
-  ]
-  ++ [
-    "--jev-model"
-    cfg.jev.model
     "--budget"
     (toString cfg.budget.daily)
     "--max-budget"
@@ -188,26 +177,6 @@ in
       };
     };
 
-    jev = {
-      apiKeyFile = mkOption {
-        type = types.nullOr types.str;
-        default = null;
-        example = "/run/secrets/jev-api-key";
-        description = ''
-          A file holding the Jev API key, read by the daemon at start-up. It
-          is a string, not a Nix path, so the key is never copied into the
-          Nix store: point it at a file managed outside Nix (for example by
-          sops-nix or agenix). When null, the daemon runs without Jev.
-        '';
-      };
-
-      model = mkOption {
-        type = types.str;
-        default = "jev-latest";
-        description = "The Jev model the daemon asks.";
-      };
-    };
-
     budget = {
       daily = mkOption {
         type = types.ints.positive;
@@ -250,14 +219,6 @@ in
       {
         assertion = cfg.budget.daily <= cfg.budget.max;
         message = "services.travel-monitor.budget.daily (${toString cfg.budget.daily}) must not exceed budget.max (${toString cfg.budget.max}).";
-      }
-      {
-        assertion = cfg.jev.apiKeyFile == null || !(lib.hasPrefix builtins.storeDir cfg.jev.apiKeyFile);
-        message = "services.travel-monitor.jev.apiKeyFile points into the Nix store, which is world-readable. Use a file outside the store.";
-      }
-      {
-        assertion = cfg.jev.apiKeyFile == null || lib.hasPrefix "/" cfg.jev.apiKeyFile;
-        message = "services.travel-monitor.jev.apiKeyFile must be an absolute path.";
       }
     ];
 

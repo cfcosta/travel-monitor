@@ -52,28 +52,27 @@ impl Store {
         Ok(QueryId(done.last_insert_rowid()))
     }
 
-    /// Records how a query ended. A query is finished once.
+    /// Records how a query ended. A query is finished once. The
+    /// `jev_calls` column is no longer used (0059): it is always 0.
     pub async fn finish_query(
         &self,
         id: QueryId,
         outcome: &QueryOutcome,
         page_loads: u32,
-        jev_calls: u32,
         finished_at: DateTime<Utc>,
     ) -> Result<()> {
         let (label, detail) = outcome_parts(outcome);
         let json = serde_json::to_string(outcome)?;
         let done = sqlx::query!(
             "UPDATE queries SET outcome = ?2, outcome_detail = ?3,
-                 outcome_json = ?4, page_loads = ?5, jev_calls = ?6,
-                 finished_at = ?7
+                 outcome_json = ?4, page_loads = ?5, jev_calls = 0,
+                 finished_at = ?6
              WHERE id = ?1 AND finished_at IS NULL",
             id.0,
             label,
             detail,
             json,
             page_loads,
-            jev_calls,
             finished_at,
         )
         .execute(&self.pool)
@@ -99,7 +98,7 @@ impl Store {
                       q.scheduled_at AS "scheduled_at: DateTime<Utc>",
                       q.started_at AS "started_at: DateTime<Utc>",
                       q.finished_at AS "finished_at: DateTime<Utc>",
-                      q.outcome_json, q.page_loads, q.jev_calls,
+                      q.outcome_json, q.page_loads,
                       (SELECT COUNT(*) FROM observations ob
                        WHERE ob.query_id = q.id) AS "cells!: i64"
                FROM queries q

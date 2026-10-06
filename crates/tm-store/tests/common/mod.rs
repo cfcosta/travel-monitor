@@ -111,7 +111,7 @@ pub async fn run_query(
         .collect();
     store.insert_observations(&cells).await.expect("inserts");
     store
-        .finish_query(q, &outcome, 1, 0, when)
+        .finish_query(q, &outcome, 1, when)
         .await
         .expect("finishes");
     q

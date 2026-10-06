@@ -27,15 +27,6 @@ gpui = { package = "gpui-pre", version = "=0.3.7" }
 hegeltest = { version = "0.48.1", features = ["serde_json", "static-engine"] }
 notify-rust = "4"
 rand = "0.9"
-reqwest = { version = "0.13.5", default-features = false, features = [
-  "json",
-  "rustls-no-provider",
-] }
-rustls = { version = "0.23", default-features = false, features = [
-  "ring",
-  "std",
-  "tls12",
-] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.151", features = ["preserve_order"] }
 sqlx = { version = "0.9.0", default-features = false, features = [
@@ -61,14 +52,12 @@ tokio-tungstenite = { version = "0.30.0", default-features = false, features = [
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 url = "2"
-webpki-roots = "1.0.9"
 
 tm-app = { path = "crates/tm-app" }
 tm-browser = { path = "crates/tm-browser" }
 tm-daemon = { path = "crates/tm-daemon" }
 tm-domain = { path = "crates/tm-domain" }
 tm-gflights = { path = "crates/tm-gflights" }
-tm-jev = { path = "crates/tm-jev" }
 tm-scheduler = { path = "crates/tm-scheduler" }
 tm-store = { path = "crates/tm-store" }
 

@@ -25,7 +25,6 @@ thiserror.workspace = true
 tm-browser.workspace = true
 tm-domain.workspace = true
 tm-gflights.workspace = true
-tm-jev.workspace = true
 tm-scheduler.workspace = true
 tm-store.workspace = true
 tokio = { workspace = true, features = [

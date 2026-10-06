@@ -68,8 +68,6 @@ in
         "tm-scheduler"
         "--package"
         "tm-store"
-        "--package"
-        "tm-jev"
       ];
       preCheck = ''
         unset TM_CHROMIUM

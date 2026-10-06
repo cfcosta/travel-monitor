@@ -7,7 +7,7 @@
 //! fields they do not read. What they read must have the expected
 //! shape: a missing price is `None`, a structure they cannot recognise
 //! is an [`RpcError`], which the daemon treats as a format change
-//! (Jev recovery, 0041).
+//! (`Unexpected`, 0059).
 
 mod booking;
 mod calendar;

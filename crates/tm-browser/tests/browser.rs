@@ -12,7 +12,7 @@ use std::time::Duration;
 
 use common::{Reply, Server, chromium};
 use serde_json::json;
-use tm_browser::{ActionKind, ContextOptions, Error};
+use tm_browser::{ContextOptions, Error};
 
 const LOAD: Duration = Duration::from_secs(15);
 const POLL: Duration = Duration::from_millis(25);
@@ -406,130 +406,6 @@ async fn context_options_set_proxy_locale_and_timezone() {
         .await
         .expect("format");
     assert_eq!(price, "3,972");
-    chromium.shutdown().await.expect("shutdown");
-}
-
-const FORM: &str = r#"<title>Support</title>
-<style>button,input,select{display:block;margin:8px;width:240px;height:32px}</style>
-<form id="form">
-  <p id="context">Cart total: $10</p>
-  <label>Name <input id="name" name="name"></label>
-  <label>Topic <select id="topic"><option>General</option><option>Billing</option></select></label>
-  <label><input id="privacy" type="checkbox"> I accept the privacy terms</label>
-  <input type="password" aria-label="Secret">
-  <input type="hidden" name="token" value="x">
-  <button id="send" type="button" onclick="window.clicks = (window.clicks || 0) + 1">Send</button>
-</form>"#;
-
-#[tokio::test(flavor = "multi_thread")]
-async fn snapshots_observe_a_form_and_guard_input() {
-    let Some((chromium, _profile)) = chromium().await else {
-        return;
-    };
-    let server = Server::start(|_| Reply::html(FORM)).await;
-    let page = chromium.browser().new_page().await.expect("page");
-    page.navigate(&server.url("/"), LOAD)
-        .await
-        .expect("navigate");
-
-    let snapshot = page.snapshot().await.expect("snapshot");
-    assert_eq!(snapshot.title, "Support");
-    assert!(snapshot.text.contains("Cart total: $10"));
-    let name = snapshot
-        .find("Name", ActionKind::Fill)
-        .expect("name field")
-        .clone();
-    assert_eq!(name.role.as_deref(), Some("textbox"));
-    assert!(snapshot.find("Open Name", ActionKind::Click).is_some());
-    let billing = snapshot
-        .find("Topic → Billing", ActionKind::Select)
-        .expect("topic option")
-        .clone();
-    assert_eq!(billing.current_value.as_deref(), Some("General"));
-    // The selected option is not offered again.
-    assert!(
-        snapshot
-            .find("Topic → General", ActionKind::Select)
-            .is_none()
-    );
-    let privacy = snapshot
-        .find("I accept the privacy terms", ActionKind::Click)
-        .expect("checkbox");
-    assert_eq!(privacy.checked.as_deref(), Some("false"));
-    let send = snapshot
-        .find("Send", ActionKind::Click)
-        .expect("send")
-        .clone();
-    assert!(
-        !snapshot.actions.iter().any(|a| a.label == "Secret"),
-        "password fields are never observed"
-    );
-    assert!(snapshot.actions.iter().any(|a| a.kind == ActionKind::Wait));
-    assert!(page.is_fresh(&snapshot, None).await.expect("fresh"));
-
-    // Typing replaces the value, and the effect is observed.
-    page.act(&snapshot, &name, Some("Ana Souza"))
-        .await
-        .expect("fill");
-    let after = page.snapshot_after(&snapshot, &name).await.expect("after");
-    assert_ne!(after.fingerprint, snapshot.fingerprint);
-    assert_eq!(
-        page.eval("document.querySelector('#name').value")
-            .await
-            .expect("value"),
-        "Ana Souza"
-    );
-    assert!(!page.is_fresh(&snapshot, None).await.expect("stale"));
-
-    let billing = after
-        .find("Topic → Billing", ActionKind::Select)
-        .expect("topic option")
-        .clone();
-    page.act(&after, &billing, None).await.expect("select");
-    assert_eq!(page.eval("topic.value").await.expect("topic"), "Billing");
-
-    // Moving the target is fine: geometry is resolved at input time.
-    let current = page.snapshot().await.expect("snapshot");
-    let send_now = current
-        .find("Send", ActionKind::Click)
-        .expect("send")
-        .clone();
-    page.eval("send.style.transform = 'translateX(40px)'")
-        .await
-        .expect("move");
-    page.act(&current, &send_now, None)
-        .await
-        .expect("click moved");
-    assert_eq!(page.eval("window.clicks").await.expect("clicks"), 1);
-
-    // A changed context, a replaced node or a cover rejects the input
-    // before anything is sent.
-    for change in [
-        "document.querySelector('#context').textContent = 'Cart total: $100'",
-        "send.outerHTML = send.outerHTML",
-        "document.body.insertAdjacentHTML('beforeend', \
-         '<div id=cover style=\"position:fixed;inset:0;z-index:9;background:white\"></div>')",
-    ] {
-        page.eval("document.querySelector('#cover')?.remove()")
-            .await
-            .expect("reset");
-        let current = page.snapshot().await.expect("snapshot");
-        let target = current
-            .find("Send", ActionKind::Click)
-            .expect("send")
-            .clone();
-        page.eval(change).await.expect("change");
-        let error = page.act(&current, &target, None).await.expect_err("stale");
-        assert!(error.is_stale(), "{change}: {error}");
-    }
-    assert_eq!(page.eval("window.clicks").await.expect("clicks"), 1);
-    // The first snapshot's Send was replaced long ago.
-    assert!(
-        page.act(&snapshot, &send, None)
-            .await
-            .expect_err("stale")
-            .is_stale()
-    );
     chromium.shutdown().await.expect("shutdown");
 }
 

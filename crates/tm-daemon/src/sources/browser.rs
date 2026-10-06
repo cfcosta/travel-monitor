@@ -3,9 +3,8 @@
 //! - Google Flights price graphs and Explore: load the generated URL,
 //!   open the graph with `tm-gflights`' snippet, and read the page's own
 //!   `GetCalendarGraph` / `GetExploreDestinations` responses through
-//!   CDP (0032). When a snippet finds nothing and Jev is configured, Jev
-//!   is asked to open the graph, then the capture is tried once more
-//!   (0041).
+//!   CDP (0032). When a snippet finds nothing, the check ends as
+//!   `Unexpected` (0059).
 //! - Confirmations: the round trip's results page (first itineraries
 //!   from the HTML-embedded `ds:1`), the returning flights for the
 //!   cheapest outbound, and that point of sale's own booking page (0031,
@@ -13,27 +12,18 @@
 //! - TAP (0051): load the deep link, read the page's availability
 //!   search, open the "Datas" step and scroll it, reading each month the
 //!   page fetches from TAP's calendar ([`crate::sites::tap`]).
-//! - Other airline sites and miles programs: Jev drives the page to a
-//!   results list; prices are read from the visible text and marked
-//!   unverified (0047). None of them is verified yet (0052).
+//! - Other airline sites and miles programs have no reader (0052,
+//!   0059).
 //!
 //! Each point of sale has its own browser context (isolated cookies,
-//! 0033); airline and miles pages use the profile's own context, where
-//! miles logins live (0024).
+//! 0033).
 
-use std::{collections::HashMap, sync::Arc, time::Duration};
+use std::{collections::HashMap, time::Duration};
 
 use async_trait::async_trait;
 use rand::Rng;
 use serde_json::Value;
-use tm_browser::{
-    Chromium,
-    ChromiumConfig,
-    Context,
-    ContextOptions,
-    Page,
-    agent::{self, AgentOutcome, Task},
-};
+use tm_browser::{Chromium, ChromiumConfig, Context, ContextOptions, Page};
 use tm_domain::{Cabin, Currency, PointOfSale, PosId, QueryOutcome};
 use tm_gflights::{
     Method,
@@ -62,11 +52,9 @@ use tm_gflights::{
     tfs::PlaceRef,
     url::{booking_url, search_url},
 };
-use tm_jev::Jev;
 use tracing::{debug, info, warn};
 
 use super::{
-    AgentJob,
     CalendarJob,
     Cell,
     ConfirmJob,
@@ -77,7 +65,7 @@ use super::{
     Sources,
     TapJob,
 };
-use crate::{extract, jobs::rebase, sites::tap};
+use crate::{jobs::rebase, sites::tap};
 
 /// How long each step may take.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -121,16 +109,14 @@ struct Running {
 
 pub struct BrowserSources {
     config: ChromiumConfig,
-    jev: Option<Arc<dyn Jev>>,
     timeouts: Timeouts,
     running: Option<Running>,
 }
 
 impl BrowserSources {
-    pub fn new(config: ChromiumConfig, jev: Option<Arc<dyn Jev>>) -> Self {
+    pub fn new(config: ChromiumConfig) -> Self {
         Self {
             config,
-            jev,
             timeouts: Timeouts::default(),
             running: None,
         }
@@ -141,16 +127,12 @@ impl BrowserSources {
         self
     }
 
-    /// A new page under `pos`'s context (created if missing), or in the
-    /// profile's own context.
-    async fn page(&mut self, pos: Option<PosId>) -> anyhow::Result<Page> {
+    /// A new page under `pos`'s context (created if missing).
+    async fn page(&mut self, pos: PosId) -> anyhow::Result<Page> {
         let running = self
             .running
             .as_mut()
             .ok_or_else(|| anyhow::anyhow!("the browser is not running"))?;
-        let Some(pos) = pos else {
-            return Ok(running.chromium.browser().new_page().await?);
-        };
         if !running.contexts.contains_key(&pos) {
             let context = running
                 .chromium
@@ -212,33 +194,6 @@ async fn navigate(
         })
 }
 
-/// What Jev is asked when a price-graph snippet finds nothing (0041).
-fn open_graph_task() -> Task {
-    let mut task = Task::new(
-        "Open the price graph of this Google Flights results page: the \
-         control labelled 'Price graph', next to 'Date grid', near the top \
-         of the results. Stop as soon as the price graph chart is visible. \
-         Do not select a flight and do not change the search.",
-    );
-    task.max_steps = 8;
-    task
-}
-
-fn jev_calls(outcome: &AgentOutcome) -> u32 {
-    u32::try_from(outcome.trace.decisions.len()).unwrap_or(u32::MAX)
-}
-
-/// Navigations an agent run caused: steps after which the URL changed.
-fn agent_loads(outcome: &AgentOutcome) -> u32 {
-    let mut urls: Vec<&str> =
-        outcome.trace.steps.iter().map(|s| s.url.as_str()).collect();
-    if let Some(last) = outcome.trace.final_url.as_deref() {
-        urls.push(last);
-    }
-    let changes = urls.windows(2).filter(|w| w[0] != w[1]).count();
-    u32::try_from(changes).unwrap_or(u32::MAX)
-}
-
 fn cells_of(calendar: Vec<CalendarCell>, display: &Currency) -> Vec<Cell> {
     calendar
         .into_iter()
@@ -261,7 +216,6 @@ fn merge(into: &mut Vec<CalendarCell>, cells: Vec<CalendarCell>) {
 async fn calendar_on(
     page: &Page,
     job: &CalendarJob,
-    jev: Option<&dyn Jev>,
     t: Timeouts,
 ) -> Fetch<Vec<Cell>> {
     let capture = match page.capture(Method::CalendarGraph.name()).await {
@@ -269,12 +223,11 @@ async fn calendar_on(
         Err(e) => return Fetch::error(format!("capture failed: {e}")),
     };
     let mut loads = 1;
-    let mut jev_used = 0;
     if let Err(outcome) = navigate(page, &job.url, t.navigation).await {
-        return Fetch::failed(outcome, loads, 0);
+        return Fetch::failed(outcome, loads);
     }
     if let Some(outcome) = blocked(page).await {
-        return Fetch::failed(outcome, loads, 0);
+        return Fetch::failed(outcome, loads);
     }
     let opened = page
         .wait_until(
@@ -284,8 +237,7 @@ async fn calendar_on(
         )
         .await
         .is_ok();
-    let mut got = opened && capture.wait_for(1, t.response).await.is_ok();
-    if !got {
+    if !(opened && capture.wait_for(1, t.response).await.is_ok()) {
         let why = if opened {
             "no GetCalendarGraph response after opening the price graph"
         } else {
@@ -297,33 +249,12 @@ async fn calendar_on(
         let excerpt: String = excerpt.chars().take(400).collect();
         let url = page.url().await.unwrap_or_default();
         warn!(%url, page = %excerpt, "{why}");
-        let Some(jev) = jev else {
-            return Fetch::failed(
-                QueryOutcome::Unexpected {
-                    detail: why.to_owned(),
-                },
-                loads,
-                0,
-            );
-        };
-        warn!(url = %job.url, "{why}; asking Jev");
-        let outcome = agent::run(page, jev, &open_graph_task()).await;
-        jev_used += jev_calls(&outcome);
-        loads += agent_loads(&outcome);
-        got = capture.wait_for(1, t.response).await.is_ok();
-        if !got {
-            return Fetch::failed(
-                QueryOutcome::Unexpected {
-                    detail: format!(
-                        "{why}; Jev recovery ended {:?} ({})",
-                        outcome.status,
-                        outcome.reason.unwrap_or_default()
-                    ),
-                },
-                loads,
-                jev_used,
-            );
-        }
+        return Fetch::failed(
+            QueryOutcome::Unexpected {
+                detail: why.to_owned(),
+            },
+            loads,
+        );
     }
     tokio::time::sleep(t.settle).await;
     let mut responses = capture.drain();
@@ -385,14 +316,13 @@ async fn calendar_on(
                 ),
             },
             loads,
-            jev_used,
         );
     }
     if !errors.is_empty() {
         warn!(?errors, "some calendar responses were not read");
     }
     info!(cells = cells.len(), pages, "price graph read");
-    Fetch::ok(cells_of(cells, &job.display), loads, jev_used)
+    Fetch::ok(cells_of(cells, &job.display), loads)
 }
 
 async fn explore_on(
@@ -405,10 +335,10 @@ async fn explore_on(
         Err(e) => return Fetch::error(format!("capture failed: {e}")),
     };
     if let Err(outcome) = navigate(page, &job.url, t.navigation).await {
-        return Fetch::failed(outcome, 1, 0);
+        return Fetch::failed(outcome, 1);
     }
     if let Some(outcome) = blocked(page).await {
-        return Fetch::failed(outcome, 1, 0);
+        return Fetch::failed(outcome, 1);
     }
     if capture.wait_for(1, t.response * 2).await.is_err() {
         return Fetch::failed(
@@ -416,7 +346,6 @@ async fn explore_on(
                 detail: "no GetExploreDestinations response".into(),
             },
             1,
-            0,
         );
     }
     tokio::time::sleep(t.settle).await;
@@ -447,74 +376,10 @@ async fn explore_on(
                 ),
             },
             1,
-            0,
         );
     }
     info!(destinations = out.len(), "Explore read");
-    Fetch::ok(out, 1, 0)
-}
-
-async fn agent_on(
-    page: &Page,
-    job: &AgentJob,
-    jev: &dyn Jev,
-    t: Timeouts,
-) -> Fetch<Vec<Cell>> {
-    if let Err(outcome) = navigate(page, &job.start_url, t.navigation).await {
-        return Fetch::failed(outcome, 1, 0);
-    }
-    let outcome = agent::run(page, jev, &job.task).await;
-    let calls = jev_calls(&outcome);
-    let loads = 1 + agent_loads(&outcome);
-    let text: String = page.eval_as(PAGE_TEXT_JS).await.unwrap_or_default();
-    let password: bool = page
-        .eval_as(extract::PASSWORD_FIELD_JS)
-        .await
-        .unwrap_or(false);
-    let prices = extract::brl_amounts(&text);
-    let miles = extract::mile_amounts(&text);
-    let found = if job.miles {
-        !miles.is_empty()
-    } else {
-        !prices.is_empty()
-    };
-    if job.miles && !found && extract::looks_logged_out(&text, password) {
-        return Fetch::failed(QueryOutcome::LoggedOut, loads, calls);
-    }
-    if !found {
-        return Fetch::failed(
-            QueryOutcome::Unexpected {
-                detail: format!(
-                    "no prices visible on {} (Jev ended {:?}: {})",
-                    job.site,
-                    outcome.status,
-                    outcome.reason.unwrap_or_default()
-                ),
-            },
-            loads,
-            calls,
-        );
-    }
-    let price = prices
-        .iter()
-        .min()
-        .map(|&minor| tm_domain::Money::new(minor, Currency::brl()));
-    let cell = Cell {
-        departure: job.departure,
-        return_date: job.return_date,
-        price,
-        miles: if job.miles {
-            miles.iter().min().copied()
-        } else {
-            None
-        },
-        carrier: job.carrier.clone(),
-        stops: None,
-        duration_minutes: None,
-        seller: Some(format!("unverified:{}", job.site)),
-    };
-    info!(site = %job.site, ?cell.price, ?cell.miles, "unverified price read");
-    Fetch::ok(vec![cell], loads, calls)
+    Fetch::ok(out, 1)
 }
 
 /// A Cloudflare challenge in place of TAP's page.
@@ -671,10 +536,10 @@ async fn tap_on(page: &Page, job: &TapJob, t: Timeouts) -> Fetch<Vec<Cell>> {
     };
     let mut loads = 1;
     if let Err(outcome) = navigate(page, &job.url, t.navigation).await {
-        return Fetch::failed(outcome, loads, 0);
+        return Fetch::failed(outcome, loads);
     }
     if let Some(outcome) = tap_blocked(page).await {
-        return Fetch::failed(outcome, loads, 0);
+        return Fetch::failed(outcome, loads);
     }
     // The app posts the deep link, moves to the results and searches.
     if search.wait_for(1, t.response * 2).await.is_err() {
@@ -683,26 +548,22 @@ async fn tap_on(page: &Page, job: &TapJob, t: Timeouts) -> Fetch<Vec<Cell>> {
                 detail: "no TAP availability search response".into(),
             }
         });
-        return Fetch::failed(outcome, loads, 0);
+        return Fetch::failed(outcome, loads);
     }
     tokio::time::sleep(t.settle).await;
     let searches = search.drain();
     if let Some(outcome) = tap_api_blocked(&searches) {
-        return Fetch::failed(outcome, loads, 0);
+        return Fetch::failed(outcome, loads);
     }
     let live = match tap_live_cell(&searches, job) {
         Ok(cell) => cell,
         Err(detail) => {
-            return Fetch::failed(
-                QueryOutcome::Unexpected { detail },
-                loads,
-                0,
-            );
+            return Fetch::failed(QueryOutcome::Unexpected { detail }, loads);
         }
     };
     if job.cabin != Cabin::Economy {
         // Economy Prime and business have no calendar (0051).
-        return Fetch::ok(vec![live], loads, 0);
+        return Fetch::ok(vec![live], loads);
     }
 
     // The "Datas" step: the page fetches each month as it scrolls into
@@ -721,7 +582,6 @@ async fn tap_on(page: &Page, job: &TapJob, t: Timeouts) -> Fetch<Vec<Cell>> {
                 detail: "TAP's 'Datas' step was not found".into(),
             },
             loads,
-            0,
         );
     }
     let mut errors = Vec::new();
@@ -738,7 +598,7 @@ async fn tap_on(page: &Page, job: &TapJob, t: Timeouts) -> Fetch<Vec<Cell>> {
             let got = calendar.drain();
             if let Some(outcome) = tap_api_blocked(&got) {
                 loads += responses;
-                return Fetch::failed(outcome, loads, 0);
+                return Fetch::failed(outcome, loads);
             }
             let read = tap_months(&got, job, &mut errors);
             responses += u32::try_from(read.len()).unwrap_or(u32::MAX);
@@ -785,7 +645,7 @@ async fn tap_on(page: &Page, job: &TapJob, t: Timeouts) -> Fetch<Vec<Cell>> {
                 ),
             }
         });
-        return Fetch::failed(outcome, loads, 0);
+        return Fetch::failed(outcome, loads);
     }
     if !errors.is_empty() {
         warn!(?errors, "some TAP calendar responses were not read");
@@ -824,7 +684,7 @@ async fn tap_on(page: &Page, job: &TapJob, t: Timeouts) -> Fetch<Vec<Cell>> {
         out_of_range,
         "TAP calendar read"
     );
-    Fetch::ok(cells, loads, 0)
+    Fetch::ok(cells, loads)
 }
 
 fn cheapest(itineraries: &[Itinerary]) -> Option<&Itinerary> {
@@ -842,10 +702,10 @@ async fn confirm_on(
     let origin = job.origin_override.as_deref();
     let first_url = rebase(&search_url(&job.search, &job.locale), origin);
     if let Err(outcome) = navigate(page, &first_url, t.navigation).await {
-        return Fetch::failed(outcome, 1, 0);
+        return Fetch::failed(outcome, 1);
     }
     if let Some(outcome) = blocked(page).await {
-        return Fetch::failed(outcome, 1, 0);
+        return Fetch::failed(outcome, 1);
     }
     let script = match page
         .wait_until(
@@ -862,7 +722,6 @@ async fn confirm_on(
                     detail: "the results page has no ds:1 data".into(),
                 },
                 1,
-                0,
             );
         }
     };
@@ -874,7 +733,6 @@ async fn confirm_on(
                     detail: format!("unreadable ds:1: {e}"),
                 },
                 1,
-                0,
             );
         }
     };
@@ -884,7 +742,7 @@ async fn confirm_on(
     };
     let Some(best) = cheapest(&outbound).cloned() else {
         info!("the confirmation found no priced itinerary");
-        return Fetch::ok(Some(confirmation), 1, 0);
+        return Fetch::ok(Some(confirmation), 1);
     };
     confirmation.cheapest = best.price;
     confirmation.carrier = Some(best.carrier.clone());
@@ -940,7 +798,7 @@ async fn confirm_on(
             "the booking page could not be read; keeping the results price"
         ),
     }
-    Fetch::ok(Some(confirmation), loads, 0)
+    Fetch::ok(Some(confirmation), loads)
 }
 
 async fn resolve_on(
@@ -949,10 +807,10 @@ async fn resolve_on(
     t: Timeouts,
 ) -> Fetch<Option<String>> {
     if let Err(outcome) = navigate(page, &job.url, t.navigation).await {
-        return Fetch::failed(outcome, 1, 0);
+        return Fetch::failed(outcome, 1);
     }
     if let Some(outcome) = blocked(page).await {
-        return Fetch::failed(outcome, 1, 0);
+        return Fetch::failed(outcome, 1);
     }
     let script = match page
         .wait_until(
@@ -969,7 +827,6 @@ async fn resolve_on(
                     detail: "no AF_dataServiceRequests on the q= page".into(),
                 },
                 1,
-                0,
             );
         }
     };
@@ -979,14 +836,13 @@ async fn resolve_on(
                 PlaceRef::City(id) => Some(id.clone()),
                 PlaceRef::Airport(_) => None,
             });
-            Fetch::ok(id, 1, 0)
+            Fetch::ok(id, 1)
         }
         Err(e) => Fetch::failed(
             QueryOutcome::Unexpected {
                 detail: format!("unreadable q= search: {e}"),
             },
             1,
-            0,
         ),
     }
 }
@@ -1056,16 +912,9 @@ impl Sources for BrowserSources {
             .is_some_and(|r| !r.chromium.browser().is_closed())
     }
 
-    fn has_jev(&self) -> bool {
-        self.jev.is_some()
-    }
-
     async fn calendar(&mut self, job: &CalendarJob) -> Fetch<Vec<Cell>> {
         let t = self.timeouts;
-        let jev = self.jev.clone();
-        on_page!(self, Some(job.pos), |page| {
-            calendar_on(&page, job, jev.as_deref(), t).await
-        })
+        on_page!(self, job.pos, |page| calendar_on(&page, job, t).await)
     }
 
     async fn explore(
@@ -1073,20 +922,12 @@ impl Sources for BrowserSources {
         job: &ExploreJob,
     ) -> Fetch<Vec<ExploreDestination>> {
         let t = self.timeouts;
-        on_page!(self, Some(job.pos), |page| explore_on(&page, job, t).await)
-    }
-
-    async fn agent_search(&mut self, job: &AgentJob) -> Fetch<Vec<Cell>> {
-        let t = self.timeouts;
-        let Some(jev) = self.jev.clone() else {
-            return Fetch::error("Jev is not configured");
-        };
-        on_page!(self, None, |page| agent_on(&page, job, &*jev, t).await)
+        on_page!(self, job.pos, |page| explore_on(&page, job, t).await)
     }
 
     async fn tap(&mut self, job: &TapJob) -> Fetch<Vec<Cell>> {
         let t = self.timeouts;
-        on_page!(self, Some(job.pos), |page| tap_on(&page, job, t).await)
+        on_page!(self, job.pos, |page| tap_on(&page, job, t).await)
     }
 
     async fn confirm(
@@ -1094,11 +935,11 @@ impl Sources for BrowserSources {
         job: &ConfirmJob,
     ) -> Fetch<Option<Confirmation>> {
         let t = self.timeouts;
-        on_page!(self, Some(job.pos), |page| confirm_on(&page, job, t).await)
+        on_page!(self, job.pos, |page| confirm_on(&page, job, t).await)
     }
 
     async fn resolve(&mut self, job: &ResolveJob) -> Fetch<Option<String>> {
         let t = self.timeouts;
-        on_page!(self, Some(job.pos), |page| resolve_on(&page, job, t).await)
+        on_page!(self, job.pos, |page| resolve_on(&page, job, t).await)
     }
 }

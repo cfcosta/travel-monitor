@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT q.id, q.family_id, f.route_id, f.cabin, f.source,\n                      f.source_code, f.pos_id, f.kind, f.leg, f.days, f.site,\n                      o.code AS origin_code, p.code AS destination_code,\n                      r.sweep AS \"sweep: bool\",\n                      q.reason_json, q.score, q.runner_up,\n                      q.scheduled_at AS \"scheduled_at: DateTime<Utc>\",\n                      q.started_at AS \"started_at: DateTime<Utc>\",\n                      q.finished_at AS \"finished_at: DateTime<Utc>\",\n                      q.outcome_json, q.page_loads, q.jev_calls,\n                      (SELECT COUNT(*) FROM observations ob\n                       WHERE ob.query_id = q.id) AS \"cells!: i64\"\n               FROM queries q\n               JOIN families f ON f.id = q.family_id\n               JOIN routes r ON r.id = f.route_id\n               JOIN places o ON o.id = r.origin_id\n               JOIN places p ON p.id = r.destination_id\n               ORDER BY q.started_at DESC, q.id DESC\n               LIMIT ?1",
+  "query": "SELECT q.id, q.family_id, f.route_id, f.cabin, f.source,\n                      f.source_code, f.pos_id, f.kind, f.leg, f.days, f.site,\n                      o.code AS origin_code, p.code AS destination_code,\n                      r.sweep AS \"sweep: bool\",\n                      q.reason_json, q.score, q.runner_up,\n                      q.scheduled_at AS \"scheduled_at: DateTime<Utc>\",\n                      q.started_at AS \"started_at: DateTime<Utc>\",\n                      q.finished_at AS \"finished_at: DateTime<Utc>\",\n                      q.outcome_json, q.page_loads,\n                      (SELECT COUNT(*) FROM observations ob\n                       WHERE ob.query_id = q.id) AS \"cells!: i64\"\n               FROM queries q\n               JOIN families f ON f.id = q.family_id\n               JOIN routes r ON r.id = f.route_id\n               JOIN places o ON o.id = r.origin_id\n               JOIN places p ON p.id = r.destination_id\n               ORDER BY q.started_at DESC, q.id DESC\n               LIMIT ?1",
   "describe": {
     "columns": [
       {
@@ -246,19 +246,8 @@
         }
       },
       {
-        "name": "jev_calls",
-        "ordinal": 22,
-        "type_info": "Integer",
-        "origin": {
-          "Table": {
-            "table": "queries",
-            "name": "jev_calls"
-          }
-        }
-      },
-      {
         "name": "cells!: i64",
-        "ordinal": 23,
+        "ordinal": 22,
         "type_info": "Integer",
         "origin": "Expression"
       }
@@ -289,9 +278,8 @@
       true,
       true,
       true,
-      true,
       false
     ]
   },
-  "hash": "551dcd80b93e0a838c477f3cc3a79942af6ddf09870505228b04a3ec78375da7"
+  "hash": "b48dabc7c15435c535a4ce5731478cde9eb3ba5c87c35472f2a027a89287d7bc"
 }

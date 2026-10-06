@@ -46,7 +46,6 @@ let
         headless = false;
         port = 9333;
       };
-      jev.apiKeyFile = "/run/secrets/jev-api-key";
       budget.daily = 120;
       logLevel = "debug,tm_browser=trace";
       extraArgs = [ "--extra" ];
@@ -130,17 +129,11 @@ runCommand "travel-monitor-hm-module-check"
     has "$start" "--profile-dir /home/tm/.local/share/travel-monitor/chromium"
     has "$start" "--chromium /nix/store/"
     has "$start" "--headed"
-    has "$start" "--cdp-port 9333"
-    has "$start" "--jev-key-file /run/secrets/jev-api-key"
-    has "$start" "--jev-model jev-latest"
-    has "$start" "--budget 120"
-    has "$start" "--max-budget 2000"
-    has "$start" "--extra"
+    # Nothing else between the port, the budget and the extra arguments.
+    has "$start" "--cdp-port 9333 --budget 120 --max-budget 2000 --extra"
 
     lacks "$defaultStart" "--headed"
-    lacks "$defaultStart" "--jev-key-file"
-    has "$defaultStart" "--cdp-port 0"
-    has "$defaultStart" "--budget 300"
+    has "$defaultStart" "--cdp-port 0 --budget 300 --max-budget 2000"
 
     test -x "$activation/home-path/bin/tm" || fail "tm is not installed"
     test -x "$activation/home-path/bin/tmd" || fail "tmd is not installed"

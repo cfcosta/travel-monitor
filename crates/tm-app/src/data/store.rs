@@ -1249,7 +1249,7 @@ mod tests {
                 .collect();
             store.insert_observations(&obs).await.expect("observations");
             store
-                .finish_query(q, &QueryOutcome::Ok, 7, 0, now)
+                .finish_query(q, &QueryOutcome::Ok, 7, now)
                 .await
                 .expect("finish");
         }

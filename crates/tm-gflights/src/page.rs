@@ -3,8 +3,8 @@
 //! detection. Everything assumes `hl=en`.
 //!
 //! Each snippet is a single expression. Snippets that act return
-//! `true` when they found their target, so the daemon can fall back to
-//! Jev (DECISIONS.md 0041) when one returns `false`.
+//! `true` when they found their target; when one returns `false`, the
+//! daemon ends the check as `Unexpected` (DECISIONS.md 0059).
 
 use chrono::{Datelike, NaiveDate};
 use thiserror::Error;

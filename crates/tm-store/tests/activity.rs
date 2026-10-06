@@ -71,13 +71,11 @@ async fn query_log_records_reason_and_outcome() {
         detail: "unusual traffic".into(),
     };
     store
-        .finish_query(q, &blocked, 3, 1, at(6, 11))
+        .finish_query(q, &blocked, 3, at(6, 11))
         .await
         .expect("finishes");
     assert!(matches!(
-        store
-            .finish_query(q, &QueryOutcome::Ok, 1, 0, at(6, 12))
-            .await,
+        store.finish_query(q, &QueryOutcome::Ok, 1, at(6, 12)).await,
         Err(StoreError::NotFound { .. })
     ));
 
@@ -96,7 +94,6 @@ async fn query_log_records_reason_and_outcome() {
     assert_eq!(e.finished_at, Some(at(6, 11)));
     assert_eq!(e.outcome, Some(blocked));
     assert_eq!(e.page_loads, Some(3));
-    assert_eq!(e.jev_calls, Some(1));
     assert_eq!(e.cells, 1);
 
     let q2 = store
@@ -131,7 +128,7 @@ async fn observations_round_trip() {
         .expect("inserts");
     assert_eq!(ids.len(), 3);
     store
-        .finish_query(q, &QueryOutcome::Ok, 1, 0, at(6, 10))
+        .finish_query(q, &QueryOutcome::Ok, 1, at(6, 10))
         .await
         .expect("finishes");
 

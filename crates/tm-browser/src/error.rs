@@ -58,25 +58,9 @@ pub enum Error {
     /// [`crate::Page::press_key`] does not know this key.
     #[error("unsupported key {0:?}")]
     UnsupportedKey(String),
-
-    /// The page changed between an observation and the input meant for
-    /// it, so the input was not sent. Safe to observe again and retry:
-    /// nothing was mutated.
-    #[error("page changed before input: {0}")]
-    Stale(String),
-
-    /// Jev gave no usable answer.
-    #[error(transparent)]
-    Jev(#[from] tm_jev::JevError),
 }
 
 impl Error {
-    /// Whether the error is a pre-input rejection: nothing was sent to
-    /// the page, so observing again and retrying is safe.
-    pub fn is_stale(&self) -> bool {
-        matches!(self, Self::Stale(_))
-    }
-
     pub(crate) fn timeout(what: impl Into<String>, after: Duration) -> Self {
         Self::Timeout {
             what: what.into(),

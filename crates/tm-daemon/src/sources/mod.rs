@@ -3,14 +3,13 @@
 //!
 //! [`browser::BrowserSources`] is the real one: Google Flights through
 //! the page's own RPCs (0032), TAP through its booking site's own
-//! calendar and availability calls (0051), Jev-driven airline and miles
-//! sites (0041), all in the daemon's headless Chromium (0021).
+//! calendar and availability calls (0051), both in the daemon's
+//! headless Chromium (0021).
 
 pub mod browser;
 
 use async_trait::async_trait;
 use chrono::{DateTime, NaiveDate, Utc};
-use tm_browser::agent::Task;
 use tm_domain::{Cabin, Currency, Money, PointOfSale, PosId, QueryOutcome};
 use tm_gflights::{
     Locale,
@@ -57,16 +56,14 @@ pub struct Fetch<T> {
     pub value: T,
     /// Page loads: navigations plus every price-graph page (0039).
     pub page_loads: u32,
-    pub jev_calls: u32,
 }
 
 impl<T> Fetch<T> {
-    pub fn ok(value: T, page_loads: u32, jev_calls: u32) -> Self {
+    pub fn ok(value: T, page_loads: u32) -> Self {
         Self {
             outcome: QueryOutcome::Ok,
             value,
             page_loads,
-            jev_calls,
         }
     }
 
@@ -76,16 +73,11 @@ impl<T> Fetch<T> {
 }
 
 impl<T: Default> Fetch<T> {
-    pub fn failed(
-        outcome: QueryOutcome,
-        page_loads: u32,
-        jev_calls: u32,
-    ) -> Self {
+    pub fn failed(outcome: QueryOutcome, page_loads: u32) -> Self {
         Self {
             outcome,
             value: T::default(),
             page_loads,
-            jev_calls,
         }
     }
 
@@ -94,7 +86,6 @@ impl<T: Default> Fetch<T> {
             QueryOutcome::Error {
                 detail: detail.into(),
             },
-            0,
             0,
         )
     }
@@ -120,21 +111,6 @@ pub struct CalendarJob {
 pub struct ExploreJob {
     pub pos: PosId,
     pub url: String,
-}
-
-/// An airline or miles search driven by Jev (0041, 0047).
-#[derive(Debug, Clone, PartialEq)]
-pub struct AgentJob {
-    /// The rate-limit site, also the seller tag (`airline:LA`).
-    pub site: String,
-    pub start_url: String,
-    pub task: Task,
-    pub departure: NaiveDate,
-    pub return_date: Option<NaiveDate>,
-    /// A miles program: read miles, and watch for a login wall (0024).
-    pub miles: bool,
-    /// The carrier to record (the airline's code).
-    pub carrier: Option<String>,
 }
 
 /// One TAP leg (0051): the deep link for one direction, read through
@@ -211,13 +187,11 @@ pub trait Sources: Send {
     /// Closes the browser, releasing the profile (0024).
     async fn stop(&mut self);
     fn is_running(&self) -> bool;
-    fn has_jev(&self) -> bool;
     async fn calendar(&mut self, job: &CalendarJob) -> Fetch<Vec<Cell>>;
     async fn explore(
         &mut self,
         job: &ExploreJob,
     ) -> Fetch<Vec<ExploreDestination>>;
-    async fn agent_search(&mut self, job: &AgentJob) -> Fetch<Vec<Cell>>;
     async fn tap(&mut self, job: &TapJob) -> Fetch<Vec<Cell>>;
     async fn confirm(
         &mut self,

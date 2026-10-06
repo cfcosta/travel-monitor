@@ -1,7 +1,5 @@
 //! `tmd`, the travel monitor daemon. See the library's documentation.
 
-use std::sync::Arc;
-
 use anyhow::Context as _;
 use clap::Parser;
 use tm_browser::ChromiumConfig;
@@ -14,7 +12,6 @@ use tm_daemon::{
     sources::browser::BrowserSources,
 };
 use tm_domain::FamilyId;
-use tm_jev::{Jev, TypeSafe};
 use tm_store::Store;
 use tokio::sync::watch;
 use tracing::{info, warn};
@@ -50,24 +47,11 @@ async fn run(cli: Cli) -> anyhow::Result<()> {
         .with_context(|| format!("cannot open {}", db.display()))?;
     info!(db = %db.display(), "database open");
 
-    let jev: Option<Arc<dyn Jev>> = match &cli.jev_key_file {
-        Some(path) => {
-            let client =
-                TypeSafe::from_key_file(path)?.model(cli.jev_model.clone());
-            info!(model = %cli.jev_model, "Jev configured");
-            Some(Arc::new(client))
-        }
-        None => {
-            info!("no Jev key: airline and miles sources and recovery are off");
-            None
-        }
-    };
-
     let mut chromium =
         ChromiumConfig::new(cli.chromium_path(), cli.profile_path());
     chromium.headless = !cli.headed;
     chromium.port = cli.cdp_port;
-    let sources = BrowserSources::new(chromium, jev);
+    let sources = BrowserSources::new(chromium);
 
     let config = Config {
         tick: cli.tick(),

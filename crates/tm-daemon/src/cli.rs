@@ -3,8 +3,7 @@
 //!
 //! ```text
 //! tmd --db <path> --profile-dir <path> --chromium <path> [--headed]
-//!     --cdp-port <n> [--jev-key-file <path>] --jev-model <name>
-//!     --budget <n> --max-budget <n>
+//!     --cdp-port <n> --budget <n> --max-budget <n>
 //! ```
 //!
 //! `--db`, `--profile-dir` and `--chromium` fall back to `TM_DB`,
@@ -42,15 +41,6 @@ pub struct Cli {
     /// Chromium's DevTools port; 0 picks a free one.
     #[arg(long, default_value_t = 0, value_name = "N")]
     pub cdp_port: u16,
-
-    /// A file holding the Jev API key. Without it the daemon runs
-    /// without Jev: no airline or miles sources and no recovery.
-    #[arg(long, value_name = "PATH")]
-    pub jev_key_file: Option<PathBuf>,
-
-    /// The Jev model to ask.
-    #[arg(long, default_value = tm_jev::DEFAULT_MODEL, value_name = "NAME")]
-    pub jev_model: String,
 
     /// The daily page-load budget to start from (DECISIONS.md 0039).
     #[arg(long, value_name = "N")]
@@ -148,10 +138,6 @@ mod tests {
             "--headed",
             "--cdp-port",
             "0",
-            "--jev-key-file",
-            "/run/secrets/jev",
-            "--jev-model",
-            "jev-latest",
             "--budget",
             "300",
             "--max-budget",
@@ -172,8 +158,6 @@ mod tests {
         );
         assert!(cli.headed);
         assert_eq!(cli.cdp_port, 0);
-        assert_eq!(cli.jev_key_file, Some(PathBuf::from("/run/secrets/jev")));
-        assert_eq!(cli.jev_model, "jev-latest");
         assert_eq!(cli.budget, Some(300));
         assert_eq!(cli.max_budget, Some(2000));
         assert!(!cli.once);
@@ -181,8 +165,7 @@ mod tests {
         assert_eq!(cli.pace, (4, 15));
     }
 
-    /// Headless, no Jev: the module leaves `--headed` and
-    /// `--jev-key-file` out.
+    /// Headless: the module leaves `--headed` out.
     #[test]
     fn optional_flags_may_be_left_out() {
         let cli = Cli::try_parse_from([
@@ -195,8 +178,6 @@ mod tests {
             "/bin/chromium",
             "--cdp-port",
             "9333",
-            "--jev-model",
-            "jev-1",
             "--budget",
             "100",
             "--max-budget",
@@ -214,8 +195,6 @@ mod tests {
         .expect("parses");
         assert!(!cli.headed);
         assert_eq!(cli.cdp_port, 9333);
-        assert_eq!(cli.jev_key_file, None);
-        assert_eq!(cli.jev_model, "jev-1");
         assert!(cli.once);
         assert_eq!(cli.tick(), Duration::from_secs(5));
         assert_eq!(cli.only_route.as_deref(), Some("LIS"));
@@ -226,7 +205,6 @@ mod tests {
     #[test]
     fn defaults() {
         let cli = Cli::try_parse_from(["tmd"]).expect("parses");
-        assert_eq!(cli.jev_model, tm_jev::DEFAULT_MODEL);
         assert_eq!(cli.cdp_port, 0);
         assert_eq!(cli.budget, None);
         assert!(cli.db_path().ends_with("travel-monitor/tm.db"));

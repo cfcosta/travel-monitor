@@ -54,7 +54,7 @@ pub enum QueryOutcome {
         detail: String,
     },
     /// The page loaded but did not produce what was expected (a format
-    /// change): Jev recovery may run (0041).
+    /// change). The check is retried later (0059).
     Unexpected {
         detail: String,
     },

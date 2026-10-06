@@ -605,7 +605,6 @@ pub(crate) struct QueryLogRow {
     pub finished_at: Option<DateTime<Utc>>,
     pub outcome_json: Option<String>,
     pub page_loads: Option<i64>,
-    pub jev_calls: Option<i64>,
     pub cells: i64,
 }
 
@@ -644,7 +643,6 @@ impl TryFrom<QueryLogRow> for QueryLogEntry {
             finished_at: row.finished_at,
             outcome,
             page_loads: opt_count("page_loads", row.page_loads)?,
-            jev_calls: opt_count("jev_calls", row.jev_calls)?,
             cells: count("cells", row.cells)?,
         })
     }

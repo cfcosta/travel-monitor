@@ -34,8 +34,6 @@ inputs.travel-monitor = {
 
   services.travel-monitor = {
     enable = true;
-    # A file outside the Nix store, e.g. from sops-nix or agenix.
-    jev.apiKeyFile = "/run/user/1000/secrets/jev-api-key";
     budget.daily = 300;
     logLevel = "info";
   };
@@ -51,13 +49,9 @@ The options are documented in `nix/hm-module.nix`. The main ones:
 | `databasePath` | `$XDG_DATA_HOME/travel-monitor/tm.db` |
 | `profileDir` | `$XDG_DATA_HOME/travel-monitor/chromium` |
 | `chromium.package` / `.headless` / `.port` | `pkgs.chromium` / `true` / `0` (free port) |
-| `jev.apiKeyFile` / `jev.model` | `null` / `"jev-latest"` |
 | `budget.daily` / `budget.max` | `300` / `2000` |
 | `logLevel` | `"info"` (`RUST_LOG`) |
 | `extraArgs`, `environment` | `[ ]`, `{ }` |
-
-The Jev key is never put in the store: `jev.apiKeyFile` is a string, and
-the daemon reads the file when it starts.
 
 ## Lingering
 
@@ -92,10 +86,10 @@ systemctl --user status travel-monitor
 systemctl --user restart travel-monitor
 ```
 
-It runs `tmd --db … --profile-dir … --chromium … --cdp-port … --jev-model …
---budget … --max-budget …` (plus `--headed` and `--jev-key-file` when
-set, and `extraArgs`), restarts on failure, and starts with the user
-manager (`default.target`).
+It runs `tmd --db … --profile-dir … --chromium … --cdp-port … --budget …
+--max-budget …` (plus `--headed` when the browser is not headless, and
+`extraArgs`), restarts on failure, and starts with the user manager
+(`default.target`).
 
 ## Open the app
 

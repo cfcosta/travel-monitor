@@ -125,7 +125,16 @@ async fn serve(stream: TcpStream, page: Arc<String>) {
         buf.extend_from_slice(&chunk[..n]);
     }
     let target = head.split_whitespace().nth(1).unwrap_or("/").to_owned();
-    let (status, kind, body) = if target.starts_with("/travel/flights/search") {
+    let (status, kind, body) = if target.starts_with("/travel/flights/changed")
+    {
+        // A results page whose layout changed: no "Price graph".
+        (
+            "200 OK",
+            "text/html; charset=utf-8",
+            "<!doctype html><title>Google Flights</title><h1>Flights</h1>"
+                .to_owned(),
+        )
+    } else if target.starts_with("/travel/flights/search") {
         (
             "200 OK",
             "text/html; charset=utf-8",
@@ -198,7 +207,7 @@ async fn the_source_reads_a_price_graph() {
         return;
     };
     let address = server().await;
-    let mut sources = BrowserSources::new(config, None).with_timeouts(fast());
+    let mut sources = BrowserSources::new(config).with_timeouts(fast());
     let pos = PointOfSale {
         id: PosId(1),
         country: CountryCode::new("BR"),
@@ -231,7 +240,23 @@ async fn the_source_reads_a_price_graph() {
         display: Currency::brl(),
     };
     let fetch = sources.calendar(&job).await;
+    // A page without the "Price graph" control: the check ends as
+    // Unexpected after its one load, with nothing tried around it
+    // (0059).
+    let changed = sources
+        .calendar(&CalendarJob {
+            url: format!("http://{address}/travel/flights/changed?tfs=x"),
+            ..job.clone()
+        })
+        .await;
     sources.stop().await;
+    assert!(
+        matches!(&changed.outcome, QueryOutcome::Unexpected { detail }
+            if detail.contains("Price graph")),
+        "{changed:?}"
+    );
+    assert_eq!(changed.page_loads, 1);
+    assert!(changed.value.is_empty());
     assert_eq!(fetch.outcome, QueryOutcome::Ok, "{fetch:?}");
     // One navigation and three graph pages.
     assert_eq!(fetch.page_loads, 1 + PAGES as u32);
@@ -280,7 +305,7 @@ async fn the_daemon_captures_parses_and_stores() {
         .await
         .expect("reads")
         .expect("the family");
-    let sources = BrowserSources::new(config, None).with_timeouts(fast());
+    let sources = BrowserSources::new(config).with_timeouts(fast());
     let daemon_config = Config {
         once: true,
         only: Only {

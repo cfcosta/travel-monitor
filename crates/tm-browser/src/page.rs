@@ -286,7 +286,7 @@ impl Page {
         self.type_text(text).await
     }
 
-    pub(crate) async fn select_all(&self) -> Result<()> {
+    async fn select_all(&self) -> Result<()> {
         let modifiers = if cfg!(target_os = "macos") { 4 } else { 2 };
         for kind in ["keyDown", "keyUp"] {
             self.call(
@@ -424,9 +424,8 @@ impl Drop for Page {
 }
 
 /// Finds an element, scrolls it into view and returns its center, or
-/// why it cannot be clicked. The same checks as the snapshot's input
-/// guards: visible, enabled, inside the viewport, and hit by a click at
-/// its center.
+/// why it cannot be clicked: it must be visible, enabled, inside the
+/// viewport, and hit by a click at its center.
 const LOCATE: &str = r##"((selector) => {
   const e = document.querySelector(selector);
   if (!e) return { missing: true };

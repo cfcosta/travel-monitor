@@ -16,7 +16,6 @@ use tm_daemon::{
     budget,
     candidates::Only,
     sources::{
-        AgentJob,
         CalendarJob,
         Cell,
         ConfirmJob,
@@ -65,7 +64,6 @@ struct Log {
     stops: usize,
     calendar: Vec<CalendarJob>,
     explore: Vec<ExploreJob>,
-    agent: Vec<AgentJob>,
     tap: Vec<TapJob>,
     confirm: Vec<ConfirmJob>,
     resolve: Vec<ResolveJob>,
@@ -73,11 +71,9 @@ struct Log {
 
 struct Fake {
     running: bool,
-    jev: bool,
     log: Arc<Mutex<Log>>,
     calendar: Answer<CalendarJob, Vec<Cell>>,
     explore: Answer<ExploreJob, Vec<ExploreDestination>>,
-    agent: Answer<AgentJob, Vec<Cell>>,
     tap: Answer<TapJob, Vec<Cell>>,
     confirm: Answer<ConfirmJob, Option<Confirmation>>,
 }
@@ -86,13 +82,11 @@ impl Fake {
     fn new(log: Arc<Mutex<Log>>) -> Self {
         Self {
             running: false,
-            jev: false,
             log,
-            calendar: Box::new(|_| Fetch::ok(Vec::new(), 2, 0)),
-            explore: Box::new(|_| Fetch::ok(Vec::new(), 1, 0)),
-            agent: Box::new(|_| Fetch::ok(Vec::new(), 1, 3)),
-            tap: Box::new(|_| Fetch::ok(Vec::new(), 1, 0)),
-            confirm: Box::new(|_| Fetch::ok(None, 1, 0)),
+            calendar: Box::new(|_| Fetch::ok(Vec::new(), 2)),
+            explore: Box::new(|_| Fetch::ok(Vec::new(), 1)),
+            tap: Box::new(|_| Fetch::ok(Vec::new(), 1)),
+            confirm: Box::new(|_| Fetch::ok(None, 1)),
         }
     }
 }
@@ -117,9 +111,6 @@ impl Sources for Fake {
     fn is_running(&self) -> bool {
         self.running
     }
-    fn has_jev(&self) -> bool {
-        self.jev
-    }
     async fn calendar(&mut self, job: &CalendarJob) -> Fetch<Vec<Cell>> {
         log(self).calendar.push(job.clone());
         (self.calendar)(job)
@@ -130,10 +121,6 @@ impl Sources for Fake {
     ) -> Fetch<Vec<ExploreDestination>> {
         log(self).explore.push(job.clone());
         (self.explore)(job)
-    }
-    async fn agent_search(&mut self, job: &AgentJob) -> Fetch<Vec<Cell>> {
-        log(self).agent.push(job.clone());
-        (self.agent)(job)
     }
     async fn tap(&mut self, job: &TapJob) -> Fetch<Vec<Cell>> {
         log(self).tap.push(job.clone());
@@ -157,7 +144,7 @@ impl Sources for Fake {
             .unwrap_or("x")
             .replace("%20", "-")
             .to_lowercase();
-        Fetch::ok(Some(format!("/m/{name}")), 1, 0)
+        Fetch::ok(Some(format!("/m/{name}")), 1)
     }
 }
 
@@ -300,7 +287,7 @@ async fn past_check(
         .collect();
     store.insert_observations(&obs).await.expect("inserts");
     store
-        .finish_query(q, &QueryOutcome::Ok, 3, 0, at)
+        .finish_query(q, &QueryOutcome::Ok, 3, at)
         .await
         .expect("finishes");
 }
@@ -348,7 +335,7 @@ async fn a_check_writes_start_and_end_heartbeats() {
                 .expect("a heartbeat");
                 during.lock().expect("lock").push(beat);
             }
-            Fetch::ok(Vec::new(), 2, 0)
+            Fetch::ok(Vec::new(), 2)
         });
     })
     .await;
@@ -508,7 +495,7 @@ async fn requests_pause_resume_and_check() {
     h.daemon.process_requests().await.expect("processes");
     h.daemon.run_manual().await.expect("runs");
     // Domestic: economy only; legs and round trip under four points of
-    // sale. Airline and miles families need Jev, which the fake lacks.
+    // sale. Airline and miles families other than TAP have no reader.
     assert_eq!(h.log().calendar.len() - before, 12);
 }
 
@@ -525,7 +512,7 @@ async fn a_tick_checks_records_and_learns() {
         },
         move |f| {
             f.calendar = Box::new(move |_| {
-                Fetch::ok(cells(first, 60, |i| 2_000 + i as i64), 4, 0)
+                Fetch::ok(cells(first, 60, |i| 2_000 + i as i64), 4)
             })
         },
     )
@@ -572,7 +559,6 @@ async fn a_block_backs_off() {
                         detail: "unusual traffic page".into(),
                     },
                     1,
-                    0,
                 )
             })
         },
@@ -618,7 +604,6 @@ async fn deals_are_found_and_confirmed() {
                 Fetch::ok(
                     cells(first, 20, |i| if i < 2 { 600 } else { 1_000 }),
                     3,
-                    0,
                 )
             });
             f.confirm = Box::new(|job| {
@@ -661,7 +646,6 @@ async fn deals_are_found_and_confirmed() {
                         offers,
                     }),
                     3,
-                    0,
                 )
             });
         },
@@ -756,11 +740,7 @@ async fn a_rejected_confirmation_does_not_alert() {
     let first = today() + Days::new(50);
     let mut h = harness(Only::default(), move |f| {
         f.calendar = Box::new(move |_| {
-            Fetch::ok(
-                cells(first, 20, |i| if i == 0 { 500 } else { 1_000 }),
-                3,
-                0,
-            )
+            Fetch::ok(cells(first, 20, |i| if i == 0 { 500 } else { 1_000 }), 3)
         });
         f.confirm = Box::new(|_| {
             Fetch::ok(
@@ -769,7 +749,6 @@ async fn a_rejected_confirmation_does_not_alert() {
                     ..Confirmation::default()
                 }),
                 1,
-                0,
             )
         });
     })
@@ -845,7 +824,6 @@ async fn explore_hints_raise_their_families() {
                         coordinates: None,
                     }],
                     1,
-                    0,
                 )
             })
         },
@@ -887,8 +865,10 @@ async fn explore_hints_raise_their_families() {
     assert_eq!(mia.state.n_hints, 0);
 }
 
+/// Airline and miles sites other than TAP have no reader (0059): a
+/// check of one, even a manual one, loads nothing and records no query.
 #[tokio::test]
-async fn miles_sessions_that_ended_are_flagged() {
+async fn sites_without_a_reader_load_nothing() {
     let store_probe = Store::open_in_memory().await.expect("opens");
     store_probe.seed_defaults().await.expect("seeds");
     let pos = home(&store_probe).await;
@@ -904,8 +884,6 @@ async fn miles_sessions_that_ended_are_flagged() {
         FamilyKind::Leg { leg: Leg::Outbound },
     )
     .await;
-    // LATAM: a Jev-driven airline (unverified, 0052, but run_check
-    // does not filter).
     let airline = family(
         &store_probe,
         lis,
@@ -915,69 +893,45 @@ async fn miles_sessions_that_ended_are_flagged() {
         FamilyKind::Leg { leg: Leg::Outbound },
     )
     .await;
-    let mut h = harness(Only::default(), |f| {
-        f.jev = true;
-        f.agent = Box::new(|job| {
-            if job.miles {
-                Fetch::failed(QueryOutcome::LoggedOut, 1, 2)
-            } else {
-                Fetch::ok(
-                    vec![Cell {
-                        seller: Some(format!("unverified:{}", job.site)),
-                        ..Cell::priced(
-                            job.departure,
-                            None,
-                            Some(Money::brl_whole(2_345)),
-                        )
-                    }],
-                    2,
-                    5,
-                )
-            }
-        });
-    })
-    .await;
+    let mut h = harness(Only::default(), |_| {}).await;
     let store = h.store().clone();
     store
         .set_miles_login("smiles", LoginState::LoggedIn, Utc::now())
         .await
         .expect("sets");
     let world = h.daemon.world().await.expect("loads");
-    h.daemon
-        .run_check(miles, QueryReason::Manual, &world)
-        .await
-        .expect("checks");
-    let smiles = store
-        .list_miles_programs()
-        .await
-        .expect("reads")
-        .into_iter()
-        .find(|m| m.program == "smiles")
-        .expect("smiles");
-    assert_eq!(smiles.login_state, LoginState::Expired);
-    let recent = store.recent_queries(1).await.expect("reads");
-    assert_eq!(recent[0].outcome, Some(QueryOutcome::LoggedOut));
-    assert_eq!(recent[0].jev_calls, Some(2));
-
-    h.daemon
-        .run_check(airline, QueryReason::Manual, &world)
-        .await
-        .expect("checks");
+    let cx = h.daemon.context(&world, Utc::now());
+    let before = store.recent_queries(100).await.expect("reads").len();
+    for id in [miles, airline] {
+        let f = world
+            .families
+            .iter()
+            .find(|f| f.id == id)
+            .expect("the family");
+        assert_eq!(
+            tm_daemon::candidates::eligibility(f, &cx),
+            Err(tm_daemon::candidates::Skip::Unprobed)
+        );
+        h.daemon
+            .run_check(id, QueryReason::Manual, &world)
+            .await
+            .expect("checks");
+        let state = store.family(id).await.expect("reads").expect("exists");
+        assert!(state.state.last_check.is_some());
+    }
     {
         let log = h.log();
-        let job = log.agent.last().expect("an agent job");
-        assert_eq!(job.site, "airline:LA");
-        assert!(!job.miles);
+        assert!(log.calendar.is_empty());
+        assert!(log.tap.is_empty());
     }
-    let since = Utc::now() - TimeDelta::hours(1);
-    let obs = store.history(airline, since).await.expect("reads");
-    assert_eq!(obs.len(), 1);
-    assert_eq!(obs[0].seller.as_deref(), Some("unverified:airline:LA"));
-    assert_eq!(obs[0].price, Some(Money::brl_whole(2_345)));
+    assert_eq!(
+        store.recent_queries(100).await.expect("reads").len(),
+        before
+    );
 }
 
 #[tokio::test]
-async fn tap_legs_run_without_jev_and_record_cells() {
+async fn tap_legs_run_and_record_cells() {
     let store_probe = Store::open_in_memory().await.expect("opens");
     store_probe.seed_defaults().await.expect("seeds");
     let pos = home(&store_probe).await;
@@ -997,15 +951,14 @@ async fn tap_legs_run_without_jev_and_record_cells() {
             for cell in &mut c {
                 cell.seller = Some("airline:TP".into());
             }
-            Fetch::ok(c, 4, 0)
+            Fetch::ok(c, 4)
         });
     })
     .await;
     let store = h.store().clone();
-    // Without Jev, TAP's legs are candidates; its round trips are not.
+    // TAP's legs are candidates; its round trips are not.
     let world = h.daemon.world().await.expect("loads");
     let cx = h.daemon.context(&world, Utc::now());
-    assert!(!cx.has_jev);
     let tap_families: Vec<_> = world
         .families
         .iter()
@@ -1038,7 +991,6 @@ async fn tap_legs_run_without_jev_and_record_cells() {
         assert_eq!(job.destination, "LIS");
         assert!(job.url.contains("market=BR&"));
         assert!(job.url.contains("&origin=GRU&destination=LIS&"));
-        assert!(log.agent.is_empty());
     }
     let since = Utc::now() - TimeDelta::hours(1);
     let obs = store.history(outbound, since).await.expect("reads");

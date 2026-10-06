@@ -78,7 +78,6 @@ use crate::{
     },
     deals::{self, Group},
     jobs::{self, Job, JobError, JobOptions},
-    sites,
     sources::{Cell, ConfirmJob, Fetch, Sources},
 };
 
@@ -127,7 +126,6 @@ pub struct World {
     pub routes: HashMap<RouteId, Route>,
     pub sweeps: HashSet<RouteId>,
     pub pos: HashMap<PosId, PointOfSale>,
-    pub logged_in: HashSet<String>,
 }
 
 impl World {
@@ -476,20 +474,11 @@ impl<S: Sources> Daemon<S> {
             .into_iter()
             .map(|p| (p.id, p))
             .collect();
-        let logged_in = self
-            .store
-            .list_miles_programs()
-            .await?
-            .into_iter()
-            .filter(|m| m.active && m.login_state == LoginState::LoggedIn)
-            .map(|m| m.program)
-            .collect();
         Ok(World {
             families,
             routes,
             sweeps,
             pos,
-            logged_in,
         })
     }
 
@@ -514,8 +503,6 @@ impl<S: Sources> Daemon<S> {
             })
             .collect();
         Context {
-            has_jev: self.sources.has_jev(),
-            logged_in: world.logged_in.clone(),
             unresolved,
             cooling: self
                 .budget
@@ -526,9 +513,6 @@ impl<S: Sources> Daemon<S> {
             paused: self.paused.is_some(),
             only: self.config.only.clone(),
             home_pos: world.pos.values().find(|p| p.is_home).map(|p| p.id),
-            // Only probed sites run (0050, 0051); the others stay off
-            // (0052).
-            verified_sites: sites::verified_sites(),
             passengers: self.settings.passengers,
         }
     }
@@ -912,10 +896,10 @@ impl<S: Sources> Daemon<S> {
             .await
     }
 
-    /// The departure an airline or miles search uses: the cheapest one
-    /// Google Flights showed lately for the same route, cabin and leg
-    /// under the home point of sale.
-    async fn agent_departure(
+    /// The departure a TAP search without a calendar prices (0053): the
+    /// cheapest one Google Flights showed lately for the same route,
+    /// cabin and leg under the home point of sale.
+    async fn cheapest_departure(
         &self,
         family: &FamilyRecord,
         world: &World,
@@ -979,9 +963,9 @@ impl<S: Sources> Daemon<S> {
             .context("the family's point of sale is not configured")?;
         let today = budget::today();
         let options = JobOptions {
-            agent_departure: match family.key.source {
+            cheapest_departure: match family.key.source {
                 Source::GoogleFlights => None,
-                _ => self.agent_departure(&family, world).await,
+                _ => self.cheapest_departure(&family, world).await,
             },
             now: Some(Utc::now()),
             ..self.config.jobs.clone()
@@ -1022,9 +1006,6 @@ impl<S: Sources> Daemon<S> {
             Job::Calendar(j) => {
                 split(self.sources.calendar(j).await, Found::Cells)
             }
-            Job::Agent(j) => {
-                split(self.sources.agent_search(j).await, Found::Cells)
-            }
             Job::Tap(j) => split(self.sources.tap(j).await, Found::Cells),
             Job::Explore(j) => {
                 split(self.sources.explore(j).await, Found::Explore)
@@ -1032,13 +1013,7 @@ impl<S: Sources> Daemon<S> {
         };
         let finished = Utc::now();
         self.store
-            .finish_query(
-                query,
-                &fetch.outcome,
-                fetch.page_loads,
-                fetch.jev_calls,
-                finished,
-            )
+            .finish_query(query, &fetch.outcome, fetch.page_loads, finished)
             .await?;
         self.spend(fetch.page_loads).await?;
         self.end_check().await;
@@ -1046,7 +1021,6 @@ impl<S: Sources> Daemon<S> {
             family = %family.id,
             outcome = ?fetch.outcome,
             loads = fetch.page_loads,
-            jev = fetch.jev_calls,
             "checked"
         );
         match &fetch.outcome {
@@ -1633,13 +1607,7 @@ impl<S: Sources> Daemon<S> {
         let fetch = self.sources.confirm(&job).await;
         let finished = Utc::now();
         self.store
-            .finish_query(
-                query,
-                &fetch.outcome,
-                fetch.page_loads,
-                fetch.jev_calls,
-                finished,
-            )
+            .finish_query(query, &fetch.outcome, fetch.page_loads, finished)
             .await?;
         self.spend(fetch.page_loads).await?;
         self.end_check().await;
@@ -1779,14 +1747,12 @@ fn split<T>(f: Fetch<T>, found: impl FnOnce(T) -> Found) -> (Fetch<()>, Found) {
         outcome,
         value,
         page_loads,
-        jev_calls,
     } = f;
     (
         Fetch {
             outcome,
             value: (),
             page_loads,
-            jev_calls,
         },
         found(value),
     )

@@ -268,7 +268,7 @@ async fn the_tap_source_reads_the_calendar() {
         return;
     };
     let address = server().await;
-    let mut sources = BrowserSources::new(config, None).with_timeouts(fast());
+    let mut sources = BrowserSources::new(config).with_timeouts(fast());
     let pos = PointOfSale {
         id: PosId(1),
         country: CountryCode::new("BR"),
@@ -293,7 +293,6 @@ async fn the_tap_source_reads_the_calendar() {
     assert_eq!(economy.outcome, QueryOutcome::Ok, "{economy:?}");
     // One navigation and three calendar months.
     assert_eq!(economy.page_loads, 4);
-    assert_eq!(economy.jev_calls, 0);
     let cells = &economy.value;
     // 22 fresh days a month (2nd to 23rd); the stale ones are left out.
     assert_eq!(cells.len(), 66, "{cells:?}");

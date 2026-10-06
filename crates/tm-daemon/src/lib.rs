@@ -10,8 +10,8 @@
 //!   trait; [`sources::browser`] is the real one.
 //! - [`sites`]: the airline and miles sites verified to run (0050),
 //!   with their pure parsers ([`sites::tap`], 0051).
-//! - [`jobs`], [`candidates`], [`deals`], [`extract`]: the pure glue
-//!   between the store, the scheduler and the sources.
+//! - [`jobs`], [`candidates`], [`deals`]: the pure glue between the
+//!   store, the scheduler and the sources.
 //! - [`budget`]: the page-load budget, persisted (0039).
 
 pub mod budget;
@@ -19,7 +19,6 @@ pub mod candidates;
 pub mod cli;
 pub mod daemon;
 pub mod deals;
-pub mod extract;
 pub mod jobs;
 pub mod sites;
 pub mod sources;

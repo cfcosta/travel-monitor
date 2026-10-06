@@ -93,10 +93,6 @@ impl Only {
 /// What the filters need to know besides the families.
 #[derive(Debug, Clone, Default)]
 pub struct Context {
-    /// Jev is configured (airline and miles sources need it, 0041).
-    pub has_jev: bool,
-    /// Miles programs with a working session (0024).
-    pub logged_in: HashSet<String>,
     /// Routes whose places Google cannot be told about yet (a city
     /// without its Freebase ID, 0041).
     pub unresolved: HashSet<RouteId>,
@@ -110,10 +106,6 @@ pub struct Context {
     pub only: Only,
     /// The home point of sale, for bootstrap ranks (0049).
     pub home_pos: Option<PosId>,
-    /// Airline and miles sites whose extraction has been built on a
-    /// probe of the site (0050). Others are skipped. The daemon uses
-    /// [`sites::verified_sites`].
-    pub verified_sites: HashSet<String>,
     /// The party every search uses (0036): some sites price only one
     /// adult.
     pub passengers: Passengers,
@@ -125,11 +117,11 @@ pub enum Skip {
     Inactive,
     Paused,
     CoolingDown,
-    NoJev,
-    LoggedOut,
     Unresolved,
     NotSelected,
-    /// An airline or miles site not probed yet (0050).
+    /// An airline or miles site with no reader in the daemon: not
+    /// probed yet (0050), or denying its browser (0052). Only TAP has
+    /// one ([`sites::scripted`]).
     Unprobed,
     /// A family its site cannot run ([`sites::unsupported`]): TAP's
     /// round trips, or a party TAP's calendar does not price.
@@ -152,24 +144,12 @@ pub fn eligibility(family: &FamilyRecord, cx: &Context) -> Result<(), Skip> {
         return Err(Skip::CoolingDown);
     }
     if !matches!(family.key.source, Source::GoogleFlights)
-        && !cx.verified_sites.contains(&family.site)
+        && !sites::scripted(&family.key.source)
     {
         return Err(Skip::Unprobed);
     }
     if sites::unsupported(&family.key, &cx.passengers).is_some() {
         return Err(Skip::Unsupported);
-    }
-    match &family.key.source {
-        Source::GoogleFlights => {}
-        source @ Source::Airline { .. } if sites::scripted(source) => {}
-        Source::Airline { .. } if !cx.has_jev => return Err(Skip::NoJev),
-        Source::Airline { .. } => {}
-        Source::Miles { .. } if !cx.has_jev => return Err(Skip::NoJev),
-        Source::Miles { program } => {
-            if !cx.logged_in.contains(program) {
-                return Err(Skip::LoggedOut);
-            }
-        }
     }
     // Scripted sites search by IATA code: they need no Freebase ID.
     if cx.unresolved.contains(&family.key.route)
@@ -289,38 +269,34 @@ mod tests {
     }
 
     fn cx() -> Context {
-        let mut cx = Context {
-            has_jev: true,
-            ..Context::default()
-        };
+        let mut cx = Context::default();
         cx.destinations.insert(RouteId(1), Some("LIS".into()));
         cx.destinations.insert(RouteId(2), Some("MIA".into()));
         cx.destinations.insert(RouteId(9), None);
-        // The filter tests below are about logins and Jev, not probes.
-        for site in ["airline:LA", "miles:smiles", "miles:latam_pass"] {
-            cx.verified_sites.insert(site.into());
-        }
         cx
     }
 
+    /// Airline and miles sites without a reader are skipped (0052,
+    /// 0059), even when their miles program is logged in.
     #[test]
-    fn unprobed_sites_are_skipped() {
+    fn sites_without_a_reader_are_skipped() {
         let families = vec![
             family(1, 1, Source::GoogleFlights),
-            family(2, 1, Source::Airline { code: "TP".into() }),
+            family(2, 1, Source::Airline { code: "LA".into() }),
+            miles(3, "smiles"),
         ];
-        let mut cx = cx();
-        cx.verified_sites.clear();
-        let (cands, skipped) = build(&families, &cx);
+        let (cands, skipped) = build(&families, &cx());
         let ids: Vec<i64> = cands.iter().map(|c| c.family.0).collect();
         assert_eq!(ids, vec![1]);
-        assert_eq!(skipped.get(&Skip::Unprobed), Some(&1));
+        assert_eq!(skipped.get(&Skip::Unprobed), Some(&2));
+        assert_eq!(skipped.len(), 1);
+        assert_eq!(eligibility(&families[2], &cx()), Err(Skip::Unprobed));
     }
 
-    /// The daemon's own list (0051, 0052): TAP runs, without Jev; every
-    /// other airline and miles site stays off.
+    /// The daemon's own readers (0051, 0052, 0059): TAP runs; every other
+    /// airline and miles site stays off.
     #[test]
-    fn only_tap_is_verified() {
+    fn only_tap_has_a_reader() {
         let mut families = vec![
             family(1, 1, Source::GoogleFlights),
             family(2, 1, Source::Airline { code: "TP".into() }),
@@ -335,12 +311,7 @@ mod tests {
             families.push(miles(id, program));
             id += 1;
         }
-        let mut cx = Context {
-            verified_sites: sites::verified_sites(),
-            ..Context::default()
-        };
-        cx.logged_in.insert("smiles".into());
-        assert!(!cx.has_jev);
+        let mut cx = Context::default();
         let (cands, skipped) = build(&families, &cx);
         let ids: Vec<i64> = cands.iter().map(|c| c.family.0).collect();
         assert_eq!(ids, vec![1, 2]);
@@ -411,39 +382,30 @@ mod tests {
     }
 
     #[test]
-    fn filters_inactive_cooling_jev_and_logins() {
+    fn filters_inactive_cooling_and_paused() {
         let mut inactive = family(2, 1, Source::GoogleFlights);
         inactive.active = false;
         let families = vec![
             family(1, 1, Source::GoogleFlights),
             inactive,
-            family(3, 1, Source::Airline { code: "LA".into() }),
-            miles(4, "smiles"),
-            miles(5, "latam_pass"),
+            family(3, 1, Source::Airline { code: "TP".into() }),
         ];
         let mut cx = cx();
-        cx.logged_in.insert("smiles".into());
         let (cands, skipped) = build(&families, &cx);
         let ids: Vec<i64> = cands.iter().map(|c| c.family.0).collect();
-        assert_eq!(ids, vec![1, 3, 4]);
+        assert_eq!(ids, vec![1, 3]);
         assert_eq!(skipped.get(&Skip::Inactive), Some(&1));
-        assert_eq!(skipped.get(&Skip::LoggedOut), Some(&1));
 
-        cx.has_jev = false;
-        let (cands, skipped) = build(&families, &cx);
-        assert_eq!(cands.len(), 1);
-        assert_eq!(skipped.get(&Skip::NoJev), Some(&3));
-
-        cx.has_jev = true;
         cx.cooling.insert("google_flights".into());
-        let (cands, _) = build(&families, &cx);
+        let (cands, skipped) = build(&families, &cx);
         let ids: Vec<i64> = cands.iter().map(|c| c.family.0).collect();
-        assert_eq!(ids, vec![3, 4]);
+        assert_eq!(ids, vec![3]);
+        assert_eq!(skipped.get(&Skip::CoolingDown), Some(&1));
 
         cx.paused = true;
         let (cands, skipped) = build(&families, &cx);
         assert!(cands.is_empty());
-        assert_eq!(skipped.get(&Skip::Paused), Some(&4));
+        assert_eq!(skipped.get(&Skip::Paused), Some(&2));
     }
 
     #[test]

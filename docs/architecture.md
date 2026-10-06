@@ -11,17 +11,16 @@ How the crates fit together. Decisions are numbered in
                  │                                   │ drives
                  ▼                                   ▼
             tm-store  ◀──────── writes ──────── tm-browser ── CDP ──▶ headless Chromium
-                 ▲                                   │
-   tm-scheduler (pure) ◀── daemon asks ──            │ Jev (navigation fallback,
-   tm-gflights  (pure) ◀── URLs + parsers ──         │ airline and miles sites)
-   tm-domain    (types, everyone)                 tm-jev
+                 ▲
+   tm-scheduler (pure) ◀── daemon asks ──
+   tm-gflights  (pure) ◀── URLs + parsers ──
+   tm-domain    (types, everyone)
 ```
 
 ## Crates and their public surface
 
-Every crate depends on `tm-domain`. Only `tm-store` touches SQLite, only
-`tm-browser` touches Chromium, only `tm-jev` calls Jev over HTTP.
-`tm-gflights` and `tm-scheduler` do no I/O, so they are tested with
+Every crate depends on `tm-domain`. Only `tm-store` touches SQLite, and
+only `tm-browser` touches Chromium. `tm-gflights` and `tm-scheduler` do no I/O, so they are tested with
 fixtures and properties alone.
 
 ### tm-domain (done)
@@ -31,21 +30,6 @@ query families (`FamilyKey` = route × cabin × source × pos × kind,
 `FamilyKind::{Leg, RoundTrip, Explore}`), observations, Explore hints,
 deals, seller quotes, query reasons and outcomes, settings and their
 validation. Read the source: it is the shared vocabulary.
-
-### tm-jev
-
-A copy of `../tau-agent/crates/plugins/tau-jev` (DECISIONS.md 0015),
-without `tau-ai`: usage and cost are local types, and retry/backoff is
-local code.
-
-- `trait Jev: Send + Sync + 'static { async fn ask(&self, &Request) -> Result<Response, JevError>; }`
-- `Request { state, questions }`, `Question::{Noul, Choice, Score}`,
-  `Response`, `Answer` with strict validation (a missing or ill-typed
-  answer is an error, never a default).
-- `TypeSafe` (HTTPS client, `TYPESAFE_API_KEY`, retries 429/503/529
-  honoring `retry-after`), `fake::FakeJev` for tests.
-- `api_key_from_file(path)`: the daemon reads its key from a file
-  (0037).
 
 ### tm-gflights (pure)
 
@@ -74,7 +58,7 @@ Everything about Google Flights that is not driving a browser.
   `parse_booking_results(body) -> Vec<SellerOffer>`.
   Every parser is tolerant of extra fields and strict about the ones it
   reads: a missing price is `None`; a structure it cannot recognise is
-  an error that triggers Jev recovery (0041).
+  an error, and the check ends as `Unexpected` (0059).
 - `page`: page-level knowledge as data, used by the daemon through
   `tm-browser`: JS snippets and selectors (open the price graph, press
   "Scroll forward", read date-grid aria-labels such as
@@ -86,9 +70,7 @@ Everything about Google Flights that is not driving a browser.
 
 ### tm-browser
 
-Chromium and CDP, async (tokio + tokio-tungstenite). Ported and adapted
-from `../vs1/crates/vs1-browser` (DECISIONS.md 0016), keeping its
-attribution.
+Chromium and CDP, async (tokio + tokio-tungstenite).
 
 - `Chromium::launch(ChromiumConfig { binary, user_data_dir, headless,
   port, window, extra_args })` → a process whose browser endpoint is
@@ -103,13 +85,6 @@ attribution.
   responses through the Network domain (request post data, status,
   body). `Capture::wait_for(n, timeout)`, `drain()`. This is how
   `GetCalendarGraph` & co. are read (0032).
-- `Page::snapshot()`: vs1-browser's DOM observation (actionable controls
-  with labels, values and kinds, visible text), with its input guards.
-- `agent::run(&Page, &dyn Jev, &Task) -> AgentOutcome`: vs1-browser's
-  Jev policy. A `Task` has a goal, a map of field values to type (no
-  text model: Jev chooses which known value fits a field), step limits
-  and optional checks. Outcomes: `Done`, `Blocked`, `Exhausted`, with a
-  trace.
 
 ### tm-store
 
@@ -133,7 +108,7 @@ reads while the daemon writes (0020, 0040).
   last minimum, additive streak, round-trip discount) read and written
   as one record.
 - Query log: `start_query`, `finish_query` (reason, score, runner-up,
-  outcome, page loads, Jev calls, timings).
+  outcome, page loads, timings).
 - Observations (append-only), Explore hints, deals (candidate →
   confirmed/rejected/expired, `seen` for the app), seller quotes.
 - Requests (0046): the app enqueues (`CheckRoute`, `CheckFamily`,
@@ -172,9 +147,10 @@ The loop: reload configuration, sync families, read requests, ask the
 scheduler for this tick's picks, run each pick through its source, write
 observations, update scheduler state, evaluate trips and deals, confirm
 candidates, record blocks and adjust the budget, write the heartbeat.
-Sources: Google Flights (legs, round trips, Explore, booking pages);
-airline sites and miles programs through Jev-driven navigation, marked
-unverified until probed (0047).
+Sources: Google Flights (legs, round trips, Explore, booking pages) and
+TAP's booking site (0051). A check whose page does not produce what is
+expected ends as `Unexpected` and is retried later. Other airline sites
+and miles programs have no reader and are skipped (0052, 0059).
 
 ### tm-app (`tm`)
 

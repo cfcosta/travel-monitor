@@ -1,12 +1,9 @@
 [package]
 name = "tm-browser"
-description = "Chromium launch, the Chrome DevTools Protocol, page observation and the Jev navigation policy."
+description = "Chromium launch, the Chrome DevTools Protocol and page control."
 version.workspace = true
 edition.workspace = true
 publish.workspace = true
-# Parts of src/snapshot.rs, src/agent and assets/ derive from Browser Use's
-# MIT-licensed Jev Ultrafast, through vs1-browser: see LICENSE-UPSTREAM and
-# UPSTREAM.json.
 
 [dependencies]
 base64.workspace = true
@@ -15,7 +12,6 @@ serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 tm-domain.workspace = true
-tm-jev.workspace = true
 tokio = { workspace = true, features = ["io-util", "process", "time"] }
 tokio-tungstenite.workspace = true
 tracing.workspace = true

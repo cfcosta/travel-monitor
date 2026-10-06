@@ -244,7 +244,6 @@ pub struct QueryLogEntry {
     /// `None` while running.
     pub outcome: Option<QueryOutcome>,
     pub page_loads: Option<u32>,
-    pub jev_calls: Option<u32>,
     /// Observations recorded by this query.
     pub cells: u32,
 }
