@@ -680,3 +680,36 @@ the page responds to a headless browser, and what blocks it. Each
 site's findings go in `docs/research/sites/`. A site is enabled in the
 daemon only once its extraction is built on those findings and tested
 against captured responses.
+
+## 0051: TAP is the first airline source
+
+- Date: 2026-10-06
+- Refines [0012](#0012-airline-sites-to-search-directly) and
+  [0050](#0050-airline-and-miles-sites-are-probed-before-they-run).
+- Research: [docs/research/sites/tap.md](docs/research/sites/tap.md).
+
+TAP's booking site served full results and its calendar to the
+daemon's headless Chromium, behind Cloudflare, with no challenge. Its
+calendar request (`bfm/rest/booking/availability/calendar/`) returns a
+month of per-day one-way prices, so six months of both legs costs
+about two page loads per route. TAP's leg families read that calendar;
+its availability search (`bfm/rest/booking/availability/search`)
+confirms a date and gives every cabin. Calendar days carry the date
+they were cached; stale days are not recorded as fresh observations.
+`airline:TP` is the first verified site.
+
+## 0052: Sites that deny the daemon's browser stay off
+
+- Date: 2026-10-06
+- Refines [0012](#0012-airline-sites-to-search-directly),
+  [0023](#0023-award-prices-are-tracked-in-smiles-latam-pass-and-azul-fidelidade)
+  and [0050](#0050-airline-and-miles-sites-are-probed-before-they-run).
+
+LATAM, GOL, United, Emirates and Qatar expose clean prices, but Akamai
+denies the daemon's headless Chromium on the first page load. Azul,
+Iberia, Air France/KLM, Turkish and American blocked or challenged even
+a normal Chrome within a few loads. The miles programs need a login and
+returned no award prices. All of them stay off. The daemon does not
+disguise its browser to get past bot protection; Google Flights already
+shows these airlines' fares. A site is reconsidered only if it stops
+denying automated browsers or offers an API.
