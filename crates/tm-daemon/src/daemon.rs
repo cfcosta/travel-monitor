@@ -77,6 +77,7 @@ use crate::{
     },
     deals::{self, Group},
     jobs::{self, Job, JobError, JobOptions},
+    sites,
     sources::{Cell, ConfirmJob, Fetch, Sources},
 };
 
@@ -483,8 +484,10 @@ impl<S: Sources> Daemon<S> {
             paused: self.paused.is_some(),
             only: self.config.only.clone(),
             home_pos: world.pos.values().find(|p| p.is_home).map(|p| p.id),
-            // No airline or miles site has been probed yet (0050).
-            verified_sites: HashSet::new(),
+            // Only probed sites run (0050, 0051); the others stay off
+            // (0052).
+            verified_sites: sites::verified_sites(),
+            passengers: self.settings.passengers,
         }
     }
 
@@ -920,6 +923,7 @@ impl<S: Sources> Daemon<S> {
                 Source::GoogleFlights => None,
                 _ => self.agent_departure(&family, world).await,
             },
+            now: Some(Utc::now()),
             ..self.config.jobs.clone()
         };
         let job = match jobs::build(
@@ -960,6 +964,7 @@ impl<S: Sources> Daemon<S> {
             Job::Agent(j) => {
                 split(self.sources.agent_search(j).await, Found::Cells)
             }
+            Job::Tap(j) => split(self.sources.tap(j).await, Found::Cells),
             Job::Explore(j) => {
                 split(self.sources.explore(j).await, Found::Explore)
             }

@@ -25,6 +25,7 @@ use tm_daemon::{
         Fetch,
         ResolveJob,
         Sources,
+        TapJob,
     },
 };
 use tm_domain::{
@@ -58,6 +59,7 @@ struct Log {
     calendar: Vec<CalendarJob>,
     explore: Vec<ExploreJob>,
     agent: Vec<AgentJob>,
+    tap: Vec<TapJob>,
     confirm: Vec<ConfirmJob>,
     resolve: Vec<ResolveJob>,
 }
@@ -69,6 +71,7 @@ struct Fake {
     calendar: Answer<CalendarJob, Vec<Cell>>,
     explore: Answer<ExploreJob, Vec<ExploreDestination>>,
     agent: Answer<AgentJob, Vec<Cell>>,
+    tap: Answer<TapJob, Vec<Cell>>,
     confirm: Answer<ConfirmJob, Option<Confirmation>>,
 }
 
@@ -81,6 +84,7 @@ impl Fake {
             calendar: Box::new(|_| Fetch::ok(Vec::new(), 2, 0)),
             explore: Box::new(|_| Fetch::ok(Vec::new(), 1, 0)),
             agent: Box::new(|_| Fetch::ok(Vec::new(), 1, 3)),
+            tap: Box::new(|_| Fetch::ok(Vec::new(), 1, 0)),
             confirm: Box::new(|_| Fetch::ok(None, 1, 0)),
         }
     }
@@ -123,6 +127,10 @@ impl Sources for Fake {
     async fn agent_search(&mut self, job: &AgentJob) -> Fetch<Vec<Cell>> {
         log(self).agent.push(job.clone());
         (self.agent)(job)
+    }
+    async fn tap(&mut self, job: &TapJob) -> Fetch<Vec<Cell>> {
+        log(self).tap.push(job.clone());
+        (self.tap)(job)
     }
     async fn confirm(
         &mut self,
@@ -514,13 +522,14 @@ async fn a_block_backs_off() {
     assert_eq!(blocks[0].detail, "unusual traffic page");
     let budget = store.budget().await.expect("reads").expect("a budget");
     assert_eq!(budget.daily_budget, 150);
-    let recent = store.recent_queries(1).await.expect("reads");
-    assert!(
-        recent[0]
-            .outcome
-            .as_ref()
-            .is_some_and(QueryOutcome::is_block)
-    );
+    // The block is per site: TAP's legs on the route still run after it.
+    let recent = store.recent_queries(20).await.expect("reads");
+    let blocked: Vec<_> = recent
+        .iter()
+        .filter(|q| q.outcome.as_ref().is_some_and(QueryOutcome::is_block))
+        .collect();
+    assert_eq!(blocked.len(), 1);
+    assert!(!h.log().tap.is_empty());
 }
 
 #[tokio::test]
@@ -826,11 +835,13 @@ async fn miles_sessions_that_ended_are_flagged() {
         FamilyKind::Leg { leg: Leg::Outbound },
     )
     .await;
+    // LATAM: a Jev-driven airline (unverified, 0052, but run_check
+    // does not filter).
     let airline = family(
         &store_probe,
         lis,
         Cabin::Economy,
-        Source::Airline { code: "TP".into() },
+        Source::Airline { code: "LA".into() },
         pos,
         FamilyKind::Leg { leg: Leg::Outbound },
     )
@@ -886,12 +897,94 @@ async fn miles_sessions_that_ended_are_flagged() {
     {
         let log = h.log();
         let job = log.agent.last().expect("an agent job");
-        assert_eq!(job.site, "airline:TP");
+        assert_eq!(job.site, "airline:LA");
         assert!(!job.miles);
     }
     let since = Utc::now() - TimeDelta::hours(1);
     let obs = store.history(airline, since).await.expect("reads");
     assert_eq!(obs.len(), 1);
-    assert_eq!(obs[0].seller.as_deref(), Some("unverified:airline:TP"));
+    assert_eq!(obs[0].seller.as_deref(), Some("unverified:airline:LA"));
     assert_eq!(obs[0].price, Some(Money::brl_whole(2_345)));
+}
+
+#[tokio::test]
+async fn tap_legs_run_without_jev_and_record_cells() {
+    let store_probe = Store::open_in_memory().await.expect("opens");
+    store_probe.seed_defaults().await.expect("seeds");
+    let pos = home(&store_probe).await;
+    let lis = route(&store_probe, "LIS").await;
+    let outbound = family(
+        &store_probe,
+        lis,
+        Cabin::Economy,
+        Source::Airline { code: "TP".into() },
+        pos,
+        FamilyKind::Leg { leg: Leg::Outbound },
+    )
+    .await;
+    let mut h = harness(Only::default(), |f| {
+        f.tap = Box::new(|job| {
+            let mut c = cells(job.first, 3, |i| 1_900 + 10 * i as i64);
+            for cell in &mut c {
+                cell.seller = Some("airline:TP".into());
+            }
+            Fetch::ok(c, 4, 0)
+        });
+    })
+    .await;
+    let store = h.store().clone();
+    // Without Jev, TAP's legs are candidates; its round trips are not.
+    let world = h.daemon.world().await.expect("loads");
+    let cx = h.daemon.context(&world, Utc::now());
+    assert!(!cx.has_jev);
+    let tap_families: Vec<_> = world
+        .families
+        .iter()
+        .filter(|f| f.site == "airline:TP")
+        .collect();
+    assert!(!tap_families.is_empty());
+    for f in &tap_families {
+        let ok = tm_daemon::candidates::eligibility(f, &cx).is_ok();
+        assert_eq!(ok, matches!(f.key.kind, FamilyKind::Leg { .. }), "{f:?}");
+    }
+    assert!(
+        world
+            .families
+            .iter()
+            .filter(|f| f.site.starts_with("airline:")
+                && f.site != "airline:TP"
+                || f.site.starts_with("miles:"))
+            .all(|f| tm_daemon::candidates::eligibility(f, &cx)
+                == Err(tm_daemon::candidates::Skip::Unprobed))
+    );
+
+    h.daemon
+        .run_check(outbound, QueryReason::Manual, &world)
+        .await
+        .expect("checks");
+    {
+        let log = h.log();
+        let job = log.tap.last().expect("a TAP job");
+        assert_eq!(job.origin, "GRU");
+        assert_eq!(job.destination, "LIS");
+        assert!(job.url.contains("market=BR&"));
+        assert!(job.url.contains("&origin=GRU&destination=LIS&"));
+        assert!(log.agent.is_empty());
+    }
+    let since = Utc::now() - TimeDelta::hours(1);
+    let obs = store.history(outbound, since).await.expect("reads");
+    assert_eq!(obs.len(), 3);
+    assert!(
+        obs.iter()
+            .all(|o| o.seller.as_deref() == Some("airline:TP"))
+    );
+    let recent = store.recent_queries(1).await.expect("reads");
+    assert_eq!(recent[0].page_loads, Some(4));
+    let state = store
+        .family(outbound)
+        .await
+        .expect("reads")
+        .expect("exists")
+        .state;
+    assert_eq!(state.last_min_price_minor, Some(190_000));
 }

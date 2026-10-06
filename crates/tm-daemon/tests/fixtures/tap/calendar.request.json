@@ -1,0 +1,14 @@
+{
+  "method": "POST",
+  "url": "https://booking.flytap.com/bfm/rest/booking/availability/calendar/",
+  "body": {
+    "cabinClass": "E",
+    "destination": "LIS",
+    "market": "BR",
+    "origin": "GRU",
+    "tripType": "O",
+    "paxType": "ADT",
+    "month": 11,
+    "year": 2026
+  }
+}

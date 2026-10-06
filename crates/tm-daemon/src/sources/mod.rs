@@ -2,15 +2,16 @@
 //! glue is tested with fakes (DECISIONS.md 0047).
 //!
 //! [`browser::BrowserSources`] is the real one: Google Flights through
-//! the page's own RPCs (0032), Jev-driven airline and miles sites
-//! (0041), all in the daemon's headless Chromium (0021).
+//! the page's own RPCs (0032), TAP through its booking site's own
+//! calendar and availability calls (0051), Jev-driven airline and miles
+//! sites (0041), all in the daemon's headless Chromium (0021).
 
 pub mod browser;
 
 use async_trait::async_trait;
-use chrono::NaiveDate;
+use chrono::{DateTime, NaiveDate, Utc};
 use tm_browser::agent::Task;
-use tm_domain::{Currency, Money, PointOfSale, PosId, QueryOutcome};
+use tm_domain::{Cabin, Currency, Money, PointOfSale, PosId, QueryOutcome};
 use tm_gflights::{
     Locale,
     Search,
@@ -136,6 +137,35 @@ pub struct AgentJob {
     pub carrier: Option<String>,
 }
 
+/// One TAP leg (0051): the deep link for one direction, read through
+/// the page's own responses.
+///
+/// Economy reads the month calendar from the "Datas" step, month by
+/// month until `horizon_end`, keeping the days TAP stored since
+/// `fresh_since`; the searched date's live economy price is added from
+/// the availability search. Economy Prime and business have no
+/// calendar: they read the availability search of `departure` only.
+#[derive(Debug, Clone, PartialEq)]
+pub struct TapJob {
+    pub pos: PosId,
+    /// The deep link (`sites::tap::Deeplink`).
+    pub url: String,
+    pub origin: String,
+    pub destination: String,
+    pub cabin: Cabin,
+    /// The deep link's date: the first departure for economy, the date
+    /// to price for the other cabins.
+    pub departure: NaiveDate,
+    /// The first departure worth recording (tomorrow).
+    pub first: NaiveDate,
+    /// The last departure the calendar should reach.
+    pub horizon_end: NaiveDate,
+    /// The most calendar months to read.
+    pub max_months: u32,
+    /// Calendar days stored by TAP before this are stale (0051).
+    pub fresh_since: DateTime<Utc>,
+}
+
 /// The second query of a deal candidate (0031): a round-trip search
 /// for those exact dates under the deal's point of sale, then that
 /// point of sale's own booking page (0034).
@@ -188,6 +218,7 @@ pub trait Sources: Send {
         job: &ExploreJob,
     ) -> Fetch<Vec<ExploreDestination>>;
     async fn agent_search(&mut self, job: &AgentJob) -> Fetch<Vec<Cell>>;
+    async fn tap(&mut self, job: &TapJob) -> Fetch<Vec<Cell>>;
     async fn confirm(
         &mut self,
         job: &ConfirmJob,

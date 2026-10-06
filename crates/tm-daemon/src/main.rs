@@ -80,7 +80,7 @@ async fn run(cli: Cli) -> anyhow::Result<()> {
         jobs: JobOptions {
             max_graph_pages: cli.max_graph_pages,
             origin_override: cli.google_origin.clone(),
-            agent_departure: None,
+            ..JobOptions::default()
         },
         budget: cli.budget,
         max_budget: cli.max_budget,

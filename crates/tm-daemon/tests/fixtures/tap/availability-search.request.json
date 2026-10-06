@@ -1,0 +1,58 @@
+{
+  "method": "POST",
+  "url": "https://booking.flytap.com/bfm/rest/booking/availability/search?payWithMiles=false&starAlliance=false",
+  "body": {
+    "adt": 1,
+    "airlineId": "TP",
+    "bfmModule": "BFM_BOOKING",
+    "c14": 0,
+    "cabinClass": "E",
+    "changeReturn": false,
+    "channelDetectionName": "",
+    "chd": 0,
+    "cmsId": "string",
+    "communities": [],
+    "departureDate": [
+      "10112026"
+    ],
+    "destination": [
+      "LIS"
+    ],
+    "groups": [],
+    "inf": 0,
+    "language": "pt-br",
+    "market": "BR",
+    "multiCityTripType": false,
+    "numSeat": 1,
+    "numSeats": 1,
+    "oneWay": true,
+    "origin": [
+      "GRU"
+    ],
+    "passengers": {
+      "ADT": 1,
+      "YTH": 0,
+      "CHD": 0,
+      "INF": 0
+    },
+    "paxSearch": {
+      "ADT": 1,
+      "YTH": 0,
+      "CHD": 0,
+      "INF": 0
+    },
+    "permittedCabins": [],
+    "preferredCarrier": [],
+    "promocode": "",
+    "promotionId": "",
+    "returnDate": "10112026",
+    "roundTripType": false,
+    "searchPoint": true,
+    "session": "string",
+    "tripType": "O",
+    "validTripType": true,
+    "student": false,
+    "resident": false,
+    "yth": 0
+  }
+}

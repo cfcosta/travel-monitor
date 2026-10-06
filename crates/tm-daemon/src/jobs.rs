@@ -1,8 +1,8 @@
-//! What one check of a family loads (DECISIONS.md 0041, 0042): pure
-//! functions from a family, its route, its point of sale and the
+//! What one check of a family loads (DECISIONS.md 0041, 0042, 0051):
+//! pure functions from a family, its route, its point of sale and the
 //! settings to a job for a [`crate::sources::Sources`].
 
-use chrono::{Days, NaiveDate};
+use chrono::{DateTime, Days, NaiveDate, Utc};
 use tm_browser::agent::Task;
 use tm_domain::{
     Cabin,
@@ -23,7 +23,10 @@ use tm_gflights::{
     url::{explore_url, resolve_url, search_url},
 };
 
-use crate::sources::{AgentJob, CalendarJob, ExploreJob, ResolveJob};
+use crate::{
+    sites::{self, tap},
+    sources::{AgentJob, CalendarJob, ExploreJob, ResolveJob, TapJob},
+};
 
 /// What a family's check loads.
 #[derive(Debug, Clone, PartialEq)]
@@ -31,6 +34,7 @@ pub enum Job {
     Calendar(CalendarJob),
     Explore(ExploreJob),
     Agent(AgentJob),
+    Tap(TapJob),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
@@ -47,6 +51,10 @@ pub enum JobError {
     /// Explore on a real route, or a leg on a sweep.
     #[error("the family's kind does not fit its source")]
     Mismatch,
+    /// A scripted site that cannot run this family (a TAP round trip,
+    /// a party TAP's calendar does not price).
+    #[error("{0}")]
+    Unsupported(&'static str),
 }
 
 /// Knobs that are not settings.
@@ -59,6 +67,11 @@ pub struct JobOptions {
     /// The date an airline or miles search uses (the daemon picks the
     /// cheapest known Google Flights date, 0028 fan-out).
     pub agent_departure: Option<NaiveDate>,
+    /// The check's time, for the freshness of cached airline prices;
+    /// `None` is midnight UTC of `today`.
+    pub now: Option<DateTime<Utc>>,
+    /// Replace TAP's `https://booking.flytap.com` (tests).
+    pub tap_base: Option<String>,
 }
 
 /// The `hl`/`gl`/`curr` of a point of sale.
@@ -162,6 +175,10 @@ pub fn build(
             }))
         }
         (_, FamilyKind::Explore) => Err(JobError::Mismatch),
+        (Source::Airline { code }, kind) if code == tap::CODE => {
+            tap_job(key, kind, route, pos, settings, today, options)
+                .map(Job::Tap)
+        }
         (source, kind) => {
             let site = source.site();
             let (start_url, miles, carrier) = match source {
@@ -216,6 +233,75 @@ pub fn build(
             }))
         }
     }
+}
+
+/// A TAP leg (0051): the BR deep link for one direction under the
+/// family's (home) point of sale.
+fn tap_job(
+    key: &FamilyKey,
+    kind: FamilyKind,
+    route: &Route,
+    pos: &PointOfSale,
+    settings: &Settings,
+    today: NaiveDate,
+    options: &JobOptions,
+) -> Result<TapJob, JobError> {
+    if let Some(why) = sites::unsupported(key, &settings.passengers) {
+        return Err(JobError::Unsupported(why));
+    }
+    let (from, to) = match kind {
+        FamilyKind::Leg { leg: Leg::Outbound } => {
+            (&route.origin, &route.destination)
+        }
+        FamilyKind::Leg { leg: Leg::Return } => {
+            (&route.destination, &route.origin)
+        }
+        FamilyKind::RoundTrip { .. } | FamilyKind::Explore => {
+            return Err(JobError::Mismatch);
+        }
+    };
+    let first = first_departure(today);
+    // Economy reads the calendar from the first departure on; the
+    // other cabins price one date, the cheapest Google showed.
+    let departure = if key.cabin == Cabin::Economy {
+        first
+    } else {
+        options
+            .agent_departure
+            .filter(|d| *d > today)
+            .unwrap_or(today + Days::new(45))
+    };
+    let origin = tap::airport(&from.code).to_owned();
+    let destination = tap::airport(&to.code).to_owned();
+    let link = tap::Deeplink {
+        market: pos.country.as_str().to_owned(),
+        language: tap::language(&settings.language),
+        origin: origin.clone(),
+        destination: destination.clone(),
+        departure,
+        return_date: None,
+        passengers: settings.passengers,
+    };
+    let base = options.tap_base.as_deref().unwrap_or(tap::BASE);
+    let url = link.url(base).ok_or(JobError::Unsupported(
+        "TAP's deep link cannot say this party",
+    ))?;
+    let end = horizon_end(today, settings);
+    let now = options.now.unwrap_or_else(|| {
+        today.and_hms_opt(0, 0, 0).unwrap_or_default().and_utc()
+    });
+    Ok(TapJob {
+        pos: pos.id,
+        url,
+        origin,
+        destination,
+        cabin: key.cabin,
+        departure,
+        first,
+        horizon_end: end,
+        max_months: tap::months_needed(first, end),
+        fresh_since: tap::fresh_since(now),
+    })
 }
 
 /// The `q=` search that resolves a city (0041).
@@ -448,7 +534,7 @@ mod tests {
             &JobOptions {
                 max_graph_pages: Some(2),
                 origin_override: Some("http://127.0.0.1:9/".into()),
-                agent_departure: None,
+                ..JobOptions::default()
             },
         );
         let Ok(Job::Calendar(job)) = job else {
@@ -518,7 +604,7 @@ mod tests {
         };
         let job = build(
             &key(
-                Source::Airline { code: "TP".into() },
+                Source::Airline { code: "LA".into() },
                 FamilyKind::Leg { leg: Leg::Outbound },
             ),
             &route(PlaceKind::Airport),
@@ -530,8 +616,8 @@ mod tests {
         let Ok(Job::Agent(job)) = job else {
             panic!("an agent job: {job:?}");
         };
-        assert_eq!(job.site, "airline:TP");
-        assert_eq!(job.start_url, "https://www.flytap.com/pt-br");
+        assert_eq!(job.site, "airline:LA");
+        assert_eq!(job.start_url, "https://www.latamairlines.com/br/pt");
         assert!(!job.miles);
         assert_eq!(job.departure, day(11, 10));
         assert!(job.task.goal.contains("one-way"));
@@ -578,5 +664,120 @@ mod tests {
             ),
             Err(JobError::NoStartPage("airline:ZZ".into()))
         );
+    }
+
+    fn home_pos() -> PointOfSale {
+        PointOfSale {
+            id: PosId(1),
+            country: CountryCode::new("BR"),
+            currency: Currency::brl(),
+            is_home: true,
+            active: true,
+        }
+    }
+
+    #[test]
+    fn tap_legs_are_deep_links() {
+        let settings = Settings::default();
+        let tap = |cabin, kind| {
+            let mut k = key(Source::Airline { code: "TP".into() }, kind);
+            k.cabin = cabin;
+            k.pos = PosId(1);
+            k
+        };
+        let now = NaiveDate::from_ymd_opt(2026, 10, 6)
+            .and_then(|d| d.and_hms_opt(12, 0, 0))
+            .unwrap_or_default()
+            .and_utc();
+        let options = JobOptions {
+            agent_departure: Some(day(11, 10)),
+            now: Some(now),
+            ..JobOptions::default()
+        };
+        let job = build(
+            &tap(Cabin::Economy, FamilyKind::Leg { leg: Leg::Return }),
+            &route(PlaceKind::Airport),
+            &home_pos(),
+            &settings,
+            day(10, 6),
+            &options,
+        );
+        let Ok(Job::Tap(job)) = job else {
+            panic!("a TAP job: {job:?}");
+        };
+        assert_eq!(job.pos, PosId(1));
+        assert_eq!(
+            (job.origin.as_str(), job.destination.as_str()),
+            ("LIS", "GRU")
+        );
+        assert_eq!(job.cabin, Cabin::Economy);
+        // Economy reads the calendar from tomorrow, to the horizon.
+        assert_eq!(job.departure, day(10, 7));
+        assert_eq!(job.first, day(10, 7));
+        assert_eq!(
+            job.horizon_end,
+            NaiveDate::from_ymd_opt(2027, 4, 4).unwrap_or_default()
+        );
+        assert_eq!(job.max_months, 7);
+        assert_eq!(job.fresh_since, now - chrono::TimeDelta::hours(48));
+        assert_eq!(
+            job.url,
+            "https://booking.flytap.com/booking/flights/deeplink?market=BR\
+             &language=en&origin=LIS&destination=GRU&flexibleDates=false\
+             &flightType=single&adt=1&chd=0&inf=0&yth=0&depDate=07.10.2026\
+             &x_tap_source=WEB"
+        );
+
+        // Business prices the cheapest date Google showed.
+        let job = build(
+            &tap(Cabin::Business, FamilyKind::Leg { leg: Leg::Outbound }),
+            &route(PlaceKind::Airport),
+            &home_pos(),
+            &settings,
+            day(10, 6),
+            &JobOptions {
+                tap_base: Some("http://127.0.0.1:9".into()),
+                ..options.clone()
+            },
+        );
+        let Ok(Job::Tap(job)) = job else {
+            panic!("a TAP job: {job:?}");
+        };
+        assert_eq!(job.departure, day(11, 10));
+        assert_eq!(
+            (job.origin.as_str(), job.destination.as_str()),
+            ("GRU", "LIS")
+        );
+        assert!(
+            job.url
+                .starts_with("http://127.0.0.1:9/booking/flights/deeplink?")
+        );
+        assert!(job.url.contains("&depDate=10.11.2026&"));
+
+        // Round trips and larger parties are not TAP's.
+        assert!(matches!(
+            build(
+                &tap(Cabin::Economy, FamilyKind::RoundTrip { days: 7 }),
+                &route(PlaceKind::Airport),
+                &home_pos(),
+                &settings,
+                day(10, 6),
+                &options,
+            ),
+            Err(JobError::Unsupported(_))
+        ));
+        let mut two = settings.clone();
+        two.passengers.adults = 2;
+        assert!(matches!(
+            build(
+                &tap(Cabin::Economy, FamilyKind::Leg { leg: Leg::Outbound }),
+                &route(PlaceKind::Airport),
+                &home_pos(),
+                &two,
+                day(10, 6),
+                &options,
+            ),
+            Err(JobError::Unsupported(_))
+        ));
     }
 }

@@ -713,3 +713,22 @@ returned no award prices. All of them stay off. The daemon does not
 disguise its browser to get past bot protection; Google Flights already
 shows these airlines' fares. A site is reconsidered only if it stops
 denying automated browsers or offers an API.
+
+## 0053: How TAP is read
+
+- Date: 2026-10-06
+- Completes [0051](#0051-tap-is-the-first-airline-source).
+
+- **Freshness:** a calendar day counts as an observation only if TAP
+  cached it within the last 48 hours. Older days are dropped.
+- **Cabins:** economy legs read the month calendar (one page load for
+  the deep link plus one per month, about 8 for six months). Premium
+  economy and business have no calendar: they price one date per check
+  (the cheapest date Google Flights showed) from the availability
+  search, for one page load.
+- **One adult only:** the calendar prices one adult and cannot be asked
+  for a party, so TAP families are skipped when the passenger setting
+  is not one adult. They are not multiplied.
+- **One way only:** TAP's round-trip families are skipped; round trips
+  and deal confirmation stay on Google Flights, whose sellers include
+  TAP.

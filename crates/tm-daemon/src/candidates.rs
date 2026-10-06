@@ -9,12 +9,15 @@ use tm_domain::{
     FamilyId,
     FamilyKey,
     FamilyKind,
+    Passengers,
     PosId,
     RouteId,
     Source,
 };
 use tm_scheduler::{Candidate, FamilyState, RoundTripDiscount};
 use tm_store::{FamilyRecord, FamilyStateRecord, RouteTripState};
+
+use crate::sites;
 
 /// The scheduler's view of a stored state.
 pub fn to_state(r: &FamilyStateRecord) -> FamilyState {
@@ -108,8 +111,12 @@ pub struct Context {
     /// The home point of sale, for bootstrap ranks (0049).
     pub home_pos: Option<PosId>,
     /// Airline and miles sites whose extraction has been built on a
-    /// probe of the site (0050). Others are skipped.
+    /// probe of the site (0050). Others are skipped. The daemon uses
+    /// [`sites::verified_sites`].
     pub verified_sites: HashSet<String>,
+    /// The party every search uses (0036): some sites price only one
+    /// adult.
+    pub passengers: Passengers,
 }
 
 /// Why a family is not a candidate.
@@ -124,6 +131,9 @@ pub enum Skip {
     NotSelected,
     /// An airline or miles site not probed yet (0050).
     Unprobed,
+    /// A family its site cannot run ([`sites::unsupported`]): TAP's
+    /// round trips, or a party TAP's calendar does not price.
+    Unsupported,
 }
 
 /// Whether `family` may be checked now, ignoring the budget and the
@@ -146,8 +156,12 @@ pub fn eligibility(family: &FamilyRecord, cx: &Context) -> Result<(), Skip> {
     {
         return Err(Skip::Unprobed);
     }
+    if sites::unsupported(&family.key, &cx.passengers).is_some() {
+        return Err(Skip::Unsupported);
+    }
     match &family.key.source {
         Source::GoogleFlights => {}
+        source @ Source::Airline { .. } if sites::scripted(source) => {}
         Source::Airline { .. } if !cx.has_jev => return Err(Skip::NoJev),
         Source::Airline { .. } => {}
         Source::Miles { .. } if !cx.has_jev => return Err(Skip::NoJev),
@@ -157,8 +171,10 @@ pub fn eligibility(family: &FamilyRecord, cx: &Context) -> Result<(), Skip> {
             }
         }
     }
+    // Scripted sites search by IATA code: they need no Freebase ID.
     if cx.unresolved.contains(&family.key.route)
         && family.key.kind != FamilyKind::Explore
+        && !sites::scripted(&family.key.source)
     {
         return Err(Skip::Unresolved);
     }
@@ -282,10 +298,63 @@ mod tests {
             family(1, 1, Source::GoogleFlights),
             family(2, 1, Source::Airline { code: "TP".into() }),
         ];
-        let (cands, skipped) = build(&families, &cx());
+        let mut cx = cx();
+        cx.verified_sites.clear();
+        let (cands, skipped) = build(&families, &cx);
         let ids: Vec<i64> = cands.iter().map(|c| c.family.0).collect();
         assert_eq!(ids, vec![1]);
         assert_eq!(skipped.get(&Skip::Unprobed), Some(&1));
+    }
+
+    /// The daemon's own list (0051, 0052): TAP runs, without Jev; every
+    /// other airline and miles site stays off.
+    #[test]
+    fn only_tap_is_verified() {
+        let mut families = vec![
+            family(1, 1, Source::GoogleFlights),
+            family(2, 1, Source::Airline { code: "TP".into() }),
+        ];
+        let mut id = 10;
+        for code in ["LA", "AD", "G3", "IB", "AF", "AA", "UA", "EK", "QR", "TK"]
+        {
+            families.push(family(id, 1, Source::Airline { code: code.into() }));
+            id += 1;
+        }
+        for program in ["smiles", "latam_pass", "azul_fidelidade"] {
+            families.push(miles(id, program));
+            id += 1;
+        }
+        let mut cx = Context {
+            verified_sites: sites::verified_sites(),
+            ..Context::default()
+        };
+        cx.logged_in.insert("smiles".into());
+        assert!(!cx.has_jev);
+        let (cands, skipped) = build(&families, &cx);
+        let ids: Vec<i64> = cands.iter().map(|c| c.family.0).collect();
+        assert_eq!(ids, vec![1, 2]);
+        assert_eq!(skipped.get(&Skip::Unprobed), Some(&13));
+        assert_eq!(skipped.len(), 1);
+
+        // TAP's round trips, and legs for a party its calendar does not
+        // price, are left out with their own reason.
+        let mut rt = family(3, 1, Source::Airline { code: "TP".into() });
+        rt.key.kind = FamilyKind::RoundTrip { days: 7 };
+        let (cands, skipped) = build(&[rt], &cx);
+        assert!(cands.is_empty());
+        assert_eq!(skipped.get(&Skip::Unsupported), Some(&1));
+        cx.passengers.adults = 2;
+        let (cands, skipped) = build(&families[..2], &cx);
+        assert_eq!(cands.len(), 1);
+        assert_eq!(skipped.get(&Skip::Unsupported), Some(&1));
+
+        // A city Google cannot be told about yet does not hold TAP.
+        cx.passengers = Passengers::default();
+        cx.unresolved.insert(RouteId(1));
+        let (cands, skipped) = build(&families[..2], &cx);
+        let ids: Vec<i64> = cands.iter().map(|c| c.family.0).collect();
+        assert_eq!(ids, vec![2]);
+        assert_eq!(skipped.get(&Skip::Unresolved), Some(&1));
     }
 
     #[test]

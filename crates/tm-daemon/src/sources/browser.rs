@@ -10,9 +10,12 @@
 //!   from the HTML-embedded `ds:1`), the returning flights for the
 //!   cheapest outbound, and that point of sale's own booking page (0031,
 //!   0034).
-//! - Airline sites and miles programs: Jev drives the page to a results
-//!   list; prices are read from the visible text and marked unverified
-//!   (0047).
+//! - TAP (0051): load the deep link, read the page's availability
+//!   search, open the "Datas" step and scroll it, reading each month the
+//!   page fetches from TAP's calendar ([`crate::sites::tap`]).
+//! - Other airline sites and miles programs: Jev drives the page to a
+//!   results list; prices are read from the visible text and marked
+//!   unverified (0047). None of them is verified yet (0052).
 //!
 //! Each point of sale has its own browser context (isolated cookies,
 //! 0033); airline and miles pages use the profile's own context, where
@@ -31,7 +34,7 @@ use tm_browser::{
     Page,
     agent::{self, AgentOutcome, Task},
 };
-use tm_domain::{Currency, PointOfSale, PosId, QueryOutcome};
+use tm_domain::{Cabin, Currency, PointOfSale, PosId, QueryOutcome};
 use tm_gflights::{
     Method,
     page::{
@@ -72,8 +75,9 @@ use super::{
     Fetch,
     ResolveJob,
     Sources,
+    TapJob,
 };
-use crate::{extract, jobs::rebase};
+use crate::{extract, jobs::rebase, sites::tap};
 
 /// How long each step may take.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -513,6 +517,316 @@ async fn agent_on(
     Fetch::ok(vec![cell], loads, calls)
 }
 
+/// A Cloudflare challenge in place of TAP's page.
+async fn tap_blocked(page: &Page) -> Option<QueryOutcome> {
+    let url = page.url().await.unwrap_or_default();
+    let (title, text): (String, String) = page
+        .eval_as(tap::TITLE_AND_TEXT_JS)
+        .await
+        .unwrap_or_default();
+    tap::detect_block(&url, &title, &text)
+        .map(|detail| QueryOutcome::Blocked { detail })
+}
+
+/// A captured TAP API call that Cloudflare answered.
+fn tap_api_blocked(responses: &[tm_browser::Captured]) -> Option<QueryOutcome> {
+    responses.iter().find_map(|r| {
+        tap::blocked_response(r.status, &r.response_headers)
+            .map(|detail| QueryOutcome::Blocked { detail })
+    })
+}
+
+/// A random pause of `base` to twice `base`.
+async fn jittered(base: Duration) {
+    let pause = base.as_millis() as u64;
+    let jitter =
+        rand::rng().random_range(pause..=pause.saturating_mul(2).max(pause));
+    tokio::time::sleep(Duration::from_millis(jitter)).await;
+}
+
+/// The cell of the availability search's own date in `cabin`: its
+/// cheapest offer, or no price when the cabin is not sold that day.
+fn tap_live_cell(
+    responses: &[tm_browser::Captured],
+    job: &TapJob,
+) -> Result<Cell, String> {
+    let mut errors = Vec::new();
+    let mut found = None;
+    for r in responses.iter().filter(|r| r.is_ok()) {
+        let date = r
+            .post_data
+            .as_deref()
+            .and_then(|b| tap::parse_search_request(b).ok())
+            .map_or(job.departure, |q| q.departure);
+        match tap::parse_availability(&r.text()) {
+            Ok(a) => found = Some((date, a)),
+            Err(e) => errors.push(e.to_string()),
+        }
+    }
+    let Some((date, availability)) = found else {
+        return Err(format!(
+            "no readable availability search response: {}",
+            errors.join("; ")
+        ));
+    };
+    let mut cell = Cell::priced(date, None, None);
+    cell.seller = Some(tap::SITE.to_owned());
+    if let Some((offer, flight)) = availability.cheapest(job.cabin) {
+        cell.price = Some(offer.price.clone());
+        cell.carrier = flight.and_then(tap::Flight::carrier);
+        cell.stops = flight.and_then(|f| f.stops);
+        cell.duration_minutes = flight.and_then(|f| f.duration_minutes);
+        info!(
+            cabin = ?job.cabin,
+            %date,
+            price = %offer.price,
+            fare = %offer.fare_family,
+            offers = availability.offers.len(),
+            "TAP availability read"
+        );
+    } else {
+        info!(cabin = ?job.cabin, %date, "TAP sells no seat in this cabin");
+    }
+    Ok(cell)
+}
+
+/// The month calendar's responses that belong to `job`, with the
+/// month each one asked for.
+fn tap_months(
+    responses: &[tm_browser::Captured],
+    job: &TapJob,
+    errors: &mut Vec<String>,
+) -> Vec<(chrono::NaiveDate, Vec<tap::CalendarDay>)> {
+    let mut out = Vec::new();
+    for r in responses {
+        debug!(
+            url = %r.url,
+            method = %r.method,
+            status = ?r.status,
+            body = r.post_data.as_deref().unwrap_or(""),
+            bytes = r.body.len(),
+            "TAP calendar response"
+        );
+        if !tap::is_calendar_url(&r.url) {
+            continue;
+        }
+        if !r.is_ok() {
+            errors.push(format!(
+                "status {:?} {}",
+                r.status,
+                r.error.as_deref().unwrap_or("")
+            ));
+            continue;
+        }
+        let request = r
+            .post_data
+            .as_deref()
+            .and_then(|b| tap::parse_calendar_request(b).ok());
+        if let Some(q) = &request {
+            let same = |a: &str, b: &str| a.is_empty() || a == b;
+            if !same(&q.trip_type, "O")
+                || !same(&q.origin, &job.origin)
+                || !same(&q.destination, &job.destination)
+            {
+                debug!(?q, "a calendar request for another search");
+                continue;
+            }
+        }
+        match tap::parse_calendar(&r.text()) {
+            Ok(days) => {
+                let month = request
+                    .as_ref()
+                    .and_then(tap::CalendarRequest::first_day)
+                    .or_else(|| {
+                        days.first().map(|d| tap::month_of(d.departure))
+                    });
+                match month {
+                    Some(m) => {
+                        let fresh = days
+                            .iter()
+                            .filter(|d| d.is_fresh(job.fresh_since))
+                            .count();
+                        debug!(%m, days = days.len(), fresh, "TAP calendar month");
+                        out.push((m, days));
+                    }
+                    None => {
+                        errors.push("a calendar month of unknown date".into())
+                    }
+                }
+            }
+            Err(e) => errors.push(e.to_string()),
+        }
+    }
+    out
+}
+
+async fn tap_on(page: &Page, job: &TapJob, t: Timeouts) -> Fetch<Vec<Cell>> {
+    let search = match page.capture(tap::SEARCH_PATH).await {
+        Ok(c) => c,
+        Err(e) => return Fetch::error(format!("capture failed: {e}")),
+    };
+    let calendar = match page.capture(tap::CALENDAR_PATH).await {
+        Ok(c) => c,
+        Err(e) => return Fetch::error(format!("capture failed: {e}")),
+    };
+    let mut loads = 1;
+    if let Err(outcome) = navigate(page, &job.url, t.navigation).await {
+        return Fetch::failed(outcome, loads, 0);
+    }
+    if let Some(outcome) = tap_blocked(page).await {
+        return Fetch::failed(outcome, loads, 0);
+    }
+    // The app posts the deep link, moves to the results and searches.
+    if search.wait_for(1, t.response * 2).await.is_err() {
+        let outcome = tap_blocked(page).await.unwrap_or_else(|| {
+            QueryOutcome::Unexpected {
+                detail: "no TAP availability search response".into(),
+            }
+        });
+        return Fetch::failed(outcome, loads, 0);
+    }
+    tokio::time::sleep(t.settle).await;
+    let searches = search.drain();
+    if let Some(outcome) = tap_api_blocked(&searches) {
+        return Fetch::failed(outcome, loads, 0);
+    }
+    let live = match tap_live_cell(&searches, job) {
+        Ok(cell) => cell,
+        Err(detail) => {
+            return Fetch::failed(
+                QueryOutcome::Unexpected { detail },
+                loads,
+                0,
+            );
+        }
+    };
+    if job.cabin != Cabin::Economy {
+        // Economy Prime and business have no calendar (0051).
+        return Fetch::ok(vec![live], loads, 0);
+    }
+
+    // The "Datas" step: the page fetches each month as it scrolls into
+    // view.
+    let opened = page
+        .wait_until(
+            tap::OPEN_DATES_JS,
+            t.open_graph,
+            Duration::from_millis(500),
+        )
+        .await
+        .is_ok();
+    if !opened {
+        return Fetch::failed(
+            QueryOutcome::Unexpected {
+                detail: "TAP's 'Datas' step was not found".into(),
+            },
+            loads,
+            0,
+        );
+    }
+    let mut errors = Vec::new();
+    let mut months: Vec<(chrono::NaiveDate, Vec<tap::CalendarDay>)> =
+        Vec::new();
+    let mut responses = 0_u32;
+    let mut quiet = 0;
+    // The first month comes with the step; each later one when a
+    // scroll brings it into view, usually within a second.
+    let mut waited = calendar.wait_for(1, t.response).await.is_ok();
+    loop {
+        if waited {
+            tokio::time::sleep(t.settle / 2).await;
+            let got = calendar.drain();
+            if let Some(outcome) = tap_api_blocked(&got) {
+                loads += responses;
+                return Fetch::failed(outcome, loads, 0);
+            }
+            let read = tap_months(&got, job, &mut errors);
+            responses += u32::try_from(read.len()).unwrap_or(u32::MAX);
+            let ended = read.iter().any(|(_, days)| days.is_empty());
+            months.extend(read);
+            quiet = 0;
+            if ended {
+                debug!("an empty month: TAP's calendar ends here");
+                break;
+            }
+        } else {
+            quiet += 1;
+        }
+        let read: Vec<chrono::NaiveDate> =
+            months.iter().map(|(m, _)| *m).collect();
+        if tap::covers(&read, job.horizon_end)
+            || months.len() >= job.max_months as usize
+            || quiet >= tap::QUIET_SCROLLS
+        {
+            break;
+        }
+        jittered(t.scroll_pause).await;
+        let moved: bool =
+            page.eval_as(tap::SCROLL_CALENDAR_JS).await.unwrap_or(false);
+        waited = calendar.wait_for(1, t.settle * 2).await.is_ok();
+        debug!(
+            moved,
+            waited,
+            months = months.len(),
+            "scrolled the calendar"
+        );
+        if !moved && !waited {
+            debug!("the calendar does not scroll further");
+            break;
+        }
+    }
+    loads += responses;
+    if months.is_empty() {
+        let outcome = tap_blocked(page).await.unwrap_or_else(|| {
+            QueryOutcome::Unexpected {
+                detail: format!(
+                    "no readable TAP calendar month: {}",
+                    errors.join("; ")
+                ),
+            }
+        });
+        return Fetch::failed(outcome, loads, 0);
+    }
+    if !errors.is_empty() {
+        warn!(?errors, "some TAP calendar responses were not read");
+    }
+    let mut cells: Vec<Cell> = Vec::new();
+    let (mut stale, mut out_of_range) = (0, 0);
+    months.sort_by_key(|(m, _)| *m);
+    for day in months.iter().flat_map(|(_, days)| days) {
+        if day.departure < job.first || day.departure > job.horizon_end {
+            out_of_range += 1;
+            continue;
+        }
+        if !day.is_fresh(job.fresh_since) {
+            stale += 1;
+            continue;
+        }
+        let mut cell = Cell::priced(day.departure, None, day.price.clone());
+        cell.seller = Some(tap::SITE.to_owned());
+        match cells.iter_mut().find(|c| c.departure == day.departure) {
+            Some(existing) => *existing = cell,
+            None => cells.push(cell),
+        }
+    }
+    // The searched date's live price beats the cached one.
+    if (job.first..=job.horizon_end).contains(&live.departure) {
+        match cells.iter_mut().find(|c| c.departure == live.departure) {
+            Some(existing) => *existing = live,
+            None => cells.push(live),
+        }
+    }
+    cells.sort_by_key(|c| c.departure);
+    info!(
+        months = months.len(),
+        cells = cells.len(),
+        stale,
+        out_of_range,
+        "TAP calendar read"
+    );
+    Fetch::ok(cells, loads, 0)
+}
+
 fn cheapest(itineraries: &[Itinerary]) -> Option<&Itinerary> {
     itineraries
         .iter()
@@ -768,6 +1082,11 @@ impl Sources for BrowserSources {
             return Fetch::error("Jev is not configured");
         };
         on_page!(self, None, |page| agent_on(&page, job, &*jev, t).await)
+    }
+
+    async fn tap(&mut self, job: &TapJob) -> Fetch<Vec<Cell>> {
+        let t = self.timeouts;
+        on_page!(self, Some(job.pos), |page| tap_on(&page, job, t).await)
     }
 
     async fn confirm(
