@@ -732,3 +732,20 @@ denying automated browsers or offers an API.
 - **One way only:** TAP's round-trip families are skipped; round trips
   and deal confirmation stay on Google Flights, whose sellers include
   TAP.
+
+## 0054: Aracaju and the Antarctic gateways join the watchlist
+
+- Date: 2026-10-06
+- Adds to [0006](#0006-a-pinned-watchlist-plus-an-explore-sweep) through
+  [0035](#0035-origins-and-destinations-are-configured-in-the-app).
+
+Three destinations are added, in the live database and in the
+first-run seed:
+
+- **AJU**, Aracaju (Brazil).
+- **USH**, Ushuaia (Argentina), and **PUQ**, Punta Arenas (Chile): the
+  two South American gateways where Antarctic cruises and flights leave
+  from.
+
+Puerto Williams and the other continents' gateways (Cape Town,
+Christchurch, Hobart) were considered and left out.

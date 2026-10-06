@@ -47,6 +47,7 @@ fn watchlist() -> Vec<NewPlace> {
         a("NAT", "Natal", "BR", -5.79, -35.21),
         a("MCZ", "Maceió", "BR", -9.67, -35.74),
         a("IGU", "Foz do Iguaçu", "BR", -25.55, -54.59),
+        a("AJU", "Aracaju", "BR", -10.98, -37.07),
         // South America
         c("BUE", "Buenos Aires", "AR", -34.60, -58.38),
         a("SCL", "Santiago", "CL", -33.45, -70.67),
@@ -54,6 +55,9 @@ fn watchlist() -> Vec<NewPlace> {
         a("LIM", "Lima", "PE", -12.05, -77.04),
         a("BOG", "Bogotá", "CO", 4.71, -74.07),
         a("BRC", "Bariloche", "AR", -41.13, -71.31),
+        // Antarctic gateways (0054)
+        a("USH", "Ushuaia", "AR", -54.84, -68.30),
+        a("PUQ", "Punta Arenas", "CL", -53.00, -70.85),
         // North America and Caribbean
         a("MIA", "Miami", "US", 25.76, -80.19),
         a("MCO", "Orlando", "US", 28.54, -81.38),
@@ -75,7 +79,7 @@ fn watchlist() -> Vec<NewPlace> {
 }
 
 const BRAZIL: &[&str] = &[
-    "RIO", "BSB", "SSA", "REC", "FOR", "FLN", "POA", "NAT", "MCZ", "IGU",
+    "RIO", "BSB", "SSA", "REC", "FOR", "FLN", "POA", "NAT", "MCZ", "IGU", "AJU",
 ];
 const EUROPE: &[&str] = &["LIS", "OPO", "MAD", "BCN", "PAR", "LON", "ROM"];
 
@@ -93,8 +97,9 @@ fn airlines() -> Vec<(&'static str, &'static str, Vec<&'static str>)> {
             with(
                 BRAZIL,
                 &[
-                    "BUE", "SCL", "MVD", "LIM", "BOG", "BRC", "MIA", "MCO",
-                    "NYC", "CUN", "PUJ", "LIS", "MAD", "BCN", "LON", "ROM",
+                    "BUE", "SCL", "MVD", "LIM", "BOG", "BRC", "USH", "PUQ",
+                    "MIA", "MCO", "NYC", "CUN", "PUJ", "LIS", "MAD", "BCN",
+                    "LON", "ROM",
                 ],
             ),
         ),
