@@ -58,6 +58,10 @@ pub enum QueryOutcome {
     Unexpected {
         detail: String,
     },
+    /// The page loaded and says there is nothing to sell ("No results
+    /// returned", "No options matching your search", "No Business Class
+    /// flights found"). Not a failure: the family waits a week (0067).
+    NoFlights,
     /// A miles program needs the user to log in again (0024).
     LoggedOut,
     Error {
@@ -68,5 +72,32 @@ pub enum QueryOutcome {
 impl QueryOutcome {
     pub fn is_block(&self) -> bool {
         matches!(self, QueryOutcome::Blocked { .. })
+    }
+
+    /// The check went wrong: blocked, an unexpected page, logged out or
+    /// an error. A check that loaded, with prices or with none
+    /// (`NoFlights`, 0067), is not a failure.
+    pub fn is_failure(&self) -> bool {
+        !matches!(self, QueryOutcome::Ok | QueryOutcome::NoFlights)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn no_flights_is_its_own_outcome() {
+        let json = serde_json::to_string(&QueryOutcome::NoFlights)
+            .expect("serializes");
+        assert_eq!(json, r#"{"outcome":"no_flights"}"#);
+        let back: QueryOutcome =
+            serde_json::from_str(&json).expect("deserializes");
+        assert_eq!(back, QueryOutcome::NoFlights);
+        assert!(!QueryOutcome::NoFlights.is_block());
+        assert!(!QueryOutcome::NoFlights.is_failure());
+        assert!(!QueryOutcome::Ok.is_failure());
+        assert!(QueryOutcome::LoggedOut.is_failure());
+        assert!(QueryOutcome::Unexpected { detail: "x".into() }.is_failure());
     }
 }

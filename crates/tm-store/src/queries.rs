@@ -83,6 +83,25 @@ impl Store {
         Ok(())
     }
 
+    /// The families whose last check that loaded found no flights
+    /// (DECISIONS.md 0067): of their `ok` and `no_flights` queries, the
+    /// latest is `no_flights`. A block or an error after it changes
+    /// nothing; a check with prices ends it.
+    pub async fn no_flights_families(&self) -> Result<Vec<FamilyId>> {
+        let ids = sqlx::query_scalar!(
+            r#"SELECT family_id AS "family_id!: i64"
+               FROM queries
+               WHERE outcome IN ('ok', 'no_flights')
+               GROUP BY family_id
+               HAVING MAX(CASE WHEN outcome = 'no_flights' THEN id END)
+                    > COALESCE(MAX(CASE WHEN outcome = 'ok' THEN id END), 0)
+               ORDER BY family_id"#
+        )
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(ids.into_iter().map(FamilyId).collect())
+    }
+
     /// The latest queries, newest first, with their family and route.
     pub async fn recent_queries(
         &self,

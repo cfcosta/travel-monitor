@@ -997,3 +997,17 @@ cabin or point of sale: no single ticket to Greenland is sold through
 it. GOH is deactivated in the live database (its history is kept, as
 for any removed route) and dropped from the first-run seed. Reykjavík
 and Anchorage stay.
+
+## 0069: How "no flights" is recognised
+
+- Date: 2026-10-06
+- Completes [0067](#0067-no-flights-is-an-outcome-of-its-own).
+
+A Google Flights page counts as "no flights" when it says "No options
+matching your search" or "No … flights found" (for example "No
+Business Class flights found"). "No results returned." alone does not:
+Google also shows it above its "Oops, something went wrong" error page,
+and any "something went wrong" text means the check failed, not that
+there is nothing to sell. A family's latest *loaded* check decides its
+7-day wait: a later block or error does not end it, a check with prices
+does.

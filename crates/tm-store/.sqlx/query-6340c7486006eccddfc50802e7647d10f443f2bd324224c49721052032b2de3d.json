@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT family_id AS \"family_id!: i64\"\n               FROM queries\n               WHERE outcome IN ('ok', 'no_flights')\n               GROUP BY family_id\n               HAVING MAX(CASE WHEN outcome = 'no_flights' THEN id END)\n                    > COALESCE(MAX(CASE WHEN outcome = 'ok' THEN id END), 0)\n               ORDER BY family_id",
+  "describe": {
+    "columns": [
+      {
+        "name": "family_id!: i64",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "queries",
+            "name": "family_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "6340c7486006eccddfc50802e7647d10f443f2bd324224c49721052032b2de3d"
+}

@@ -723,6 +723,112 @@ async fn a_block_backs_off() {
     assert!(!h.log().tap.is_empty());
 }
 
+/// A page that says there are no flights ends the check as NoFlights
+/// (0067): its load is spent, nothing is observed, nothing is blocked,
+/// and the family (a daily core one) waits a week. Prices end that.
+#[tokio::test]
+async fn no_flights_waits_a_week() {
+    use std::sync::atomic::{AtomicBool, Ordering};
+
+    let store_probe = Store::open_in_memory().await.expect("opens");
+    store_probe.seed_defaults().await.expect("seeds");
+    let id = leg(&store_probe, "LIS", Leg::Outbound).await;
+    let first = today() + Days::new(1);
+    let empty = Arc::new(AtomicBool::new(true));
+    let answer = Arc::clone(&empty);
+    let mut h = harness(
+        Only {
+            family: Some(id),
+            destination: None,
+        },
+        move |f| {
+            f.calendar = Box::new(move |_| {
+                if answer.load(Ordering::SeqCst) {
+                    Fetch::failed(QueryOutcome::NoFlights, 1)
+                } else {
+                    Fetch::ok(cells(first, 5, |_| 2_000), 3)
+                }
+            })
+        },
+    )
+    .await;
+    let store = h.store().clone();
+    // A core family: due daily.
+    assert_eq!(intervals(&h, id).await, (None, Some(TimeDelta::hours(24))));
+
+    h.daemon.tick().await.expect("ticks");
+    assert_eq!(h.log().calendar.len(), 1);
+    let recent = store.recent_queries(1).await.expect("reads");
+    assert_eq!(recent[0].family, id);
+    assert_eq!(recent[0].outcome, Some(QueryOutcome::NoFlights));
+    assert_eq!(recent[0].page_loads, Some(1));
+    assert_eq!(recent[0].cells, 0);
+    // The load counts; nothing is a block.
+    let budget = h.site_budget("google_flights").await;
+    assert_eq!((budget.daily_budget, budget.loads_today), (300, 1));
+    let blocks = store
+        .blocks_since(Utc::now() - TimeDelta::hours(1))
+        .await
+        .expect("reads");
+    assert!(blocks.is_empty());
+    assert_eq!(h.status("google_flights").await.state, "idle");
+    let f = store.family(id).await.expect("reads").expect("exists");
+    assert!(f.state.last_check.is_some());
+    assert_eq!(f.state.last_min_price_minor, None);
+    assert_eq!(store.no_flights_families().await.expect("reads"), [id]);
+
+    // A week's wait, without the daily cadence.
+    assert_eq!(intervals(&h, id).await, (Some(TimeDelta::days(7)), None));
+    let checked = |days_ago: i64, minutes: i64| {
+        let store = store.clone();
+        async move {
+            let mut state = store
+                .family(id)
+                .await
+                .expect("reads")
+                .expect("exists")
+                .state;
+            state.last_check = Some(
+                Utc::now() - TimeDelta::days(days_ago)
+                    + TimeDelta::minutes(minutes),
+            );
+            store.save_family_state(id, &state).await.expect("saves");
+        }
+    };
+    h.daemon.tick().await.expect("ticks");
+    // Six days on (past the daily maximum): still waiting.
+    checked(6, 0).await;
+    h.daemon.tick().await.expect("ticks");
+    assert_eq!(h.log().calendar.len(), 1);
+
+    // A week on it is checked again; prices bring it back to normal.
+    checked(7, -1).await;
+    empty.store(false, Ordering::SeqCst);
+    h.daemon.tick().await.expect("ticks");
+    assert_eq!(h.log().calendar.len(), 2);
+    let recent = store.recent_queries(1).await.expect("reads");
+    assert_eq!(recent[0].outcome, Some(QueryOutcome::Ok));
+    assert_eq!(recent[0].reason, QueryReason::Overdue);
+    assert_eq!(recent[0].cells, 5);
+    assert!(store.no_flights_families().await.expect("reads").is_empty());
+    assert_eq!(intervals(&h, id).await, (None, Some(TimeDelta::hours(24))));
+}
+
+/// The (minimum, maximum) intervals of `id`'s candidate this tick.
+async fn intervals(
+    h: &Harness,
+    id: FamilyId,
+) -> (Option<TimeDelta>, Option<TimeDelta>) {
+    let world = h.daemon.world().await.expect("loads");
+    let cx = h.daemon.context(&world, Utc::now()).await.expect("builds");
+    let (cands, _) = tm_daemon::candidates::build(&world.families, &cx);
+    let c = cands
+        .into_iter()
+        .find(|c| c.family == id)
+        .expect("still a candidate");
+    (c.min_interval, c.max_interval)
+}
+
 #[tokio::test]
 async fn deals_are_found_and_confirmed() {
     let store_probe = Store::open_in_memory().await.expect("opens");

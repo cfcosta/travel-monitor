@@ -223,6 +223,8 @@ pub struct World {
     pub routes: HashMap<RouteId, Route>,
     pub sweeps: HashSet<RouteId>,
     pub pos: HashMap<PosId, PointOfSale>,
+    /// Families whose last check that loaded found no flights (0067).
+    pub no_flights: HashSet<FamilyId>,
 }
 
 impl World {
@@ -251,11 +253,13 @@ pub async fn world(store: &Store) -> anyhow::Result<World> {
         .into_iter()
         .map(|p| (p.id, p))
         .collect();
+    let no_flights = store.no_flights_families().await?.into_iter().collect();
     Ok(World {
         families,
         routes,
         sweeps,
         pos,
+        no_flights,
     })
 }
 
@@ -294,6 +298,7 @@ pub fn context(
         only: only.clone(),
         home_pos: world.pos.values().find(|p| p.is_home).map(|p| p.id),
         passengers: settings.passengers,
+        no_flights: world.no_flights.clone(),
     }
 }
 
@@ -1180,6 +1185,13 @@ impl<S: Sources> Worker<S> {
                         .set_miles_login(program, LoginState::Expired, finished)
                         .await?;
                 }
+                self.mark_checked(family.id, finished).await?;
+                return Ok(());
+            }
+            // Nothing to sell (0067): not a failure, and no observations.
+            // The family waits a week (`candidates::intervals`).
+            QueryOutcome::NoFlights => {
+                info!(family = %family.id, "no flights: next check in a week");
                 self.mark_checked(family.id, finished).await?;
                 return Ok(());
             }

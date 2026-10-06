@@ -5,7 +5,6 @@
 //! 1. **Overdue**: checked longer ago than its maximum interval (the
 //!    candidate's own [`Candidate::max_interval`], else `max_interval`),
 //!    most overdue first.
-//!    first.
 //! 2. **Bootstrap**: never checked, lowest [`Candidate::bootstrap_rank`]
 //!    first (DECISIONS.md 0049), then the earliest added
 //!    ([`Candidate::added`], 0065), then highest weight. Ranks are taken
@@ -21,7 +20,8 @@
 //!    runner-up's.
 //!
 //! Throughout, a family is eligible only when it is active and was not
-//! checked within `min_interval`, and a pick must fit both the tick's
+//! checked within its minimum interval (the candidate's own
+//! [`Candidate::min_interval`], else `min_interval`), and a pick must fit both the tick's
 //! remaining page loads and its site's remaining loads, at the family's
 //! expected cost ([`FamilyState::expected_loads`]). A family that does
 //! not fit is skipped, so a cheaper one can still use the rest. Each
@@ -53,6 +53,9 @@ pub struct Candidate {
     /// A tighter maximum interval for this family (core families are
     /// checked daily, DECISIONS.md 0056); `None` uses the global one.
     pub max_interval: Option<chrono::TimeDelta>,
+    /// A longer minimum interval for this family (a week after a check
+    /// found no flights, DECISIONS.md 0067); `None` uses the global one.
+    pub min_interval: Option<chrono::TimeDelta>,
     /// When the family's route was added, as an increasing number (the
     /// daemon uses the route id): never-checked families of earlier
     /// routes are filled in first (0065).
@@ -92,8 +95,8 @@ pub fn plan_tick<R: Rng + ?Sized>(
         loads: budget.loads_available,
         sites: budget.per_site_remaining.clone(),
     };
-    let min_days = params.min_interval.num_seconds() as f64 / 86_400.0;
-    let max_days = params.max_interval.num_seconds() as f64 / 86_400.0;
+    let min_days = days(params.min_interval);
+    let max_days = days(params.max_interval);
 
     let mut overdue = Vec::new();
     let mut bootstrap = Vec::new();
@@ -107,12 +110,11 @@ pub fn plan_tick<R: Rng + ?Sized>(
             Some(last) if last > now => {} // clock skew: just checked
             Some(_) => {
                 let tau = c.state.elapsed_days(now).unwrap_or(0.0);
+                let min_days = c.min_interval.map_or(min_days, days);
                 if tau < min_days {
                     continue;
                 }
-                let max_days = c
-                    .max_interval
-                    .map_or(max_days, |m| m.num_seconds() as f64 / 86_400.0);
+                let max_days = c.max_interval.map_or(max_days, days);
                 if tau >= max_days {
                     overdue.push((i, tau));
                 } else {
@@ -224,6 +226,10 @@ pub fn plan_tick<R: Rng + ?Sized>(
     picks
 }
 
+fn days(interval: chrono::TimeDelta) -> f64 {
+    interval.num_seconds() as f64 / 86_400.0
+}
+
 fn finite(x: f64) -> f64 {
     if x.is_finite() { x } else { 0.0 }
 }
@@ -294,6 +300,7 @@ mod tests {
             active: true,
             bootstrap_rank: 0,
             max_interval: None,
+            min_interval: None,
             added: id,
         }
     }
@@ -343,6 +350,46 @@ mod tests {
         );
         assert_eq!(picks.len(), 1);
         assert_eq!(picks[0].family.0, 2);
+        assert_eq!(picks[0].reason, QueryReason::Overdue);
+    }
+
+    /// A family's own minimum interval holds it back past the global
+    /// one, then lets it through once it has passed (0067).
+    #[test]
+    fn a_family_minimum_interval_holds_it_back() {
+        let mut quiet = cand(1, "gf", Some(24 * 3));
+        quiet.min_interval = Some(TimeDelta::days(7));
+        let normal = cand(2, "gf", Some(24 * 3));
+        let picks = plan_tick(
+            &[quiet.clone(), normal],
+            now(),
+            &budget(10),
+            &no_random(),
+            &mut StdRng::seed_from_u64(5),
+        );
+        let ids: Vec<i64> = picks.iter().map(|p| p.family.0).collect();
+        assert_eq!(ids, vec![2]);
+        // Even past a daily maximum, it waits out its minimum.
+        quiet.max_interval = Some(TimeDelta::hours(24));
+        let picks = plan_tick(
+            &[quiet.clone()],
+            now(),
+            &budget(10),
+            &no_random(),
+            &mut StdRng::seed_from_u64(5),
+        );
+        assert!(picks.is_empty());
+        // A week on, it is due (the global maximum is a week).
+        quiet.max_interval = None;
+        quiet.state.last_check = Some(now() - TimeDelta::days(7));
+        let picks = plan_tick(
+            &[quiet],
+            now(),
+            &budget(10),
+            &no_random(),
+            &mut StdRng::seed_from_u64(5),
+        );
+        assert_eq!(picks.len(), 1);
         assert_eq!(picks[0].reason, QueryReason::Overdue);
     }
 

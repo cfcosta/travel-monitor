@@ -134,6 +134,17 @@ async fn serve(stream: TcpStream, page: Arc<String>) {
             "<!doctype html><title>Google Flights</title><h1>Flights</h1>"
                 .to_owned(),
         )
+    } else if target.starts_with("/travel/flights/empty") {
+        // A route Google Flights sells nothing on (São Paulo ↔ Nuuk).
+        (
+            "200 OK",
+            "text/html; charset=utf-8",
+            "<!doctype html><title>Google Flights</title><h1>Search \
+             results</h1><p>No results returned.</p><div>No Business Class \
+             flights found</div><p>There might be no Business Class flights \
+             to Nuuk (GOH).</p>"
+                .to_owned(),
+        )
     } else if target.starts_with("/travel/flights/search") {
         (
             "200 OK",
@@ -249,7 +260,18 @@ async fn the_source_reads_a_price_graph() {
             ..job.clone()
         })
         .await;
+    // A page that says there are no flights: NoFlights, its load
+    // counted (0067).
+    let empty = sources
+        .calendar(&CalendarJob {
+            url: format!("http://{address}/travel/flights/empty?tfs=x"),
+            ..job.clone()
+        })
+        .await;
     sources.stop().await;
+    assert_eq!(empty.outcome, QueryOutcome::NoFlights, "{empty:?}");
+    assert_eq!(empty.page_loads, 1);
+    assert!(empty.value.is_empty());
     assert!(
         matches!(&changed.outcome, QueryOutcome::Unexpected { detail }
             if detail.contains("Price graph")),

@@ -177,6 +177,7 @@ pub(crate) fn outcome_parts(
         QueryOutcome::Ok => ("ok", None),
         QueryOutcome::Blocked { detail } => ("blocked", Some(detail)),
         QueryOutcome::Unexpected { detail } => ("unexpected", Some(detail)),
+        QueryOutcome::NoFlights => ("no_flights", None),
         QueryOutcome::LoggedOut => ("logged_out", None),
         QueryOutcome::Error { detail } => ("error", Some(detail)),
     }
@@ -915,6 +916,7 @@ mod tests {
             QueryOutcome::Ok,
             QueryOutcome::Blocked { detail: "x".into() },
             QueryOutcome::Unexpected { detail: "x".into() },
+            QueryOutcome::NoFlights,
             QueryOutcome::LoggedOut,
             QueryOutcome::Error { detail: "x".into() },
         ] {

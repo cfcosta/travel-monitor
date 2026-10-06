@@ -381,6 +381,11 @@ fn activity_row(
         Some(QueryOutcome::Unexpected { detail }) => {
             (format!("unexpected page: {detail}"), Tone::Bad)
         }
+        // The page loaded and has nothing to sell: quiet, not an error
+        // (0067).
+        Some(QueryOutcome::NoFlights) => {
+            ("no flights".to_owned(), Tone::Neutral)
+        }
         Some(QueryOutcome::LoggedOut) => ("logged out".to_owned(), Tone::Bad),
         Some(QueryOutcome::Error { detail }) => {
             (format!("error: {detail}"), Tone::Bad)
@@ -1625,6 +1630,57 @@ mod tests {
         daemon.close().await;
         drop(backend);
         let _ = std::fs::remove_dir_all(dir);
+    }
+
+    /// "No flights" reads as a quiet result, not an error (0067); only
+    /// failures are red.
+    #[test]
+    fn no_flights_is_a_quiet_result() {
+        let at = Utc::now();
+        let row = |outcome: QueryOutcome| {
+            let entry = QueryLogEntry {
+                id: tm_domain::QueryId(1),
+                family: FamilyId(2),
+                key: tm_domain::FamilyKey {
+                    route: RouteId(3),
+                    cabin: Cabin::Business,
+                    source: Source::GoogleFlights,
+                    pos: PosId(1),
+                    kind: FamilyKind::Leg { leg: Leg::Outbound },
+                },
+                origin_code: "SAO".into(),
+                destination_code: "GOH".into(),
+                sweep: false,
+                site: "google_flights".into(),
+                reason: QueryReason::Bootstrap,
+                score: None,
+                runner_up: None,
+                scheduled_at: at,
+                started_at: at,
+                finished_at: Some(at),
+                outcome: Some(outcome),
+                page_loads: Some(1),
+                cells: 0,
+            };
+            let pos = HashMap::from([(PosId(1), CountryCode::new("BR"))]);
+            activity_row(&entry, &pos)
+        };
+        let quiet = row(QueryOutcome::NoFlights);
+        assert_eq!(quiet.result, "no flights");
+        assert_eq!(quiet.tone, Tone::Neutral);
+        assert!(!quiet.running);
+        assert_eq!(quiet.loads, Some(1));
+        for outcome in [
+            QueryOutcome::Ok,
+            QueryOutcome::NoFlights,
+            QueryOutcome::Blocked { detail: "x".into() },
+            QueryOutcome::Unexpected { detail: "x".into() },
+            QueryOutcome::LoggedOut,
+            QueryOutcome::Error { detail: "x".into() },
+        ] {
+            let bad = row(outcome.clone()).tone == Tone::Bad;
+            assert_eq!(bad, outcome.is_failure(), "{outcome:?}");
+        }
     }
 
     #[test]

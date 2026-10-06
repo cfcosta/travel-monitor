@@ -109,6 +109,8 @@ pub struct Context {
     /// The party every search uses (0036): some sites price only one
     /// adult.
     pub passengers: Passengers,
+    /// Families whose last check that loaded found no flights (0067).
+    pub no_flights: HashSet<FamilyId>,
 }
 
 /// Why a family is not a candidate.
@@ -205,6 +207,24 @@ pub fn core_interval(
     (bootstrap_rank(key, home_pos) == 0).then(|| chrono::TimeDelta::hours(24))
 }
 
+/// How long a family whose last check found no flights waits before the
+/// next one (DECISIONS.md 0067).
+pub const NO_FLIGHTS_WAIT: chrono::TimeDelta = chrono::TimeDelta::days(7);
+
+/// A family's own (minimum, maximum) intervals: core families are due
+/// daily (0056), unless their last check found no flights, which makes
+/// them wait a week and drops the daily cadence (0067).
+pub fn intervals(
+    family: &FamilyRecord,
+    cx: &Context,
+) -> (Option<chrono::TimeDelta>, Option<chrono::TimeDelta>) {
+    if cx.no_flights.contains(&family.id) {
+        (Some(NO_FLIGHTS_WAIT), None)
+    } else {
+        (None, core_interval(&family.key, cx.home_pos))
+    }
+}
+
 /// The candidates for `plan_tick`, and how many families each reason
 /// left out (for the log). A site's worker passes its own site's
 /// families only (0062).
@@ -216,17 +236,21 @@ pub fn build<'a>(
     let mut skipped = BTreeMap::new();
     for f in families {
         match eligibility(f, cx) {
-            Ok(()) => out.push(Candidate {
-                family: f.id,
-                site: f.site.clone(),
-                weight: f.weight,
-                state: to_state(&f.state),
-                active: true,
-                bootstrap_rank: bootstrap_rank(&f.key, cx.home_pos),
-                max_interval: core_interval(&f.key, cx.home_pos),
-                // Route ids grow as destinations are added (0065).
-                added: f.key.route.0,
-            }),
+            Ok(()) => {
+                let (min_interval, max_interval) = intervals(f, cx);
+                out.push(Candidate {
+                    family: f.id,
+                    site: f.site.clone(),
+                    weight: f.weight,
+                    state: to_state(&f.state),
+                    active: true,
+                    bootstrap_rank: bootstrap_rank(&f.key, cx.home_pos),
+                    max_interval,
+                    min_interval,
+                    // Route ids grow as destinations are added (0065).
+                    added: f.key.route.0,
+                });
+            }
             Err(skip) => *skipped.entry(skip).or_insert(0) += 1,
         }
     }
@@ -383,6 +407,25 @@ mod tests {
         );
         assert_eq!(core_interval(&key(Cabin::Business, 1, leg), home), None);
         assert_eq!(core_interval(&key(Cabin::Economy, 2, leg), home), None);
+    }
+
+    /// A family whose last check found no flights waits a week and is
+    /// no longer due daily; the others keep their intervals (0067).
+    #[test]
+    fn no_flights_waits_a_week_without_the_daily_cadence() {
+        let families = vec![
+            family(1, 1, Source::GoogleFlights),
+            family(2, 1, Source::GoogleFlights),
+        ];
+        let mut cx = cx();
+        cx.home_pos = Some(PosId(1));
+        cx.no_flights.insert(FamilyId(2));
+        let (cands, _) = build(&families, &cx);
+        assert_eq!(cands.len(), 2, "still a candidate");
+        assert_eq!(cands[0].min_interval, None);
+        assert_eq!(cands[0].max_interval, Some(chrono::TimeDelta::hours(24)));
+        assert_eq!(cands[1].min_interval, Some(NO_FLIGHTS_WAIT));
+        assert_eq!(cands[1].max_interval, None);
     }
 
     fn miles(id: i64, program: &str) -> FamilyRecord {

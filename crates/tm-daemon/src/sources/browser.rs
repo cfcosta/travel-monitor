@@ -3,7 +3,8 @@
 //! - Google Flights price graphs and Explore: load the generated URL,
 //!   open the graph with `tm-gflights`' snippet, and read the page's own
 //!   `GetCalendarGraph` / `GetExploreDestinations` responses through
-//!   CDP (0032). When a snippet finds nothing, the check ends as
+//!   CDP (0032). When the page says it has no flights, the check ends
+//!   as `NoFlights` (0067); when a snippet finds nothing otherwise, as
 //!   `Unexpected` (0059).
 //! - Confirmations: the round trip's results page (first itineraries
 //!   from the HTML-embedded `ds:1`), the returning flights for the
@@ -35,6 +36,7 @@ use tm_gflights::{
         PAGE_TEXT_JS,
         SCROLL_FORWARD_JS,
         detect_block,
+        detect_no_results,
         init_data_js,
     },
     plan::reaches,
@@ -266,10 +268,14 @@ async fn calendar_on(
             "the 'Price graph' control was not found"
         };
         let text: String = page.eval_as(PAGE_TEXT_JS).await.unwrap_or_default();
+        let url = page.url().await.unwrap_or_default();
+        if detect_no_results(&text) {
+            info!(%url, "no flights for this search");
+            return Fetch::failed(QueryOutcome::NoFlights, loads);
+        }
         let excerpt: String =
             text.split_whitespace().collect::<Vec<_>>().join(" ");
         let excerpt: String = excerpt.chars().take(400).collect();
-        let url = page.url().await.unwrap_or_default();
         warn!(%url, page = %excerpt, "{why}");
         return Fetch::failed(
             QueryOutcome::Unexpected {
@@ -363,6 +369,11 @@ async fn explore_on(
         return Fetch::failed(outcome, 1);
     }
     if capture.wait_for(1, t.response * 2).await.is_err() {
+        let text: String = page.eval_as(PAGE_TEXT_JS).await.unwrap_or_default();
+        if detect_no_results(&text) {
+            info!(url = %job.url, "no Explore destinations");
+            return Fetch::failed(QueryOutcome::NoFlights, 1);
+        }
         return Fetch::failed(
             QueryOutcome::Unexpected {
                 detail: "no GetExploreDestinations response".into(),

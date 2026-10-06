@@ -68,7 +68,8 @@ pub fn init_data_js(key: &str) -> String {
     )
 }
 
-/// The page's visible text, for [`detect_block`].
+/// The page's visible text, for [`detect_block`] and
+/// [`detect_no_results`].
 pub const PAGE_TEXT_JS: &str =
     "document.body ? document.body.innerText.slice(0, 20000) : ''";
 
@@ -172,6 +173,45 @@ pub fn detect_block(url: &str, text: &str) -> Option<Block> {
         return Some(Block::Consent);
     }
     None
+}
+
+/// Whether a results or Explore page says it has nothing to sell
+/// (DECISIONS.md 0067), from its visible text ([`PAGE_TEXT_JS`]):
+///
+/// - "No options matching your search" (economy);
+/// - "No Business Class flights found", "No Premium Economy flights
+///   found" (a cabin no one flies on the route), or any "No … flights
+///   found" of a few words.
+///
+/// "No results returned." alone does not count: the page shows it
+/// above "Oops, something went wrong. Reload" too, a failed load that
+/// must stay `Unexpected`, and that error wins over any other text.
+pub fn detect_no_results(text: &str) -> bool {
+    let text = text.split_whitespace().collect::<Vec<_>>().join(" ");
+    let text = text.to_lowercase();
+    if text.contains("something went wrong") {
+        return false;
+    }
+    if text.contains("no options matching your search") {
+        return true;
+    }
+    text.match_indices("no ").any(|(i, _)| {
+        let starts_word = text[..i]
+            .chars()
+            .next_back()
+            .is_none_or(|c| !c.is_alphanumeric());
+        let words: Vec<&str> = text[i + 3..].split(' ').take(6).collect();
+        starts_word
+            && words
+                .iter()
+                .position(|w| *w == "flights")
+                .is_some_and(|at| {
+                    words.get(at + 1) == Some(&"found")
+                        && words[..at].iter().all(|w| {
+                            !w.is_empty() && w.chars().all(char::is_alphabetic)
+                        })
+                })
+    })
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
@@ -390,6 +430,60 @@ mod tests {
         assert!(Block::Sorry.is_rate_limit());
         assert!(Block::Sorry.outcome().is_block());
         assert!(!Block::Consent.is_rate_limit());
+    }
+
+    /// Page text the daemon logged for São Paulo ↔ Nuuk (GOH), where
+    /// Google Flights sells nothing (0067, 0068), and for a page that
+    /// failed to load.
+    const GOH_ECONOMY: &str = "Skip to main content Accessibility feedback \
+        Explore Flights Hotels Vacation rentals Change appearance Sign in \
+        Loading results Flight search One way 1 Economy São Paulo Nuuk GOH \
+        Filters All filters Stops Airlines Bags Price Times Emissions \
+        Connecting airports Duration Search results No results returned. \
+        No options matching your search Try changing your dates or \
+        destination to see results Language\u{200b}English (United States)";
+    const GOH_BUSINESS: &str = "Skip to main content Accessibility feedback \
+        Explore Flights Hotels Vacation rentals Change appearance Sign in \
+        Loading results Flight search Round trip 1 Business São Paulo Nuuk \
+        GOH Filters All filters Stops Airlines Bags Price Times Emissions \
+        Connecting airports Duration Search results No results returned. \
+        No Business Class flights found There might be no Business Class \
+        flights to Nuuk (GOH). Try";
+    const GOH_PREMIUM: &str = "Flight search One way 1 Premium economy \
+        Nuuk GOH São Paulo Filters All filters Stops Airlines Bags Price \
+        Times Emissions Connecting airports Duration Search results\n\
+        No results returned.\nNo Premium Economy flights found\nThere \
+        might be no Premium Economy flights to São Paulo.";
+    const CGB_OOPS: &str = "Skip to main content Accessibility feedback \
+        Explore Flights Hotels Vacation rentals Change appearance Sign in \
+        Loading results Flight search One way 1 Economy São Paulo Cuiabá CGB \
+        Filters All filters Stops Airlines Bags Price Times Emissions \
+        Connecting airports Duration Search results No results returned. \
+        Oops, something went wrong. Reload Language\u{200b}English (United \
+        States) Location\u{200b}Brazil CurrencyBRL";
+
+    #[test]
+    fn no_results_pages() {
+        assert!(detect_no_results(GOH_ECONOMY));
+        assert!(detect_no_results(GOH_BUSINESS));
+        assert!(detect_no_results(GOH_PREMIUM));
+        assert!(detect_no_results("No First Class flights found"));
+        assert!(detect_no_results("Search results\nNo flights found"));
+        // A failed load says "No results returned." too: not an answer.
+        assert!(!detect_no_results(CGB_OOPS));
+        assert!(!detect_no_results("Search results No results returned."));
+        assert!(!detect_no_results(&format!(
+            "{GOH_ECONOMY} Oops, something went wrong."
+        )));
+        // Ordinary results, and look-alikes.
+        assert!(!detect_no_results(
+            "Search results Top departing flights R$3,972 round trip \
+             Nonstop 11 hr 5 min Select flight"
+        ));
+        assert!(!detect_no_results("Casino flights found here"));
+        assert!(!detect_no_results("No flights"));
+        assert!(!detect_no_results("no 2 flights found"));
+        assert!(!detect_no_results(""));
     }
 
     #[test]
