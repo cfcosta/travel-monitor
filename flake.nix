@@ -164,6 +164,9 @@
             nativeBuildInputs = [ pkgs.pkg-config ];
 
             LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath guiLibs;
+            # tm-store's queries are checked against the committed .sqlx
+            # data; no database is needed to build.
+            SQLX_OFFLINE = "true";
             TM_CHROMIUM = pkgs.lib.getExe pkgs.chromium;
           };
         }
