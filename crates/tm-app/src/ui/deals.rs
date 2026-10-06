@@ -30,6 +30,7 @@ use crate::{
     data::{RouteDetail, RouteRow},
     format,
     grid::{GridCell, TripGrid},
+    live::Fresh,
     theme::{self, Fonts, color},
 };
 
@@ -272,7 +273,12 @@ impl TravelMonitor {
                     )
                     .child(widgets::change_chip(fonts, row.change, deal)),
             )
-            .on_click(cx.listener(move |this, _, _, cx| this.select(key, cx)));
+            .on_click(cx.listener(move |this, _, _, cx| this.select(key, cx)))
+            .relative()
+            // A deal that just showed up (0057).
+            .children(widgets::fresh_tint(
+                row.deal.map_or(0.0, |d| self.glow(Fresh::Deal(d))),
+            ));
         if selected {
             item.relative()
                 .bg(color(theme::SELECTED))
@@ -525,9 +531,15 @@ impl TravelMonitor {
                 .border_color(color(theme::BORDER_INPUT))
                 .shadow_lg()
                 .debug_selector(|| "detail-card".into())
+                .relative()
                 .child(first)
                 .child(grid)
-                .child(sellers),
+                .child(sellers)
+                // New observations for this route just arrived (0057).
+                .children(
+                    widgets::fresh_tint(self.glow(Fresh::Route(key)))
+                        .map(|t| t.rounded(px(16.))),
+                ),
         )
     }
 }

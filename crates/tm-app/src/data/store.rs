@@ -7,11 +7,17 @@
 //! in the window, retried with every refresh. Leg and history reads are
 //! cached per family and only re-read when the family was checked
 //! again.
+//!
+//! Changes (0057): a task on the same runtime keeps one connection of
+//! its own ([`tm_store::ChangeWatch`], not from the pool) and reads
+//! `PRAGMA data_version` every [`POLL`]; when another connection
+//! committed, it tells the window, which refreshes (debounced).
 
 use std::{
     collections::HashMap,
     path::PathBuf,
-    sync::{Arc, Mutex},
+    sync::{Arc, Mutex, OnceLock, Weak},
+    time::Duration as StdDuration,
 };
 
 use anyhow::Context as _;
@@ -41,6 +47,7 @@ use tm_domain::{
     effective_brl,
 };
 use tm_store::{
+    ChangeWatch,
     DealFilter,
     FamilyRecord,
     LoginState,
@@ -55,6 +62,9 @@ use super::{
     ActivityRow,
     Backend,
     BlockRow,
+    ChangeSender,
+    Changes,
+    CurrentCheck,
     DaemonStatus,
     ExploreSummary,
     FeedItem,
@@ -100,7 +110,15 @@ struct Inner {
 pub struct StoreBackend {
     inner: Arc<Inner>,
     tokio: Handle,
+    /// Started by the first [`Backend::changes`].
+    changes: OnceLock<ChangeSender>,
 }
+
+/// How often the watcher reads `data_version`.
+pub const POLL: StdDuration = StdDuration::from_millis(250);
+
+/// How long the watcher waits to retry a database it cannot open.
+const REOPEN: StdDuration = StdDuration::from_secs(2);
 
 /// The backend for the database at `path`; nothing is opened yet.
 pub fn backend(path: PathBuf, tokio: Handle) -> SharedBackend {
@@ -111,7 +129,46 @@ pub fn backend(path: PathBuf, tokio: Handle) -> SharedBackend {
             cache: Mutex::new(Cache::default()),
         }),
         tokio,
+        changes: OnceLock::new(),
     })
+}
+
+/// Watches the database for commits by any other connection (the
+/// daemon's, or the app's own pool) until the backend is dropped. The
+/// file may not exist yet: the first snapshot creates it. A connection
+/// that fails is reopened, and a reopen counts as a change, since
+/// writes may have been missed meanwhile.
+async fn watch_changes(inner: Weak<Inner>, path: PathBuf, tx: ChangeSender) {
+    let mut watch: Option<ChangeWatch> = None;
+    while inner.strong_count() > 0 {
+        let Some(w) = watch.as_mut() else {
+            match ChangeWatch::open(&path).await {
+                Ok(mut w) => {
+                    if let Err(error) = w.changed().await {
+                        tracing::debug!("cannot watch the database: {error}");
+                        tokio::time::sleep(REOPEN).await;
+                        continue;
+                    }
+                    watch = Some(w);
+                    tx.notify();
+                }
+                Err(error) => {
+                    tracing::debug!("cannot watch the database: {error}");
+                    tokio::time::sleep(REOPEN).await;
+                }
+            }
+            continue;
+        };
+        match w.changed().await {
+            Ok(true) => tx.notify(),
+            Ok(false) => {}
+            Err(error) => {
+                tracing::warn!("watching the database failed: {error}");
+                watch = None;
+            }
+        }
+        tokio::time::sleep(POLL).await;
+    }
 }
 
 impl StoreBackend {
@@ -329,6 +386,7 @@ fn activity_row(
         }
     };
     ActivityRow {
+        id: q.id.0,
         at: q.started_at,
         route: if q.sweep {
             format!("{} → anywhere", q.origin_code)
@@ -696,18 +754,30 @@ async fn snapshot(
         blocks.iter().filter(|b| b.at.date_naive() == today).count() as u32;
     let budget = store.budget().await?;
     let daemon = match store.heartbeat().await? {
-        Some(h) => DaemonStatus {
-            heartbeat: Some(h.updated_at),
-            state: h.state,
-            next_check: h.next_check,
-            loads_today: h.loads_today,
-            budget: h.budget,
-            blocks_today,
-        },
+        Some(h) => {
+            let check = match &h.check {
+                Some(c) if h.state == "checking" => {
+                    current_check(store, c, &pos_names).await?
+                }
+                _ => None,
+            };
+            DaemonStatus {
+                heartbeat: Some(h.updated_at),
+                state: h.state,
+                next_check: h.next_check,
+                next_check_at: h.next_check_at,
+                check,
+                loads_today: h.loads_today,
+                budget: h.budget,
+                blocks_today,
+            }
+        }
         None => DaemonStatus {
             heartbeat: None,
             state: String::new(),
             next_check: None,
+            next_check_at: None,
+            check: None,
             loads_today: budget
                 .filter(|b| b.day == today)
                 .map_or(0, |b| b.loads_today),
@@ -820,6 +890,48 @@ async fn snapshot(
     })
 }
 
+/// The check in progress with its route, cabin, kind and point of sale
+/// filled in from its family (0057).
+async fn current_check(
+    store: &Store,
+    check: &tm_store::CheckInProgress,
+    pos: &HashMap<PosId, CountryCode>,
+) -> anyhow::Result<Option<CurrentCheck>> {
+    let Some(family) = store.family(check.family).await? else {
+        return Ok(None);
+    };
+    let Some(route) = store.route(family.key.route).await? else {
+        return Ok(None);
+    };
+    let sweep = matches!(family.key.kind, FamilyKind::Explore);
+    let kind = match (&check.reason, family.key.kind) {
+        (QueryReason::Confirmation, _) => "confirm".to_owned(),
+        (_, FamilyKind::Leg { leg: Leg::Outbound }) => "outbound".to_owned(),
+        (_, FamilyKind::Leg { leg: Leg::Return }) => "return".to_owned(),
+        (_, FamilyKind::RoundTrip { days }) => format!("round trip {days} d"),
+        (_, FamilyKind::Explore) => "explore".to_owned(),
+    };
+    Ok(Some(CurrentCheck {
+        query: check.query.map(|q| q.0),
+        route: if sweep {
+            format!("{}→anywhere", route.origin.code)
+        } else {
+            format!("{}→{}", route.origin.code, route.destination.code)
+        },
+        cabin: family.key.cabin,
+        kind,
+        pos: pos
+            .get(&family.key.pos)
+            .map_or_else(|| "?".to_owned(), |c| c.as_str().to_owned()),
+        site: match &family.key.source {
+            Source::GoogleFlights => None,
+            other => Some(other.site()),
+        },
+        reason: reason_label(&check.reason),
+        started_at: check.started_at,
+    }))
+}
+
 fn request_kind(request: Request) -> RequestKind {
     match request {
         Request::CheckRoute(route) => RequestKind::CheckRoute { route },
@@ -846,6 +958,21 @@ impl Backend for StoreBackend {
     async fn snapshot(&self, query: SnapshotQuery) -> anyhow::Result<Snapshot> {
         self.run(move |inner| async move { snapshot(&inner, query).await })
             .await
+    }
+
+    fn changes(&self) -> Changes {
+        self.changes
+            .get_or_init(|| {
+                let (tx, _) = Changes::channel();
+                let watcher = tx.clone();
+                self.tokio.spawn(watch_changes(
+                    Arc::downgrade(&self.inner),
+                    self.inner.path.clone(),
+                    watcher,
+                ));
+                tx
+            })
+            .subscribe()
     }
 
     async fn enqueue(&self, request: Request) -> anyhow::Result<Ticket> {
@@ -1255,6 +1382,90 @@ mod tests {
             .await
             .expect("after");
         assert!(s.notices.is_empty());
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    /// The daemon's writes reach the window as change notices, and its
+    /// heartbeat as the check in progress (0057).
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn notices_the_daemons_writes() {
+        let dir = dir();
+        let path = dir.join("tm.db");
+        let backend = backend(path.clone(), Handle::current());
+        let mut changes = backend.changes();
+        backend
+            .snapshot(SnapshotQuery::default())
+            .await
+            .expect("creates and reads");
+        // The watcher opens the file once it exists, and says so.
+        let wait = |changes: &mut Changes| {
+            let mut changes = changes.clone();
+            async move {
+                tokio::time::timeout(StdDuration::from_secs(5), changes.next())
+                    .await
+                    .expect("a notice in time")
+            }
+        };
+        assert!(wait(&mut changes).await);
+        changes.take();
+
+        let daemon = Store::open(&path).await.expect("the daemon's pool");
+        let lis = daemon
+            .route_between("SAO", "LIS")
+            .await
+            .expect("route")
+            .expect("SAO → LIS");
+        let home = daemon.home_point_of_sale().await.expect("pos").expect("BR");
+        let family = daemon
+            .family_id(&tm_domain::FamilyKey {
+                route: lis,
+                cabin: Cabin::Economy,
+                source: Source::GoogleFlights,
+                pos: home.id,
+                kind: FamilyKind::Leg { leg: Leg::Return },
+            })
+            .await
+            .expect("family")
+            .expect("the return leg");
+        let started = Utc::now();
+        let query = daemon
+            .start_query(family, &QueryReason::Bootstrap, started)
+            .await
+            .expect("starts");
+        daemon
+            .write_heartbeat(&tm_store::Heartbeat {
+                pid: 1,
+                updated_at: started,
+                state: "checking".into(),
+                next_check: None,
+                next_check_at: None,
+                check: Some(tm_store::CheckInProgress {
+                    family,
+                    query: Some(query),
+                    reason: QueryReason::Bootstrap,
+                    started_at: started,
+                }),
+                loads_today: 3,
+                budget: 300,
+            })
+            .await
+            .expect("beats");
+        assert!(wait(&mut changes).await, "the commits were noticed");
+
+        let s = backend
+            .snapshot(SnapshotQuery::default())
+            .await
+            .expect("reads");
+        let check = s.daemon.checking().expect("a check in progress");
+        assert_eq!(check.route, "SAO→LIS");
+        assert_eq!(check.kind, "return");
+        assert_eq!(check.cabin, Cabin::Economy);
+        assert_eq!(check.pos, "BR");
+        assert_eq!(check.reason, "First check");
+        assert_eq!(check.query, Some(query.0));
+        assert!(s.activity.iter().any(|a| a.id == query.0 && a.running));
+        daemon.close().await;
+        drop(backend);
         let _ = std::fs::remove_dir_all(dir);
     }
 

@@ -3,6 +3,10 @@
 //! sellers, legs and baselines that make a believable calendar, and an
 //! activity log. Edits change the in-memory state, so the settings
 //! screen works too.
+//!
+//! Tests stand in for the daemon: [`FakeBackend::land_query`],
+//! [`FakeBackend::set_checking`] and [`FakeBackend::check_route`] change
+//! the data and send a change notice, as a commit would (0057).
 
 use std::{
     collections::{HashMap, HashSet},
@@ -33,6 +37,9 @@ use super::{
     ActivityRow,
     Backend,
     BlockRow,
+    ChangeSender,
+    Changes,
+    CurrentCheck,
     DaemonStatus,
     ExploreSummary,
     FeedItem,
@@ -165,6 +172,13 @@ struct FakeState {
     next_ticket: i64,
     next_place: i64,
     requests: Vec<Request>,
+    /// Queries that landed after the sample log, newest last.
+    landed: Vec<ActivityRow>,
+    /// The check the daemon is running.
+    checking: Option<CurrentCheck>,
+    /// Minutes taken off a destination's last check (`check_route`).
+    rechecked: HashMap<String, i64>,
+    snapshots: u32,
 }
 
 /// The fake backend.
@@ -172,6 +186,7 @@ pub struct FakeBackend {
     state: Mutex<FakeState>,
     /// A fixed clock for tests; the real one otherwise.
     now: Option<DateTime<Utc>>,
+    changes: ChangeSender,
 }
 
 fn place(
@@ -271,8 +286,13 @@ impl FakeBackend {
                 next_ticket: 1,
                 next_place: 100,
                 requests: Vec::new(),
+                landed: Vec::new(),
+                checking: Some(sample_check()),
+                rechecked: HashMap::new(),
+                snapshots: 0,
             }),
             now: None,
+            changes: Changes::channel().0,
         }
     }
 
@@ -299,6 +319,60 @@ impl FakeBackend {
     #[cfg(test)]
     pub fn requests(&self) -> Vec<Request> {
         self.lock().requests.clone()
+    }
+
+    /// How many snapshots were taken.
+    #[cfg(test)]
+    pub fn snapshots(&self) -> u32 {
+        self.lock().snapshots
+    }
+
+    /// A query finished, as the daemon would log it; returns its id.
+    #[cfg(test)]
+    pub fn land_query(&self, route: &str, result: &str) -> i64 {
+        let id = {
+            let mut state = self.lock();
+            let id = 2000 + state.landed.len() as i64;
+            state.landed.push(ActivityRow {
+                id,
+                at: self.now(),
+                route: route.to_owned(),
+                query: "Outbound leg · Economy · BR".to_owned(),
+                reason: "Scheduled · score 0.52".to_owned(),
+                result: result.to_owned(),
+                tone: Tone::Neutral,
+                loads: Some(2),
+                running: false,
+            });
+            id
+        };
+        self.changes.notify();
+        id
+    }
+
+    /// The daemon started (or, with `None`, ended) a check.
+    #[cfg(test)]
+    pub fn set_checking(&self, check: Option<CurrentCheck>) {
+        self.lock().checking = check;
+        self.changes.notify();
+    }
+
+    /// New observations for the route to `code`: its last check moves
+    /// to now.
+    #[cfg(test)]
+    pub fn check_route(&self, code: &str) {
+        let minutes = SAMPLES
+            .iter()
+            .find(|s| s.code == code)
+            .map_or(0, |s| s.checked_min);
+        self.lock().rechecked.insert(code.to_owned(), minutes);
+        self.changes.notify();
+    }
+
+    /// A change notice without a change (a write the app does not show).
+    #[cfg(test)]
+    pub fn touch(&self) {
+        self.changes.notify();
     }
 
     fn lock(&self) -> std::sync::MutexGuard<'_, FakeState> {
@@ -502,6 +576,24 @@ fn trip_of(s: &Sample, today: NaiveDate, f: f64) -> Trip {
     }
 }
 
+/// The running MIA business check of the sample log.
+fn sample_check() -> CurrentCheck {
+    CurrentCheck {
+        query: Some(SAMPLE_RUNNING),
+        route: "SAO→MIA".into(),
+        cabin: Cabin::Business,
+        kind: "outbound".into(),
+        pos: "BR".into(),
+        site: None,
+        reason: "Scheduled · score 0.38".into(),
+        // Moved to the snapshot's time.
+        started_at: DateTime::<Utc>::MIN_UTC,
+    }
+}
+
+/// The id of the sample log's running query; ids count down from it.
+const SAMPLE_RUNNING: i64 = 1000;
+
 fn activity(origin: &str, now: DateTime<Utc>) -> Vec<ActivityRow> {
     let row = |min: i64,
                dest: &str,
@@ -522,6 +614,7 @@ fn activity(origin: &str, now: DateTime<Utc>) -> Vec<ActivityRow> {
         tone,
         loads: Some(loads),
         running: false,
+        id: 0,
     };
     let mut rows = vec![
         ActivityRow {
@@ -711,6 +804,9 @@ fn activity(origin: &str, now: DateTime<Utc>) -> Vec<ActivityRow> {
         ),
     ];
     rows.sort_by_key(|r| std::cmp::Reverse(r.at));
+    for (i, r) in rows.iter_mut().enumerate() {
+        r.id = SAMPLE_RUNNING - i as i64;
+    }
     rows
 }
 
@@ -748,10 +844,16 @@ fn feed(now: DateTime<Utc>) -> Vec<FeedItem> {
 
 #[async_trait]
 impl Backend for FakeBackend {
+    fn changes(&self) -> Changes {
+        self.changes.subscribe()
+    }
+
     async fn snapshot(&self, query: SnapshotQuery) -> anyhow::Result<Snapshot> {
         let now = self.now();
         let today = now.date_naive();
-        let state = self.lock();
+        let mut state = self.lock();
+        state.snapshots += 1;
+        let state = state;
         let origin = query
             .origin
             .and_then(|id| state.origins.iter().find(|p| p.id == id))
@@ -800,7 +902,12 @@ impl Backend for FakeBackend {
                 baseline: Some(brl(scaled(usual(s), f))),
                 change: Some(s.drop as f64 / 100.0),
                 history: history(s, f),
-                last_checked: Some(now - Duration::minutes(s.checked_min)),
+                last_checked: Some(
+                    now - Duration::minutes(s.checked_min)
+                        + Duration::minutes(
+                            state.rechecked.get(s.code).copied().unwrap_or(0),
+                        ),
+                ),
                 deal: s.status.is_deal().then_some(DealId(100 + si as i64)),
                 found_at: s
                     .status
@@ -882,13 +989,41 @@ impl Backend for FakeBackend {
             rows,
             daemon: DaemonStatus {
                 heartbeat: Some(now - Duration::seconds(4)),
-                state: "running".into(),
+                state: if state.checking.is_some() {
+                    "checking".into()
+                } else {
+                    "running".into()
+                },
                 next_check: Some("MIA · Business in 4 min".into()),
+                next_check_at: state
+                    .checking
+                    .is_none()
+                    .then(|| now + Duration::minutes(4)),
+                check: state.checking.clone().map(|mut c| {
+                    if c.started_at == DateTime::<Utc>::MIN_UTC {
+                        c.started_at = now - Duration::seconds(12);
+                    }
+                    c
+                }),
                 loads_today: 212,
                 budget: state.settings.daily_budget,
                 blocks_today: 0,
             },
-            activity: activity(&origin.code, now),
+            activity: {
+                let mut rows = activity(&origin.code, now);
+                // The sample's running query ends with its check.
+                if let Some(r) = rows.first_mut()
+                    && r.running
+                    && state.checking.is_none()
+                {
+                    r.running = false;
+                    r.loads = Some(2);
+                    r.result = "no change".into();
+                    r.tone = Tone::Neutral;
+                }
+                rows.splice(0..0, state.landed.iter().rev().cloned());
+                rows
+            },
             blocks: vec![BlockRow {
                 at: now - Duration::hours(50),
                 site: "google_flights".into(),

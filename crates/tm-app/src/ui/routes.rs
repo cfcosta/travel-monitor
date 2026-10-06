@@ -394,7 +394,7 @@ impl TravelMonitor {
             .child(head("Best dates", COLS[4]))
             .child(head("Checked", COLS[5]))
             .child(head("Status", COLS[6]));
-        let now = s.taken_at;
+        let now = self.now;
         let body = rows.into_iter().map(|r| {
             let key = r.key();
             let deal = r.status.is_deal();

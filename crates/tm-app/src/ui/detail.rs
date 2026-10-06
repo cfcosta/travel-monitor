@@ -27,6 +27,7 @@ use crate::{
     format,
     geo::GeoWindow,
     grid::{CalendarDay, Tone},
+    live::Fresh,
     theme::{self, Fonts, color},
 };
 
@@ -288,6 +289,7 @@ impl TravelMonitor {
         let money =
             |minor: i64| format::money(&Money::new(minor, Currency::brl()));
         let tiles = div()
+            .relative()
             .w(px(360.))
             .flex_none()
             .flex()
@@ -375,7 +377,7 @@ impl TravelMonitor {
                                 .map(|n| {
                                     format!(
                                         "next in {}",
-                                        format::until(s.taken_at, n)
+                                        format::until(self.now, n)
                                     )
                                 })
                                 .unwrap_or_default(),
@@ -383,7 +385,9 @@ impl TravelMonitor {
                         )
                         .flex_1(),
                     ),
-            );
+            )
+            // New observations for this route just arrived (0057).
+            .children(widgets::fresh_tint(self.glow(Fresh::Route(row.key()))));
         let route_map = {
             let o = &row.route.origin;
             let d = &row.route.destination;
@@ -460,6 +464,7 @@ impl TravelMonitor {
             .child(render_checks(
                 fonts,
                 detail.map(|d| d.recent_checks.as_slice()).unwrap_or(&[]),
+                |id| self.glow(Fresh::Query(id)),
             ))
     }
 
@@ -800,11 +805,17 @@ impl TravelMonitor {
     }
 }
 
-fn render_checks(fonts: &Fonts, checks: &[ActivityRow]) -> Div {
+fn render_checks(
+    fonts: &Fonts,
+    checks: &[ActivityRow],
+    glow: impl Fn(i64) -> f32,
+) -> Div {
     div()
         .flex()
         .flex_col()
         .gap(px(8.))
         .child(widgets::heading("Recent checks", 15.))
-        .child(super::activity::activity_table(fonts, checks, false))
+        .child(super::activity::activity_table(
+            fonts, checks, false, None, glow,
+        ))
 }

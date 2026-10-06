@@ -85,6 +85,31 @@ pub fn until(now: DateTime<Utc>, then: DateTime<Utc>) -> String {
     }
 }
 
+/// How long something has run: `12 s`, `1 min 5 s`, `14 min`, `2 h`.
+pub fn elapsed(now: DateTime<Utc>, since: DateTime<Utc>) -> String {
+    let secs = (now - since).num_seconds().max(0);
+    match secs {
+        0..60 => format!("{secs} s"),
+        60..600 => match secs % 60 {
+            0 => format!("{} min", secs / 60),
+            s => format!("{} min {s} s", secs / 60),
+        },
+        600..3600 => format!("{} min", secs / 60),
+        _ => format!("{} h", secs / 3600),
+    }
+}
+
+/// A countdown to `then`: `45 s`, `3 min`, `~2 h`, `now` once due.
+pub fn countdown(now: DateTime<Utc>, then: DateTime<Utc>) -> String {
+    let secs = (then - now).num_seconds();
+    match secs {
+        ..1 => "now".to_owned(),
+        1..60 => format!("{secs} s"),
+        60..3600 => format!("{} min", (secs + 30) / 60),
+        _ => until(now, then),
+    }
+}
+
 /// Local wall-clock time, `12:04`.
 pub fn clock(at: DateTime<Utc>) -> String {
     at.with_timezone(&Local).format("%H:%M").to_string()
@@ -166,6 +191,52 @@ mod tests {
         assert_eq!(ago_by(4 * 86_400), "4 days ago");
         assert_eq!(until(now, now + chrono::Duration::minutes(4)), "4 min");
         assert_eq!(until(now, now + chrono::Duration::hours(5)), "~5 h");
+    }
+
+    /// The one-second clock moves these without a new snapshot (0057).
+    #[test]
+    fn relative_times_follow_the_clock() {
+        let start = Utc.with_ymd_and_hms(2026, 10, 6, 12, 0, 0).unwrap();
+        let tick = |s: i64| start + chrono::Duration::seconds(s);
+        let beat = start - chrono::Duration::seconds(50);
+        let next = start + chrono::Duration::seconds(75);
+        let seen: Vec<(String, String, String)> = [0, 9, 10, 15, 74, 75, 80]
+            .into_iter()
+            .map(|s| {
+                (
+                    ago(tick(s), beat),
+                    elapsed(tick(s), start),
+                    countdown(tick(s), next),
+                )
+            })
+            .collect();
+        let expect = |a: &str, e: &str, c: &str| {
+            (a.to_owned(), e.to_owned(), c.to_owned())
+        };
+        assert_eq!(
+            seen,
+            vec![
+                expect("just now", "0 s", "1 min"),
+                expect("just now", "9 s", "1 min"),
+                expect("1 min ago", "10 s", "1 min"),
+                expect("1 min ago", "15 s", "1 min"),
+                expect("2 min ago", "1 min 14 s", "1 s"),
+                expect("2 min ago", "1 min 15 s", "now"),
+                expect("2 min ago", "1 min 20 s", "now"),
+            ]
+        );
+        assert_eq!(
+            countdown(start, start + chrono::Duration::seconds(45)),
+            "45 s"
+        );
+        assert_eq!(
+            countdown(start, start + chrono::Duration::minutes(3)),
+            "3 min"
+        );
+        assert_eq!(
+            elapsed(start + chrono::Duration::minutes(14), start),
+            "14 min"
+        );
     }
 
     #[test]

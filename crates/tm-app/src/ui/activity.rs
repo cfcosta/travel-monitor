@@ -1,6 +1,9 @@
 //! What the daemon did: recent queries with why they ran and how they
-//! ended (0028), and the blocks it met (0039).
+//! ended (0028), and the blocks it met (0039). While a check runs, a
+//! "Now checking" row heads the log, and queries that land are tinted
+//! for a moment (0057).
 
+use chrono::{DateTime, Utc};
 use gpui::{AnyElement, Context, Div, FontWeight, div, prelude::*, px};
 
 use super::{
@@ -8,18 +11,23 @@ use super::{
     widgets::{self, mono},
 };
 use crate::{
-    data::{ActivityRow, Health, Tone},
+    data::{ActivityRow, CurrentCheck, Live, Tone},
     format,
-    theme::{self, Fonts, color},
+    live::Fresh,
+    theme::{self, Fonts, alpha, color},
 };
 
 /// The query log as a table; `with_route` adds the route column.
+/// `checking` heads it with the check in progress (its own running row
+/// is left out), and `glow` tints rows that just landed.
 pub(super) fn activity_table(
     fonts: &Fonts,
     rows: &[ActivityRow],
     with_route: bool,
+    checking: Option<(&CurrentCheck, DateTime<Utc>)>,
+    glow: impl Fn(i64) -> f32,
 ) -> Div {
-    let line = || div().flex().gap(px(12.)).px(px(16.)).py(px(9.));
+    let line = || div().relative().flex().gap(px(12.)).px(px(16.)).py(px(9.));
     let header = line()
         .text_size(px(12.))
         .text_color(color(theme::TEXT_LABEL))
@@ -31,7 +39,71 @@ pub(super) fn activity_table(
         .child(div().flex_1().min_w_0().child("Why"))
         .child(div().flex_1().min_w_0().child("Result"))
         .child(div().w(px(60.)).flex_none().text_right().child("Loads"));
-    let body = rows.iter().map(|r| {
+    let now_row = checking.map(|(c, now)| {
+        let what = [
+            Some(capitalized(&c.kind)),
+            Some(c.cabin.label().to_owned()),
+            Some(c.pos.clone()),
+            c.site.clone(),
+        ]
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>()
+        .join(" · ");
+        line()
+            .border_t_1()
+            .border_color(color(theme::ROW_RULE_FAINT))
+            .bg(alpha(theme::TEAL, 0.06))
+            .text_size(px(13.))
+            .debug_selector(|| "now-checking".into())
+            .child(
+                mono(fonts, format::elapsed(now, c.started_at))
+                    .w(px(70.))
+                    .flex_none()
+                    .text_color(color(theme::TEAL)),
+            )
+            .when(with_route, |l| {
+                l.child(
+                    div()
+                        .w(px(120.))
+                        .flex_none()
+                        .font_weight(FontWeight::MEDIUM)
+                        .child(c.route.replace('→', " → ")),
+                )
+            })
+            .child(div().flex_1().min_w_0().truncate().child(what))
+            .child(
+                div()
+                    .flex_1()
+                    .min_w_0()
+                    .truncate()
+                    .text_color(color(theme::TEXT_MUTED))
+                    .child(c.reason.clone()),
+            )
+            .child(
+                div()
+                    .flex_1()
+                    .min_w_0()
+                    .flex()
+                    .items_center()
+                    .gap(px(8.))
+                    .text_color(color(theme::TEAL))
+                    .child(widgets::pulse(
+                        "now-checking-pulse",
+                        widgets::dot(theme::TEAL, 6., true),
+                    ))
+                    .child("Now checking"),
+            )
+            .child(
+                mono(fonts, "…")
+                    .w(px(60.))
+                    .flex_none()
+                    .text_right()
+                    .text_color(color(theme::TEXT_FAINT)),
+            )
+    });
+    let hidden = checking.and_then(|(c, _)| c.query);
+    let body = rows.iter().filter(|r| Some(r.id) != hidden).map(|r| {
         let result_color = match r.tone {
             Tone::Deal => theme::YELLOW,
             Tone::Bad => theme::RED,
@@ -84,8 +156,9 @@ pub(super) fn activity_table(
                 .text_right()
                 .text_color(color(theme::TEXT_FAINT)),
             )
+            .children(widgets::fresh_tint(glow(r.id)))
     });
-    let empty = rows.is_empty().then(|| {
+    let empty = (rows.is_empty() && now_row.is_none()).then(|| {
         line()
             .border_t_1()
             .border_color(color(theme::ROW_RULE_FAINT))
@@ -101,7 +174,16 @@ pub(super) fn activity_table(
         .overflow_hidden()
         .child(header)
         .children(empty)
+        .children(now_row)
         .children(body)
+}
+
+/// `Outbound`, `Round trip 7 d`.
+fn capitalized(text: &str) -> String {
+    let mut chars = text.chars();
+    chars.next().map_or_else(String::new, |first| {
+        first.to_uppercase().chain(chars).collect()
+    })
 }
 
 impl TravelMonitor {
@@ -114,16 +196,34 @@ impl TravelMonitor {
             return div().into_any_element();
         };
         let d = &s.daemon;
-        let health = match d.health(s.taken_at) {
-            Health::Running => ("Running", theme::TEAL),
-            Health::Stale => ("Stale", theme::YELLOW),
-            Health::Missing => ("Not seen", theme::RED),
+        let now = self.now;
+        let live = d.live(now);
+        let health = match live {
+            Live::Missing => ("Not seen", theme::RED),
+            Live::Stale(_) => ("Stale", theme::YELLOW),
+            Live::Paused(_) => ("Paused", theme::YELLOW),
+            Live::Checking(_) | Live::Idle(_) => ("Running", theme::TEAL),
         };
-        let running = s.activity.iter().filter(|a| a.running).count();
+        let (doing, doing_sub) = match live {
+            Live::Checking(c) => (
+                "Checking".to_owned(),
+                format!("{} · {}", c.route, format::elapsed(now, c.started_at)),
+            ),
+            Live::Idle(Some(at)) => (
+                "Idle".to_owned(),
+                format!("next in {}", format::countdown(now, at)),
+            ),
+            Live::Idle(None) => ("Idle".to_owned(), String::new()),
+            Live::Paused(state) => ("Paused".to_owned(), state.to_owned()),
+            Live::Stale(_) | Live::Missing => {
+                ("–".to_owned(), d.next_check.clone().unwrap_or_default())
+            }
+        };
+        let checking = d.checking().map(|c| (c, now));
         let loads_hour: u32 = s
             .activity
             .iter()
-            .filter(|a| (s.taken_at - a.at).num_minutes() < 60)
+            .filter(|a| (now - a.at).num_minutes() < 60)
             .filter_map(|a| a.loads)
             .sum();
         let tiles = div()
@@ -135,9 +235,7 @@ impl TravelMonitor {
                     "Daemon",
                     div().text_color(color(health.1)).child(health.0),
                     d.heartbeat
-                        .map(|at| {
-                            format!("heartbeat {}", format::ago(s.taken_at, at))
-                        })
+                        .map(|at| format!("heartbeat {}", format::ago(now, at)))
                         .unwrap_or_else(|| "no heartbeat".to_owned()),
                     theme::TEXT,
                 )
@@ -175,9 +273,13 @@ impl TravelMonitor {
                 widgets::stat_tile(
                     fonts,
                     "Now",
-                    format!("{running} running"),
-                    d.next_check.clone().unwrap_or_else(|| d.state.clone()),
-                    theme::TEXT,
+                    doing,
+                    doing_sub,
+                    if checking.is_some() {
+                        theme::TEAL
+                    } else {
+                        theme::TEXT
+                    },
                 )
                 .flex_1(),
             );
@@ -241,7 +343,9 @@ impl TravelMonitor {
             .child(widgets::heading("Activity", 22.))
             .child(tiles)
             .child(widgets::heading("Recent queries", 15.))
-            .child(activity_table(fonts, &s.activity, true))
+            .child(activity_table(fonts, &s.activity, true, checking, |id| {
+                self.glow(Fresh::Query(id))
+            }))
             .child(widgets::heading("Blocks", 15.))
             .child(
                 div()

@@ -5,6 +5,10 @@
 //! file through `tm-store`, [`fake::FakeBackend`] from sample data shaped
 //! like the designs (`tm --fake`). The views only ever see snapshots, so
 //! they are developed and tested without a database.
+//!
+//! Each backend also says when its data changed ([`Changes`], 0057): the
+//! store watches SQLite's `data_version`, the fake is told by tests. The
+//! window refreshes on those notices, not on a fixed timer.
 
 pub mod detail;
 pub mod fake;
@@ -30,6 +34,7 @@ use tm_domain::{
     RouteId,
     Settings,
 };
+use tokio::sync::watch;
 
 use crate::grid::{Calendar, TripGrid};
 
@@ -145,6 +150,8 @@ pub struct SellerRow {
 /// One query of the log, as the activity views show it.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ActivityRow {
+    /// The query log's row id: what tells a new row from an old one.
+    pub id: i64,
     pub at: DateTime<Utc>,
     /// `SAO → LIS`, or `SAO → anywhere` for Explore.
     pub route: String,
@@ -194,9 +201,33 @@ pub struct DaemonStatus {
     pub heartbeat: Option<DateTime<Utc>>,
     pub state: String,
     pub next_check: Option<String>,
+    /// When the daemon looks for work again (0057).
+    pub next_check_at: Option<DateTime<Utc>>,
+    /// The check running now (0057).
+    pub check: Option<CurrentCheck>,
     pub loads_today: u32,
     pub budget: u32,
     pub blocks_today: u32,
+}
+
+/// The check the daemon is running, as the status chip and the activity
+/// screen show it (0057).
+#[derive(Debug, Clone, PartialEq)]
+pub struct CurrentCheck {
+    /// Its row in the query log, which shows as running meanwhile.
+    pub query: Option<i64>,
+    /// `SAO→LIS`, `SAO→anywhere` for Explore.
+    pub route: String,
+    pub cabin: Cabin,
+    /// `outbound`, `return`, `round trip 7 d`, `explore`, `confirm`.
+    pub kind: String,
+    /// The point of sale's country: `BR`.
+    pub pos: String,
+    /// Another site than Google Flights: `airline:TP`.
+    pub site: Option<String>,
+    /// `Scheduled · score 0.41`.
+    pub reason: String,
+    pub started_at: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -211,14 +242,57 @@ pub enum Health {
 /// A heartbeat older than this reads as stale.
 pub const STALE_AFTER_SECS: i64 = 120;
 
+/// A check runs without a heartbeat until it ends; one longer than this
+/// reads as stale.
+pub const CHECK_STALE_AFTER_SECS: i64 = 600;
+
+/// What the daemon is doing, as of the window's clock (0057).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Live<'a> {
+    /// Never seen.
+    Missing,
+    /// No heartbeat for a while; when the last one was.
+    Stale(DateTime<Utc>),
+    /// Paused for a login, or stopped: the daemon's own words.
+    Paused(&'a str),
+    Checking(&'a CurrentCheck),
+    /// Between checks; when it looks for work again, if known.
+    Idle(Option<DateTime<Utc>>),
+}
+
 impl DaemonStatus {
     pub fn health(&self, now: DateTime<Utc>) -> Health {
+        let limit = if self.checking().is_some() {
+            CHECK_STALE_AFTER_SECS
+        } else {
+            STALE_AFTER_SECS
+        };
         match self.heartbeat {
             None => Health::Missing,
-            Some(at) if (now - at).num_seconds() > STALE_AFTER_SECS => {
-                Health::Stale
-            }
+            Some(at) if (now - at).num_seconds() > limit => Health::Stale,
             Some(_) => Health::Running,
+        }
+    }
+
+    /// The check in progress, trusted only while the state says so (a
+    /// daemon built before 0057 leaves the columns alone).
+    pub fn checking(&self) -> Option<&CurrentCheck> {
+        self.check.as_ref().filter(|_| self.state == "checking")
+    }
+
+    pub fn live(&self, now: DateTime<Utc>) -> Live<'_> {
+        match (self.health(now), self.heartbeat) {
+            (Health::Missing, _) | (_, None) => Live::Missing,
+            (Health::Stale, Some(at)) => Live::Stale(at),
+            (Health::Running, Some(_)) => {
+                if let Some(check) = self.checking() {
+                    Live::Checking(check)
+                } else if matches!(self.state.as_str(), "running" | "") {
+                    Live::Idle(self.next_check_at)
+                } else {
+                    Live::Paused(&self.state)
+                }
+            }
         }
     }
 }
@@ -369,11 +443,55 @@ pub struct NewPos {
     pub currency: Currency,
 }
 
+/// Notices that a backend's data changed (0057). Every clone sees every
+/// notice; a burst of notices between two looks reads as one.
+#[derive(Debug, Clone)]
+pub struct Changes(watch::Receiver<u64>);
+
+/// The sending end of [`Changes`], kept by a backend.
+#[derive(Debug, Clone)]
+pub struct ChangeSender(watch::Sender<u64>);
+
+impl Changes {
+    pub fn channel() -> (ChangeSender, Changes) {
+        let (tx, rx) = watch::channel(0);
+        (ChangeSender(tx), Changes(rx))
+    }
+
+    /// Waits for a change not seen yet, and marks it seen. `false` once
+    /// the backend stopped watching.
+    pub async fn next(&mut self) -> bool {
+        let changed = self.0.changed().await.is_ok();
+        self.0.mark_unchanged();
+        changed
+    }
+
+    /// Whether a change arrived since the last look; marks it seen.
+    pub fn take(&mut self) -> bool {
+        let changed = self.0.has_changed().unwrap_or(false);
+        self.0.mark_unchanged();
+        changed
+    }
+}
+
+impl ChangeSender {
+    pub fn notify(&self) {
+        self.0.send_modify(|n| *n = n.wrapping_add(1));
+    }
+
+    pub fn subscribe(&self) -> Changes {
+        Changes(self.0.subscribe())
+    }
+}
+
 /// Where snapshots come from and edits go. Every method may do I/O; the
 /// app runs them on background tasks, never on the interface's thread.
 #[async_trait]
 pub trait Backend: Send + Sync + 'static {
     async fn snapshot(&self, query: SnapshotQuery) -> anyhow::Result<Snapshot>;
+    /// Notices that the data changed, from whoever wrote it (0057).
+    /// Watching starts on the first call, off the interface's thread.
+    fn changes(&self) -> Changes;
     async fn enqueue(&self, request: Request) -> anyhow::Result<Ticket>;
     async fn ticket(&self, ticket: Ticket) -> anyhow::Result<TicketState>;
     /// The app has shown these deals (0040).

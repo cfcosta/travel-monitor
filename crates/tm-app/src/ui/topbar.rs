@@ -1,5 +1,6 @@
 //! The top bar: logo, sections, origin picker and the daemon's status.
 
+use chrono::{DateTime, Utc};
 use gpui::{
     AnyElement,
     Context,
@@ -15,9 +16,66 @@ use gpui::{
 
 use super::{Menu, Screen, TravelMonitor, widgets};
 use crate::{
-    data::Health,
+    data::{DaemonStatus, Live},
+    format,
     theme::{self, Fonts, color},
 };
+
+/// The status chip: its dot's colour, its text, and whether a check is
+/// running (the dot pulses). `checking SAO→LIS · economy · outbound ·
+/// BR · 12 s`, `idle · next in 3 min · 212/1200 loads`, `paused for
+/// login: smiles`, `stale · seen 5 min ago` (0057).
+pub(crate) fn status_line(
+    d: &DaemonStatus,
+    now: DateTime<Utc>,
+) -> (u32, String, bool) {
+    let loads = format!("{}/{} loads", d.loads_today, d.budget);
+    let (dot, mut parts, checking) = match d.live(now) {
+        Live::Missing => {
+            (theme::RED, vec!["daemon not seen".to_owned()], false)
+        }
+        Live::Stale(at) => (
+            theme::YELLOW,
+            vec![format!("stale · seen {}", format::ago(now, at)), loads],
+            false,
+        ),
+        Live::Paused(state) => {
+            (theme::YELLOW, vec![state.to_owned(), loads], false)
+        }
+        Live::Checking(c) => {
+            let mut parts = vec![
+                format!("checking {}", c.route),
+                c.cabin.label().to_lowercase(),
+                c.kind.clone(),
+                c.pos.clone(),
+            ];
+            parts.extend(c.site.clone());
+            parts.push(format::elapsed(now, c.started_at));
+            (theme::TEAL, parts, true)
+        }
+        Live::Idle(next) => (
+            theme::TEAL,
+            vec![
+                match next {
+                    Some(at) => {
+                        format!("idle · next in {}", format::countdown(now, at))
+                    }
+                    None => "idle".to_owned(),
+                },
+                loads,
+            ],
+            false,
+        ),
+    };
+    if d.blocks_today > 0 {
+        parts.push(format!(
+            "{} block{}",
+            d.blocks_today,
+            if d.blocks_today == 1 { "" } else { "s" }
+        ));
+    }
+    (dot, parts.join(" · "), checking)
+}
 
 impl TravelMonitor {
     pub(super) fn render_topbar(
@@ -76,6 +134,7 @@ impl TravelMonitor {
             .child(
                 div()
                     .ml_auto()
+                    .min_w_0()
                     .flex()
                     .items_center()
                     .gap(px(12.))
@@ -129,51 +188,34 @@ impl TravelMonitor {
         let Some(s) = &self.snapshot else {
             return div();
         };
-        let d = &s.daemon;
-        let (dot, state) = match d.health(s.taken_at) {
-            Health::Running => (theme::TEAL, None),
-            Health::Stale => (
-                theme::YELLOW,
-                Some(format!(
-                    "stale {}",
-                    d.heartbeat
-                        .map(|at| crate::format::ago(s.taken_at, at))
-                        .unwrap_or_default()
-                )),
-            ),
-            Health::Missing => (theme::RED, Some("daemon not seen".to_owned())),
-        };
-        let paused = (d.state != "running" && !d.state.is_empty())
-            .then(|| d.state.clone());
-        let text = [
-            state.or(paused),
-            Some(format!("{}/{} loads", d.loads_today, d.budget)),
-            Some(format!(
-                "{} block{}",
-                d.blocks_today,
-                if d.blocks_today == 1 { "" } else { "s" }
-            )),
-        ]
-        .into_iter()
-        .flatten()
-        .collect::<Vec<_>>()
-        .join(" · ");
+        let (dot, text, checking) = status_line(&s.daemon, self.now);
+        let dot = widgets::dot(dot, 7., true);
         div()
             .flex()
+            .min_w_0()
             .items_center()
             .gap(px(8.))
+            .max_w(px(520.))
             .px(px(12.))
             .py(px(6.))
             .rounded(px(16.))
             .bg(color(theme::CARD))
             .border_1()
-            .border_color(color(theme::BORDER_CARD))
+            .border_color(color(if checking {
+                theme::BORDER_INPUT
+            } else {
+                theme::BORDER_CARD
+            }))
             .font_family(fonts.mono.clone())
             .text_size(px(12.))
             .text_color(color(theme::TEXT_MUTED))
             .debug_selector(|| "daemon-status".into())
-            .child(widgets::dot(dot, 7., true))
-            .child(text)
+            .child(if checking {
+                widgets::pulse("status-pulse", dot).into_any_element()
+            } else {
+                dot.into_any_element()
+            })
+            .child(div().min_w_0().truncate().child(text))
     }
 
     /// A select: a trigger showing `current`, and a menu of `options`

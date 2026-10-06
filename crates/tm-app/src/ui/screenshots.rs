@@ -35,7 +35,9 @@ fn screenshots() -> anyhow::Result<()> {
         notifier: Rc::new(Recorder::default()),
         login: LoginConfig::resolve(None, None),
         tokio: None,
-        refresh_every: Duration::from_secs(5),
+        refresh_every: Duration::from_secs(30),
+        debounce: crate::live::Debounce::default(),
+        clock: crate::live::Clock::From(now),
     };
     // Every screen at the designs' size, then the main screen at other
     // shapes: the map must fill tall, wide and small windows alike.

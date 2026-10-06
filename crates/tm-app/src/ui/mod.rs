@@ -2,8 +2,13 @@
 //!
 //! [`TravelMonitor`] owns the latest [`Snapshot`] and the interface
 //! state (screen, filters, selection). Snapshots are fetched on a
-//! background task every few seconds and whenever the selection
-//! changes; nothing here waits on the database.
+//! background task when the backend says its data changed (debounced),
+//! when the selection changes, and every half minute as a fallback;
+//! nothing here waits on the database (0057).
+//!
+//! A one-second clock re-renders relative times, the heartbeat's age,
+//! countdowns and the running check's elapsed time without reading
+//! anything. Rows that just arrived are tinted for two seconds.
 
 mod activity;
 mod deals;
@@ -15,9 +20,13 @@ pub mod text_field;
 mod topbar;
 pub mod widgets;
 
-use std::{collections::HashSet, rc::Rc, time::Duration};
+use std::{
+    collections::HashSet,
+    rc::Rc,
+    time::{Duration, Instant},
+};
 
-use chrono::NaiveDate;
+use chrono::{DateTime, NaiveDate, Utc};
 use gpui::{
     AnyElement,
     Context,
@@ -44,10 +53,14 @@ use crate::{
         Snapshot,
         SnapshotQuery,
     },
+    live::{self, Clock, Debounce, Fresh, Highlights},
     login::LoginConfig,
     notify::Notifier,
     theme::{self, color},
 };
+
+/// How often a fading highlight is redrawn (20 frames a second).
+const FADE_FRAME: Duration = Duration::from_millis(50);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Screen {
@@ -145,7 +158,10 @@ pub struct AppEnv {
     pub login: LoginConfig,
     /// The runtime that runs the login window; `None` in tests.
     pub tokio: Option<tokio::runtime::Handle>,
+    /// The fallback refresh, for changes the backend did not notice.
     pub refresh_every: Duration,
+    pub debounce: Debounce,
+    pub clock: Clock,
 }
 
 pub struct TravelMonitor {
@@ -171,14 +187,27 @@ pub struct TravelMonitor {
     pub(crate) logins: HashSet<String>,
     notified: HashSet<DealId>,
     generation: u64,
+    /// The wall clock, moved every second (0057).
+    pub(crate) now: DateTime<Utc>,
+    /// The executor's time when the window opened, for [`Clock::From`].
+    opened_at: Instant,
+    /// The executor's time of the frame being drawn.
+    frame_at: Instant,
+    /// Rows that just arrived.
+    pub(crate) fresh: Highlights<Fresh>,
+    fading: bool,
     focus: FocusHandle,
     loading: Option<Task<()>>,
     toast_task: Option<Task<()>>,
     _poll: Option<Task<()>>,
+    _watch: Option<Task<()>>,
+    _clock: Option<Task<()>>,
 }
 
 impl TravelMonitor {
     pub fn new(env: AppEnv, cx: &mut Context<Self>) -> Self {
+        let opened_at = cx.background_executor().now();
+        let now = env.clock.read(Duration::ZERO);
         let mut this = Self {
             env,
             snapshot: None,
@@ -199,14 +228,106 @@ impl TravelMonitor {
             logins: HashSet::new(),
             notified: HashSet::new(),
             generation: 0,
+            now,
+            opened_at,
+            frame_at: opened_at,
+            fresh: Highlights::default(),
+            fading: false,
             focus: cx.focus_handle(),
             loading: None,
             toast_task: None,
             _poll: None,
+            _watch: None,
+            _clock: None,
         };
         this.refresh(cx);
         this.start_polling(cx);
+        this.start_watching(cx);
+        this.start_clock(cx);
         this
+    }
+
+    /// Refreshes when the backend says its data changed, once a burst of
+    /// notices settles (0057).
+    fn start_watching(&mut self, cx: &mut Context<Self>) {
+        let mut changes = self.env.backend.changes();
+        let debounce = self.env.debounce;
+        self._watch = Some(cx.spawn(async move |this, cx| {
+            while changes.next().await {
+                let mut wait = debounce.first();
+                let mut waited = Duration::ZERO;
+                loop {
+                    cx.background_executor().timer(wait).await;
+                    waited += wait;
+                    match debounce.next(waited, changes.take()) {
+                        Some(more) => wait = more,
+                        None => break,
+                    }
+                }
+                if this.update(cx, |this, cx| this.refresh(cx)).is_err() {
+                    break;
+                }
+            }
+        }));
+    }
+
+    /// Moves the wall clock every second; nothing is read.
+    fn start_clock(&mut self, cx: &mut Context<Self>) {
+        self._clock = Some(cx.spawn(async move |this, cx| {
+            loop {
+                cx.background_executor().timer(Duration::from_secs(1)).await;
+                if this.update(cx, |this, cx| this.tick(cx)).is_err() {
+                    break;
+                }
+            }
+        }));
+    }
+
+    /// One tick of the clock.
+    pub fn tick(&mut self, cx: &mut Context<Self>) {
+        self.now = self.read_clock(cx);
+        self.fresh.prune(cx.background_executor().now());
+        cx.notify();
+    }
+
+    fn read_clock(&self, cx: &gpui::App) -> DateTime<Utc> {
+        let elapsed = cx
+            .background_executor()
+            .now()
+            .saturating_duration_since(self.opened_at);
+        self.env.clock.read(elapsed)
+    }
+
+    /// Tints `keys` and redraws while the tint fades.
+    fn mark_fresh(&mut self, keys: Vec<Fresh>, cx: &mut Context<Self>) {
+        if keys.is_empty() {
+            return;
+        }
+        self.fresh.mark(keys, cx.background_executor().now());
+        if self.fading {
+            return;
+        }
+        self.fading = true;
+        cx.spawn(async move |this, cx| {
+            loop {
+                cx.background_executor().timer(FADE_FRAME).await;
+                let more = this.update(cx, |this, cx| {
+                    this.fresh.prune(cx.background_executor().now());
+                    this.fading = !this.fresh.is_empty();
+                    cx.notify();
+                    this.fading
+                });
+                if !matches!(more, Ok(true)) {
+                    break;
+                }
+            }
+        })
+        .detach();
+    }
+
+    /// How strongly `key` is tinted in the frame being drawn, 0 to 1.
+    pub(crate) fn glow(&self, key: Fresh) -> f32 {
+        self.fresh.strength(&key, self.frame_at)
     }
 
     fn start_polling(&mut self, cx: &mut Context<Self>) {
@@ -256,9 +377,16 @@ impl TravelMonitor {
         match result {
             Ok(snapshot) => {
                 self.notify_new(&snapshot.notices, cx);
+                let arrived = self
+                    .snapshot
+                    .as_ref()
+                    .map(|old| live::arrivals(old, &snapshot))
+                    .unwrap_or_default();
                 self.error = None;
                 self.origin = snapshot.origin;
                 self.snapshot = Some(snapshot);
+                self.now = self.read_clock(cx);
+                self.mark_fresh(arrived, cx);
                 if let Some(form) = &self.settings_form {
                     form.update(cx, |form, cx| {
                         if let Some(s) = &self.snapshot {
@@ -516,6 +644,7 @@ impl Render for TravelMonitor {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> impl IntoElement {
+        self.frame_at = cx.background_executor().now();
         let fonts = theme::fonts(cx);
         let body: AnyElement = match (&self.snapshot, self.screen) {
             (None, _) => self.render_loading(),

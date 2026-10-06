@@ -307,3 +307,32 @@ pub fn accent() -> Div {
         .w(px(3.))
         .bg(color(theme::YELLOW))
 }
+
+/// A tint over a row that just arrived (0057), fading with `strength`
+/// from 1 to 0. Put it last in a `relative()` parent; it takes no
+/// clicks.
+pub fn fresh_tint(strength: f32) -> Option<Div> {
+    (strength > 0.0).then(|| {
+        div()
+            .absolute()
+            .inset_0()
+            .bg(alpha(theme::TEAL, 0.2 * strength))
+    })
+}
+
+/// A slow pulse, for what is running now (0057). Redrawn at most 15
+/// times a second.
+pub fn pulse<E: Styled + IntoElement + 'static>(
+    id: impl Into<gpui::ElementId>,
+    element: E,
+) -> gpui::AnimationElement<E> {
+    use gpui::{Animation, AnimationExt as _, pulsating_between};
+    element.with_animation(
+        id,
+        Animation::new(std::time::Duration::from_millis(1600))
+            .repeat()
+            .with_easing(pulsating_between(0.35, 1.0))
+            .with_max_fps(15.),
+        |e, t| e.opacity(t),
+    )
+}
