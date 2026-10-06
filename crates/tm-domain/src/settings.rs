@@ -73,7 +73,7 @@ pub struct Settings {
     pub iof: f64,
     /// The card's exchange spread (0038).
     pub card_spread: f64,
-    /// Page loads per day; starts at 300 and ramps (0039).
+    /// Page loads per day; starts at 600 and ramps (0039, 0049).
     pub daily_budget: u32,
     pub max_daily_budget: u32,
     /// A family is checked at least this often (0029: one week).
@@ -102,7 +102,8 @@ impl Default for Settings {
             horizon_days: 180,
             iof: 0.035,
             card_spread: 0.01,
-            daily_budget: 300,
+            // 0049: start at 600, up from 0039's 300.
+            daily_budget: 600,
             max_daily_budget: 2000,
             max_interval_hours: 24 * 7,
             min_interval_hours: 6,

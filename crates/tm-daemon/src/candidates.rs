@@ -4,7 +4,15 @@
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 
-use tm_domain::{FamilyId, FamilyKind, RouteId, Source};
+use tm_domain::{
+    Cabin,
+    FamilyId,
+    FamilyKey,
+    FamilyKind,
+    PosId,
+    RouteId,
+    Source,
+};
 use tm_scheduler::{Candidate, FamilyState, RoundTripDiscount};
 use tm_store::{FamilyRecord, FamilyStateRecord, RouteTripState};
 
@@ -97,6 +105,11 @@ pub struct Context {
     /// The browser is paused for a login.
     pub paused: bool,
     pub only: Only,
+    /// The home point of sale, for bootstrap ranks (0049).
+    pub home_pos: Option<PosId>,
+    /// Airline and miles sites whose extraction has been built on a
+    /// probe of the site (0050). Others are skipped.
+    pub verified_sites: HashSet<String>,
 }
 
 /// Why a family is not a candidate.
@@ -109,6 +122,8 @@ pub enum Skip {
     LoggedOut,
     Unresolved,
     NotSelected,
+    /// An airline or miles site not probed yet (0050).
+    Unprobed,
 }
 
 /// Whether `family` may be checked now, ignoring the budget and the
@@ -125,6 +140,11 @@ pub fn eligibility(family: &FamilyRecord, cx: &Context) -> Result<(), Skip> {
     }
     if cx.cooling.contains(&family.site) {
         return Err(Skip::CoolingDown);
+    }
+    if !matches!(family.key.source, Source::GoogleFlights)
+        && !cx.verified_sites.contains(&family.site)
+    {
+        return Err(Skip::Unprobed);
     }
     match &family.key.source {
         Source::GoogleFlights => {}
@@ -159,6 +179,26 @@ fn selected(family: &FamilyRecord, cx: &Context) -> bool {
     }
 }
 
+/// Which never-checked families go first (DECISIONS.md 0049): home
+/// point of sale before foreign ones; within each, economy legs and the
+/// Explore sweep, then economy round trips, then the premium cabins.
+/// Airline and miles sources come last.
+pub fn bootstrap_rank(key: &FamilyKey, home_pos: Option<PosId>) -> u8 {
+    if !matches!(key.source, Source::GoogleFlights) {
+        return 6;
+    }
+    let within = match (key.cabin, key.kind) {
+        (Cabin::Economy, FamilyKind::Leg { .. } | FamilyKind::Explore) => 0,
+        (Cabin::Economy, FamilyKind::RoundTrip { .. }) => 1,
+        _ => 2,
+    };
+    if Some(key.pos) == home_pos {
+        within
+    } else {
+        3 + within
+    }
+}
+
 /// The candidates for `plan_tick`, and how many families each reason
 /// left out (for the log).
 pub fn build(
@@ -175,6 +215,7 @@ pub fn build(
                 weight: f.weight,
                 state: to_state(&f.state),
                 active: true,
+                bootstrap_rank: bootstrap_rank(&f.key, cx.home_pos),
             }),
             Err(skip) => *skipped.entry(skip).or_insert(0) += 1,
         }
@@ -198,7 +239,7 @@ pub fn of_route(
 
 #[cfg(test)]
 mod tests {
-    use tm_domain::{Cabin, FamilyKey, Leg, PosId};
+    use tm_domain::Leg;
 
     use super::*;
 
@@ -228,7 +269,49 @@ mod tests {
         cx.destinations.insert(RouteId(1), Some("LIS".into()));
         cx.destinations.insert(RouteId(2), Some("MIA".into()));
         cx.destinations.insert(RouteId(9), None);
+        // The filter tests below are about logins and Jev, not probes.
+        for site in ["airline:LA", "miles:smiles", "miles:latam_pass"] {
+            cx.verified_sites.insert(site.into());
+        }
         cx
+    }
+
+    #[test]
+    fn unprobed_sites_are_skipped() {
+        let families = vec![
+            family(1, 1, Source::GoogleFlights),
+            family(2, 1, Source::Airline { code: "TP".into() }),
+        ];
+        let (cands, skipped) = build(&families, &cx());
+        let ids: Vec<i64> = cands.iter().map(|c| c.family.0).collect();
+        assert_eq!(ids, vec![1]);
+        assert_eq!(skipped.get(&Skip::Unprobed), Some(&1));
+    }
+
+    #[test]
+    fn bootstrap_ranks_put_home_economy_legs_first() {
+        let home = Some(PosId(1));
+        let key = |cabin, pos, kind| FamilyKey {
+            route: RouteId(1),
+            cabin,
+            source: Source::GoogleFlights,
+            pos: PosId(pos),
+            kind,
+        };
+        let leg = FamilyKind::Leg { leg: Leg::Outbound };
+        let rt = FamilyKind::RoundTrip { days: 7 };
+        assert_eq!(bootstrap_rank(&key(Cabin::Economy, 1, leg), home), 0);
+        assert_eq!(
+            bootstrap_rank(&key(Cabin::Economy, 1, FamilyKind::Explore), home),
+            0
+        );
+        assert_eq!(bootstrap_rank(&key(Cabin::Economy, 1, rt), home), 1);
+        assert_eq!(bootstrap_rank(&key(Cabin::Business, 1, leg), home), 2);
+        assert_eq!(bootstrap_rank(&key(Cabin::Economy, 2, leg), home), 3);
+        assert_eq!(bootstrap_rank(&key(Cabin::Business, 2, rt), home), 5);
+        let mut airline = key(Cabin::Economy, 1, leg);
+        airline.source = Source::Airline { code: "LA".into() };
+        assert_eq!(bootstrap_rank(&airline, home), 6);
     }
 
     fn miles(id: i64, program: &str) -> FamilyRecord {

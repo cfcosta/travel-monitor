@@ -4,7 +4,12 @@
 //!
 //! 1. **Overdue**: checked longer ago than `max_interval`, most overdue
 //!    first.
-//! 2. **Bootstrap**: never checked, highest weight first.
+//! 2. **Bootstrap**: never checked, lowest [`Candidate::bootstrap_rank`]
+//!    first (DECISIONS.md 0049), then highest weight. Ranks are taken
+//!    strictly in order: once a never-checked family does not fit, cheaper
+//!    ones of the same rank may still go, but no later rank is
+//!    bootstrapped this tick, and never-checked families do not compete
+//!    in the scored slots.
 //! 3. Every further slot is, with probability `random_share`, a uniformly
 //!    random eligible family (**Random**), otherwise the highest-scoring
 //!    one (**Scheduled**, with its score and the runner-up's).
@@ -36,6 +41,9 @@ pub struct Candidate {
     pub state: FamilyState,
     /// Inactive families (removed routes) are never picked.
     pub active: bool,
+    /// Bootstrap order for never-checked families: lower ranks are
+    /// checked first (DECISIONS.md 0049). Ignored once checked.
+    pub bootstrap_rank: u8,
 }
 
 /// What this tick may spend.
@@ -116,23 +124,35 @@ pub fn plan_tick<R: Rng + ?Sized>(
 
     bootstrap.sort_by(|&a, &b| {
         let (ca, cb) = (&candidates[a], &candidates[b]);
-        finite(cb.weight)
-            .total_cmp(&finite(ca.weight))
+        ca.bootstrap_rank
+            .cmp(&cb.bootstrap_rank)
+            .then(finite(cb.weight).total_cmp(&finite(ca.weight)))
             .then(ca.family.cmp(&cb.family))
     });
+    // A family that does not fit lets cheaper ones of the same rank
+    // through, but no later rank: those wait for a later tick.
+    let mut blocked_rank = None;
     for &i in &bootstrap {
+        let rank = candidates[i].bootstrap_rank;
+        if blocked_rank.is_some_and(|blocked| rank > blocked) {
+            break;
+        }
+        let before = picks.len();
         ledger.try_pick(
             &candidates[i],
             QueryReason::Bootstrap,
             &mut picks,
             &mut taken[i],
         );
+        if picks.len() == before && blocked_rank.is_none() {
+            blocked_rank = Some(rank);
+        }
     }
 
-    // Overdue and bootstrap families that did not fit stay eligible for
-    // the scored and random slots.
+    // Overdue families that did not fit stay eligible for the scored
+    // and random slots. Never-checked ones wait for their turn, so a
+    // late rank cannot overtake an earlier one through a score.
     pool.extend(overdue.iter().map(|(i, _)| *i).filter(|&i| !taken[i]));
-    pool.extend(bootstrap.iter().copied().filter(|&i| !taken[i]));
     // Score in a fixed order so Thompson samples are reproducible.
     pool.sort_by_key(|&i| (candidates[i].family, i));
     let mut scored: Vec<(usize, f64)> = pool
@@ -247,7 +267,31 @@ mod tests {
                 ..FamilyState::default()
             },
             active: true,
+            bootstrap_rank: 0,
         }
+    }
+
+    #[test]
+    fn bootstrap_follows_rank_strictly() {
+        // Rank 0 costs 3, rank 1 costs 1: with 4 loads, two rank-0
+        // families cannot both fit, and the cheap rank-1 one must not
+        // jump ahead of the waiting rank-0 one.
+        let mut a = cand(1, "gf", None);
+        a.state.cost_loads = 3.0;
+        let mut b = cand(2, "gf", None);
+        b.state.cost_loads = 3.0;
+        let mut c = cand(3, "gf", None);
+        c.bootstrap_rank = 1;
+        let cands = vec![c, b, a];
+        let picks = plan_tick(
+            &cands,
+            now(),
+            &budget(4),
+            &no_random(),
+            &mut StdRng::seed_from_u64(1),
+        );
+        let ids: Vec<i64> = picks.iter().map(|p| p.family.0).collect();
+        assert_eq!(ids, vec![1]);
     }
 
     fn budget(loads: u32) -> TickBudget {

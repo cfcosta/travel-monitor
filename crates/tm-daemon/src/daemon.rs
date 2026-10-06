@@ -482,6 +482,9 @@ impl<S: Sources> Daemon<S> {
             destinations,
             paused: self.paused.is_some(),
             only: self.config.only.clone(),
+            home_pos: world.pos.values().find(|p| p.is_home).map(|p| p.id),
+            // No airline or miles site has been probed yet (0050).
+            verified_sites: HashSet::new(),
         }
     }
 

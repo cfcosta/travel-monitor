@@ -1,6 +1,6 @@
 //! The daily page-load budget (DECISIONS.md 0039).
 //!
-//! - Start at `daily_budget` (300).
+//! - Start at `daily_budget` (600 by default, DECISIONS.md 0049).
 //! - Every full 24 hours without a block anywhere raises it by
 //!   `budget_ramp` (10%, at least one load), up to `max_daily_budget`.
 //! - A block (CAPTCHA, "unusual traffic", a block page) halves it, never
@@ -194,6 +194,15 @@ mod tests {
 
     use super::*;
 
+    /// These tests were written around a 300-load start (0039); the
+    /// default is now 600 (0049).
+    fn params_300() -> Params {
+        Params {
+            daily_budget: 300,
+            ..Params::default()
+        }
+    }
+
     fn t0() -> DateTime<Utc> {
         Utc.with_ymd_and_hms(2026, 10, 6, 0, 0, 0)
             .single()
@@ -202,7 +211,7 @@ mod tests {
 
     #[test]
     fn ramps_ten_percent_a_day_to_the_cap() {
-        let p = Params::default(); // 300 → max 2000
+        let p = params_300(); // 300 → max 2000
         let mut b = BudgetState::new(&p, t0());
         b.advance(t0() + TimeDelta::hours(23), &p);
         assert_eq!(b.daily_budget, 300);
@@ -221,7 +230,7 @@ mod tests {
 
     #[test]
     fn block_halves_and_backs_off() {
-        let p = Params::default();
+        let p = params_300();
         let mut b = BudgetState::new(&p, t0());
         let t = t0() + TimeDelta::days(2); // 363
         b.on_block("google_flights", t, &p);
@@ -261,7 +270,7 @@ mod tests {
 
     #[test]
     fn allowance_paces_the_rest_of_the_day() {
-        let p = Params::default();
+        let p = params_300();
         let b = BudgetState::new(&p, t0());
         let mut rng = StdRng::seed_from_u64(4);
         assert_eq!(b.tick_allowance(t0(), 300, 10, &p, &mut rng), 0);
@@ -275,7 +284,7 @@ mod tests {
 
     #[hegel::test(test_cases = 200)]
     fn allowance_never_exceeds_what_is_left(tc: TestCase) {
-        let p = Params::default();
+        let p = params_300();
         let b = BudgetState::new(&p, t0());
         let used = tc.draw(gs::integers::<u32>().max_value(400));
         let ticks = tc.draw(gs::integers::<u32>().max_value(2000));
@@ -292,7 +301,7 @@ mod tests {
 
     #[hegel::test(test_cases = 100)]
     fn budget_stays_within_bounds(tc: TestCase) {
-        let p = Params::default();
+        let p = params_300();
         let mut b = BudgetState::new(&p, t0());
         let steps = tc.draw(
             gs::vecs(gs::tuples!(

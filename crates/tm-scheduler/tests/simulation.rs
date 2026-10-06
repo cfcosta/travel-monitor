@@ -131,6 +131,7 @@ fn run_greedy(paths: &[Path], seed: u64) -> Vec<Vec<f64>> {
                 weight: 1.0,
                 state: s.clone(),
                 active: true,
+                bootstrap_rank: 0,
             })
             .collect();
         for pick in plan_tick(&candidates, now, &budget, &params, &mut rng) {
@@ -261,6 +262,7 @@ fn reasons_over_a_week() {
                 weight: 1.0,
                 state: s.clone(),
                 active: true,
+                bootstrap_rank: 0,
             })
             .collect();
         for pick in plan_tick(&candidates, now, &budget, &params, &mut rng) {

@@ -647,3 +647,36 @@ Routes, cabins, points of sale, money, observations, query families and
 settings are plain types in a `tm-domain` crate, with serde and no I/O.
 Every other crate depends on it, so `tm-scheduler` stays I/O-free and
 the store, daemon and app share one vocabulary.
+
+## 0049: Bootstrap core families first, starting at 600 loads a day
+
+- Date: 2026-10-06
+- Refines [0028](#0028-the-scheduler-runs-checks-by-a-greedy-value-index)
+  and [0039](#0039-the-page-load-budget-starts-conservative-and-ramps-up).
+
+The first live configuration has about 2,200 query families (about 840
+on Google Flights). At 300 page loads a day and about 3 loads per check,
+a first pass over all of them would take more than a week. Two changes:
+
+- **Core first.** Families that were never checked are bootstrapped in
+  rank order: home point of sale, economy, both legs and the Explore
+  sweep first; then the home point of sale's round trips; then premium
+  economy and business at home; then the foreign points of sale. Within
+  a rank, the scheduler's order is kept. Every route gets core coverage
+  in about a day.
+- **A higher start.** The daily budget starts at 600 page loads instead
+  of 300, and ramps from there as in 0039, backing off on any block.
+
+## 0050: Airline and miles sites are probed before they run
+
+- Date: 2026-10-06
+- Refines [0047](#0047-the-first-implementation-covers-every-decision-so-far).
+
+Airline and miles sources stay paused until each site has been
+investigated the way Google Flights was
+([docs/research/google-flights.md](docs/research/google-flights.md)):
+how a search is expressed in a URL, which requests carry prices, how
+the page responds to a headless browser, and what blocks it. Each
+site's findings go in `docs/research/sites/`. A site is enabled in the
+daemon only once its extraction is built on those findings and tested
+against captured responses.
