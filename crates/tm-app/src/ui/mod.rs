@@ -138,6 +138,7 @@ pub enum Menu {
 }
 
 /// What the app was started with.
+#[derive(Clone)]
 pub struct AppEnv {
     pub backend: SharedBackend,
     pub notifier: Rc<dyn Notifier>,

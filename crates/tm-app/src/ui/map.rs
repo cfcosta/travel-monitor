@@ -57,18 +57,25 @@ pub struct MapModel {
 }
 
 impl MapModel {
-    /// The default crop, grown to hold every place.
+    /// The box around the origin and every destination, padded so arcs
+    /// and labels clear the edges; the designs' crop when there is
+    /// nothing to show. The projection fits this box to the panel and
+    /// the slack around it shows more of the globe, so the map fills
+    /// any window size.
     pub fn fit_window(
         origin: Option<&MapPlace>,
         dests: &[MapDest],
     ) -> GeoWindow {
-        GeoWindow::DEFAULT.including(
+        GeoWindow::around(
             origin
                 .into_iter()
                 .chain(dests.iter().map(|d| &d.place))
                 .map(|p| (p.lon, p.lat)),
-            6.0,
+            10.0,
+            60.0,
+            40.0,
         )
+        .unwrap_or(GeoWindow::DEFAULT)
     }
 }
 
@@ -214,14 +221,18 @@ fn paint_map(
         y + 8.0,
         w - 16.0,
         h - inset - 16.0,
-    );
+    )
+    .clamped_to_globe(x, y, w, h - inset);
     let z = proj.zoom().clamp(0.45, 2.5);
 
     // Land: a 2° grid of dots, about 44% of the spacing wide.
     let land = color(theme::LAND);
     let r = (proj.scale * 2.0 * 0.22).max(0.8);
+    // Every land dot that lands in the panel, not only those inside the
+    // fitted window, so the dot field fills the slack with more globe
+    // instead of stopping at a hard edge.
     for &(lon, lat) in LAND_DOTS {
-        if proj.contains(lon, lat) {
+        if proj.lands_in(lon, lat, x, y, w, h) {
             circle(window, proj.project(lon, lat), r, land);
         }
     }

@@ -8,6 +8,7 @@ use gpui::{
     Div,
     FontWeight,
     SharedString,
+    Stateful,
     Window,
     div,
     prelude::*,
@@ -281,9 +282,13 @@ impl TravelMonitor {
         }
     }
 
-    fn render_map_pane(&self, fonts: &Fonts, cx: &mut Context<Self>) -> Div {
+    fn render_map_pane(
+        &self,
+        fonts: &Fonts,
+        cx: &mut Context<Self>,
+    ) -> Stateful<Div> {
         let Some(s) = &self.snapshot else {
-            return div();
+            return div().id("deals-map-pane");
         };
         let origin = s.origin_place().map(|p| MapPlace {
             code: p.code.clone().into(),
@@ -322,7 +327,8 @@ impl TravelMonitor {
             origin,
             destinations: dests,
             window,
-            bottom_inset: 300.,
+            // The card sits below the map, not over it.
+            bottom_inset: 0.,
             labels: true,
         };
         let entity = cx.entity().downgrade();
@@ -333,15 +339,24 @@ impl TravelMonitor {
                 view.update(cx, |this, cx| this.select(key, cx));
             }
         };
+        // A column: the map takes what the card leaves, at least a usable
+        // minimum, and the pane scrolls when a small window cannot hold
+        // both. The card used to float over the map and covered all of
+        // it (and the top bar) in small windows.
         div()
+            .id("deals-map-pane")
             .flex_1()
             .min_w_0()
-            .relative()
-            .child(div().absolute().inset_0().child(map(
-                model,
-                fonts.clone(),
-                picker,
-            )))
+            .flex()
+            .flex_col()
+            .overflow_y_scroll()
+            .child(div().relative().flex_1().min_h(px(280.)).child(
+                div().absolute().inset_0().child(map(
+                    model,
+                    fonts.clone(),
+                    picker,
+                )),
+            ))
             .children(self.render_card(fonts, cx))
     }
 
@@ -496,10 +511,9 @@ impl TravelMonitor {
             .children(detail.map(|d| sellers_table(fonts, d, false)));
         Some(
             div()
-                .absolute()
-                .right(px(24.))
-                .bottom(px(24.))
-                .left(px(24.))
+                .flex_none()
+                .mx(px(24.))
+                .mb(px(24.))
                 .flex()
                 .flex_wrap()
                 .gap(px(20.))

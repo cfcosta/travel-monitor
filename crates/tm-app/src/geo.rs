@@ -69,6 +69,53 @@ impl GeoWindow {
     }
 }
 
+impl GeoWindow {
+    /// The smallest window holding every `(lon, lat)`, padded by
+    /// `margin` degrees and grown around its centre to at least
+    /// `min_width` × `min_height` degrees, clamped to the globe. `None`
+    /// when there are no points.
+    ///
+    /// The map fits this box rather than a fixed crop, so the routes
+    /// fill the panel at any window size and aspect ratio.
+    pub fn around(
+        points: impl IntoIterator<Item = (f32, f32)>,
+        margin: f32,
+        min_width: f32,
+        min_height: f32,
+    ) -> Option<Self> {
+        let mut it = points.into_iter();
+        let (lon, lat) = it.next()?;
+        let mut w = GeoWindow {
+            west: lon,
+            east: lon,
+            north: lat,
+            south: lat,
+        };
+        for (lon, lat) in it {
+            w.west = w.west.min(lon);
+            w.east = w.east.max(lon);
+            w.north = w.north.max(lat);
+            w.south = w.south.min(lat);
+        }
+        w.west -= margin;
+        w.east += margin;
+        w.north += margin;
+        w.south -= margin;
+        let grow = |lo: &mut f32, hi: &mut f32, min: f32| {
+            let extra = (min - (*hi - *lo)).max(0.0) / 2.0;
+            *lo -= extra;
+            *hi += extra;
+        };
+        grow(&mut w.west, &mut w.east, min_width);
+        grow(&mut w.south, &mut w.north, min_height);
+        w.west = w.west.max(-180.0);
+        w.east = w.east.min(180.0);
+        w.north = w.north.min(85.0);
+        w.south = w.south.max(-85.0);
+        Some(w)
+    }
+}
+
 /// An equirectangular projection of a [`GeoWindow`] into a box,
 /// keeping degrees square and centring the slack ("meet").
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -104,6 +151,52 @@ impl Projection {
         }
     }
 
+    /// The land data's extent: the map never shows sky past these.
+    pub const GLOBE_NORTH: f32 = 84.0;
+    pub const GLOBE_SOUTH: f32 = -88.0;
+    pub const GLOBE_WEST: f32 = -180.0;
+    pub const GLOBE_EAST: f32 = 180.0;
+
+    /// Slides the map inside the box `(x, y, width, height)` so its
+    /// slack never shows beyond the globe: when the box shows more than
+    /// the whole globe along an axis, the globe is centred on that axis;
+    /// otherwise an edge past a pole (or the date line) is pulled back to
+    /// it. The scale is kept, so the fitted window stays fully visible
+    /// whenever it can.
+    pub fn clamped_to_globe(
+        mut self,
+        x: f32,
+        y: f32,
+        width: f32,
+        height: f32,
+    ) -> Self {
+        if self.scale <= 0.0 {
+            return self;
+        }
+        let s = self.scale;
+        // Latitude: the top of the box shows `north + (origin.y − y)/s`.
+        let span = height / s;
+        let globe = Self::GLOBE_NORTH - Self::GLOBE_SOUTH;
+        let top = self.window.north + (self.origin.y - y) / s;
+        let top = if span >= globe {
+            Self::GLOBE_NORTH + (span - globe) / 2.0
+        } else {
+            top.min(Self::GLOBE_NORTH).max(Self::GLOBE_SOUTH + span)
+        };
+        self.origin.y = y + (top - self.window.north) * s;
+        // Longitude: the left of the box shows `west − (origin.x − x)/s`.
+        let span = width / s;
+        let globe = Self::GLOBE_EAST - Self::GLOBE_WEST;
+        let left = self.window.west - (self.origin.x - x) / s;
+        let left = if span >= globe {
+            Self::GLOBE_WEST - (span - globe) / 2.0
+        } else {
+            left.max(Self::GLOBE_WEST).min(Self::GLOBE_EAST - span)
+        };
+        self.origin.x = x + (self.window.west - left) * s;
+        self
+    }
+
     pub fn project(&self, lon: f32, lat: f32) -> Pt {
         Pt::new(
             self.origin.x + (lon - self.window.west) * self.scale,
@@ -111,7 +204,24 @@ impl Projection {
         )
     }
 
+    /// Whether `(lon, lat)` lands inside the screen box
+    /// `(x, y, width, height)`: the window is only what must fit; the
+    /// slack around it shows more of the globe.
+    pub fn lands_in(
+        &self,
+        lon: f32,
+        lat: f32,
+        x: f32,
+        y: f32,
+        width: f32,
+        height: f32,
+    ) -> bool {
+        let p = self.project(lon, lat);
+        p.x >= x && p.x <= x + width && p.y >= y && p.y <= y + height
+    }
+
     /// Whether `(lon, lat)` falls inside the window.
+    #[cfg(test)]
     pub fn contains(&self, lon: f32, lat: f32) -> bool {
         lon >= self.window.west
             && lon <= self.window.east
@@ -265,6 +375,80 @@ mod tests {
         assert!((p.origin.y - 20.0).abs() < 1e-3);
         let nw = p.project(-128.0, 66.0);
         assert!(close(nw, p.origin, 1e-3));
+    }
+
+    #[test]
+    fn around_fits_the_points_with_a_minimum_size() {
+        assert_eq!(GeoWindow::around(std::iter::empty(), 5.0, 1.0, 1.0), None);
+        // SAO to Lisbon and Tokyo.
+        let w = GeoWindow::around(
+            [(-46.6, -23.5), (-9.1, 38.7), (139.7, 35.7)],
+            8.0,
+            60.0,
+            40.0,
+        )
+        .expect("points");
+        assert!((w.west - -54.6).abs() < 1e-3 && (w.east - 147.7).abs() < 1e-3);
+        assert!(
+            (w.north - 46.7).abs() < 1e-3 && (w.south - -31.5).abs() < 1e-3
+        );
+        // A single domestic route still gets a sensible box.
+        let w = GeoWindow::around(
+            [(-46.6, -23.5), (-37.1, -11.0)],
+            4.0,
+            60.0,
+            40.0,
+        )
+        .expect("points");
+        assert!((w.width() - 60.0).abs() < 1e-3);
+        assert!((w.height() - 40.0).abs() < 1e-3);
+    }
+
+    #[test]
+    fn a_tall_box_centres_the_globe_and_a_short_one_stops_at_the_poles() {
+        let w = GeoWindow {
+            west: -60.0,
+            east: 20.0,
+            north: 40.0,
+            south: -30.0,
+        };
+        // 10 px per degree, 2000 px tall: 200° shown, more than the
+        // globe's 172°, so it is centred: 14° of slack at each end.
+        let p = Projection::fit(w, 0.0, 0.0, 800.0, 2000.0)
+            .clamped_to_globe(0.0, 0.0, 800.0, 2000.0);
+        let top = p.project(0.0, Projection::GLOBE_NORTH).y;
+        let bottom = p.project(0.0, Projection::GLOBE_SOUTH).y;
+        assert!((top - 140.0).abs() < 1e-3, "{top}");
+        assert!((2000.0 - bottom - 140.0).abs() < 1e-3, "{bottom}");
+        // A window near the pole in a box taller than it: the top edge
+        // is pulled back to the data's north.
+        let arctic = GeoWindow {
+            west: -60.0,
+            east: 20.0,
+            north: 80.0,
+            south: 40.0,
+        };
+        let p = Projection::fit(arctic, 0.0, 0.0, 800.0, 900.0)
+            .clamped_to_globe(0.0, 0.0, 800.0, 900.0);
+        assert!(p.project(0.0, Projection::GLOBE_NORTH).y.abs() < 1e-3);
+        // And the window itself is still on screen.
+        assert!(p.lands_in(-20.0, 60.0, 0.0, 0.0, 800.0, 900.0));
+    }
+
+    #[test]
+    fn slack_shows_more_globe() {
+        // A tall box: the window fits the width, and land above and
+        // below it still lands on screen.
+        let w = GeoWindow {
+            west: -60.0,
+            east: 20.0,
+            north: 40.0,
+            south: -30.0,
+        };
+        let p = Projection::fit(w, 0.0, 0.0, 800.0, 2000.0);
+        assert!(!p.contains(-40.0, 60.0));
+        assert!(p.lands_in(-40.0, 60.0, 0.0, 0.0, 800.0, 2000.0));
+        assert!(!p.lands_in(-100.0, 0.0, 0.0, 0.0, 800.0, 2000.0));
     }
 
     #[test]
