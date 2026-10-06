@@ -141,3 +141,74 @@ Risks:
 | `login-redirect.txt` | The award URL, where it ended (`state` removed), the login page text, and the calls the hook saw |
 
 No price fixture: no award search ran.
+
+## Probe with a logged-in profile (2026-10-06)
+
+- Method: the daemon was paused with an `open_login` request for
+  `latam_pass` (request 5, done 17:56:37 UTC, "Chromium stopped").
+  Then one headless Chromium 151 ran on the daemon's profile
+  (`~/.local/share/travel-monitor/chromium`), with the daemon's own
+  flags (`--headless=new`, `--window-size=1440,1000`,
+  `--password-store=basic`, `--use-mock-keychain`, and the others in
+  `tm-browser`'s `ChromiumConfig::args`). It used the default user
+  agent (`HeadlessChrome/151.0.0.0`) and nothing to hide automation.
+  `chrome-cdp` added an XHR/fetch hook before the navigation. The
+  Chromium was closed and the daemon resumed with `close_login`
+  (request 6, done 17:57:39 UTC, "Chromium is up"). The pause took
+  62 seconds.
+- Load count: 1 page load (the award URL in §1, GRU→LIS one way
+  2026-11-10, `redemption=true`). No retry.
+
+### Result: Akamai denied the first request
+
+- Final URL: the award URL itself, with no redirect
+  (`redirectCount: 0`). The HTTP status was **403**.
+- Page: Akamai **"Access Denied"**, in Spanish, English and Portuguese,
+  `Reference Code: #0.88421502.1791309413.1cb737c`. It is the same page
+  that the cash site returns to headless (latam.md §5).
+- No JavaScript from LATAM ran. The hook saw 0 calls. No
+  `/bff/air-offers` request was made, so **no award response was
+  captured**. The miles fields are still unknown.
+- No login wall was shown. The edge refused the request before the app
+  could check for a session.
+
+The denial is the same as for a fresh profile. A LATAM Pass session in
+the profile does not change Akamai's decision at the edge. This
+supports decision 0052: LATAM Pass stays off while the daemon uses a
+headless browser that it does not disguise.
+
+### The LATAM session was no longer in the profile
+
+The profile's history shows that the app's login window completed a
+login at 17:52–17:53 UTC. The visits were `auth.latamairlines.com/u/login/identifier`,
+then `/u/login/password`, `/u/mfa-login-options`, `/u/mfa-sms-challenge`
+(an SMS code), `/authorize/resume`, `www.latamairlines.com/callback`, and
+then `/pt-br/myaccount/`. But when the probe started, the default
+context had **1 cookie** in total (`akavpau_latamairlines_BBB`, set by
+the denied request). `Default/Cookies` had **0 rows** after the daemon
+restarted. The session was already gone before the probe, because the
+daemon had relaunched on this profile at 17:54:01. Two possible causes,
+not verified:
+
+1. The login window (`tm-app` `login.rs`) starts Chromium **without**
+   `--password-store=basic --use-mock-keychain`. In this case Chromium
+   encrypts cookies with a key from the desktop keyring (`Local State`
+   `os_crypt` has a `portal` entry). The daemon's Chromium uses the
+   basic store, so it cannot decrypt those cookies and drops them.
+2. LATAM's session cookies have no expiry date, so they ended when the
+   login window closed.
+
+Either way, a manual login does not reach the daemon's headless
+browser at present. Use the same `--password-store` flags in the login
+window and in the daemon before trying LATAM Pass, Smiles or Azul
+again. That alone does not help LATAM: the edge denial above comes
+first.
+
+### Fixtures
+
+| File | Source |
+| ---- | ------ |
+| `headless-logged-in-access-denied.html` | The Akamai page that the award URL returned (403) |
+| `headless-logged-in-access-denied.png` | Screenshot of that page, 1440×1000 |
+
+No award fixture: no award search ran.
