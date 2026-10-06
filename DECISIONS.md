@@ -961,3 +961,14 @@ daemon for a minute. Instead:
 
 Logins made before this change live in the old shared profile; they
 are not migrated.
+
+## 0066: Iceland, Greenland and Alaska join the watchlist
+
+- Date: 2026-10-06
+- Adds to [0063](#0063-sixty-two-leisure-and-long-haul-destinations-join-the-watchlist).
+
+Three destinations join the first-run seed, the biggest airport of each
+place: Keflavík (KEF) for Iceland, Nuuk (GOH) for Greenland, whose new
+runway took over the international flights from Kangerlussuaq in 2024,
+and Anchorage (ANC) for Alaska. The watchlist grows from 114 to 117.
+A database seeded before this gets them from the app's settings.
