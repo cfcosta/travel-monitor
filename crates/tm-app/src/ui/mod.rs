@@ -1,0 +1,588 @@
+//! The window: a top bar and five screens (DECISIONS.md 0044).
+//!
+//! [`TravelMonitor`] owns the latest [`Snapshot`] and the interface
+//! state (screen, filters, selection). Snapshots are fetched on a
+//! background task every few seconds and whenever the selection
+//! changes; nothing here waits on the database.
+
+mod activity;
+mod deals;
+mod detail;
+pub mod map;
+mod routes;
+mod settings;
+pub mod text_field;
+mod topbar;
+pub mod widgets;
+
+use std::{collections::HashSet, rc::Rc, time::Duration};
+
+use chrono::NaiveDate;
+use gpui::{
+    AnyElement,
+    Context,
+    Entity,
+    FocusHandle,
+    Focusable,
+    SharedString,
+    Task,
+    Window,
+    div,
+    prelude::*,
+    px,
+};
+use tm_domain::{Cabin, DealId, PlaceId};
+
+pub use self::settings::SettingsForm;
+use crate::{
+    data::{
+        Notice,
+        Request,
+        RouteRow,
+        RowKey,
+        SharedBackend,
+        Snapshot,
+        SnapshotQuery,
+    },
+    login::LoginConfig,
+    notify::Notifier,
+    theme::{self, color},
+};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Screen {
+    Deals,
+    Routes,
+    Detail,
+    Activity,
+    Settings,
+}
+
+impl Screen {
+    /// The tabs of the top bar; the route detail is reached from a row.
+    pub const TABS: [Screen; 4] = [
+        Screen::Deals,
+        Screen::Routes,
+        Screen::Activity,
+        Screen::Settings,
+    ];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Screen::Deals => "Deals",
+            Screen::Routes | Screen::Detail => "Routes",
+            Screen::Activity => "Activity",
+            Screen::Settings => "Settings",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ListTab {
+    Deals,
+    All,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Sort {
+    BiggestDrop,
+    LowestPrice,
+    RecentlyFound,
+}
+
+impl Sort {
+    pub const ALL: [Sort; 3] =
+        [Sort::BiggestDrop, Sort::LowestPrice, Sort::RecentlyFound];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Sort::BiggestDrop => "Biggest drop",
+            Sort::LowestPrice => "Lowest price",
+            Sort::RecentlyFound => "Recently found",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RoutesFilter {
+    All,
+    Deals,
+    Domestic,
+    International,
+}
+
+impl RoutesFilter {
+    pub const ALL: [RoutesFilter; 4] = [
+        RoutesFilter::All,
+        RoutesFilter::Deals,
+        RoutesFilter::Domestic,
+        RoutesFilter::International,
+    ];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            RoutesFilter::All => "All",
+            RoutesFilter::Deals => "Deals",
+            RoutesFilter::Domestic => "Domestic",
+            RoutesFilter::International => "International",
+        }
+    }
+}
+
+/// The dropdowns.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Menu {
+    Origin,
+    Cabin,
+    Sort,
+}
+
+/// What the app was started with.
+pub struct AppEnv {
+    pub backend: SharedBackend,
+    pub notifier: Rc<dyn Notifier>,
+    pub login: LoginConfig,
+    /// The runtime that runs the login window; `None` in tests.
+    pub tokio: Option<tokio::runtime::Handle>,
+    pub refresh_every: Duration,
+}
+
+pub struct TravelMonitor {
+    pub(crate) env: AppEnv,
+    pub(crate) snapshot: Option<Snapshot>,
+    pub(crate) error: Option<SharedString>,
+    pub(crate) screen: Screen,
+    pub(crate) list_tab: ListTab,
+    pub(crate) cabin: Option<Cabin>,
+    pub(crate) sort: Sort,
+    pub(crate) routes_filter: RoutesFilter,
+    pub(crate) selected: Option<RowKey>,
+    pub(crate) origin: Option<PlaceId>,
+    pub(crate) calendar_days: Option<u16>,
+    pub(crate) departure: Option<NaiveDate>,
+    pub(crate) menu: Option<Menu>,
+    /// The menu a click outside just closed, so the same click on its
+    /// trigger does not open it again.
+    menu_closed: Option<(Menu, std::time::Instant)>,
+    pub(crate) toast: Option<SharedString>,
+    pub(crate) settings_form: Option<Entity<SettingsForm>>,
+    /// Miles programs with a login window open.
+    pub(crate) logins: HashSet<String>,
+    notified: HashSet<DealId>,
+    generation: u64,
+    focus: FocusHandle,
+    loading: Option<Task<()>>,
+    toast_task: Option<Task<()>>,
+    _poll: Option<Task<()>>,
+}
+
+impl TravelMonitor {
+    pub fn new(env: AppEnv, cx: &mut Context<Self>) -> Self {
+        let mut this = Self {
+            env,
+            snapshot: None,
+            error: None,
+            screen: Screen::Deals,
+            list_tab: ListTab::Deals,
+            cabin: None,
+            sort: Sort::BiggestDrop,
+            routes_filter: RoutesFilter::All,
+            selected: None,
+            origin: None,
+            calendar_days: None,
+            departure: None,
+            menu: None,
+            menu_closed: None,
+            toast: None,
+            settings_form: None,
+            logins: HashSet::new(),
+            notified: HashSet::new(),
+            generation: 0,
+            focus: cx.focus_handle(),
+            loading: None,
+            toast_task: None,
+            _poll: None,
+        };
+        this.refresh(cx);
+        this.start_polling(cx);
+        this
+    }
+
+    fn start_polling(&mut self, cx: &mut Context<Self>) {
+        let every = self.env.refresh_every;
+        self._poll = Some(cx.spawn(async move |this, cx| {
+            loop {
+                cx.background_executor().timer(every).await;
+                if this.update(cx, |this, cx| this.refresh(cx)).is_err() {
+                    break;
+                }
+            }
+        }));
+    }
+
+    pub fn query(&self) -> SnapshotQuery {
+        SnapshotQuery {
+            origin: self.origin,
+            selected: self.selected,
+            calendar_days: self.calendar_days,
+            departure: self.departure,
+        }
+    }
+
+    /// Fetches a snapshot for the current query on a background task.
+    pub fn refresh(&mut self, cx: &mut Context<Self>) {
+        self.generation += 1;
+        let generation = self.generation;
+        let backend = self.env.backend.clone();
+        let query = self.query();
+        let fetch =
+            cx.background_spawn(async move { backend.snapshot(query).await });
+        self.loading = Some(cx.spawn(async move |this, cx| {
+            let result = fetch.await;
+            let _ = this.update(cx, |this, cx| {
+                if this.generation == generation {
+                    this.apply(result, cx);
+                }
+            });
+        }));
+    }
+
+    pub fn apply(
+        &mut self,
+        result: anyhow::Result<Snapshot>,
+        cx: &mut Context<Self>,
+    ) {
+        match result {
+            Ok(snapshot) => {
+                self.notify_new(&snapshot.notices, cx);
+                self.error = None;
+                self.origin = snapshot.origin;
+                self.snapshot = Some(snapshot);
+                if let Some(form) = &self.settings_form {
+                    form.update(cx, |form, cx| {
+                        if let Some(s) = &self.snapshot {
+                            form.sync(s, cx);
+                        }
+                    });
+                }
+                let visible = self.visible_rows();
+                let still_there = self.selected.is_some_and(|key| {
+                    self.snapshot.as_ref().is_some_and(|s| s.row(key).is_some())
+                });
+                if !still_there {
+                    let first =
+                        visible.first().map(|r| r.key()).or_else(|| {
+                            self.snapshot
+                                .as_ref()
+                                .and_then(|s| s.rows.first().map(RouteRow::key))
+                        });
+                    if first.is_some() {
+                        self.selected = first;
+                        self.departure = None;
+                        self.refresh(cx);
+                    }
+                }
+            }
+            Err(error) => {
+                tracing::warn!("cannot read the database: {error:#}");
+                self.error = Some(format!("{error:#}").into());
+            }
+        }
+        cx.notify();
+    }
+
+    /// Shows a desktop notification for each confirmed deal not shown
+    /// yet, then marks them seen (0040).
+    fn notify_new(&mut self, notices: &[Notice], cx: &mut Context<Self>) {
+        let fresh: Vec<&Notice> = notices
+            .iter()
+            .filter(|n| !self.notified.contains(&n.deal))
+            .collect();
+        if fresh.is_empty() {
+            return;
+        }
+        for notice in &fresh {
+            self.env.notifier.show(notice);
+            self.notified.insert(notice.deal);
+        }
+        let ids: Vec<DealId> = fresh.iter().map(|n| n.deal).collect();
+        let backend = self.env.backend.clone();
+        cx.background_spawn(async move {
+            if let Err(error) = backend.mark_seen(ids).await {
+                tracing::warn!("cannot mark deals seen: {error:#}");
+            }
+        })
+        .detach();
+    }
+
+    /// The rows of the main list, filtered and sorted.
+    pub fn visible_rows(&self) -> Vec<&RouteRow> {
+        let Some(s) = &self.snapshot else {
+            return Vec::new();
+        };
+        let mut rows: Vec<&RouteRow> = s
+            .rows
+            .iter()
+            .filter(|r| self.list_tab == ListTab::All || r.status.is_deal())
+            .filter(|r| self.cabin.is_none_or(|c| c == r.cabin))
+            .collect();
+        sort_rows(&mut rows, self.sort);
+        rows
+    }
+
+    pub fn select(&mut self, key: RowKey, cx: &mut Context<Self>) {
+        if self.selected != Some(key) {
+            self.selected = Some(key);
+            self.departure = None;
+            self.refresh(cx);
+        }
+        cx.notify();
+    }
+
+    pub fn navigate(
+        &mut self,
+        screen: Screen,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        self.screen = screen;
+        self.menu = None;
+        if screen == Screen::Settings && self.settings_form.is_none() {
+            let snapshot = self.snapshot.clone();
+            self.settings_form =
+                Some(cx.new(|cx| {
+                    SettingsForm::new(snapshot.as_ref(), window, cx)
+                }));
+        }
+        cx.notify();
+    }
+
+    pub fn set_origin(&mut self, origin: PlaceId, cx: &mut Context<Self>) {
+        self.origin = Some(origin);
+        self.selected = None;
+        self.menu = None;
+        self.refresh(cx);
+        cx.notify();
+    }
+
+    pub fn toggle_menu(&mut self, menu: Menu, cx: &mut Context<Self>) {
+        if let Some((closed, at)) = self.menu_closed.take()
+            && closed == menu
+            && at.elapsed() < Duration::from_millis(300)
+        {
+            return;
+        }
+        self.menu = if self.menu == Some(menu) {
+            None
+        } else {
+            Some(menu)
+        };
+        cx.notify();
+    }
+
+    pub fn close_menu(&mut self, cx: &mut Context<Self>) {
+        self.menu_closed =
+            self.menu.take().map(|m| (m, std::time::Instant::now()));
+        cx.notify();
+    }
+
+    pub fn show_toast(
+        &mut self,
+        text: impl Into<SharedString>,
+        cx: &mut Context<Self>,
+    ) {
+        self.toast = Some(text.into());
+        self.toast_task = Some(cx.spawn(async move |this, cx| {
+            cx.background_executor().timer(Duration::from_secs(4)).await;
+            let _ = this.update(cx, |this, cx| {
+                this.toast = None;
+                cx.notify();
+            });
+        }));
+        cx.notify();
+    }
+
+    /// Asks the daemon to check the selected route now (0046).
+    pub fn check_now(&mut self, cx: &mut Context<Self>) {
+        let Some(row) =
+            self.selected.and_then(|k| self.snapshot.as_ref()?.row(k))
+        else {
+            return;
+        };
+        let label = format!("{} → {}", row.route.origin.code, row.code());
+        let request = match (row.status, row.deal) {
+            (crate::data::RowStatus::Confirming, Some(deal)) => {
+                Request::ConfirmDeal(deal)
+            }
+            _ => Request::CheckRoute(row.route.id),
+        };
+        self.enqueue(request, format!("Check requested: {label}"), cx);
+    }
+
+    pub fn enqueue(
+        &mut self,
+        request: Request,
+        done: String,
+        cx: &mut Context<Self>,
+    ) {
+        let backend = self.env.backend.clone();
+        let sent =
+            cx.background_spawn(async move { backend.enqueue(request).await });
+        cx.spawn(async move |this, cx| {
+            let result = sent.await;
+            let _ = this.update(cx, |this, cx| match result {
+                Ok(_) => this.show_toast(done, cx),
+                Err(error) => this.show_toast(
+                    format!("Could not ask the daemon: {error:#}"),
+                    cx,
+                ),
+            });
+        })
+        .detach();
+    }
+
+    /// Opens the selected trip in Google Flights with the system opener.
+    pub fn open_in_google_flights(&mut self, cx: &mut Context<Self>) {
+        let url = self
+            .snapshot
+            .as_ref()
+            .and_then(|s| s.detail.as_ref())
+            .filter(|d| Some(d.key) == self.selected)
+            .and_then(|d| d.url.clone());
+        match url {
+            Some(url) => cx.open_url(&url),
+            None => self.show_toast("No search link for this trip yet", cx),
+        }
+    }
+
+    /// Runs a configuration edit on a background task, asks the daemon
+    /// to reload, then refreshes.
+    pub fn write(
+        &mut self,
+        edit: impl Future<Output = anyhow::Result<()>> + Send + 'static,
+        done: &'static str,
+        cx: &mut Context<Self>,
+    ) {
+        let task = cx.background_spawn(edit);
+        cx.spawn(async move |this, cx| {
+            let result = task.await;
+            let _ = this.update(cx, |this, cx| {
+                match result {
+                    Ok(()) => {
+                        this.show_toast(done, cx);
+                        let backend = this.env.backend.clone();
+                        cx.background_spawn(async move {
+                            let _ =
+                                backend.enqueue(Request::ReloadConfig).await;
+                        })
+                        .detach();
+                    }
+                    Err(error) => this.show_toast(format!("{error:#}"), cx),
+                }
+                this.refresh(cx);
+            });
+        })
+        .detach();
+    }
+}
+
+/// Sorts rows: biggest drop first, lowest price first, or newest deal
+/// first (rows without a value go last).
+pub fn sort_rows(rows: &mut [&RouteRow], sort: Sort) {
+    match sort {
+        Sort::BiggestDrop => rows.sort_by(|a, b| {
+            let key = |r: &RouteRow| r.change.unwrap_or(f64::INFINITY);
+            key(a).total_cmp(&key(b))
+        }),
+        Sort::LowestPrice => rows.sort_by_key(|r| {
+            r.best.as_ref().map_or(i64::MAX, |t| t.price.minor)
+        }),
+        Sort::RecentlyFound => {
+            rows.sort_by_key(|r| std::cmp::Reverse(r.found_at))
+        }
+    }
+}
+
+impl Focusable for TravelMonitor {
+    fn focus_handle(&self, _: &gpui::App) -> FocusHandle {
+        self.focus.clone()
+    }
+}
+
+impl Render for TravelMonitor {
+    fn render(
+        &mut self,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> impl IntoElement {
+        let fonts = theme::fonts(cx);
+        let body: AnyElement = match (&self.snapshot, self.screen) {
+            (None, _) => self.render_loading(),
+            (Some(_), Screen::Deals) => self.render_deals(&fonts, window, cx),
+            (Some(_), Screen::Routes) => self.render_routes(&fonts, cx),
+            (Some(_), Screen::Detail) => self.render_detail(&fonts, cx),
+            (Some(_), Screen::Activity) => self.render_activity(&fonts, cx),
+            (Some(_), Screen::Settings) => self.render_settings(&fonts, cx),
+        };
+        div()
+            .id("travel-monitor")
+            .track_focus(&self.focus)
+            .size_full()
+            .flex()
+            .flex_col()
+            .bg(color(theme::GROUND))
+            .text_color(color(theme::TEXT))
+            .font_family(fonts.sans.clone())
+            .text_size(px(14.))
+            .child(self.render_topbar(&fonts, cx))
+            .children(self.error.clone().map(|e| {
+                div()
+                    .px(px(24.))
+                    .py(px(8.))
+                    .bg(color(0x2A1414))
+                    .text_color(color(theme::RED))
+                    .text_size(px(13.))
+                    .child(SharedString::from(format!(
+                        "Cannot read the database: {e}"
+                    )))
+            }))
+            .child(div().flex_1().min_h_0().flex().child(body))
+            .children(self.toast.clone().map(|t| {
+                div()
+                    .absolute()
+                    .bottom(px(20.))
+                    .left(px(20.))
+                    .px(px(14.))
+                    .py(px(10.))
+                    .rounded(px(10.))
+                    .bg(color(theme::CARD))
+                    .border_1()
+                    .border_color(color(theme::BORDER_INPUT))
+                    .text_size(px(13.))
+                    .debug_selector(|| "toast".into())
+                    .child(t)
+            }))
+    }
+}
+
+impl TravelMonitor {
+    fn render_loading(&self) -> AnyElement {
+        div()
+            .size_full()
+            .flex()
+            .items_center()
+            .justify_center()
+            .text_color(color(theme::TEXT_FAINT))
+            .child(if self.error.is_some() {
+                "Waiting for the database…"
+            } else {
+                "Loading…"
+            })
+            .into_any_element()
+    }
+}
+
+#[cfg(test)]
+mod screenshots;
+#[cfg(test)]
+mod tests;

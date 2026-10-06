@@ -1,0 +1,49 @@
+[package]
+name = "tm-app"
+description = "The travel monitor app (gpui)."
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "tm"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+async-trait.workspace = true
+chrono.workspace = true
+clap.workspace = true
+dirs.workspace = true
+gpui.workspace = true
+tm-domain.workspace = true
+tm-gflights.workspace = true
+tm-scheduler.workspace = true
+tm-store.workspace = true
+tokio = { workspace = true, features = ["process"] }
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+# The desktop's windows (Wayland and X11), as ../tau-agent's `tau` binary.
+[target.'cfg(not(target_os = "android"))'.dependencies]
+gpui_platform = { package = "gpui-pre-platform", version = "=0.3.7", features = [
+  "wayland",
+  "x11",
+  "font-kit",
+] }
+
+# Desktop notifications over D-Bus in Rust (zbus), no libdbus.
+[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies]
+notify-rust.workspace = true
+
+[dev-dependencies]
+# Offscreen rendering for the screenshot test (`--ignored screenshots`).
+gpui_platform = { package = "gpui-pre-platform", version = "=0.3.7", features = [
+  "test-support",
+] }
+gpui_wgpu = { package = "gpui-pre-wgpu", version = "=0.3.7" }
+gpui = { workspace = true, features = ["test-support"] }
+tokio = { workspace = true, features = ["process", "macros", "rt-multi-thread"] }
+
+[lints]
+workspace = true
