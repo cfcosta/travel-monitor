@@ -53,6 +53,7 @@ use tm_scheduler::{
     update::{min_moved, update_after_check_with},
 };
 use tm_store::{
+    CheckInProgress,
     DealFilter,
     FamilyRecord,
     Heartbeat,
@@ -165,6 +166,10 @@ pub struct Daemon<S: Sources> {
     resolve_tried: HashSet<PlaceId>,
     state: String,
     next_check: Option<String>,
+    /// When the daemon looks for work again, for the app's countdown.
+    next_check_at: Option<DateTime<Utc>>,
+    /// The check running now, for the heartbeat (0057).
+    check: Option<CheckInProgress>,
 }
 
 impl<S: Sources> Daemon<S> {
@@ -195,6 +200,8 @@ impl<S: Sources> Daemon<S> {
             resolve_tried: HashSet::new(),
             state: "starting".into(),
             next_check: None,
+            next_check_at: None,
+            check: None,
         }
     }
 
@@ -302,6 +309,11 @@ impl<S: Sources> Daemon<S> {
                     error!("tick failed: {e:#}");
                 }
                 next_tick = tokio::time::Instant::now() + self.config.tick;
+                self.next_check_at = Some(
+                    Utc::now()
+                        + chrono::TimeDelta::from_std(self.config.tick)
+                            .unwrap_or_default(),
+                );
                 self.next_check = Some(format!(
                     "next tick at {}",
                     (chrono::Local::now()
@@ -331,6 +343,8 @@ impl<S: Sources> Daemon<S> {
         self.sources.stop().await;
         self.state = "stopped".into();
         self.next_check = None;
+        self.next_check_at = None;
+        self.check = None;
         if let Some(budget) = &self.budget
             && let Err(e) = budget.save(&self.store).await
         {
@@ -349,6 +363,7 @@ impl<S: Sources> Daemon<S> {
             Some(program) if self.state != "stopped" => {
                 format!("paused for login: {program}")
             }
+            _ if self.check.is_some() => "checking".to_owned(),
             _ => self.state.clone(),
         };
         let beat = Heartbeat {
@@ -356,11 +371,38 @@ impl<S: Sources> Daemon<S> {
             updated_at: now,
             state,
             next_check: self.next_check.clone(),
+            next_check_at: self.next_check_at,
+            check: self.check.clone(),
             loads_today,
             budget,
         };
         if let Err(e) = self.store.write_heartbeat(&beat).await {
             warn!("heartbeat failed: {e}");
+        }
+    }
+
+    /// Says on the heartbeat that a check started (0057).
+    async fn begin_check(
+        &mut self,
+        family: FamilyId,
+        query: QueryId,
+        reason: &QueryReason,
+        started_at: DateTime<Utc>,
+    ) {
+        self.check = Some(CheckInProgress {
+            family,
+            query: Some(query),
+            reason: reason.clone(),
+            started_at,
+        });
+        self.next_check_at = None;
+        self.heartbeat().await;
+    }
+
+    /// Says on the heartbeat that the check ended, if one was running.
+    async fn end_check(&mut self) {
+        if self.check.take().is_some() {
+            self.heartbeat().await;
         }
     }
 
@@ -568,6 +610,12 @@ impl<S: Sources> Daemon<S> {
             return;
         }
         let secs = self.rng.random_range(min..=max);
+        self.next_check_at = Some(
+            Utc::now()
+                + chrono::TimeDelta::from_std(Duration::from_secs(secs))
+                    .unwrap_or_default(),
+        );
+        self.heartbeat().await;
         let mut shutdown = self.shutdown.clone();
         tokio::select! {
             () = tokio::time::sleep(Duration::from_secs(secs)) => {}
@@ -897,8 +945,20 @@ impl<S: Sources> Daemon<S> {
             .map(|(_, d)| d)
     }
 
-    /// Runs one check of `family` and records everything it saw.
+    /// Runs one check of `family` and records everything it saw. The
+    /// heartbeat says so while it runs (0057).
     pub async fn run_check(
+        &mut self,
+        family_id: FamilyId,
+        reason: QueryReason,
+        world: &World,
+    ) -> anyhow::Result<()> {
+        let result = self.check_family(family_id, reason, world).await;
+        self.end_check().await;
+        result
+    }
+
+    async fn check_family(
         &mut self,
         family_id: FamilyId,
         reason: QueryReason,
@@ -947,6 +1007,7 @@ impl<S: Sources> Daemon<S> {
         };
         let started = Utc::now();
         let query = self.store.start_query(family.id, &reason, started).await?;
+        self.begin_check(family.id, query, &reason, started).await;
         info!(
             family = %family.id,
             route = %format!("{}-{}", route.origin.code, route.destination.code),
@@ -980,6 +1041,7 @@ impl<S: Sources> Daemon<S> {
             )
             .await?;
         self.spend(fetch.page_loads).await?;
+        self.end_check().await;
         info!(
             family = %family.id,
             outcome = ?fetch.outcome,
@@ -1500,6 +1562,17 @@ impl<S: Sources> Daemon<S> {
         deal: &Deal,
         legs_sum: Option<i64>,
     ) -> anyhow::Result<()> {
+        let result = self.confirm_deal(id, deal, legs_sum).await;
+        self.end_check().await;
+        result
+    }
+
+    async fn confirm_deal(
+        &mut self,
+        id: DealId,
+        deal: &Deal,
+        legs_sum: Option<i64>,
+    ) -> anyhow::Result<()> {
         if self
             .budget
             .as_ref()
@@ -1549,6 +1622,8 @@ impl<S: Sources> Daemon<S> {
             .store
             .start_query(log_family, &QueryReason::Confirmation, now)
             .await?;
+        self.begin_check(log_family, query, &QueryReason::Confirmation, now)
+            .await;
         let job = ConfirmJob {
             pos: pos.id,
             search,
@@ -1567,6 +1642,7 @@ impl<S: Sources> Daemon<S> {
             )
             .await?;
         self.spend(fetch.page_loads).await?;
+        self.end_check().await;
         match &fetch.outcome {
             QueryOutcome::Ok => {}
             QueryOutcome::Blocked { detail } => {

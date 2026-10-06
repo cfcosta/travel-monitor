@@ -6,7 +6,7 @@
     reason = "#[tokio::test] expands to block_on: a test is the runtime's entry point"
 )]
 
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, OnceLock};
 
 use async_trait::async_trait;
 use chrono::{DateTime, Days, NaiveDate, TimeDelta, Utc};
@@ -46,7 +46,14 @@ use tm_domain::{
     Source,
 };
 use tm_gflights::rpc::{ExploreDestination, Seller, SellerOffer};
-use tm_store::{DealFilter, LoginState, RequestKind, RequestStatus, Store};
+use tm_store::{
+    DealFilter,
+    Heartbeat,
+    LoginState,
+    RequestKind,
+    RequestStatus,
+    Store,
+};
 use tokio::sync::watch;
 
 type Answer<J, T> = Box<dyn FnMut(&J) -> Fetch<T> + Send>;
@@ -320,6 +327,68 @@ async fn startup_seeds_and_learns_freebase_ids() {
     assert_eq!(beat.state, "running");
     assert_eq!(beat.budget, 300);
     assert_eq!(beat.loads_today, 7);
+}
+
+/// The heartbeat says what is being checked while the source runs, and
+/// goes back to idle when it is done (0057).
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn a_check_writes_start_and_end_heartbeats() {
+    let slot: Arc<OnceLock<Store>> = Arc::new(OnceLock::new());
+    let during: Arc<Mutex<Vec<Heartbeat>>> = Arc::default();
+    let mut h = harness(Only::default(), |fake| {
+        let (slot, during) = (Arc::clone(&slot), Arc::clone(&during));
+        fake.calendar = Box::new(move |_| {
+            // What the app would read while the page loads.
+            if let Some(store) = slot.get() {
+                let beat = tokio::task::block_in_place(|| {
+                    tokio::runtime::Handle::current()
+                        .block_on(store.heartbeat())
+                })
+                .expect("reads")
+                .expect("a heartbeat");
+                during.lock().expect("lock").push(beat);
+            }
+            Fetch::ok(Vec::new(), 2, 0)
+        });
+    })
+    .await;
+    let store = h.store().clone();
+    assert!(slot.set(store.clone()).is_ok());
+    let lis = leg(&store, "LIS", Leg::Outbound).await;
+    let before = store
+        .heartbeat()
+        .await
+        .expect("reads")
+        .expect("a heartbeat");
+    assert_eq!(before.state, "running");
+    assert_eq!(before.check, None);
+
+    let world = h.daemon.world().await.expect("loads");
+    h.daemon
+        .run_check(lis, QueryReason::Manual, &world)
+        .await
+        .expect("checks");
+
+    let during = during.lock().expect("lock").clone();
+    assert_eq!(during.len(), 1, "the source ran once");
+    let beat = &during[0];
+    assert_eq!(beat.state, "checking");
+    let check = beat.check.as_ref().expect("the check in progress");
+    assert_eq!(check.family, lis);
+    assert_eq!(check.reason, QueryReason::Manual);
+    assert!(check.started_at >= before.updated_at);
+    let logged = store.recent_queries(1).await.expect("reads");
+    assert_eq!(check.query, Some(logged[0].id));
+    assert!(logged[0].finished_at.is_some());
+
+    let after = store
+        .heartbeat()
+        .await
+        .expect("reads")
+        .expect("a heartbeat");
+    assert_eq!(after.state, "running");
+    assert_eq!(after.check, None);
+    assert!(after.updated_at >= beat.updated_at);
 }
 
 #[tokio::test]
