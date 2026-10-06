@@ -2,7 +2,9 @@
 //!
 //! Order of picks:
 //!
-//! 1. **Overdue**: checked longer ago than `max_interval`, most overdue
+//! 1. **Overdue**: checked longer ago than its maximum interval (the
+//!    candidate's own [`Candidate::max_interval`], else `max_interval`),
+//!    most overdue first.
 //!    first.
 //! 2. **Bootstrap**: never checked, lowest [`Candidate::bootstrap_rank`]
 //!    first (DECISIONS.md 0049), then highest weight. Ranks are taken
@@ -44,6 +46,9 @@ pub struct Candidate {
     /// Bootstrap order for never-checked families: lower ranks are
     /// checked first (DECISIONS.md 0049). Ignored once checked.
     pub bootstrap_rank: u8,
+    /// A tighter maximum interval for this family (core families are
+    /// checked daily, DECISIONS.md 0056); `None` uses the global one.
+    pub max_interval: Option<chrono::TimeDelta>,
 }
 
 /// What this tick may spend.
@@ -97,6 +102,9 @@ pub fn plan_tick<R: Rng + ?Sized>(
                 if tau < min_days {
                     continue;
                 }
+                let max_days = c
+                    .max_interval
+                    .map_or(max_days, |m| m.num_seconds() as f64 / 86_400.0);
                 if tau >= max_days {
                     overdue.push((i, tau));
                 } else {
@@ -268,7 +276,26 @@ mod tests {
             },
             active: true,
             bootstrap_rank: 0,
+            max_interval: None,
         }
+    }
+
+    #[test]
+    fn a_family_interval_overrides_the_global_one() {
+        // Checked 30 hours ago: within the weekly cap, past a daily one.
+        let weekly = cand(1, "gf", Some(30));
+        let mut daily = cand(2, "gf", Some(30));
+        daily.max_interval = Some(TimeDelta::hours(24));
+        let picks = plan_tick(
+            &[weekly, daily],
+            now(),
+            &budget(1),
+            &no_random(),
+            &mut StdRng::seed_from_u64(3),
+        );
+        assert_eq!(picks.len(), 1);
+        assert_eq!(picks[0].family.0, 2);
+        assert_eq!(picks[0].reason, QueryReason::Overdue);
     }
 
     #[test]

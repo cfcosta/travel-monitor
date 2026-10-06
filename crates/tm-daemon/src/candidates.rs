@@ -215,6 +215,16 @@ pub fn bootstrap_rank(key: &FamilyKey, home_pos: Option<PosId>) -> u8 {
     }
 }
 
+/// Core families (rank 0: the home point of sale's economy legs and
+/// Explore sweeps on Google Flights) are checked at least daily
+/// (DECISIONS.md 0056); the rest keep the global weekly maximum.
+pub fn core_interval(
+    key: &FamilyKey,
+    home_pos: Option<PosId>,
+) -> Option<chrono::TimeDelta> {
+    (bootstrap_rank(key, home_pos) == 0).then(|| chrono::TimeDelta::hours(24))
+}
+
 /// The candidates for `plan_tick`, and how many families each reason
 /// left out (for the log).
 pub fn build(
@@ -232,6 +242,7 @@ pub fn build(
                 state: to_state(&f.state),
                 active: true,
                 bootstrap_rank: bootstrap_rank(&f.key, cx.home_pos),
+                max_interval: core_interval(&f.key, cx.home_pos),
             }),
             Err(skip) => *skipped.entry(skip).or_insert(0) += 1,
         }
@@ -381,6 +392,12 @@ mod tests {
         let mut airline = key(Cabin::Economy, 1, leg);
         airline.source = Source::Airline { code: "LA".into() };
         assert_eq!(bootstrap_rank(&airline, home), 6);
+        assert_eq!(
+            core_interval(&key(Cabin::Economy, 1, leg), home),
+            Some(chrono::TimeDelta::hours(24))
+        );
+        assert_eq!(core_interval(&key(Cabin::Business, 1, leg), home), None);
+        assert_eq!(core_interval(&key(Cabin::Economy, 2, leg), home), None);
     }
 
     fn miles(id: i64, program: &str) -> FamilyRecord {

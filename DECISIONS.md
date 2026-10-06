@@ -749,3 +749,35 @@ first-run seed:
 
 Puerto Williams and the other continents' gateways (Cape Town,
 Christchurch, Hobart) were considered and left out.
+
+## 0055: South America's main airports join the watchlist
+
+- Date: 2026-10-06
+- Adds to [0054](#0054-aracaju-and-the-antarctic-gateways-join-the-watchlist).
+
+The busiest South American airports not yet watched are added, in the
+live database and the first-run seed: CNF Belo Horizonte, CWB Curitiba,
+BEL Belém, MAO Manaus, GYN Goiânia, VIX Vitória, CGB Cuiabá (Brazil);
+MDE Medellín, CTG Cartagena, CLO Cali (Colombia); UIO Quito, GYE
+Guayaquil (Ecuador); CCS Caracas (Venezuela); ASU Asunción (Paraguay);
+VVI Santa Cruz, LPB La Paz (Bolivia); CUZ Cusco (Peru); COR Córdoba,
+MDZ Mendoza (Argentina). The watchlist grows from 33 to 52
+destinations.
+
+## 0056: Core families are checked every day
+
+- Date: 2026-10-06
+- Refines [0029](#0029-a-daily-budget-with-a-weekly-maximum-interval),
+  [0039](#0039-the-page-load-budget-starts-conservative-and-ramps-up)
+  and [0049](#0049-bootstrap-core-families-first-starting-at-600-loads-a-day).
+
+Every watched destination must be covered at least once a day. "Core"
+families (bootstrap rank 0 of 0049: the home point of sale's economy
+legs in both directions, and the Explore sweeps) get a maximum interval
+of 24 hours instead of a week, so the scheduler checks each of them at
+least daily. Premium cabins, round trips and foreign points of sale
+keep the weekly maximum.
+
+At about 8 page loads per leg check, 52 destinations need about 850
+loads a day for the core alone, so the daily budget starts at 1,200 and
+may ramp to 3,000. Blocks still halve it and cool the site down (0039).
