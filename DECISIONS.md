@@ -972,3 +972,28 @@ place: Keflavík (KEF) for Iceland, Nuuk (GOH) for Greenland, whose new
 runway took over the international flights from Kangerlussuaq in 2024,
 and Anchorage (ANC) for Alaska. The watchlist grows from 114 to 117.
 A database seeded before this gets them from the app's settings.
+
+## 0067: "No flights" is an outcome of its own
+
+- Date: 2026-10-06
+- Refines [0059](#0059-jev-is-removed).
+
+When a source loads correctly and says there is nothing to sell
+(Google Flights' "No results returned" / "No options matching your
+search" / "No business class flights found"), the check ends as
+`QueryOutcome::NoFlights`, not `Unexpected`. It costs its page load, is
+shown quietly in Activity (not as an error), and that family waits a
+week before the next check: a family whose last check found no flights
+gets a minimum interval of 7 days and loses the daily core cadence of
+0056. A family that finds flights again goes back to normal.
+
+## 0068: Nuuk leaves the watchlist
+
+- Date: 2026-10-06
+- Removes GOH from [0066](#0066-iceland-greenland-and-alaska-join-the-watchlist).
+
+Google Flights has no results at all for São Paulo ↔ Nuuk, in any
+cabin or point of sale: no single ticket to Greenland is sold through
+it. GOH is deactivated in the live database (its history is kept, as
+for any removed route) and dropped from the first-run seed. Reykjavík
+and Anchorage stay.

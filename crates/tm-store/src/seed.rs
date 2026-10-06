@@ -169,7 +169,6 @@ fn watchlist() -> Vec<NewPlace> {
         a("AKL", "Auckland", "NZ", -36.85, 174.76),
         // The far north, the biggest airport of each (0066)
         a("KEF", "Reykjavík", "IS", 64.15, -21.94),
-        a("GOH", "Nuuk", "GL", 64.18, -51.72),
         a("ANC", "Anchorage", "US", 61.22, -149.90),
         // Long-haul
         a("DXB", "Dubai", "AE", 25.20, 55.27),
