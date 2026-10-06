@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO destinations (place_id, weight, active) VALUES (?1, ?2, 1)\n         ON CONFLICT (place_id) DO UPDATE SET active = 1, weight = ?2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "468330f79e1523002a33858349f453432d468152aa895ffb962dd4543f33441e"
+}

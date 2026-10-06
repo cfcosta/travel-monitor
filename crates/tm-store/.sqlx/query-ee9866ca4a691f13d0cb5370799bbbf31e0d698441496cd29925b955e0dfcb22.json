@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT r.id FROM routes r\n             JOIN places o ON o.id = r.origin_id\n             JOIN places p ON p.id = r.destination_id\n             WHERE o.code = ?1 AND p.code = ?2",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "ee9866ca4a691f13d0cb5370799bbbf31e0d698441496cd29925b955e0dfcb22"
+}

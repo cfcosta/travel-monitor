@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO miles_programs (program, name, active) VALUES (?1, ?2, ?3)\n         ON CONFLICT (program) DO UPDATE SET name = excluded.name,\n             active = excluded.active",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "59c5d200202d64a806dcdab76c4deba8016e4581e30afd9e6b09da0cf329709c"
+}

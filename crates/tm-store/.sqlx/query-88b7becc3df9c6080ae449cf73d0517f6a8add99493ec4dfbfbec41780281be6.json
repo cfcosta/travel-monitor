@@ -1,0 +1,50 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT code, name, active AS \"active: bool\"\n               FROM airline_sources ORDER BY code",
+  "describe": {
+    "columns": [
+      {
+        "name": "code",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "airline_sources",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "airline_sources",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "name": "active: bool",
+        "ordinal": 2,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "airline_sources",
+            "name": "active"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "88b7becc3df9c6080ae449cf73d0517f6a8add99493ec4dfbfbec41780281be6"
+}

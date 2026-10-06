@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO requests (kind, payload, status, created_at)\n             VALUES (?1, ?2, 'pending', ?3)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "8058f2533e3ed59b5829fe8e0fd8cf9f5916e2a29d30ee69a8271e55b6e203a6"
+}

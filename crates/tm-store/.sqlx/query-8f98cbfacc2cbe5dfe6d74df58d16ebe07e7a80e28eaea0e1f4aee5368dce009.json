@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT OR IGNORE INTO airline_destinations (airline_code, place_id)\n             VALUES (?1, ?2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "8f98cbfacc2cbe5dfe6d74df58d16ebe07e7a80e28eaea0e1f4aee5368dce009"
+}

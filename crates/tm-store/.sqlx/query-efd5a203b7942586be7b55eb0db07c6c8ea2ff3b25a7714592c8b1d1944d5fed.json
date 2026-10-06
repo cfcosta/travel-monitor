@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO blocks (site, at, detail, loads_last_hour)\n             VALUES (?1, ?2, ?3, ?4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "efd5a203b7942586be7b55eb0db07c6c8ea2ff3b25a7714592c8b1d1944d5fed"
+}

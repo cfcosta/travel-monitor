@@ -1,0 +1,242 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT adults, children, infants_in_seat, infants_on_lap,\n                trip_min_days, trip_max_days, round_trip_days, horizon_days,\n                iof, card_spread, daily_budget, max_daily_budget,\n                max_interval_hours, min_interval_hours, random_share,\n                deal_threshold, min_history_weeks, additive_checks_to_stop,\n                language\n         FROM settings WHERE id = 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "adults",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "adults"
+          }
+        }
+      },
+      {
+        "name": "children",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "children"
+          }
+        }
+      },
+      {
+        "name": "infants_in_seat",
+        "ordinal": 2,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "infants_in_seat"
+          }
+        }
+      },
+      {
+        "name": "infants_on_lap",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "infants_on_lap"
+          }
+        }
+      },
+      {
+        "name": "trip_min_days",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "trip_min_days"
+          }
+        }
+      },
+      {
+        "name": "trip_max_days",
+        "ordinal": 5,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "trip_max_days"
+          }
+        }
+      },
+      {
+        "name": "round_trip_days",
+        "ordinal": 6,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "round_trip_days"
+          }
+        }
+      },
+      {
+        "name": "horizon_days",
+        "ordinal": 7,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "horizon_days"
+          }
+        }
+      },
+      {
+        "name": "iof",
+        "ordinal": 8,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "iof"
+          }
+        }
+      },
+      {
+        "name": "card_spread",
+        "ordinal": 9,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "card_spread"
+          }
+        }
+      },
+      {
+        "name": "daily_budget",
+        "ordinal": 10,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "daily_budget"
+          }
+        }
+      },
+      {
+        "name": "max_daily_budget",
+        "ordinal": 11,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "max_daily_budget"
+          }
+        }
+      },
+      {
+        "name": "max_interval_hours",
+        "ordinal": 12,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "max_interval_hours"
+          }
+        }
+      },
+      {
+        "name": "min_interval_hours",
+        "ordinal": 13,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "min_interval_hours"
+          }
+        }
+      },
+      {
+        "name": "random_share",
+        "ordinal": 14,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "random_share"
+          }
+        }
+      },
+      {
+        "name": "deal_threshold",
+        "ordinal": 15,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "deal_threshold"
+          }
+        }
+      },
+      {
+        "name": "min_history_weeks",
+        "ordinal": 16,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "min_history_weeks"
+          }
+        }
+      },
+      {
+        "name": "additive_checks_to_stop",
+        "ordinal": 17,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "additive_checks_to_stop"
+          }
+        }
+      },
+      {
+        "name": "language",
+        "ordinal": 18,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "language"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "48576669da97a5ffda9d12152f1e9c27f42892d846258e49f6bb218f75ae0719"
+}

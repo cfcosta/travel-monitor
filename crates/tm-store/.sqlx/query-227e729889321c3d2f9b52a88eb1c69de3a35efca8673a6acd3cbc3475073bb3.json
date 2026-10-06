@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE miles_programs SET login_state = ?2, last_checked = ?3\n             WHERE program = ?1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "227e729889321c3d2f9b52a88eb1c69de3a35efca8673a6acd3cbc3475073bb3"
+}

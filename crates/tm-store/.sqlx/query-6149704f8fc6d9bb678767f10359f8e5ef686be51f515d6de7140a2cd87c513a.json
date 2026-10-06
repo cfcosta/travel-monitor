@@ -1,0 +1,50 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT e.currency, e.brl_per_unit, e.at AS \"at: DateTime<Utc>\"\n               FROM exchange_rates e\n               WHERE e.id = (SELECT x.id FROM exchange_rates x\n                             WHERE x.currency = e.currency\n                             ORDER BY x.at DESC, x.id DESC LIMIT 1)\n               ORDER BY e.currency",
+  "describe": {
+    "columns": [
+      {
+        "name": "currency",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "exchange_rates",
+            "name": "currency"
+          }
+        }
+      },
+      {
+        "name": "brl_per_unit",
+        "ordinal": 1,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "exchange_rates",
+            "name": "brl_per_unit"
+          }
+        }
+      },
+      {
+        "name": "at: DateTime<Utc>",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "exchange_rates",
+            "name": "at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "6149704f8fc6d9bb678767f10359f8e5ef686be51f515d6de7140a2cd87c513a"
+}

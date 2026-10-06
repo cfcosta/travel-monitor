@@ -1,0 +1,297 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT q.id, q.family_id, f.route_id, f.cabin, f.source,\n                      f.source_code, f.pos_id, f.kind, f.leg, f.days, f.site,\n                      o.code AS origin_code, p.code AS destination_code,\n                      r.sweep AS \"sweep: bool\",\n                      q.reason_json, q.score, q.runner_up,\n                      q.scheduled_at AS \"scheduled_at: DateTime<Utc>\",\n                      q.started_at AS \"started_at: DateTime<Utc>\",\n                      q.finished_at AS \"finished_at: DateTime<Utc>\",\n                      q.outcome_json, q.page_loads, q.jev_calls,\n                      (SELECT COUNT(*) FROM observations ob\n                       WHERE ob.query_id = q.id) AS \"cells!: i64\"\n               FROM queries q\n               JOIN families f ON f.id = q.family_id\n               JOIN routes r ON r.id = f.route_id\n               JOIN places o ON o.id = r.origin_id\n               JOIN places p ON p.id = r.destination_id\n               ORDER BY q.started_at DESC, q.id DESC\n               LIMIT ?1",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "queries",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "family_id",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "queries",
+            "name": "family_id"
+          }
+        }
+      },
+      {
+        "name": "route_id",
+        "ordinal": 2,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "route_id"
+          }
+        }
+      },
+      {
+        "name": "cabin",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "cabin"
+          }
+        }
+      },
+      {
+        "name": "source",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "source"
+          }
+        }
+      },
+      {
+        "name": "source_code",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "source_code"
+          }
+        }
+      },
+      {
+        "name": "pos_id",
+        "ordinal": 6,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "pos_id"
+          }
+        }
+      },
+      {
+        "name": "kind",
+        "ordinal": 7,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "name": "leg",
+        "ordinal": 8,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "leg"
+          }
+        }
+      },
+      {
+        "name": "days",
+        "ordinal": 9,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "days"
+          }
+        }
+      },
+      {
+        "name": "site",
+        "ordinal": 10,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "site"
+          }
+        }
+      },
+      {
+        "name": "origin_code",
+        "ordinal": 11,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "name": "destination_code",
+        "ordinal": 12,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "name": "sweep: bool",
+        "ordinal": 13,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "sweep"
+          }
+        }
+      },
+      {
+        "name": "reason_json",
+        "ordinal": 14,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "queries",
+            "name": "reason_json"
+          }
+        }
+      },
+      {
+        "name": "score",
+        "ordinal": 15,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "queries",
+            "name": "score"
+          }
+        }
+      },
+      {
+        "name": "runner_up",
+        "ordinal": 16,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "queries",
+            "name": "runner_up"
+          }
+        }
+      },
+      {
+        "name": "scheduled_at: DateTime<Utc>",
+        "ordinal": 17,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "queries",
+            "name": "scheduled_at"
+          }
+        }
+      },
+      {
+        "name": "started_at: DateTime<Utc>",
+        "ordinal": 18,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "queries",
+            "name": "started_at"
+          }
+        }
+      },
+      {
+        "name": "finished_at: DateTime<Utc>",
+        "ordinal": 19,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "queries",
+            "name": "finished_at"
+          }
+        }
+      },
+      {
+        "name": "outcome_json",
+        "ordinal": 20,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "queries",
+            "name": "outcome_json"
+          }
+        }
+      },
+      {
+        "name": "page_loads",
+        "ordinal": 21,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "queries",
+            "name": "page_loads"
+          }
+        }
+      },
+      {
+        "name": "jev_calls",
+        "ordinal": 22,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "queries",
+            "name": "jev_calls"
+          }
+        }
+      },
+      {
+        "name": "cells!: i64",
+        "ordinal": 23,
+        "type_info": "Integer",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "551dcd80b93e0a838c477f3cc3a79942af6ddf09870505228b04a3ec78375da7"
+}

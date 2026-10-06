@@ -1,0 +1,134 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT p.id, p.code, p.name, p.country, p.kind, p.freebase_id,\n                      p.lat, p.lon, d.weight, d.active AS \"active: bool\"\n               FROM destinations d JOIN places p ON p.id = d.place_id\n               WHERE (?1 = 0 OR d.active = 1)\n               ORDER BY p.code",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "code",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "name": "name",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "name": "country",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "country"
+          }
+        }
+      },
+      {
+        "name": "kind",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "name": "freebase_id",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "freebase_id"
+          }
+        }
+      },
+      {
+        "name": "lat",
+        "ordinal": 6,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "lat"
+          }
+        }
+      },
+      {
+        "name": "lon",
+        "ordinal": 7,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "lon"
+          }
+        }
+      },
+      {
+        "name": "weight",
+        "ordinal": 8,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "destinations",
+            "name": "weight"
+          }
+        }
+      },
+      {
+        "name": "active: bool",
+        "ordinal": 9,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "destinations",
+            "name": "active"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "4049c0ecdbd3787e717049755dd65cdd29da9ef1011e22729426c6f1539ef28f"
+}

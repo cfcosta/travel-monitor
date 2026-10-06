@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT airline_code AS \"airline_code!\", place_id AS \"place_id!\"\n             FROM airline_destinations\n             ORDER BY airline_code, place_id",
+  "describe": {
+    "columns": [
+      {
+        "name": "airline_code!",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "airline_destinations",
+            "name": "airline_code"
+          }
+        }
+      },
+      {
+        "name": "place_id!",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "airline_destinations",
+            "name": "place_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "28496a02907292d622c0c613feea1d68f04b2b1425a685ddf234ed0b075e3362"
+}

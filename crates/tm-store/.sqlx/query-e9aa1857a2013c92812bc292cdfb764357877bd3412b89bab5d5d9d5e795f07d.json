@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE places SET freebase_id = ?2 WHERE id = ?1 AND kind = 'city'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "e9aa1857a2013c92812bc292cdfb764357877bd3412b89bab5d5d9d5e795f07d"
+}

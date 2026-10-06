@@ -1,0 +1,98 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE requests SET status = 'claimed', claimed_at = ?1\n               WHERE id = (SELECT id FROM requests WHERE status = 'pending'\n                           ORDER BY id LIMIT 1)\n               RETURNING id AS \"id!: i64\", payload AS \"payload!: String\",\n                         status AS \"status!: String\",\n                         created_at AS \"created_at!: DateTime<Utc>\",\n                         claimed_at AS \"claimed_at: DateTime<Utc>\",\n                         finished_at AS \"finished_at: DateTime<Utc>\",\n                         detail AS \"detail: String\"",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!: i64",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "requests",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "payload!: String",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "requests",
+            "name": "payload"
+          }
+        }
+      },
+      {
+        "name": "status!: String",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "requests",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "name": "created_at!: DateTime<Utc>",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "requests",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "name": "claimed_at: DateTime<Utc>",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "requests",
+            "name": "claimed_at"
+          }
+        }
+      },
+      {
+        "name": "finished_at: DateTime<Utc>",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "requests",
+            "name": "finished_at"
+          }
+        }
+      },
+      {
+        "name": "detail: String",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "requests",
+            "name": "detail"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "419faf63b7bf314fd46006ed7b0e56dca3eeec3d13549487ec6fdbdd041c1f29"
+}

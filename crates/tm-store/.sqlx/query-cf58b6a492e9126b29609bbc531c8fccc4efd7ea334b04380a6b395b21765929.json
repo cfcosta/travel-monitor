@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE requests SET status = 'pending', claimed_at = NULL\n             WHERE status = 'claimed'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "cf58b6a492e9126b29609bbc531c8fccc4efd7ea334b04380a6b395b21765929"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE airline_sources SET active = ?2 WHERE code = ?1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "354352db28386678ee5cbd08f84039b2ecbe58cf2aba2913324f6bb8eee64d07"
+}

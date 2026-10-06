@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE origins SET active = 0 WHERE place_id = ?1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "500aac9d60fb5ff613100cbd7229827f589144fd7b1f8fc9238fa887ea400203"
+}

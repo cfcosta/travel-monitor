@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO points_of_sale (country, currency, is_home, active)\n         VALUES (?1, ?2, ?3, 1)\n         ON CONFLICT (country) DO UPDATE SET\n             currency = excluded.currency,\n             is_home = excluded.is_home,\n             active = 1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "e589eb06bdb0ad7c05251e892754b315a645b5245dba35e13680a3031b6929ca"
+}

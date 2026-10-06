@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE families SET chg_a = ?2, chg_b = ?3, deal_a = ?4,\n                 deal_b = ?5, prec_a = ?6, prec_b = ?7, n_hints = ?8,\n                 last_check = ?9, last_min_price_minor = ?10, checks = ?11,\n                 cost_loads = ?12\n             WHERE id = ?1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 12
+    },
+    "nullable": []
+  },
+  "hash": "5425f92868b69b5f5f661bfab177d0d9a20fdf6f134e8cf8bc9701f467a2f41f"
+}

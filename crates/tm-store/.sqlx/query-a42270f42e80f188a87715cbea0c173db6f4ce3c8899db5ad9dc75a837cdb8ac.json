@@ -1,0 +1,74 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT program, name, login_state,\n                      last_checked AS \"last_checked: DateTime<Utc>\",\n                      active AS \"active: bool\"\n               FROM miles_programs ORDER BY program",
+  "describe": {
+    "columns": [
+      {
+        "name": "program",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "miles_programs",
+            "name": "program"
+          }
+        }
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "miles_programs",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "name": "login_state",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "miles_programs",
+            "name": "login_state"
+          }
+        }
+      },
+      {
+        "name": "last_checked: DateTime<Utc>",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "miles_programs",
+            "name": "last_checked"
+          }
+        }
+      },
+      {
+        "name": "active: bool",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "miles_programs",
+            "name": "active"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "a42270f42e80f188a87715cbea0c173db6f4ce3c8899db5ad9dc75a837cdb8ac"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO seller_quotes (deal_id, pos_id, seller, is_airline,\n                 price_minor, currency, quoted_minor, quoted_currency)\n             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 8
+    },
+    "nullable": []
+  },
+  "hash": "db971f9a473aa4f593de6f39c668ba26ced527664bcf04dd32b5d7998ce78366"
+}

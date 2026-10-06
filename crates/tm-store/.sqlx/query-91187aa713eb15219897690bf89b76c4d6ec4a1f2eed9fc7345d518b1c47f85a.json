@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO families (\n                     key, route_id, cabin, source, source_code, pos_id, kind,\n                     leg, days, site, active, chg_a, chg_b, deal_a, deal_b,\n                     prec_a, prec_b, n_hints, checks, cost_loads)\n                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, 1, ?11, ?12,\n                         ?13, ?14, ?15, ?16, 0, 0, ?17)\n                 ON CONFLICT (key) DO UPDATE SET active = 1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 17
+    },
+    "nullable": []
+  },
+  "hash": "91187aa713eb15219897690bf89b76c4d6ec4a1f2eed9fc7345d518b1c47f85a"
+}

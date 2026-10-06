@@ -1,0 +1,333 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT f.id, f.route_id, f.cabin, f.source, f.source_code,\n                      f.pos_id, f.kind, f.leg, f.days, f.site,\n                      f.active AS \"active: bool\",\n                      CASE WHEN r.sweep = 1 THEN 1.0\n                           ELSE COALESCE(d.weight, 1.0) END AS \"weight!: f64\",\n                      f.chg_a, f.chg_b, f.deal_a, f.deal_b, f.prec_a, f.prec_b,\n                      f.n_hints,\n                      f.last_check AS \"last_check: DateTime<Utc>\",\n                      f.last_min_price_minor, f.checks, f.cost_loads,\n                      r.rt_discount_ewma, r.rt_discount_n, r.additive_streak,\n                      r.additive AS \"additive: bool\"\n               FROM families f\n               JOIN routes r ON r.id = f.route_id\n               LEFT JOIN destinations d ON d.place_id = r.destination_id\n               WHERE (?1 = 0 OR f.active = 1)\n               ORDER BY f.id",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "route_id",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "route_id"
+          }
+        }
+      },
+      {
+        "name": "cabin",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "cabin"
+          }
+        }
+      },
+      {
+        "name": "source",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "source"
+          }
+        }
+      },
+      {
+        "name": "source_code",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "source_code"
+          }
+        }
+      },
+      {
+        "name": "pos_id",
+        "ordinal": 5,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "pos_id"
+          }
+        }
+      },
+      {
+        "name": "kind",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "name": "leg",
+        "ordinal": 7,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "leg"
+          }
+        }
+      },
+      {
+        "name": "days",
+        "ordinal": 8,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "days"
+          }
+        }
+      },
+      {
+        "name": "site",
+        "ordinal": 9,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "site"
+          }
+        }
+      },
+      {
+        "name": "active: bool",
+        "ordinal": 10,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "active"
+          }
+        }
+      },
+      {
+        "name": "weight!: f64",
+        "ordinal": 11,
+        "type_info": "Float",
+        "origin": "Expression"
+      },
+      {
+        "name": "chg_a",
+        "ordinal": 12,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "chg_a"
+          }
+        }
+      },
+      {
+        "name": "chg_b",
+        "ordinal": 13,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "chg_b"
+          }
+        }
+      },
+      {
+        "name": "deal_a",
+        "ordinal": 14,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "deal_a"
+          }
+        }
+      },
+      {
+        "name": "deal_b",
+        "ordinal": 15,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "deal_b"
+          }
+        }
+      },
+      {
+        "name": "prec_a",
+        "ordinal": 16,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "prec_a"
+          }
+        }
+      },
+      {
+        "name": "prec_b",
+        "ordinal": 17,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "prec_b"
+          }
+        }
+      },
+      {
+        "name": "n_hints",
+        "ordinal": 18,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "n_hints"
+          }
+        }
+      },
+      {
+        "name": "last_check: DateTime<Utc>",
+        "ordinal": 19,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "last_check"
+          }
+        }
+      },
+      {
+        "name": "last_min_price_minor",
+        "ordinal": 20,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "last_min_price_minor"
+          }
+        }
+      },
+      {
+        "name": "checks",
+        "ordinal": 21,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "checks"
+          }
+        }
+      },
+      {
+        "name": "cost_loads",
+        "ordinal": 22,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "families",
+            "name": "cost_loads"
+          }
+        }
+      },
+      {
+        "name": "rt_discount_ewma",
+        "ordinal": 23,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "rt_discount_ewma"
+          }
+        }
+      },
+      {
+        "name": "rt_discount_n",
+        "ordinal": 24,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "rt_discount_n"
+          }
+        }
+      },
+      {
+        "name": "additive_streak",
+        "ordinal": 25,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "additive_streak"
+          }
+        }
+      },
+      {
+        "name": "additive: bool",
+        "ordinal": 26,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "additive"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "1c571422cbcc21947f6d000ba89e389cbaa6d26c010b24efaaa0c96b1479f3d0"
+}

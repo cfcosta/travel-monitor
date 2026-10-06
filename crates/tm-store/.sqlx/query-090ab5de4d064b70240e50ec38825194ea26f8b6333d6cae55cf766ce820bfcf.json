@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO origins (place_id, active) VALUES (?1, 1)\n         ON CONFLICT (place_id) DO UPDATE SET active = 1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "090ab5de4d064b70240e50ec38825194ea26f8b6333d6cae55cf766ce820bfcf"
+}

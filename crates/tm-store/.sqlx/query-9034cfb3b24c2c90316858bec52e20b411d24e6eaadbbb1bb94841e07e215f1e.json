@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT brl_per_unit, at AS \"at: DateTime<Utc>\"\n               FROM exchange_rates WHERE currency = ?1\n               ORDER BY at DESC, id DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "brl_per_unit",
+        "ordinal": 0,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "exchange_rates",
+            "name": "brl_per_unit"
+          }
+        }
+      },
+      {
+        "name": "at: DateTime<Utc>",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "exchange_rates",
+            "name": "at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "9034cfb3b24c2c90316858bec52e20b411d24e6eaadbbb1bb94841e07e215f1e"
+}

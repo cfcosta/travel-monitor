@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO routes (origin_id, destination_id, sweep, active)\n         SELECT o.place_id, d.place_id, 0, 1\n         FROM origins o JOIN destinations d\n         WHERE o.active = 1 AND d.active = 1 AND o.place_id != d.place_id\n         ON CONFLICT (origin_id, destination_id) DO UPDATE SET active = 1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "8c31a231fd1cfb382456d8678149132e859bfe0d4f9a4372810fdb7ca353d129"
+}

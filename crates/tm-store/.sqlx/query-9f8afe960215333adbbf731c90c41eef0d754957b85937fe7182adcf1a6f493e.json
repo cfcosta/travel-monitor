@@ -1,0 +1,21 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT seeded_at IS NOT NULL AS \"seeded!: bool\"\n               FROM meta WHERE id = 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "seeded!: bool",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9f8afe960215333adbbf731c90c41eef0d754957b85937fe7182adcf1a6f493e"
+}

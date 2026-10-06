@@ -1,0 +1,74 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, country, currency, is_home AS \"is_home: bool\",\n                      active AS \"active: bool\"\n               FROM points_of_sale WHERE is_home = 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "points_of_sale",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "country",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "points_of_sale",
+            "name": "country"
+          }
+        }
+      },
+      {
+        "name": "currency",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "points_of_sale",
+            "name": "currency"
+          }
+        }
+      },
+      {
+        "name": "is_home: bool",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "points_of_sale",
+            "name": "is_home"
+          }
+        }
+      },
+      {
+        "name": "active: bool",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "points_of_sale",
+            "name": "active"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "42ea5cf6ca1960dd854524f54bfed4f446d6dabe64cacd8bf6a26c81dbdc2b11"
+}

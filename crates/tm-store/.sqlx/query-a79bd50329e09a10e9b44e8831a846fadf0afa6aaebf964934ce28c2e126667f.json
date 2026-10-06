@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE routes SET active = 0\n         WHERE sweep = 0 AND active = 1 AND NOT EXISTS (\n             SELECT 1 FROM origins o, destinations d\n             WHERE o.place_id = routes.origin_id\n               AND d.place_id = routes.destination_id\n               AND o.active = 1 AND d.active = 1)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "a79bd50329e09a10e9b44e8831a846fadf0afa6aaebf964934ce28c2e126667f"
+}

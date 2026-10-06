@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO places (code, name, country, kind, freebase_id, lat, lon)\n         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)\n         ON CONFLICT (code) DO UPDATE SET\n             name = excluded.name,\n             country = excluded.country,\n             kind = excluded.kind,\n             freebase_id = CASE WHEN excluded.kind = 'city'\n                 THEN COALESCE(excluded.freebase_id, places.freebase_id)\n                 ELSE NULL END,\n             lat = excluded.lat,\n             lon = excluded.lon",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 7
+    },
+    "nullable": []
+  },
+  "hash": "72b68b32c582fc9cfcb754dfd4dadaad6195fe3eba1b5c7912c3d19e2264b6b8"
+}

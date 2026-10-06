@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE deals SET status = ?2,\n                 confirmed_at = CASE WHEN ?2 = 'confirmed' THEN ?3\n                                     ELSE confirmed_at END,\n                 rejected_at = CASE WHEN ?2 = 'rejected' THEN ?3\n                                    ELSE rejected_at END,\n                 expired_at = CASE WHEN ?2 = 'expired' THEN ?3\n                                   ELSE expired_at END\n             WHERE id = ?1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "c5c55a59032dc993d9bcdbc10c0180c9480b8e849bd02d069de15bee0b2b9c3a"
+}

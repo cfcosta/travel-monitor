@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE destinations SET weight = ?2 WHERE place_id = ?1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "2d802366e736b522bbf10eb7028ffa220db6d8d6374122106a7f6ec785c5fd0d"
+}

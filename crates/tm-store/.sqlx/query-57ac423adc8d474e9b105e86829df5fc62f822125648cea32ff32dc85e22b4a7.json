@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO exchange_rates (currency, brl_per_unit, at)\n             VALUES (?1, ?2, ?3)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "57ac423adc8d474e9b105e86829df5fc62f822125648cea32ff32dc85e22b4a7"
+}

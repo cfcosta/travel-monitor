@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE points_of_sale SET is_home = 0\n             WHERE is_home = 1 AND country != ?1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "5dd057e088468659b59d6dc85bdfbe70c937b7217c4994fa65bc73a30e2d2c88"
+}

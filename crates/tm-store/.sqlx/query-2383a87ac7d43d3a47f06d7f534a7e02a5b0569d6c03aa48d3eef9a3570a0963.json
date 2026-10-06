@@ -1,0 +1,62 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT rt_discount_ewma, rt_discount_n, additive_streak,\n                      additive AS \"additive: bool\"\n               FROM routes WHERE id = ?1",
+  "describe": {
+    "columns": [
+      {
+        "name": "rt_discount_ewma",
+        "ordinal": 0,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "rt_discount_ewma"
+          }
+        }
+      },
+      {
+        "name": "rt_discount_n",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "rt_discount_n"
+          }
+        }
+      },
+      {
+        "name": "additive_streak",
+        "ordinal": 2,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "additive_streak"
+          }
+        }
+      },
+      {
+        "name": "additive: bool",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "additive"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "2383a87ac7d43d3a47f06d7f534a7e02a5b0569d6c03aa48d3eef9a3570a0963"
+}

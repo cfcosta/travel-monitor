@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO queries (family_id, reason, score, runner_up,\n                 reason_json, passengers, scheduled_at, started_at)\n             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 8
+    },
+    "nullable": []
+  },
+  "hash": "87da2b9e6c19cd97ad7b3d9a59355e1c5107b107994d1e037918b5d96336be89"
+}

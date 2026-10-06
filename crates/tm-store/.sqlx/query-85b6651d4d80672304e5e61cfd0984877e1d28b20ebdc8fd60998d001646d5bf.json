@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE places SET code = ?2, name = ?3, country = ?4, kind = ?5,\n                 freebase_id = ?6, lat = ?7, lon = ?8\n             WHERE id = ?1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 8
+    },
+    "nullable": []
+  },
+  "hash": "85b6651d4d80672304e5e61cfd0984877e1d28b20ebdc8fd60998d001646d5bf"
+}

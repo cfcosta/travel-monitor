@@ -1,0 +1,110 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT deal_id, pos_id, seller, is_airline AS \"is_airline: bool\",\n                      price_minor, currency, quoted_minor, quoted_currency\n               FROM seller_quotes\n               WHERE deal_id IN (SELECT value FROM json_each(?1))\n               ORDER BY id",
+  "describe": {
+    "columns": [
+      {
+        "name": "deal_id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "seller_quotes",
+            "name": "deal_id"
+          }
+        }
+      },
+      {
+        "name": "pos_id",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "seller_quotes",
+            "name": "pos_id"
+          }
+        }
+      },
+      {
+        "name": "seller",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "seller_quotes",
+            "name": "seller"
+          }
+        }
+      },
+      {
+        "name": "is_airline: bool",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "seller_quotes",
+            "name": "is_airline"
+          }
+        }
+      },
+      {
+        "name": "price_minor",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "seller_quotes",
+            "name": "price_minor"
+          }
+        }
+      },
+      {
+        "name": "currency",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "seller_quotes",
+            "name": "currency"
+          }
+        }
+      },
+      {
+        "name": "quoted_minor",
+        "ordinal": 6,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "seller_quotes",
+            "name": "quoted_minor"
+          }
+        }
+      },
+      {
+        "name": "quoted_currency",
+        "ordinal": 7,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "seller_quotes",
+            "name": "quoted_currency"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "424cf719ee61a8ef620b9559635b061bd10c13ee4e7e34cd66c4ce84781322d3"
+}

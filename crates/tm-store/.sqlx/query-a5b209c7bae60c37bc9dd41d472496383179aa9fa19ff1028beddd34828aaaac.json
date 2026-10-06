@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE families SET active = 0 WHERE active = 1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "a5b209c7bae60c37bc9dd41d472496383179aa9fa19ff1028beddd34828aaaac"
+}

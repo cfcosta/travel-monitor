@@ -1,0 +1,237 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT r.id, r.active AS \"active: bool\",\n                      COALESCE(d.weight, 1.0) AS \"weight!: f64\",\n                      o.id AS o_id, o.code AS o_code, o.name AS o_name,\n                      o.country AS o_country, o.kind AS o_kind,\n                      o.freebase_id AS o_freebase_id, o.lat AS o_lat,\n                      o.lon AS o_lon,\n                      p.id AS d_id, p.code AS d_code, p.name AS d_name,\n                      p.country AS d_country, p.kind AS d_kind,\n                      p.freebase_id AS d_freebase_id, p.lat AS d_lat,\n                      p.lon AS d_lon\n               FROM routes r\n               JOIN places o ON o.id = r.origin_id\n               JOIN places p ON p.id = r.destination_id\n               LEFT JOIN destinations d ON d.place_id = r.destination_id\n               WHERE r.sweep = 0 AND (?1 = 0 OR r.active = 1)\n               ORDER BY o.code, p.code",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "active: bool",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "routes",
+            "name": "active"
+          }
+        }
+      },
+      {
+        "name": "weight!: f64",
+        "ordinal": 2,
+        "type_info": "Float",
+        "origin": "Expression"
+      },
+      {
+        "name": "o_id",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "o_code",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "name": "o_name",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "name": "o_country",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "country"
+          }
+        }
+      },
+      {
+        "name": "o_kind",
+        "ordinal": 7,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "name": "o_freebase_id",
+        "ordinal": 8,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "freebase_id"
+          }
+        }
+      },
+      {
+        "name": "o_lat",
+        "ordinal": 9,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "lat"
+          }
+        }
+      },
+      {
+        "name": "o_lon",
+        "ordinal": 10,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "lon"
+          }
+        }
+      },
+      {
+        "name": "d_id",
+        "ordinal": 11,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "d_code",
+        "ordinal": 12,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "name": "d_name",
+        "ordinal": 13,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "name": "d_country",
+        "ordinal": 14,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "country"
+          }
+        }
+      },
+      {
+        "name": "d_kind",
+        "ordinal": 15,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "name": "d_freebase_id",
+        "ordinal": 16,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "freebase_id"
+          }
+        }
+      },
+      {
+        "name": "d_lat",
+        "ordinal": 17,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "lat"
+          }
+        }
+      },
+      {
+        "name": "d_lon",
+        "ordinal": 18,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "places",
+            "name": "lon"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "9c4eaae8769c8957542ba3abc9fc58863f3160eb77c09edc554b81490cd2766f"
+}

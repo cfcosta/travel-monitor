@@ -1,0 +1,278 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, route_id, cabin, pos_id,\n                      departure AS \"departure: NaiveDate\",\n                      return_date AS \"return_date: NaiveDate\",\n                      price_minor, currency, effective_minor,\n                      effective_currency, baseline_minor, baseline_currency,\n                      reason, change, estimated AS \"estimated: bool\", status,\n                      found_at AS \"found_at: DateTime<Utc>\",\n                      confirmed_at AS \"confirmed_at: DateTime<Utc>\",\n                      seen AS \"seen: bool\", carrier, seller, url\n               FROM deals WHERE id = ?1",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "route_id",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "route_id"
+          }
+        }
+      },
+      {
+        "name": "cabin",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "cabin"
+          }
+        }
+      },
+      {
+        "name": "pos_id",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "pos_id"
+          }
+        }
+      },
+      {
+        "name": "departure: NaiveDate",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "departure"
+          }
+        }
+      },
+      {
+        "name": "return_date: NaiveDate",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "return_date"
+          }
+        }
+      },
+      {
+        "name": "price_minor",
+        "ordinal": 6,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "price_minor"
+          }
+        }
+      },
+      {
+        "name": "currency",
+        "ordinal": 7,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "currency"
+          }
+        }
+      },
+      {
+        "name": "effective_minor",
+        "ordinal": 8,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "effective_minor"
+          }
+        }
+      },
+      {
+        "name": "effective_currency",
+        "ordinal": 9,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "effective_currency"
+          }
+        }
+      },
+      {
+        "name": "baseline_minor",
+        "ordinal": 10,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "baseline_minor"
+          }
+        }
+      },
+      {
+        "name": "baseline_currency",
+        "ordinal": 11,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "baseline_currency"
+          }
+        }
+      },
+      {
+        "name": "reason",
+        "ordinal": 12,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "reason"
+          }
+        }
+      },
+      {
+        "name": "change",
+        "ordinal": 13,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "change"
+          }
+        }
+      },
+      {
+        "name": "estimated: bool",
+        "ordinal": 14,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "estimated"
+          }
+        }
+      },
+      {
+        "name": "status",
+        "ordinal": 15,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "name": "found_at: DateTime<Utc>",
+        "ordinal": 16,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "found_at"
+          }
+        }
+      },
+      {
+        "name": "confirmed_at: DateTime<Utc>",
+        "ordinal": 17,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "confirmed_at"
+          }
+        }
+      },
+      {
+        "name": "seen: bool",
+        "ordinal": 18,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "seen"
+          }
+        }
+      },
+      {
+        "name": "carrier",
+        "ordinal": 19,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "carrier"
+          }
+        }
+      },
+      {
+        "name": "seller",
+        "ordinal": 20,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "seller"
+          }
+        }
+      },
+      {
+        "name": "url",
+        "ordinal": 21,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "url"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "f8292bf0384a5721ce5c1170028eddbe196f76e870cc1bc345d78abfd9bd6012"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO observations (query_id, family_id, observed_at,\n                     departure, return_date, price_minor, currency, miles,\n                     carrier, stops, duration_minutes, seller, passengers)\n                 SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12,\n                        q.passengers\n                 FROM queries q WHERE q.id = ?1 AND q.family_id = ?2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 12
+    },
+    "nullable": []
+  },
+  "hash": "d71ae8c984e346fd42de49d1f94274d1b8380ee6b3a16c90b6d1e4017197831e"
+}

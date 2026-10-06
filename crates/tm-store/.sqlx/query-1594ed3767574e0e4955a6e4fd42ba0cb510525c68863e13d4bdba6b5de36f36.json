@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE points_of_sale SET active = ?2 WHERE id = ?1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "1594ed3767574e0e4955a6e4fd42ba0cb510525c68863e13d4bdba6b5de36f36"
+}

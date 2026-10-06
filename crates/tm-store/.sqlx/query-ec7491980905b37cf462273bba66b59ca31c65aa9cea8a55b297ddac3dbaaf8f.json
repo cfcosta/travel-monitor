@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO airline_sources (code, name, active) VALUES (?1, ?2, ?3)\n         ON CONFLICT (code) DO UPDATE SET name = excluded.name,\n             active = excluded.active",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "ec7491980905b37cf462273bba66b59ca31c65aa9cea8a55b297ddac3dbaaf8f"
+}
