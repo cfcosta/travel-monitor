@@ -160,7 +160,7 @@ mod tests {
         assert_eq!(p.min_interval, TimeDelta::hours(4));
         assert_eq!(p.max_interval, TimeDelta::hours(48));
         assert_eq!(p.random_share, 0.2);
-        assert_eq!(p.daily_budget, 1200);
+        assert_eq!(p.daily_budget, 2400);
         assert_eq!(p.min_history_weeks, 4.0);
     }
 

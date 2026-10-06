@@ -644,7 +644,7 @@ async fn budget_blocks_rates_and_heartbeat() {
     let store = seeded().await;
     assert_eq!(store.budget().await.expect("reads"), None);
     let b = store.add_loads(5, date(10, 6)).await.expect("adds");
-    assert_eq!(b.daily_budget, 1200); // Settings default (0056)
+    assert_eq!(b.daily_budget, 2400); // Settings default (0058)
     assert_eq!(b.loads_today, 5);
     let b = store.add_loads(7, date(10, 6)).await.expect("adds");
     assert_eq!(b.loads_today, 12);

@@ -801,3 +801,16 @@ point of sale, elapsed time). A one-second clock re-renders relative
 times and countdowns without touching the database. Rows that just
 arrived (activity, deals, observations on the open route) are briefly
 highlighted.
+
+## 0058: The daily budget doubles to 2,400 page loads
+
+- Date: 2026-10-06
+- Refines [0056](#0056-core-families-are-checked-every-day).
+
+The daily budget starts at 2,400 page loads instead of 1,200, and the
+ramp may reach 6,000 instead of 3,000. After the first day at 1,200,
+with about 1,100 loads and no block from Google, the user asked to
+double the rate. The core still needs about 850 loads a day; the rest
+lets premium cabins, round trips and foreign points of sale come round
+more often than weekly. Blocks still halve the budget and cool the
+site down (0039).
