@@ -781,3 +781,23 @@ keep the weekly maximum.
 At about 8 page loads per leg check, 52 destinations need about 850
 loads a day for the core alone, so the daily budget starts at 1,200 and
 may ramp to 3,000. Blocks still halve it and cool the site down (0039).
+
+## 0057: The app updates as the daemon writes
+
+- Date: 2026-10-06
+- Refines [0040](#0040-the-app-runs-on-the-same-box-and-raises-the-alerts)
+  and [0044](#0044-the-apps-main-screen-is-a-map-with-a-list).
+
+The app no longer re-reads everything on a fixed timer. It watches
+SQLite's `PRAGMA data_version` on a connection of its own (it changes
+whenever another connection commits) a few times a second, and rebuilds
+its snapshot only when the daemon has written something, debounced so a
+burst of writes is one refresh. A slow periodic refresh stays as a
+fallback.
+
+The daemon writes its heartbeat when a check starts and when it ends,
+so the app shows what is being checked right now (route, cabin, leg,
+point of sale, elapsed time). A one-second clock re-renders relative
+times and countdowns without touching the database. Rows that just
+arrived (activity, deals, observations on the open route) are briefly
+highlighted.
