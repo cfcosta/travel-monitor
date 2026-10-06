@@ -25,7 +25,11 @@ pub struct Budget {
     pub state: BudgetState,
     pub loads_today: u32,
     pub day: NaiveDate,
-    bank: u32,
+    /// Loads banked for the next picks. Negative after a check cost more
+    /// than it was charged (a never-checked family's estimate is low):
+    /// the debt is repaid from later shares instead of being forgiven,
+    /// which let a day's spending run past its budget.
+    bank: i64,
     recent: VecDeque<(DateTime<Utc>, u32)>,
 }
 
@@ -179,11 +183,11 @@ impl Budget {
         } else {
             BANK_CAP.min(left)
         };
-        self.bank = self.bank.saturating_add(share).min(cap);
+        self.bank = (self.bank + i64::from(share)).min(i64::from(cap));
         let per_site_remaining: BTreeMap<String, u32> =
             self.cooling(now).into_iter().map(|s| (s, 0)).collect();
         TickBudget {
-            loads_available: self.bank,
+            loads_available: u32::try_from(self.bank.max(0)).unwrap_or(0),
             per_site_remaining,
         }
     }
@@ -199,7 +203,7 @@ impl Budget {
         if loads == 0 {
             return Ok(());
         }
-        self.bank = self.bank.saturating_sub(loads);
+        self.bank -= i64::from(loads);
         self.recent.push_back((now, loads));
         while self
             .recent
@@ -326,5 +330,35 @@ mod tests {
         assert!(next.advance(at(7, 12), at(7, 12).date_naive(), &params));
         assert_eq!(next.loads_today, 0);
         assert!(ticks_left_today(std::time::Duration::from_secs(60)) >= 1);
+    }
+
+    #[tokio::test]
+    async fn a_check_that_costs_more_than_charged_is_repaid() {
+        let store = Store::open_in_memory().await.expect("opens");
+        store.seed_defaults().await.expect("seeds");
+        let settings = apply_flags(&store, Some(600), Some(600))
+            .await
+            .expect("applies");
+        let params = Params::from_settings(&settings);
+        let day = at(6, 0).date_naive();
+        let mut budget = Budget::restore(&store, &params, at(6, 0), day)
+            .await
+            .expect("restores");
+        // A never-checked family was charged 3 loads but used 8.
+        budget.bank = 3;
+        budget
+            .spend(&store, 8, at(6, 1), day)
+            .await
+            .expect("spends");
+        assert_eq!(budget.bank, -5);
+        // The next ticks pay the 5 back before anything is available.
+        let mut rng = StdRng::seed_from_u64(1);
+        let mut seen = 0;
+        while budget.bank < 0 {
+            let t = budget.tick(at(6, 2), 600, &params, &mut rng);
+            assert_eq!(t.loads_available, 0);
+            seen += 1;
+            assert!(seen < 10_000, "the debt is never repaid");
+        }
     }
 }
