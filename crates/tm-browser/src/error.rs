@@ -58,6 +58,11 @@ pub enum Error {
     /// [`crate::Page::press_key`] does not know this key.
     #[error("unsupported key {0:?}")]
     UnsupportedKey(String),
+
+    /// A profile's files on disk could not be read, such as its cookie
+    /// jar while a Chromium holds it locked.
+    #[error("{0}")]
+    Profile(String),
 }
 
 impl Error {

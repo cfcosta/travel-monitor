@@ -10,6 +10,7 @@
 
 use std::{
     collections::{BTreeMap, HashMap, HashSet, VecDeque},
+    path::PathBuf,
     time::Duration,
 };
 
@@ -98,6 +99,9 @@ pub struct Config {
     /// Seed for the scheduler's randomness (tests); `None` seeds from
     /// the OS.
     pub seed: Option<u64>,
+    /// The Chromium profile, whose cookie jar says whether a miles login
+    /// took (0024). `None` records no login state.
+    pub profile_dir: Option<PathBuf>,
 }
 
 impl Default for Config {
@@ -112,6 +116,7 @@ impl Default for Config {
             max_budget: None,
             request_poll: Duration::from_secs(2),
             seed: None,
+            profile_dir: None,
         }
     }
 }
@@ -650,15 +655,31 @@ impl<S: Sources> Daemon<S> {
                     .await?;
             }
             RequestKind::CloseLogin => {
-                if let Some(program) = self.paused.take() {
-                    info!(%program, "login window closed: resuming");
-                    self.store
-                        .set_miles_login(
-                            &program,
-                            LoginState::LoggedIn,
-                            Utc::now(),
-                        )
-                        .await?;
+                if let Some(program) = self.paused.take()
+                    && let Some(dir) = &self.config.profile_dir
+                {
+                    // The window has closed and our Chromium is not up
+                    // yet, so the cookie jar is free to read.
+                    let domains = tm_domain::miles_session_domains(&program);
+                    let now = Utc::now();
+                    match tm_browser::profile::login_cookies(dir, domains, now)
+                        .await
+                    {
+                        Ok(cookies) => {
+                            let state = if cookies.is_empty() {
+                                LoginState::LoggedOut
+                            } else {
+                                LoginState::LoggedIn
+                            };
+                            info!(%program, ?state, "login window closed");
+                            self.store
+                                .set_miles_login(&program, state, now)
+                                .await?;
+                        }
+                        Err(e) => {
+                            warn!(%program, "login not checked: {e}");
+                        }
+                    }
                 }
                 self.ensure_browser().await;
                 let ok = self.sources.is_running();

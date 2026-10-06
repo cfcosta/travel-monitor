@@ -76,6 +76,18 @@ impl Source {
     }
 }
 
+/// The sites whose cookies hold a miles program's login session (0024):
+/// the registrable domains, each matching its subdomains too. Empty for
+/// an unknown program.
+pub fn miles_session_domains(program: &str) -> &'static [&'static str] {
+    match program {
+        "smiles" => &["smiles.com.br"],
+        "latam_pass" => &["latamairlines.com", "latam.com"],
+        "azul_fidelidade" => &["voeazul.com.br", "tudoazul.com.br"],
+        _ => &[],
+    }
+}
+
 impl fmt::Display for Source {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.site())

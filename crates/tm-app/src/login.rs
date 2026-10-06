@@ -3,10 +3,21 @@
 //! can be open in one process only, so the app first asks the daemon to
 //! pause its headless browser (`OpenLogin`), waits for it, opens the
 //! window, and asks it to resume (`CloseLogin`) when the window closes.
+//!
+//! The window passes the daemon's profile flags
+//! ([`tm_browser::profile_args`]), so the cookies it writes are the ones
+//! the daemon's Chromium can read. Once it closes, the profile's cookie
+//! jar says whether the login took ([`tm_browser::profile`] has the
+//! heuristic and its limits); the daemon checks the same jar when it
+//! resumes and records what it finds.
 
-use std::{path::PathBuf, time::Duration};
+use std::{
+    path::{Path, PathBuf},
+    time::Duration,
+};
 
 use anyhow::{Context as _, bail};
+use chrono::Utc;
 use gpui::Context;
 
 use crate::{
@@ -46,15 +57,19 @@ impl LoginConfig {
         }
     }
 
-    /// The command line of the login window.
+    /// The command line of the login window: the daemon's profile with
+    /// the daemon's profile flags, visible and without DevTools.
     pub fn args(&self, url: &str) -> Vec<String> {
-        vec![
-            format!("--user-data-dir={}", self.profile_dir.display()),
+        let mut args =
+            vec![format!("--user-data-dir={}", self.profile_dir.display())];
+        args.extend(tm_browser::profile_args().iter().map(|&a| a.to_owned()));
+        args.extend([
             "--no-first-run".to_owned(),
             "--no-default-browser-check".to_owned(),
             "--new-window".to_owned(),
             url.to_owned(),
-        ]
+        ]);
+        args
     }
 }
 
@@ -67,6 +82,53 @@ pub fn login_url(program: &str) -> &'static str {
             "https://www.voeazul.com.br/br/pt/programa-fidelidade"
         }
         _ => "about:blank",
+    }
+}
+
+/// What the profile holds for a program once the login window closed.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Session {
+    /// A cookie that counts as a login is there.
+    Found,
+    /// None is: the login did not take, or its cookies end with the
+    /// browser.
+    Missing,
+    /// The cookie jar could not be read.
+    Unknown(String),
+}
+
+impl Session {
+    /// The toast after a login attempt for `name` (`"LATAM Pass"`).
+    pub fn message(&self, name: &str) -> String {
+        match self {
+            Session::Found => format!("{name}: logged in"),
+            Session::Missing => {
+                format!("{name}: no session found \u{2014} try again")
+            }
+            Session::Unknown(error) => {
+                format!("{name}: could not check the session ({error})")
+            }
+        }
+    }
+}
+
+/// Reads the profile's cookie jar for `program`'s session. Only while no
+/// Chromium runs on the profile.
+pub async fn check_session(profile_dir: &Path, program: &str) -> Session {
+    let domains = tm_domain::miles_session_domains(program);
+    match tm_browser::profile::login_cookies(profile_dir, domains, Utc::now())
+        .await
+    {
+        Ok(cookies) if cookies.is_empty() => Session::Missing,
+        Ok(cookies) => {
+            let names: Vec<_> = cookies
+                .iter()
+                .map(|c| format!("{}:{}", c.host, c.name))
+                .collect();
+            tracing::info!(%program, ?names, "login cookies found");
+            Session::Found
+        }
+        Err(error) => Session::Unknown(error.to_string()),
     }
 }
 
@@ -100,13 +162,14 @@ pub async fn wait_for(
 }
 
 /// The whole login, on tokio: pause the daemon (when it runs), open
-/// the window, wait for it to close, resume the daemon.
+/// the window, wait for it to close, check the profile for a session,
+/// resume the daemon.
 pub async fn run(
     backend: SharedBackend,
     config: LoginConfig,
     program: String,
     daemon_running: bool,
-) -> anyhow::Result<()> {
+) -> anyhow::Result<Session> {
     if daemon_running {
         let ticket =
             backend.enqueue(Request::OpenLogin(program.clone())).await?;
@@ -130,7 +193,7 @@ pub async fn run(
                 format!("cannot start {}", config.chromium.display())
             })?;
         tracing::info!("login window for {program} closed ({status})");
-        anyhow::Ok(())
+        anyhow::Ok(check_session(&config.profile_dir, &program).await)
     }
     .await;
     if daemon_running {
@@ -152,6 +215,11 @@ impl TravelMonitor {
             .snapshot
             .as_ref()
             .is_some_and(|s| s.daemon.health(s.taken_at) == Health::Running);
+        let name = self
+            .snapshot
+            .as_ref()
+            .and_then(|s| s.miles.iter().find(|m| m.program == program))
+            .map_or_else(|| program.clone(), |m| m.name.clone());
         self.logins.insert(program.clone());
         let job = tokio.spawn(run(
             self.env.backend.clone(),
@@ -175,10 +243,7 @@ impl TravelMonitor {
             let _ = this.update(cx, |this, cx| {
                 this.logins.remove(&program);
                 match result {
-                    Ok(()) => this.show_toast(
-                        "Login window closed; the daemon resumes",
-                        cx,
-                    ),
+                    Ok(session) => this.show_toast(session.message(&name), cx),
                     Err(error) => {
                         this.show_toast(format!("Login failed: {error:#}"), cx)
                     }
@@ -211,6 +276,31 @@ mod tests {
         assert_eq!(
             args.last().map(String::as_str),
             Some("https://example.com")
+        );
+    }
+
+    /// The window opens the profile the way the daemon's Chromium does,
+    /// so the daemon can read the cookies it writes; but it stays a
+    /// visible window without DevTools.
+    #[test]
+    fn the_window_passes_every_profile_flag() {
+        let c = LoginConfig::resolve(Some("/p".into()), Some("c".into()));
+        let args = c.args("https://example.com");
+        for flag in tm_browser::profile_args() {
+            assert!(args.iter().any(|a| a == flag), "{flag} missing");
+        }
+        assert!(!args.iter().any(|a| a.starts_with("--headless")
+            || a.starts_with("--remote-debugging")));
+    }
+
+    #[test]
+    fn every_program_has_session_domains() {
+        for p in ["smiles", "latam_pass", "azul_fidelidade"] {
+            assert!(!tm_domain::miles_session_domains(p).is_empty());
+        }
+        assert_eq!(
+            Session::Missing.message("LATAM Pass"),
+            "LATAM Pass: no session found \u{2014} try again"
         );
     }
 
@@ -252,13 +342,122 @@ mod tests {
             chromium: PathBuf::from("true"),
         };
         // `wait_for` polls once a second; the fake is done on the 3rd poll.
-        run(backend, config, "smiles".into(), true)
+        let session = run(backend, config, "smiles".into(), true)
             .await
             .expect("login");
+        assert_eq!(session, Session::Missing, "an empty profile");
         assert_eq!(
             fake.requests(),
             vec![Request::OpenLogin("smiles".into()), Request::CloseLogin]
         );
         let _ = std::fs::remove_dir_all(dir);
+    }
+
+    /// A local site: `/login` sets a cookie that lasts a day, any other
+    /// path sets nothing.
+    async fn serve(listener: tokio::net::TcpListener) {
+        use tokio::io::{AsyncReadExt as _, AsyncWriteExt as _};
+        while let Ok((mut stream, _)) = listener.accept().await {
+            let mut buf = vec![0; 4096];
+            let n = stream.read(&mut buf).await.unwrap_or(0);
+            let request = String::from_utf8_lossy(&buf[..n]);
+            let cookie = if request.starts_with("GET /login ") {
+                "Set-Cookie: tm_login=yes; Max-Age=86400; Path=/\r\n"
+            } else {
+                ""
+            };
+            let body = "<!doctype html><title>ok</title>";
+            let response = format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n{cookie}\
+                 Content-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                body.len()
+            );
+            let _ = stream.write_all(response.as_bytes()).await;
+        }
+    }
+
+    /// The bug of docs/research/sites/latam-pass.md: a cookie set in the
+    /// login window must be there for the daemon's Chromium on the same
+    /// profile. The window runs headless with DevTools here, only so the
+    /// test can wait for the cookie and close it cleanly. Skips without
+    /// `TM_CHROMIUM`.
+    #[tokio::test]
+    async fn the_windows_cookies_reach_the_daemons_browser() {
+        use tm_browser::{CHROMIUM_VAR, Chromium, ChromiumConfig};
+
+        let Some(chromium) =
+            std::env::var_os(CHROMIUM_VAR).filter(|v| !v.is_empty())
+        else {
+            eprintln!("skipped: {CHROMIUM_VAR} is not set");
+            return;
+        };
+        let profile = tempfile::tempdir().expect("profile");
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0")
+            .await
+            .expect("bind");
+        let port = listener.local_addr().expect("addr").port();
+        tokio::spawn(serve(listener));
+        let config = LoginConfig {
+            profile_dir: profile.path().to_owned(),
+            chromium: chromium.into(),
+        };
+
+        let mut args = vec![
+            "--headless=new".to_owned(),
+            "--remote-debugging-port=0".to_owned(),
+        ];
+        args.extend(config.args(&format!("http://127.0.0.1:{port}/login")));
+        let window = Chromium::launch_with(&config.chromium, args)
+            .await
+            .expect("login window");
+        let start = std::time::Instant::now();
+        loop {
+            let cookies = window
+                .browser()
+                .call("Storage.getCookies", serde_json::json!({}))
+                .await
+                .expect("cookies");
+            if cookies.to_string().contains("tm_login") {
+                break;
+            }
+            assert!(start.elapsed() < Duration::from_secs(30), "no cookie");
+            tokio::time::sleep(Duration::from_millis(100)).await;
+        }
+        window.shutdown().await.expect("close the window");
+
+        assert_eq!(
+            check_session(profile.path(), "smiles").await,
+            Session::Missing,
+            "no cookie on smiles.com.br"
+        );
+        let jar = tm_browser::profile::login_cookies(
+            profile.path(),
+            &["127.0.0.1"],
+            Utc::now(),
+        )
+        .await
+        .expect("jar");
+        assert!(jar.iter().any(|c| c.name == "tm_login"), "{jar:?}");
+
+        let daemon = Chromium::launch(ChromiumConfig::new(
+            &config.chromium,
+            profile.path(),
+        ))
+        .await
+        .expect("daemon's Chromium");
+        let page = daemon.browser().new_page().await.expect("page");
+        page.navigate(
+            &format!("http://127.0.0.1:{port}/check"),
+            Duration::from_secs(30),
+        )
+        .await
+        .expect("navigate");
+        let cookie: String =
+            page.eval_as("document.cookie").await.expect("cookie");
+        daemon
+            .shutdown()
+            .await
+            .expect("close the daemon's Chromium");
+        assert!(cookie.contains("tm_login=yes"), "{cookie:?}");
     }
 }

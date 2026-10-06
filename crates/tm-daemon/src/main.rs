@@ -68,6 +68,7 @@ async fn run(cli: Cli) -> anyhow::Result<()> {
         },
         budget: cli.budget,
         max_budget: cli.max_budget,
+        profile_dir: Some(cli.profile_path()),
         ..Config::default()
     };
 

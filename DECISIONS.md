@@ -895,3 +895,25 @@ and the first-run seed:
 
 The daily core (0056) becomes about 228 leg families, roughly 1,830
 Google Flights page loads a day, within that site's 2,400 (0060).
+
+## 0064: A login counts only if the profile holds a session
+
+- Date: 2026-10-06
+- Refines [0024](#0024-miles-programs-are-logged-in-by-hand-once).
+
+The app's login window and the daemon's Chromium start with the same
+profile flags (`--password-store=basic`, `--use-mock-keychain`,
+`--disable-sync`, shared from `tm-browser`), so cookies written while
+logging in stay readable by the daemon. A LATAM Pass login was lost
+because the window did not use them.
+
+Closing the login window no longer marks the program logged in. When
+the daemon handles `CloseLogin`, it reads the profile's cookie jar
+(read-only, after the window has exited) and records the program as
+logged in only if a persistent, unexpired cookie exists on the
+program's domains that is not an analytics, consent or bot-protection
+cookie (Akamai's `_abck` and `_ga` are set on any visit). The app runs
+the same check and says whether a session was found. Limits: a
+leftover preference cookie reads as logged in; a session ended
+server-side still counts until its cookie expires; a login held only in
+session cookies or local storage reads as logged out.

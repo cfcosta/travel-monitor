@@ -15,6 +15,9 @@
 //!   adds init scripts, takes screenshots and emulates locale and time
 //!   zone. [`Page::capture`] records matching XHR/fetch traffic with
 //!   request bodies and full response bodies.
+//! - [`profile_args`] are the flags every Chromium on the daemon's
+//!   profile passes, and [`profile`] reads the profile's cookie jar to
+//!   tell whether a miles login took (0024).
 
 mod browser;
 pub mod capture;
@@ -22,10 +25,11 @@ mod cdp;
 mod error;
 mod launch;
 mod page;
+pub mod profile;
 
 pub use browser::{Browser, Context, ContextOptions, Version};
 pub use capture::{Capture, Captured};
 pub use cdp::Event;
 pub use error::{Error, Result};
-pub use launch::{CHROMIUM_VAR, Chromium, ChromiumConfig};
+pub use launch::{CHROMIUM_VAR, Chromium, ChromiumConfig, profile_args};
 pub use page::Page;

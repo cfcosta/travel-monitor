@@ -155,6 +155,15 @@ struct Harness {
 }
 
 async fn harness(only: Only, tweak: impl FnOnce(&mut Fake)) -> Harness {
+    harness_on(only, tweak, None).await
+}
+
+/// [`harness`], with the daemon reading logins from `profile_dir`.
+async fn harness_on(
+    only: Only,
+    tweak: impl FnOnce(&mut Fake),
+    profile_dir: Option<std::path::PathBuf>,
+) -> Harness {
     let store = Store::open_in_memory().await.expect("opens");
     let log = Arc::new(Mutex::new(Log::default()));
     let mut fake = Fake::new(Arc::clone(&log));
@@ -166,6 +175,7 @@ async fn harness(only: Only, tweak: impl FnOnce(&mut Fake)) -> Harness {
         seed: Some(7),
         budget: Some(300),
         max_budget: Some(2000),
+        profile_dir,
         ..Config::default()
     };
     let (stop, shutdown) = watch::channel(false);
@@ -296,8 +306,9 @@ async fn past_check(
 async fn startup_seeds_and_learns_freebase_ids() {
     let h = harness(Only::default(), |_| {}).await;
     assert_eq!(h.log().starts, 1);
-    // The seeded cities without an ID: RIO, BUE, NYC, PAR, LON, ROM, TYO.
-    assert_eq!(h.log().resolve.len(), 7);
+    // The seeded cities without an ID: RIO, BUE, NYC, PAR, LON, ROM, TYO,
+    // MIL and SEL (SAO and WAS are seeded with theirs).
+    assert_eq!(h.log().resolve.len(), 9);
     let rome = h
         .store()
         .place_by_code("ROM")
@@ -313,7 +324,8 @@ async fn startup_seeds_and_learns_freebase_ids() {
         .expect("a heartbeat");
     assert_eq!(beat.state, "running");
     assert_eq!(beat.budget, 300);
-    assert_eq!(beat.loads_today, 7);
+    // One page load per city learned.
+    assert_eq!(beat.loads_today, 9);
 }
 
 /// The heartbeat says what is being checked while the source runs, and
@@ -428,7 +440,8 @@ async fn requests_pause_resume_and_check() {
         .into_iter()
         .find(|m| m.program == "smiles")
         .expect("smiles");
-    assert_eq!(smiles.login_state, LoginState::LoggedIn);
+    // No profile to check: a closed window is not taken for a login.
+    assert_eq!(smiles.login_state, LoginState::LoggedOut);
     assert_eq!(
         store
             .request(close)
@@ -1008,4 +1021,96 @@ async fn tap_legs_run_and_record_cells() {
         .expect("exists")
         .state;
     assert_eq!(state.last_min_price_minor, Some(190_000));
+}
+
+/// A cookie jar shaped like Chromium's `Default/Network/Cookies` (the
+/// columns the daemon reads), with one cookie per `(host, name)` that
+/// expires in a month.
+async fn cookie_jar(profile: &std::path::Path, cookies: &[(&str, &str)]) {
+    use sqlx::{
+        Connection as _,
+        sqlite::{SqliteConnectOptions, SqliteConnection},
+    };
+    let network = profile.join("Default").join("Network");
+    std::fs::create_dir_all(&network).expect("creates");
+    let file = network.join("Cookies");
+    let _ = std::fs::remove_file(&file);
+    let options = SqliteConnectOptions::new()
+        .filename(file)
+        .create_if_missing(true);
+    let mut c = SqliteConnection::connect_with(&options)
+        .await
+        .expect("opens");
+    sqlx::query(
+        "CREATE TABLE cookies (host_key TEXT NOT NULL, name TEXT NOT NULL, \
+         expires_utc INTEGER NOT NULL)",
+    )
+    .execute(&mut c)
+    .await
+    .expect("creates");
+    // Chromium counts microseconds from 1601-01-01.
+    let expires = (Utc::now() + TimeDelta::days(30)).timestamp_micros()
+        + 11_644_473_600_000_000;
+    for (host, name) in cookies {
+        sqlx::query("INSERT INTO cookies VALUES (?1, ?2, ?3)")
+            .bind(host)
+            .bind(name)
+            .bind(expires)
+            .execute(&mut c)
+            .await
+            .expect("inserts");
+    }
+    c.close().await.expect("closes");
+}
+
+/// After the login window, the daemon records what the profile holds,
+/// not that the window closed (0024).
+#[tokio::test]
+async fn closing_the_login_records_the_profiles_session() {
+    let profile = tempfile::tempdir().expect("tempdir");
+    let mut h =
+        harness_on(Only::default(), |_| {}, Some(profile.path().into())).await;
+    let store = h.store().clone();
+    let smiles_state = async |store: &Store| {
+        store
+            .list_miles_programs()
+            .await
+            .expect("reads")
+            .into_iter()
+            .find(|m| m.program == "smiles")
+            .expect("smiles")
+            .login_state
+    };
+    for (cookies, expected) in [
+        // Only what any visit sets: Akamai and analytics.
+        (
+            &[(".smiles.com.br", "_abck"), (".smiles.com.br", "_ga")][..],
+            LoginState::LoggedOut,
+        ),
+        (
+            &[(".smiles.com.br", "_abck"), ("www.smiles.com.br", "token")][..],
+            LoginState::LoggedIn,
+        ),
+        // Another program's session is not Smiles'.
+        (
+            &[(".latamairlines.com", "token")][..],
+            LoginState::LoggedOut,
+        ),
+    ] {
+        cookie_jar(profile.path(), cookies).await;
+        store
+            .enqueue(&RequestKind::OpenLogin {
+                program: "smiles".into(),
+            })
+            .await
+            .expect("enqueues");
+        h.daemon.process_requests().await.expect("processes");
+        store
+            .enqueue(&RequestKind::CloseLogin)
+            .await
+            .expect("enqueues");
+        h.daemon.process_requests().await.expect("processes");
+        assert!(!h.daemon.is_paused());
+        assert_eq!(smiles_state(&store).await, expected, "{cookies:?}");
+    }
 }
