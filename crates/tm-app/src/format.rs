@@ -146,6 +146,11 @@ pub fn stops(stops: u8) -> String {
     }
 }
 
+/// A price per kilometre in BRL: `R$0.31/km`.
+pub fn per_km(brl: f64) -> String {
+    format!("R${brl:.2}/km")
+}
+
 #[cfg(test)]
 mod tests {
     use chrono::TimeZone;

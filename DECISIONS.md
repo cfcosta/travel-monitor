@@ -860,3 +860,17 @@ Starting values: Google Flights (searches and Explore) 2,400, ramping
 to 6,000; TAP 300, ramping to 1,000 (about 30 leg families at about 8
 loads each need about 240 a day); any other site 300, ramping to 1,000,
 until set otherwise.
+
+## 0061: Deals can be sorted by price per kilometre
+
+- Date: 2026-10-06
+- Refines [0044](#0044-the-apps-main-screen-is-a-map-with-a-list).
+
+The deals list gains a "Lowest price per km" sort next to "Lowest
+price". A row's figure is its best trip's price divided by the
+round-trip great-circle distance (origin to destination and back,
+haversine on the mean Earth radius, from the places' coordinates), so a
+cheap trip that goes far ranks above an equally cheap short hop. Actual
+routings with stops are longer; the figure compares destinations, not
+itineraries. While that sort is active each row shows its value
+(`R$0.25/km`).

@@ -249,7 +249,18 @@ impl TravelMonitor {
                         div()
                             .text_size(px(12.))
                             .text_color(color(theme::TEXT_FAINT))
-                            .child(format!("{} · {dates}", row.cabin.label())),
+                            .child(match row.price_per_km() {
+                                Some(per_km)
+                                    if self.sort == Sort::LowestPricePerKm =>
+                                {
+                                    format!(
+                                        "{} · {dates} · {}",
+                                        row.cabin.label(),
+                                        format::per_km(per_km)
+                                    )
+                                }
+                                _ => format!("{} · {dates}", row.cabin.label()),
+                            }),
                     ),
             )
             .child(widgets::sparkline(

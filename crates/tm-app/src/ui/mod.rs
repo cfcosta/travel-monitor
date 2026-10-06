@@ -100,17 +100,25 @@ pub enum ListTab {
 pub enum Sort {
     BiggestDrop,
     LowestPrice,
+    /// Price over the round trip's great-circle distance: a cheap trip
+    /// that goes far ranks above an equally cheap short hop.
+    LowestPricePerKm,
     RecentlyFound,
 }
 
 impl Sort {
-    pub const ALL: [Sort; 3] =
-        [Sort::BiggestDrop, Sort::LowestPrice, Sort::RecentlyFound];
+    pub const ALL: [Sort; 4] = [
+        Sort::BiggestDrop,
+        Sort::LowestPrice,
+        Sort::LowestPricePerKm,
+        Sort::RecentlyFound,
+    ];
 
     pub fn label(self) -> &'static str {
         match self {
             Sort::BiggestDrop => "Biggest drop",
             Sort::LowestPrice => "Lowest price",
+            Sort::LowestPricePerKm => "Lowest price per km",
             Sort::RecentlyFound => "Recently found",
         }
     }
@@ -615,8 +623,8 @@ impl TravelMonitor {
     }
 }
 
-/// Sorts rows: biggest drop first, lowest price first, or newest deal
-/// first (rows without a value go last).
+/// Sorts rows: biggest drop first, lowest price first, lowest price per
+/// kilometre first, or newest deal first (rows without a value go last).
 pub fn sort_rows(rows: &mut [&RouteRow], sort: Sort) {
     match sort {
         Sort::BiggestDrop => rows.sort_by(|a, b| {
@@ -625,6 +633,10 @@ pub fn sort_rows(rows: &mut [&RouteRow], sort: Sort) {
         }),
         Sort::LowestPrice => rows.sort_by_key(|r| {
             r.best.as_ref().map_or(i64::MAX, |t| t.price.minor)
+        }),
+        Sort::LowestPricePerKm => rows.sort_by(|a, b| {
+            let key = |r: &RouteRow| r.price_per_km().unwrap_or(f64::INFINITY);
+            key(a).total_cmp(&key(b))
         }),
         Sort::RecentlyFound => {
             rows.sort_by_key(|r| std::cmp::Reverse(r.found_at))

@@ -236,6 +236,19 @@ impl Projection {
     }
 }
 
+/// The great-circle distance between two points, in kilometres
+/// (haversine on a sphere of the Earth's mean radius). Used to rank
+/// trips by price per kilometre flown.
+pub fn great_circle_km(lat1: f64, lon1: f64, lat2: f64, lon2: f64) -> f64 {
+    const EARTH_RADIUS_KM: f64 = 6371.0088;
+    let (p1, p2) = (lat1.to_radians(), lat2.to_radians());
+    let dp = p2 - p1;
+    let dl = (lon2 - lon1).to_radians();
+    let h = (dp / 2.0).sin().powi(2)
+        + p1.cos() * p2.cos() * (dl / 2.0).sin().powi(2);
+    2.0 * EARTH_RADIUS_KM * h.sqrt().asin()
+}
+
 /// How far an arc bows out, as a share of its chord (the designs use
 /// 0.22).
 pub const BOW: f32 = 0.22;
@@ -538,5 +551,15 @@ mod tests {
         assert!(sparkline(&[], 10.0, 10.0, 0.0).is_empty());
         let flat = sparkline(&[5.0, 5.0], 10.0, 10.0, 0.0);
         assert_eq!(flat[0].y, 5.0);
+    }
+
+    #[test]
+    fn great_circle_distances() {
+        // São Paulo to Lisbon and to Salvador.
+        let lis = great_circle_km(-23.55, -46.63, 38.72, -9.14);
+        assert!((lis - 7948.59).abs() < 0.1, "{lis}");
+        let ssa = great_circle_km(-23.55, -46.63, -12.97, -38.50);
+        assert!((ssa - 1455.38).abs() < 0.1, "{ssa}");
+        assert_eq!(great_circle_km(10.0, 20.0, 10.0, 20.0), 0.0);
     }
 }

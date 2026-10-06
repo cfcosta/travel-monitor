@@ -1208,6 +1208,29 @@ mod tests {
     }
 
     #[test]
+    fn price_per_km_ranks_far_cheap_trips_first() {
+        use crate::ui::{Sort, sort_rows};
+        let b = FakeBackend::at(now());
+        let s = run(snap(&b, SnapshotQuery::default()));
+        let position = |rows: &[&RouteRow], code: &str| {
+            rows.iter().position(|r| r.code() == code).expect("row")
+        };
+        let mut by_price: Vec<&RouteRow> = s.rows.iter().collect();
+        sort_rows(&mut by_price, Sort::LowestPrice);
+        let mut by_km: Vec<&RouteRow> = s.rows.iter().collect();
+        sort_rows(&mut by_km, Sort::LowestPricePerKm);
+        // Salvador is cheaper, but Lisbon goes over five times as far.
+        assert!(position(&by_price, "SSA") < position(&by_price, "LIS"));
+        assert!(position(&by_km, "LIS") < position(&by_km, "SSA"));
+        let values: Vec<f64> =
+            by_km.iter().filter_map(|r| r.price_per_km()).collect();
+        assert!(values.windows(2).all(|w| w[0] <= w[1]), "{values:?}");
+        // R$3,932 over 2 × 7,949 km.
+        let lis = by_km[position(&by_km, "LIS")];
+        assert!((lis.price_per_km().expect("priced") - 0.2473).abs() < 1e-3);
+    }
+
+    #[test]
     fn detail_follows_the_selection() {
         let b = FakeBackend::at(now());
         let first = run(snap(&b, SnapshotQuery::default()));

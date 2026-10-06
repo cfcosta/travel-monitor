@@ -119,6 +119,21 @@ pub struct RouteRow {
 }
 
 impl RouteRow {
+    /// The great-circle distance from origin to destination, one way.
+    pub fn distance_km(&self) -> f64 {
+        let (o, d) = (&self.route.origin, &self.route.destination);
+        crate::geo::great_circle_km(o.lat, o.lon, d.lat, d.lon)
+    }
+
+    /// What the best trip costs per kilometre flown: its price over the
+    /// round trip's distance (there and back). `None` without a price,
+    /// or for places too close to measure.
+    pub fn price_per_km(&self) -> Option<f64> {
+        let trip = self.best.as_ref()?;
+        let km = 2.0 * self.distance_km();
+        (km >= 1.0).then(|| trip.price.as_f64() / km)
+    }
+
     pub fn key(&self) -> RowKey {
         RowKey {
             route: self.route.id,
