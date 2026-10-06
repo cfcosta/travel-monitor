@@ -936,3 +936,28 @@ session cookies or local storage reads as logged out.
   maximum interval) and the ~10% random checks are unchanged.
 - **Google Flights doubles again:** its daily budget starts at 4,800
   page loads and may ramp to 12,000 (was 2,400 and 6,000).
+
+## 0062: A browser profile per site, and sites checked in parallel
+
+- Date: 2026-10-06
+- Refines [0021](#0021-the-daemon-runs-its-own-headless-chromium),
+  [0024](#0024-miles-programs-are-logged-in-by-hand-once) and
+  [0060](#0060-each-website-has-its-own-daily-budget).
+
+The daemon ran every site through one Chromium profile, so anything
+else that needed the profile (a miles login, a probe) had to stop the
+daemon for a minute. Instead:
+
+- **One profile per site.** Each site (`Source::site()`: Google
+  Flights, TAP, each miles program) gets its own Chromium profile
+  directory and its own browser process, started when the site has work
+  and closed when idle. A login opens only that site's profile, so only
+  that site pauses; every other site keeps running.
+- **Sites in parallel.** Each site runs at most one check at a time,
+  with its own pacing and its own budget (0060), and different sites run
+  at the same time. One site's pace and blocks never slow another.
+- **Points of sale** stay isolated as browser contexts inside the
+  site's process (0033).
+
+Logins made before this change live in the old shared profile; they
+are not migrated.
