@@ -203,3 +203,53 @@ Cost per route × cabin × point of sale for six months:
   trip length;
 - round trip at several lengths (date grid, departure week × return
   week): a few dozen calls.
+
+## Results, booking pages and passengers
+
+- Date: 2026-10-06
+- Method: `chrome-cdp`, one tab, XHR hook; fixtures in
+  `crates/tm-gflights/tests/fixtures/` (see its README).
+
+**Results come embedded.** A results page loaded from a URL (`q=` or
+`tfs=`) renders its first itineraries from data in the HTML
+(`AF_initDataCallback`, key `ds:1`), with no `GetShoppingResults` call.
+The RPC is made only after an interaction: choosing a departing flight
+(the returning flights), or loading a URL whose `tfs` already selects
+one. `GetShoppingResults` streams several payloads; the last holds every
+itinerary. The "Cheapest" tab's request ended with status 0 and an empty
+body in the hook (streamed differently); not pursued.
+
+**Selected flights are in `tfs`.** Choosing a flight adds field 4 to its
+leg: `{ 1: "GRU", 2: "2026-11-10", 3: "LIS", 5: "TP", 6: "84" }`, one per
+segment. The booking URL is the search with every leg's flights, plus a
+`tfu` parameter: `{ 1: <the itinerary's price token>, 2: { 1: 0 },
+4: { 1: "1" } }`. So a booking URL can be built from parsed results.
+
+**`tfu` carries the point of sale's offers.** The booking URL from a
+gl=BR session, loaded directly under gl=BR, listed all 11 sellers. The
+same URL under gl=US, PT or IN listed only TAP. Reached through the
+gl=US search page instead (its own `tfu`), it listed 18 sellers, most
+quoting USD (`[["USD", 742]]` next to R$3,709). For foreign points of
+sale the booking page has to come from that point of sale's own results.
+
+**A one-way booking page stalled** on "Getting prices" twice (no
+`GetBookingResults`). Not investigated; it may have been throttling.
+
+**Price tokens are exact.** The base64 token next to each price is a
+protobuf: `{ 2: label, 3: { 1: amount, 2: 2 (decimals), 3: "BRL" } }`.
+`382485` is R$3,824.85, displayed as R$3,825. Labels: Explore
+`GRU-LIS:2026-11-12_2026-11-19`, results `TP1924|TP93`, booking
+`options:1`.
+
+**Passengers.** `tfs` field 8 is one entry per traveller: 1 adult,
+2 child, 3 infant on lap, 4 infant in seat. Verified by loading a
+generated URL with `1,1,1,2,2,3,3,4`: the passenger dialog showed 3
+adults, 2 children, 1 infant in seat and 2 on lap, and the page's
+request carried `[3, 2, 2, 1]` (adults, children, lap, seat).
+
+**Resolving a city.** `q=Flights to Rome` resolves in the page's
+embedded `AF_dataServiceRequests` (`/m/06c62`, type 4), with the
+origin taken from the user's location. No RPC is involved.
+
+**Explore streams too.** The business-class Explore response had 68
+destinations in its first payload and four more in four later payloads.
