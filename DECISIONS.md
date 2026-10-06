@@ -1024,3 +1024,17 @@ second pass the next family of each, and so on. Every destination gets
 a first price sooner, and "older first" still holds within each pass.
 "Check now" is unchanged: it still checks every family of the route,
 ahead of the schedule (0046).
+
+## 0071: "Check now" shares the site with the schedule
+
+- Date: 2026-10-06
+- Refines [0046](#0046-the-app-asks-the-daemon-for-work-through-a-requests-table).
+
+"Check now" still queues every family of the route, but manual checks
+no longer all run ahead of the schedule. Each site's worker runs one
+manual check, then one scheduled pick, and so on; when the scheduler has
+nothing due, manual checks run one after another, paced like any other
+check. When several requests are pending, the next manual check comes
+from a different request than the last, so several clicks take turns.
+A single click on a big route (36 families) no longer holds Google
+Flights for twenty minutes.

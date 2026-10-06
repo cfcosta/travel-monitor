@@ -216,6 +216,25 @@ enum Manual {
     Confirm(DealId, RequestId),
 }
 
+/// Which queued manual check goes next: the first one for a request
+/// other than `last`, else the first one (0071).
+fn next_manual_index(
+    queue: &VecDeque<Manual>,
+    last: Option<RequestId>,
+) -> usize {
+    queue.iter().position(|m| m.request() != last).unwrap_or(0)
+}
+
+impl Manual {
+    /// The app request this check serves, if any.
+    fn request(&self) -> Option<RequestId> {
+        match self {
+            Manual::Check(_, request) => *request,
+            Manual::Confirm(_, request) => Some(*request),
+        }
+    }
+}
+
 /// The configuration a tick works from.
 #[derive(Debug, Clone, Default)]
 pub struct World {
@@ -319,8 +338,12 @@ pub(crate) struct Worker<S: Sources> {
     pending: VecDeque<Command>,
     /// The program being logged into while the site is paused (0024).
     paused: Option<String>,
-    /// Manual checks (0046), run before the scheduler's picks.
+    /// Manual checks (0046), interleaved one-for-one with the
+    /// scheduler's picks (0071).
     manual: VecDeque<Manual>,
+    /// The request the last manual check served, so the next one comes
+    /// from another pending request when there is one (0071).
+    last_manual: Option<RequestId>,
     /// Places whose Freebase ID could not be learned under
     /// `resolve_version` of the configuration.
     resolve_tried: HashSet<PlaceId>,
@@ -361,6 +384,7 @@ impl<S: Sources + 'static> Worker<S> {
             pending: VecDeque::new(),
             paused: None,
             manual: VecDeque::new(),
+            last_manual: None,
             resolve_tried: HashSet::new(),
             resolve_version: -1,
             unavailable: false,
@@ -426,7 +450,10 @@ impl<S: Sources> Worker<S> {
                 break;
             }
             if self.autonomous {
-                if let Err(e) = self.run_manual().await {
+                // One manual check per turn (0071): the tick below
+                // interleaves the rest with its picks, and between ticks
+                // the loop comes straight back for the next one.
+                if let Err(e) = self.run_manual(Some(1)).await {
                     warn!(site = %self.site, "manual checks: {e:#}");
                 }
                 if tokio::time::Instant::now() >= next_tick {
@@ -443,7 +470,10 @@ impl<S: Sources> Worker<S> {
                     self.status().await;
                 }
                 self.close_when_idle().await;
-                if !self.pending.is_empty() || self.stopping() {
+                if !self.pending.is_empty()
+                    || self.stopping()
+                    || (!self.manual.is_empty() && self.paused.is_none())
+                {
                     continue;
                 }
             }
@@ -486,7 +516,7 @@ impl<S: Sources> Worker<S> {
                 let _ = reply.send(());
             }
             Command::RunManual(reply) => {
-                if let Err(e) = self.run_manual().await {
+                if let Err(e) = self.run_manual(None).await {
                     warn!(site = %self.site, "manual checks: {e:#}");
                 }
                 let _ = reply.send(());
@@ -853,8 +883,9 @@ impl<S: Sources> Worker<S> {
                 info!(site = %self.site, "paused for a login: ending the tick early");
                 break;
             }
+            // One manual check, then one scheduled pick (0071).
             if !self.manual.is_empty() {
-                self.run_manual().await?;
+                self.run_manual(Some(1)).await?;
             }
             if self.paused.is_some() || self.budget.is_cooling(Utc::now()) {
                 break;
@@ -874,14 +905,21 @@ impl<S: Sources> Worker<S> {
         Ok(())
     }
 
-    /// Runs the queued manual checks, first in line (0046).
-    async fn run_manual(&mut self) -> anyhow::Result<()> {
+    /// Runs up to `limit` queued manual checks (all with `None`), taking
+    /// each from a different pending request than the last when it can
+    /// (0071), and pacing them like any other check.
+    async fn run_manual(&mut self, limit: Option<usize>) -> anyhow::Result<()> {
         if self.manual.is_empty() || self.paused.is_some() {
             return Ok(());
         }
         self.refresh_loaded().await;
-        let mut first = true;
-        while let Some(item) = self.manual.pop_front() {
+        let mut first = !self.recently_worked();
+        let mut ran = 0;
+        while limit.is_none_or(|n| ran < n) {
+            let Some(item) = self.next_manual() else {
+                break;
+            };
+            ran += 1;
             if self.stopping() || self.paused.is_some() {
                 self.manual.push_front(item);
                 break;
@@ -895,6 +933,7 @@ impl<S: Sources> Worker<S> {
                 self.pace().await;
             }
             first = false;
+            self.last_manual = item.request();
             match item {
                 Manual::Check(family, request) => {
                     let result =
@@ -915,6 +954,19 @@ impl<S: Sources> Worker<S> {
             self.poll().await;
         }
         Ok(())
+    }
+
+    /// The next manual check: the first one queued for a request other
+    /// than the last one served, else the first one (0071).
+    fn next_manual(&mut self) -> Option<Manual> {
+        let i = next_manual_index(&self.manual, self.last_manual);
+        self.manual.remove(i)
+    }
+
+    /// A check ran within the pacing window, so the next one waits its
+    /// turn even when it is the first of a call.
+    fn recently_worked(&self) -> bool {
+        self.last_work.elapsed() < Duration::from_secs(60)
     }
 
     async fn confirm_request(
@@ -1896,4 +1948,33 @@ fn split<T>(f: Fetch<T>, found: impl FnOnce(T) -> Found) -> (Fetch<()>, Found) {
         },
         found(value),
     )
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn manual_checks_rotate_across_requests() {
+        use std::collections::VecDeque;
+
+        use tm_domain::{FamilyId, RequestId};
+
+        use super::{Manual, next_manual_index};
+
+        // Request 1 queued three checks, then request 2 queued two.
+        let mut q: VecDeque<Manual> = [(1, 1), (2, 1), (3, 1), (4, 2), (5, 2)]
+            .into_iter()
+            .map(|(f, r)| Manual::Check(FamilyId(f), Some(RequestId(r))))
+            .collect();
+        let mut last = None;
+        let mut order = Vec::new();
+        while !q.is_empty() {
+            let i = next_manual_index(&q, last);
+            let m = q.remove(i).expect("item");
+            last = m.request();
+            if let Manual::Check(f, _) = m {
+                order.push(f.0);
+            }
+        }
+        assert_eq!(order, vec![1, 4, 2, 5, 3]);
+    }
 }
