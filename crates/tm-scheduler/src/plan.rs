@@ -6,7 +6,8 @@
 //!    candidate's own [`Candidate::max_interval`], else `max_interval`),
 //!    most overdue first.
 //! 2. **Bootstrap**: never checked, lowest [`Candidate::bootstrap_rank`]
-//!    first (DECISIONS.md 0049), then the earliest added
+//!    first (DECISIONS.md 0049); within a rank one family per route per
+//!    pass (0070), earliest-added route first in each pass
 //!    ([`Candidate::added`], 0065), then highest weight. Ranks are taken
 //!    strictly in order: once a never-checked family does not fit, cheaper
 //!    ones of the same rank may still go, but no later rank is
@@ -140,10 +141,29 @@ pub fn plan_tick<R: Rng + ?Sized>(
         );
     }
 
+    // One family per route per pass (0070): number each never-checked
+    // family within its rank and route, in family order, then take pass
+    // 0 of every route (earliest added first), then pass 1, and so on.
+    let mut pass = vec![0usize; candidates.len()];
+    {
+        let mut by_route: Vec<usize> = bootstrap.clone();
+        by_route.sort_by_key(|&i| {
+            let c = &candidates[i];
+            (c.bootstrap_rank, c.added, c.family)
+        });
+        let mut seen: BTreeMap<(u8, i64), usize> = BTreeMap::new();
+        for i in by_route {
+            let c = &candidates[i];
+            let n = seen.entry((c.bootstrap_rank, c.added)).or_insert(0);
+            pass[i] = *n;
+            *n += 1;
+        }
+    }
     bootstrap.sort_by(|&a, &b| {
         let (ca, cb) = (&candidates[a], &candidates[b]);
         ca.bootstrap_rank
             .cmp(&cb.bootstrap_rank)
+            .then(pass[a].cmp(&pass[b]))
             .then(ca.added.cmp(&cb.added))
             .then(finite(cb.weight).total_cmp(&finite(ca.weight)))
             .then(ca.family.cmp(&cb.family))
@@ -303,6 +323,27 @@ mod tests {
             min_interval: None,
             added: id,
         }
+    }
+
+    #[test]
+    fn new_families_are_filled_in_one_route_at_a_time() {
+        // Route 1 (older) has three never-checked families, route 2 has
+        // two: the order is 1, 2, 1, 2, 1.
+        let mk = |id: i64, route: i64| {
+            let mut c = cand(id, "gf", None);
+            c.added = route;
+            c
+        };
+        let cands = [mk(10, 1), mk(11, 1), mk(12, 1), mk(20, 2), mk(21, 2)];
+        let picks = plan_tick(
+            &cands,
+            now(),
+            &budget(5),
+            &no_random(),
+            &mut StdRng::seed_from_u64(5),
+        );
+        let ids: Vec<i64> = picks.iter().map(|p| p.family.0).collect();
+        assert_eq!(ids, vec![10, 20, 11, 21, 12]);
     }
 
     #[test]

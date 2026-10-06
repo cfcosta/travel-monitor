@@ -1011,3 +1011,16 @@ and any "something went wrong" text means the check failed, not that
 there is nothing to sell. A family's latest *loaded* check decides its
 7-day wait: a later block or error does not end it, a check with prices
 does.
+
+## 0070: New families are filled in one route at a time, in turn
+
+- Date: 2026-10-06
+- Refines [0065](#0065-fill-in-and-refresh-the-oldest-data-first-google-flights-doubles-again).
+
+Within a bootstrap rank, never-checked families are taken one per
+route per pass instead of a whole route at a time: the first pass
+takes one family from each route (earliest-added routes first), the
+second pass the next family of each, and so on. Every destination gets
+a first price sooner, and "older first" still holds within each pass.
+"Check now" is unchanged: it still checks every family of the route,
+ahead of the schedule (0046).
