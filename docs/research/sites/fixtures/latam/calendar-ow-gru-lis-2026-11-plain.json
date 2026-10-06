@@ -1,0 +1,32 @@
+[
+ {
+  "calendar": [
+   {
+    "month": "2026-11",
+    "origin": "GRU",
+    "destination": "LIS",
+    "travelType": "ONEWAY",
+    "direction": "OUTBOUND",
+    "minimum": null,
+    "maximum": null,
+    "average": null,
+    "detailsCalendar": []
+   }
+  ]
+ },
+ {
+  "calendar": [
+   {
+    "month": "2026-12",
+    "origin": "GRU",
+    "destination": "LIS",
+    "travelType": "ONEWAY",
+    "direction": "OUTBOUND",
+    "minimum": null,
+    "maximum": null,
+    "average": null,
+    "detailsCalendar": []
+   }
+  ]
+ }
+]

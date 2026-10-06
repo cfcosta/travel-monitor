@@ -1,0 +1,1451 @@
+{
+ "id": "<scrubbed>",
+ "currency": {
+  "sale": {
+   "code": "BRL",
+   "scale": 2
+  },
+  "priced": {
+   "code": "USD",
+   "scale": 2
+  }
+ },
+ "options": [
+  {
+   "optionId": 1,
+   "priceSummary": {
+    "total": {
+     "amount": 9287.21,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 7294.37,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-07T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-14T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 2,
+   "priceSummary": {
+    "total": {
+     "amount": 7552.11,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5559.27,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-07T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-15T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 3,
+   "priceSummary": {
+    "total": {
+     "amount": 7093.41,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5100.57,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-07T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-16T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 4,
+   "priceSummary": {
+    "total": {
+     "amount": 7552.11,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5559.27,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-07T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-17T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 5,
+   "priceSummary": {
+    "total": {
+     "amount": 8329.91,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 6337.07,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-07T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-18T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 6,
+   "priceSummary": {
+    "total": {
+     "amount": 8329.91,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 6337.07,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-07T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-19T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 7,
+   "priceSummary": {
+    "total": {
+     "amount": 8329.91,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 6337.07,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-07T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-20T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 8,
+   "priceSummary": {
+    "total": {
+     "amount": 9287.21,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 7294.37,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-08T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-14T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 9,
+   "priceSummary": {
+    "total": {
+     "amount": 7552.11,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5559.27,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-08T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-15T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 10,
+   "priceSummary": {
+    "total": {
+     "amount": 7093.41,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5100.57,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-08T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-16T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 11,
+   "priceSummary": {
+    "total": {
+     "amount": 7552.11,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5559.27,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-08T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-17T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 12,
+   "priceSummary": {
+    "total": {
+     "amount": 8329.91,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 6337.07,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-08T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-18T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 13,
+   "priceSummary": {
+    "total": {
+     "amount": 8329.91,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 6337.07,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-08T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-19T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 14,
+   "priceSummary": {
+    "total": {
+     "amount": 8329.91,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 6337.07,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-08T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-20T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 15,
+   "priceSummary": {
+    "total": {
+     "amount": 9287.21,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 7294.37,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-09T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-14T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 16,
+   "priceSummary": {
+    "total": {
+     "amount": 7552.11,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5559.27,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-09T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-15T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 17,
+   "priceSummary": {
+    "total": {
+     "amount": 7093.41,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5100.57,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-09T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-16T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 18,
+   "priceSummary": {
+    "total": {
+     "amount": 7552.11,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5559.27,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-09T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-17T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 19,
+   "priceSummary": {
+    "total": {
+     "amount": 8329.91,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 6337.07,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-09T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-18T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 20,
+   "priceSummary": {
+    "total": {
+     "amount": 8329.91,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 6337.07,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-09T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-19T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 21,
+   "priceSummary": {
+    "total": {
+     "amount": 8329.91,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 6337.07,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-09T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-20T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 22,
+   "priceSummary": {
+    "total": {
+     "amount": 9287.21,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 7294.37,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-10T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-14T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 23,
+   "priceSummary": {
+    "total": {
+     "amount": 7552.11,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5559.27,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-10T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-15T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 24,
+   "priceSummary": {
+    "total": {
+     "amount": 7093.41,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5100.57,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-10T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-16T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 25,
+   "priceSummary": {
+    "total": {
+     "amount": 7552.11,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5559.27,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-10T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-17T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 26,
+   "priceSummary": {
+    "total": {
+     "amount": 8329.91,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 6337.07,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-10T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-18T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 27,
+   "priceSummary": {
+    "total": {
+     "amount": 8329.91,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 6337.07,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-10T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-19T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 28,
+   "priceSummary": {
+    "total": {
+     "amount": 8329.91,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 6337.07,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-10T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-20T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 29,
+   "priceSummary": {
+    "total": {
+     "amount": 15783.83,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 13790.99,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-11T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-14T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 30,
+   "priceSummary": {
+    "total": {
+     "amount": 6774.31,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 4781.47,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-11T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-15T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 31,
+   "priceSummary": {
+    "total": {
+     "amount": 6315.61,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 4322.77,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "lowestPrice": true,
+   "outbound": {
+    "travelDate": "2026-11-11T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-16T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 32,
+   "priceSummary": {
+    "total": {
+     "amount": 6774.31,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 4781.47,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-11T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-17T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 33,
+   "priceSummary": {
+    "total": {
+     "amount": 7552.11,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5559.27,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-11T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-18T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 34,
+   "priceSummary": {
+    "total": {
+     "amount": 7552.11,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5559.27,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-11T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-19T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 35,
+   "priceSummary": {
+    "total": {
+     "amount": 7552.11,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5559.27,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-11T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-20T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 36,
+   "priceSummary": {
+    "total": {
+     "amount": 15783.83,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 13790.99,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-12T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-14T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 37,
+   "priceSummary": {
+    "total": {
+     "amount": 6774.31,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 4781.47,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-12T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-15T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 38,
+   "priceSummary": {
+    "total": {
+     "amount": 6315.61,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 4322.77,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "lowestPrice": true,
+   "outbound": {
+    "travelDate": "2026-11-12T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-16T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 39,
+   "priceSummary": {
+    "total": {
+     "amount": 6774.31,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 4781.47,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-12T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-17T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 40,
+   "priceSummary": {
+    "total": {
+     "amount": 7552.11,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5559.27,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-12T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-18T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 41,
+   "priceSummary": {
+    "total": {
+     "amount": 7552.11,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5559.27,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-12T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-19T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 42,
+   "priceSummary": {
+    "total": {
+     "amount": 7552.11,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5559.27,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-12T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-20T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 43,
+   "priceSummary": {
+    "total": {
+     "amount": 15783.83,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 13790.99,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-13T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-14T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 44,
+   "priceSummary": {
+    "total": {
+     "amount": 6774.31,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 4781.47,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-13T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-15T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 45,
+   "priceSummary": {
+    "total": {
+     "amount": 6315.61,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 4322.77,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "lowestPrice": true,
+   "outbound": {
+    "travelDate": "2026-11-13T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-16T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 46,
+   "priceSummary": {
+    "total": {
+     "amount": 6774.31,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 4781.47,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-13T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-17T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 47,
+   "priceSummary": {
+    "total": {
+     "amount": 7552.11,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5559.27,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-13T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-18T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 48,
+   "priceSummary": {
+    "total": {
+     "amount": 7552.11,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5559.27,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-13T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-19T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  },
+  {
+   "optionId": 49,
+   "priceSummary": {
+    "total": {
+     "amount": 7552.11,
+     "type": "CASH"
+    },
+    "baseFare": {
+     "amount": 5559.27,
+     "type": "CASH"
+    },
+    "taxTotal": {
+     "amount": 1992.84,
+     "type": "CASH"
+    }
+   },
+   "outbound": {
+    "travelDate": "2026-11-13T01:30:00",
+    "cabin": [
+     "Y"
+    ]
+   },
+   "inbound": {
+    "travelDate": "2026-11-20T09:05:00",
+    "cabin": [
+     "Y"
+    ]
+   }
+  }
+ ],
+ "requestedCabinAvailable": true,
+ "mixedCabinGridDisplay": false,
+ "isUpsell": false,
+ "isDownsell": false,
+ "isAllLowestPriced": false,
+ "transactionId": "<scrubbed>",
+ "analyticsProps": {
+  "isSearchChanged": true,
+  "searchMethod": "GENERAL",
+  "searchDetails": "",
+  "flightSearchId": "<scrubbed>"
+ }
+}

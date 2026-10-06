@@ -1,0 +1,29 @@
+# Azul block page served to the user's desktop Chrome, 2026-10-06.
+# GET https://www.voeazul.com.br/br/pt/home -> HTTP 403, transferSize 3836.
+# Truncated capture: the first ~1,600 characters of the HTML (<head> styles
+# elided) and the full visible text. The client IP is replaced with
+# 203.0.113.1 (documentation range).
+# Cookies set on the domain (names only): ardsp, ATAB, _abck, bm_so, bm_sz, bm_lso
+# Scripts on the page: an inline translation script and the Akamai Bot Manager
+# sensor at https://www.voeazul.com.br/j69L/uGKq/O/ktc/5pOJLg/wbYhNmp7Y75X/Rjt6GwE/RXN/MA3BdL3ER?v=<uuid>
+
+--- HTML (head styles elided) ---
+<html lang="pt"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>…</style>
+</head>
+<body>
+<nav class="nav"><img src="https://cybersecurity.voeazul.com.br/assets/d3fdc81f8673b21d06b7cd3c93e26a9a6d9c3176.svg"></nav>
+<main class="cnt">
+<div class="hero">
+<div class="hero-g"><img src="https://cybersecurity.voeazul.com.br/assets/b0b915539931a2faf6556047b3c0173235a54052.svg" class="img-c"></div>
+<div class="hero-t"><h1 id="t1">Oops! Just a moment.</h1>
+<div class="msg"><p id="t2">We detected unusual activity from your IP. Access is temporarily limited.</p>
+<p id="t3" style="margin-top:15px">Please try disabling VPN, clearing cookies, or wait a moment.</p>
+<p style="margin-top:20px;font-size:14px;opacity:0.8">IP: 203.0.113.1 | Ref: 0.cf031502.1791265775.dabedc29</p>
+</div></div></div>
+</main>
+<footer class="ft"><div class="ft-c"><img src="https://cybersecurity.voeazul.com.br/assets/757f1e3728dfdd6c709392b24f917c6e098b1a9f.svg"><div class="ft-i"><p>Av. Marcos P. de U. Rodrigues, 939 - Torre Jatobá, 11º andar</p><p>CNPJ: 09.296.295/0001-60 | © 2022 Azul Linhas Aéreas</p></div></div></footer>
+<script>
+if(navigator.language.startsWith('en')){const d={t1:"Oops! Just a moment.",t2:"We detected unusual activity from your IP. Access is temporarily limited.",t3:"Please try disabling VPN, clearing cookies, or wait a moment.",t4:"Contact us?", … }
+…

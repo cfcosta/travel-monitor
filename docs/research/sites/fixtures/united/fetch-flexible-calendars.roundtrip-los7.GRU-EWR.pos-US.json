@@ -1,0 +1,296 @@
+{
+ "request": {
+  "SearchTypeSelection": 2,
+  "SortType": "bestmatches",
+  "SortTypeDescending": false,
+  "Trips": [
+   {
+    "Origin": "GRU",
+    "Destination": "EWR",
+    "DepartDate": "2026-11-10",
+    "Index": 1,
+    "TripIndex": 1,
+    "SearchRadiusMilesOrigin": 0,
+    "SearchRadiusMilesDestination": 0,
+    "DepartTimeApprox": 0,
+    "SearchFiltersIn": {
+     "FareFamily": "ECONOMY",
+     "AirportsStop": null,
+     "AirportsStopToAvoid": null,
+     "ShopIndicators": {
+      "IsTravelCreditsApplied": false,
+      "IsDoveFlow": true,
+      "DisableBasicEconomy": false,
+      "DisableBasicPremium": false
+     },
+     "StopCountMin": -1,
+     "StopCountMax": -1
+    },
+    "UseFilters": true
+   },
+   {
+    "Origin": "EWR",
+    "Destination": "GRU",
+    "DepartDate": "2026-11-17",
+    "Index": 2,
+    "TripIndex": 2,
+    "SearchRadiusMilesOrigin": 0,
+    "SearchRadiusMilesDestination": 0,
+    "DepartTimeApprox": 0,
+    "SearchFiltersIn": {
+     "FareFamily": "ECONOMY",
+     "AirportsStop": null,
+     "AirportsStopToAvoid": null,
+     "ShopIndicators": {
+      "IsTravelCreditsApplied": false,
+      "IsDoveFlow": true,
+      "DisableBasicEconomy": false,
+      "DisableBasicPremium": false
+     }
+    }
+   }
+  ],
+  "CabinPreferenceMain": "economy",
+  "PaxInfoList": [
+   {
+    "PaxType": 1
+   }
+  ],
+  "AwardTravel": false,
+  "NGRP": false,
+  "CalendarOnly": true,
+  "FareCalendar": true,
+  "CalendarLengthOfStay": 7,
+  "PetCount": 0,
+  "RecentSearchKey": "GRUEWR11/10/2026EWRGRU11/17/2026",
+  "CalendarFilters": {
+   "Filters": {
+    "PriceScheduleOptions": {
+     "Stops": 1
+    }
+   }
+  },
+  "Characteristics": [
+   {
+    "Code": "SOFT_LOGGED_IN",
+    "Value": false
+   },
+   {
+    "Code": "UsePassedCartId",
+    "Value": false
+   }
+  ],
+  "FareType": null,
+  "BuildHashValue": "true"
+ },
+ "response": {
+  "Data": {
+   "CartId": "00000000-0000-0000-0000-000000000000",
+   "CalendarPriceCells": [
+    {
+     "Cheapest": true,
+     "Date": "2026-11-10",
+     "Fare": 986.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Cheapest": true,
+     "Date": "2026-11-11",
+     "Fare": 986.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-11-12",
+     "Fare": 1013.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-11-13",
+     "Fare": 1172.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-11-14",
+     "Fare": 1154.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-11-15",
+     "Fare": 1046.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-11-16",
+     "Fare": 990.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Cheapest": true,
+     "Date": "2026-11-17",
+     "Fare": 986.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Cheapest": true,
+     "Date": "2026-11-18",
+     "Fare": 986.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Cheapest": true,
+     "Date": "2026-11-19",
+     "Fare": 986.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-11-20",
+     "Fare": 1046.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-11-21",
+     "Fare": 1046.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-11-22",
+     "Fare": 1046.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Cheapest": true,
+     "Date": "2026-11-23",
+     "Fare": 986.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Cheapest": true,
+     "Date": "2026-11-24",
+     "Fare": 986.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Cheapest": true,
+     "Date": "2026-11-25",
+     "Fare": 986.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Cheapest": true,
+     "Date": "2026-11-26",
+     "Fare": 986.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-11-27",
+     "Fare": 1050.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-11-28",
+     "Fare": 1307.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-11-29",
+     "Fare": 1208.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-11-30",
+     "Fare": 1000.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-12-01",
+     "Fare": 1017.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-12-02",
+     "Fare": 1100.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-12-03",
+     "Fare": 1210.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-12-04",
+     "Fare": 1261.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-12-05",
+     "Fare": 1386.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-12-06",
+     "Fare": 1293.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-12-07",
+     "Fare": 1312.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-12-08",
+     "Fare": 1349.0,
+     "CurrencyCode": "USD"
+    },
+    {
+     "Date": "2026-12-09",
+     "Fare": 1426.0,
+     "CurrencyCode": "USD"
+    }
+   ],
+   "LastResultId": "REDACTED",
+   "Timings": [
+    {
+     "Name": "Boombox query time",
+     "TimeMilliseconds": "18458"
+    },
+    {
+     "Name": "TranslateTravelerType",
+     "TimeMilliseconds": "000000.01",
+     "DTStart": "20261006_055738.103"
+    },
+    {
+     "Name": "UNMR Validation",
+     "TimeMilliseconds": "000000.01",
+     "DTStart": "20261006_055738.103"
+    },
+    {
+     "Name": "Origin Destination Validation",
+     "TimeMilliseconds": "000000.02",
+     "DTStart": "20261006_055738.103"
+    },
+    {
+     "Name": "ShopRequest Validation",
+     "TimeMilliseconds": "000000.01",
+     "DTStart": "20261006_055738.103"
+    },
+    {
+     "Name": "Young Adult Age Validation",
+     "TimeMilliseconds": "000000.00",
+     "DTStart": "20261006_055738.103"
+    },
+    {
+     "Name": "Input Validation",
+     "TimeMilliseconds": "000000.05",
+     "DTStart": "20261006_055738.103"
+    },
+    {
+     "Name": "Flexible Calendar - Total Call",
+     "TimeMilliseconds": "018466.07",
+     "DTStart": "20261006_055738.103"
+    }
+   ],
+   "Status": 1,
+   "LastTripIndexRequested": 1
+  }
+ }
+}

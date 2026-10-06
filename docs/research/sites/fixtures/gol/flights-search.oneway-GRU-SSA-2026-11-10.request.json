@@ -1,0 +1,29 @@
+{
+ "method": "POST",
+ "url": "https://bff-flight.voegol.com.br/flights/search",
+ "headers": [
+  "Content-Type: application/json",
+  "Authorization: Bearer <anonymous token from gol-auth-api create-token>",
+  "x-sabre-cookie-encoded: <session value>"
+ ],
+ "body": {
+  "searchType": "BRANDED",
+  "promoCodes": [],
+  "pointOfSale": "BR",
+  "currency": null,
+  "itineraryParts": [
+   {
+    "fromCode": "GRU",
+    "toCode": "SSA",
+    "when": "2026-11-10"
+   }
+  ],
+  "passengers": {
+   "adt": 1,
+   "chd": 0,
+   "inf": 0
+  },
+  "hasCourtesyTicket": false,
+  "orderSort": "sort-network-priority"
+ }
+}

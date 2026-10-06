@@ -1,0 +1,3251 @@
+{
+  "captured": "2026-10-06",
+  "site": "www.turkishairlines.com/pt-br",
+  "method": "POST",
+  "url": "https://www.turkishairlines.com/api/v1/availability",
+  "status": 200,
+  "request": {
+    "selectedBookerSearch": "O",
+    "selectedCabinClass": "ECONOMY",
+    "moduleType": "TICKETING",
+    "passengerTypeList": [
+      {
+        "quantity": 1,
+        "code": "ADULT"
+      }
+    ],
+    "originDestinationInformationList": [
+      {
+        "originAirportCode": "GRU",
+        "originCountryCode": "BR",
+        "originMultiPort": false,
+        "originDomestic": false,
+        "destinationAirportCode": "IST",
+        "destinationCountryCode": "TR",
+        "destinationMultiPort": false,
+        "destinationDomestic": true,
+        "departureDate": "10-11-2026",
+        "originCityCode": "SAO",
+        "destinationCityCode": "IST",
+        "originCity": "São Paulo",
+        "destinationCity": "Istambul"
+      }
+    ],
+    "savedDate": "2026-10-06T05:57:36.731Z",
+    "preselectedOptionDetails": []
+  },
+  "response": {
+    "data": {
+      "amadeusJSessionId": "<redacted>",
+      "availabilityFeatureToggles": {
+        "domesticSimplyBookerActive": true,
+        "ReservationRightSaleActive": true,
+        "BrandRightTooltipActive": true,
+        "AutoFareRulesCallActive": true,
+        "AvailabilityDomesticRTMCWeeklyHistogramRequestActive": false,
+        "AvailabilityCovidInfoFieldActive": true,
+        "MCPActive": true,
+        "AvailabilityDomesticOWWeeklyRequestActive": true,
+        "CLMCutoverActive": false,
+        "BrandRightTooltipReissueRightActive": false,
+        "internationalSimplyBookerActive": true,
+        "cmOffersPaymentActive": true,
+        "EnableReissueSorting": true,
+        "ExtraSeatSelectionActive": true,
+        "EcoFlyCompareModalInternationalActive": true,
+        "AvailabilityDomesticRTWeeklyRequestActive": true,
+        "EcoJetCompareModalInternationalActive": true,
+        "EcoFlyCompareModalDomesticActive": true
+      },
+      "bestFare": null,
+      "businessStartingPrice": {
+        "brandCode": "BF",
+        "startingPrice": {
+          "currencyCode": "BRL",
+          "amount": 20630.46,
+          "currencySign": "R$",
+          "currencySignPosition": "LEFT",
+          "decimalPlaces": 2
+        }
+      },
+      "comparableBrands": {
+        "EF": "PF",
+        "FL": "BL",
+        "PF": "BU",
+        "CL": "GN"
+      },
+      "domestic": false,
+      "duTax": null,
+      "economyStartingPrice": {
+        "brandCode": "CL",
+        "startingPrice": {
+          "currencyCode": "BRL",
+          "amount": 5298.81,
+          "currencySign": "R$",
+          "currencySignPosition": "LEFT",
+          "decimalPlaces": 2
+        }
+      },
+      "flightPageLimit": 15,
+      "limitedAirlinesList": null,
+      "originDestinationInformationList": [
+        {
+          "arrivalDate": null,
+          "beyond": false,
+          "campaignBanner": null,
+          "departureDate": "10-11-2026",
+          "filterAndSortParameters": {
+            "minFlightCountForSorting": 0,
+            "minFlightCountForTimeRangeFiltering": 5,
+            "minFlightCountForOptionsFiltering": 5,
+            "defaultFlightSortingParameter": "departuretime",
+            "maximumDaysForAvailability": 355
+          },
+          "originDestinationOptionList": [
+            {
+              "businessBannerKey": "availabilityBusinessBanner.WIDE",
+              "cabinTextAndTooltip": null,
+              "cheapest": true,
+              "dateDifference": 1,
+              "differenceWithBestFare": null,
+              "excessBaggageAttention": false,
+              "fareCategory": {
+                "ECONOMY": {
+                  "bookingPriceInfoList": [
+                    {
+                      "brandCode": "CL",
+                      "brandCodeList": [
+                        "CL"
+                      ],
+                      "brandRightList": [
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "8",
+                            "piece": "1"
+                          },
+                          "hasRight": true,
+                          "key": "CARRY_ON_BAGGAGE.ALLOWED",
+                          "order": 1,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CARRY_ON_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 1,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": false,
+                          "key": "CHECKED_BAGGAGE.NOT_ALLOWED",
+                          "order": 2,
+                          "rightStatus": "NOT_ALLOWED",
+                          "rightType": "CHECKED_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": false,
+                          "key": "MERGED_SEAT_SELECTION.NOT_ALLOWED",
+                          "order": 3,
+                          "rightStatus": "NOT_ALLOWED",
+                          "rightType": "MERGED_SEAT_SELECTION",
+                          "tooltipKey": "brand.tooltip.preferredseatselection",
+                          "upgradePopupOrder": 3,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "amount": "997.18",
+                            "currency": "BRL"
+                          },
+                          "hasRight": true,
+                          "key": "REISSUE.AMOUNT.ALLOWED_WITH_PENALTY_AMOUNT",
+                          "order": 4,
+                          "rightStatus": "ALLOWED_WITH_PENALTY_AMOUNT",
+                          "rightType": "REISSUE",
+                          "tooltipKey": "brand.tooltip.reissue.classfeedifference",
+                          "upgradePopupOrder": 5,
+                          "withCharge": true
+                        },
+                        {
+                          "args": {
+                            "amount": "1296.33",
+                            "currency": "BRL"
+                          },
+                          "hasRight": true,
+                          "key": "REFUND.AMOUNT.ALLOWED_WITH_PENALTY_AMOUNT",
+                          "order": 6,
+                          "rightStatus": "ALLOWED_WITH_PENALTY_AMOUNT",
+                          "rightType": "REFUND",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 6,
+                          "withCharge": true
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "FULL_REFUND_IN_24_HOURS.ALLOWED",
+                          "order": 7,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "FULL_REFUND_IN_24_HOURS",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "percentage": "0"
+                          },
+                          "hasRight": true,
+                          "key": "BONUS_MILE.ALLOWED",
+                          "order": 8,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "BONUS_MILE",
+                          "tooltipKey": "brand.tooltip.bonusmile",
+                          "upgradePopupOrder": 7,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "amount": "80000",
+                            "currency": "MILE"
+                          },
+                          "hasRight": true,
+                          "key": "BUSINESS_UPGRADE_MILE.AMOUNT.ALLOWED_WITH_CHARGE",
+                          "order": 16,
+                          "rightStatus": "ALLOWED_WITH_CHARGE",
+                          "rightType": "BUSINESS_UPGRADE_MILE",
+                          "tooltipKey": "brand.tooltip.businessupgrademile",
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": true
+                        }
+                      ],
+                      "cabinType": "ECONOMY",
+                      "compareRequired": true,
+                      "differenceWithBestFare": null,
+                      "discountInfo": false,
+                      "dynamicPricingId": null,
+                      "fareBasisCodeList": [
+                        "Q"
+                      ],
+                      "fareBreakdown": {
+                        "passengerFareList": [
+                          {
+                            "extraSeatFare": null,
+                            "fuelFare": null,
+                            "passengerTypeCode": "ADT",
+                            "quantity": 1,
+                            "taxAndFeeFare": null,
+                            "ticketingFare": null,
+                            "totalFare": {
+                              "currencyCode": "BRL",
+                              "amount": 4008.66,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            },
+                            "unknownTaxList": []
+                          }
+                        ],
+                        "totalBaseFare": {
+                          "code": "BASE_FARE",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 4008.66,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalFuelFare": {
+                          "code": "FUEL",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 1221.54,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalTicketingFare": null,
+                        "totalTaxAndFeeFare": {
+                          "code": "OTHER",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 68.61,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "extraSeatFare": {
+                          "code": "EXTRA_SEAT",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 5230.20,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "unknownTaxList": [
+                          {
+                            "code": "BR",
+                            "fare": {
+                              "currencyCode": "BRL",
+                              "amount": 68.61,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            }
+                          }
+                        ]
+                      },
+                      "grandTotalFare": {
+                        "currencyCode": "BRL",
+                        "amount": 5298.81,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "grandTotalFareWithExtraSeat": {
+                        "currencyCode": "BRL",
+                        "amount": 10529.01,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "inboundFlightId": null,
+                      "initialDynamicPricingId": null,
+                      "initiallySelected": false,
+                      "originDestinationInformation": null,
+                      "outboundFareBasisCodeList": null,
+                      "outboundResBookDesigCodeList": null,
+                      "recommendationId": 0,
+                      "recommended": false,
+                      "referencePassengerFare": {
+                        "extraSeatFare": null,
+                        "fuelFare": null,
+                        "passengerTypeCode": "ADT",
+                        "quantity": 1,
+                        "taxAndFeeFare": null,
+                        "ticketingFare": null,
+                        "totalFare": {
+                          "currencyCode": "BRL",
+                          "amount": 5298.81,
+                          "currencySign": "R$",
+                          "currencySignPosition": "LEFT",
+                          "decimalPlaces": 2
+                        },
+                        "unknownTaxList": []
+                      },
+                      "resBookDesigCodeList": [
+                        "Y"
+                      ]
+                    },
+                    {
+                      "brandCode": "LG",
+                      "brandCodeList": [
+                        "LG"
+                      ],
+                      "brandRightList": [
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "8",
+                            "piece": "1"
+                          },
+                          "hasRight": true,
+                          "key": "CARRY_ON_BAGGAGE.ALLOWED",
+                          "order": 1,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CARRY_ON_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 1,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "23",
+                            "piece": "1"
+                          },
+                          "hasRight": true,
+                          "key": "CHECKED_BAGGAGE.PIECE.ALLOWED",
+                          "order": 2,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CHECKED_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": false,
+                          "key": "MERGED_SEAT_SELECTION.NOT_ALLOWED",
+                          "order": 3,
+                          "rightStatus": "NOT_ALLOWED",
+                          "rightType": "MERGED_SEAT_SELECTION",
+                          "tooltipKey": "brand.tooltip.preferredseatselection",
+                          "upgradePopupOrder": 3,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "amount": "648.16",
+                            "currency": "BRL"
+                          },
+                          "hasRight": true,
+                          "key": "REISSUE.AMOUNT.ALLOWED_WITH_PENALTY_AMOUNT",
+                          "order": 4,
+                          "rightStatus": "ALLOWED_WITH_PENALTY_AMOUNT",
+                          "rightType": "REISSUE",
+                          "tooltipKey": "brand.tooltip.reissue.chargeable",
+                          "upgradePopupOrder": 5,
+                          "withCharge": true
+                        },
+                        {
+                          "args": {
+                            "amount": "1296.33",
+                            "currency": "BRL"
+                          },
+                          "hasRight": true,
+                          "key": "REFUND.AMOUNT.ALLOWED_WITH_PENALTY_AMOUNT",
+                          "order": 6,
+                          "rightStatus": "ALLOWED_WITH_PENALTY_AMOUNT",
+                          "rightType": "REFUND",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 6,
+                          "withCharge": true
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "FULL_REFUND_IN_24_HOURS.ALLOWED",
+                          "order": 7,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "FULL_REFUND_IN_24_HOURS",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "percentage": "0"
+                          },
+                          "hasRight": true,
+                          "key": "BONUS_MILE.ALLOWED",
+                          "order": 8,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "BONUS_MILE",
+                          "tooltipKey": "brand.tooltip.bonusmile",
+                          "upgradePopupOrder": 7,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "amount": "75000",
+                            "currency": "MILE"
+                          },
+                          "hasRight": true,
+                          "key": "BUSINESS_UPGRADE_MILE.AMOUNT.ALLOWED_WITH_CHARGE",
+                          "order": 16,
+                          "rightStatus": "ALLOWED_WITH_CHARGE",
+                          "rightType": "BUSINESS_UPGRADE_MILE",
+                          "tooltipKey": "brand.tooltip.businessupgrademile",
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": true
+                        }
+                      ],
+                      "cabinType": "ECONOMY",
+                      "compareRequired": false,
+                      "differenceWithBestFare": null,
+                      "discountInfo": false,
+                      "dynamicPricingId": null,
+                      "fareBasisCodeList": [
+                        "Q"
+                      ],
+                      "fareBreakdown": {
+                        "passengerFareList": [
+                          {
+                            "extraSeatFare": null,
+                            "fuelFare": null,
+                            "passengerTypeCode": "ADT",
+                            "quantity": 1,
+                            "taxAndFeeFare": null,
+                            "ticketingFare": null,
+                            "totalFare": {
+                              "currencyCode": "BRL",
+                              "amount": 4307.81,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            },
+                            "unknownTaxList": []
+                          }
+                        ],
+                        "totalBaseFare": {
+                          "code": "BASE_FARE",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 4307.81,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalFuelFare": {
+                          "code": "FUEL",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 1221.54,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalTicketingFare": null,
+                        "totalTaxAndFeeFare": {
+                          "code": "OTHER",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 68.61,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "extraSeatFare": {
+                          "code": "EXTRA_SEAT",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 5529.35,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "unknownTaxList": [
+                          {
+                            "code": "BR",
+                            "fare": {
+                              "currencyCode": "BRL",
+                              "amount": 68.61,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            }
+                          }
+                        ]
+                      },
+                      "grandTotalFare": {
+                        "currencyCode": "BRL",
+                        "amount": 5597.96,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "grandTotalFareWithExtraSeat": {
+                        "currencyCode": "BRL",
+                        "amount": 11127.31,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "inboundFlightId": null,
+                      "initialDynamicPricingId": null,
+                      "initiallySelected": false,
+                      "originDestinationInformation": null,
+                      "outboundFareBasisCodeList": null,
+                      "outboundResBookDesigCodeList": null,
+                      "recommendationId": 1,
+                      "recommended": false,
+                      "referencePassengerFare": {
+                        "extraSeatFare": null,
+                        "fuelFare": null,
+                        "passengerTypeCode": "ADT",
+                        "quantity": 1,
+                        "taxAndFeeFare": null,
+                        "ticketingFare": null,
+                        "totalFare": {
+                          "currencyCode": "BRL",
+                          "amount": 5597.96,
+                          "currencySign": "R$",
+                          "currencySignPosition": "LEFT",
+                          "decimalPlaces": 2
+                        },
+                        "unknownTaxList": []
+                      },
+                      "resBookDesigCodeList": [
+                        "Y"
+                      ]
+                    },
+                    {
+                      "brandCode": "GN",
+                      "brandCodeList": [
+                        "GN"
+                      ],
+                      "brandRightList": [
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "8",
+                            "piece": "1"
+                          },
+                          "hasRight": true,
+                          "key": "CARRY_ON_BAGGAGE.ALLOWED",
+                          "order": 1,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CARRY_ON_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 1,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "23",
+                            "piece": "2"
+                          },
+                          "hasRight": true,
+                          "key": "CHECKED_BAGGAGE.PIECE.ALLOWED",
+                          "order": 2,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CHECKED_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "seatType": "brand.right.seattype.standart"
+                          },
+                          "hasRight": true,
+                          "key": "MERGED_SEAT_SELECTION.ALLOWED",
+                          "order": 3,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "MERGED_SEAT_SELECTION",
+                          "tooltipKey": "brand.tooltip.preferredseatselection",
+                          "upgradePopupOrder": 3,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "amount": "648.16",
+                            "currency": "BRL"
+                          },
+                          "hasRight": true,
+                          "key": "REISSUE.AMOUNT.ALLOWED_WITH_PENALTY_AMOUNT",
+                          "order": 4,
+                          "rightStatus": "ALLOWED_WITH_PENALTY_AMOUNT",
+                          "rightType": "REISSUE",
+                          "tooltipKey": "brand.tooltip.reissue.classfeedifference",
+                          "upgradePopupOrder": 5,
+                          "withCharge": true
+                        },
+                        {
+                          "args": {
+                            "amount": "1296.33",
+                            "currency": "BRL"
+                          },
+                          "hasRight": true,
+                          "key": "REFUND.AMOUNT.ALLOWED_WITH_PENALTY_AMOUNT",
+                          "order": 6,
+                          "rightStatus": "ALLOWED_WITH_PENALTY_AMOUNT",
+                          "rightType": "REFUND",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 6,
+                          "withCharge": true
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "FULL_REFUND_IN_24_HOURS.ALLOWED",
+                          "order": 7,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "FULL_REFUND_IN_24_HOURS",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "percentage": "15"
+                          },
+                          "hasRight": true,
+                          "key": "BONUS_MILE.ALLOWED",
+                          "order": 8,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "BONUS_MILE",
+                          "tooltipKey": "brand.tooltip.bonusmile",
+                          "upgradePopupOrder": 7,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "amount": "75000",
+                            "currency": "MILE"
+                          },
+                          "hasRight": true,
+                          "key": "BUSINESS_UPGRADE_MILE.AMOUNT.ALLOWED_WITH_CHARGE",
+                          "order": 16,
+                          "rightStatus": "ALLOWED_WITH_CHARGE",
+                          "rightType": "BUSINESS_UPGRADE_MILE",
+                          "tooltipKey": "brand.tooltip.businessupgrademile",
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": true
+                        }
+                      ],
+                      "cabinType": "ECONOMY",
+                      "compareRequired": false,
+                      "differenceWithBestFare": null,
+                      "discountInfo": false,
+                      "dynamicPricingId": null,
+                      "fareBasisCodeList": [
+                        "Q"
+                      ],
+                      "fareBreakdown": {
+                        "passengerFareList": [
+                          {
+                            "extraSeatFare": null,
+                            "fuelFare": null,
+                            "passengerTypeCode": "ADT",
+                            "quantity": 1,
+                            "taxAndFeeFare": null,
+                            "ticketingFare": null,
+                            "totalFare": {
+                              "currencyCode": "BRL",
+                              "amount": 4906.12,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            },
+                            "unknownTaxList": []
+                          }
+                        ],
+                        "totalBaseFare": {
+                          "code": "BASE_FARE",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 4906.12,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalFuelFare": {
+                          "code": "FUEL",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 1221.54,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalTicketingFare": null,
+                        "totalTaxAndFeeFare": {
+                          "code": "OTHER",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 68.61,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "extraSeatFare": {
+                          "code": "EXTRA_SEAT",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 6127.66,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "unknownTaxList": [
+                          {
+                            "code": "BR",
+                            "fare": {
+                              "currencyCode": "BRL",
+                              "amount": 68.61,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            }
+                          }
+                        ]
+                      },
+                      "grandTotalFare": {
+                        "currencyCode": "BRL",
+                        "amount": 6196.27,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "grandTotalFareWithExtraSeat": {
+                        "currencyCode": "BRL",
+                        "amount": 12323.93,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "inboundFlightId": null,
+                      "initialDynamicPricingId": null,
+                      "initiallySelected": false,
+                      "originDestinationInformation": null,
+                      "outboundFareBasisCodeList": null,
+                      "outboundResBookDesigCodeList": null,
+                      "recommendationId": 2,
+                      "recommended": true,
+                      "referencePassengerFare": {
+                        "extraSeatFare": null,
+                        "fuelFare": null,
+                        "passengerTypeCode": "ADT",
+                        "quantity": 1,
+                        "taxAndFeeFare": null,
+                        "ticketingFare": null,
+                        "totalFare": {
+                          "currencyCode": "BRL",
+                          "amount": 6196.27,
+                          "currencySign": "R$",
+                          "currencySignPosition": "LEFT",
+                          "decimalPlaces": 2
+                        },
+                        "unknownTaxList": []
+                      },
+                      "resBookDesigCodeList": [
+                        "Y"
+                      ]
+                    },
+                    {
+                      "brandCode": "FL",
+                      "brandCodeList": [
+                        "FL"
+                      ],
+                      "brandRightList": [
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "8",
+                            "piece": "1"
+                          },
+                          "hasRight": true,
+                          "key": "CARRY_ON_BAGGAGE.ALLOWED",
+                          "order": 1,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CARRY_ON_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 1,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "23",
+                            "piece": "2"
+                          },
+                          "hasRight": true,
+                          "key": "CHECKED_BAGGAGE.PIECE.ALLOWED",
+                          "order": 2,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CHECKED_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "seatType": "brand.right.seattype.standartandpreferred"
+                          },
+                          "hasRight": true,
+                          "key": "MERGED_SEAT_SELECTION.ALLOWED",
+                          "order": 3,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "MERGED_SEAT_SELECTION",
+                          "tooltipKey": "brand.tooltip.preferredseatselection",
+                          "upgradePopupOrder": 3,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "REISSUE.ALLOWED",
+                          "order": 4,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "REISSUE",
+                          "tooltipKey": "brand.tooltip.reissue.classfeedifference",
+                          "upgradePopupOrder": 5,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "SAME_DAY_CHANGE.ALLOWED",
+                          "order": 5,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "SAME_DAY_CHANGE",
+                          "tooltipKey": "brand.tooltip.samedaychange",
+                          "upgradePopupOrder": 17,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "REFUND.ALLOWED.INTERNATIONAL",
+                          "order": 6,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "REFUND",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 6,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "FULL_REFUND_IN_24_HOURS.ALLOWED",
+                          "order": 7,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "FULL_REFUND_IN_24_HOURS",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "percentage": "30"
+                          },
+                          "hasRight": true,
+                          "key": "BONUS_MILE.ALLOWED",
+                          "order": 8,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "BONUS_MILE",
+                          "tooltipKey": "brand.tooltip.bonusmile",
+                          "upgradePopupOrder": 7,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "FAST_TRACK.ALLOWED",
+                          "order": 9,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "FAST_TRACK",
+                          "tooltipKey": "brand.tooltip.fasttrack.economy",
+                          "upgradePopupOrder": 12,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "amount": "75000",
+                            "currency": "MILE"
+                          },
+                          "hasRight": true,
+                          "key": "BUSINESS_UPGRADE_MILE.AMOUNT.ALLOWED_WITH_CHARGE",
+                          "order": 16,
+                          "rightStatus": "ALLOWED_WITH_CHARGE",
+                          "rightType": "BUSINESS_UPGRADE_MILE",
+                          "tooltipKey": "brand.tooltip.businessupgrademile",
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": true
+                        }
+                      ],
+                      "cabinType": "ECONOMY",
+                      "compareRequired": true,
+                      "differenceWithBestFare": null,
+                      "discountInfo": false,
+                      "dynamicPricingId": null,
+                      "fareBasisCodeList": [
+                        "Q"
+                      ],
+                      "fareBreakdown": {
+                        "passengerFareList": [
+                          {
+                            "extraSeatFare": null,
+                            "fuelFare": null,
+                            "passengerTypeCode": "ADT",
+                            "quantity": 1,
+                            "taxAndFeeFare": null,
+                            "ticketingFare": null,
+                            "totalFare": {
+                              "currencyCode": "BRL",
+                              "amount": 5803.58,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            },
+                            "unknownTaxList": []
+                          }
+                        ],
+                        "totalBaseFare": {
+                          "code": "BASE_FARE",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 5803.58,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalFuelFare": {
+                          "code": "FUEL",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 1221.54,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalTicketingFare": null,
+                        "totalTaxAndFeeFare": {
+                          "code": "OTHER",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 68.61,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "extraSeatFare": {
+                          "code": "EXTRA_SEAT",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 7025.12,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "unknownTaxList": [
+                          {
+                            "code": "BR",
+                            "fare": {
+                              "currencyCode": "BRL",
+                              "amount": 68.61,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            }
+                          }
+                        ]
+                      },
+                      "grandTotalFare": {
+                        "currencyCode": "BRL",
+                        "amount": 7093.73,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "grandTotalFareWithExtraSeat": {
+                        "currencyCode": "BRL",
+                        "amount": 14118.85,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "inboundFlightId": null,
+                      "initialDynamicPricingId": null,
+                      "initiallySelected": false,
+                      "originDestinationInformation": null,
+                      "outboundFareBasisCodeList": null,
+                      "outboundResBookDesigCodeList": null,
+                      "recommendationId": 3,
+                      "recommended": false,
+                      "referencePassengerFare": {
+                        "extraSeatFare": null,
+                        "fuelFare": null,
+                        "passengerTypeCode": "ADT",
+                        "quantity": 1,
+                        "taxAndFeeFare": null,
+                        "ticketingFare": null,
+                        "totalFare": {
+                          "currencyCode": "BRL",
+                          "amount": 7093.73,
+                          "currencySign": "R$",
+                          "currencySignPosition": "LEFT",
+                          "decimalPlaces": 2
+                        },
+                        "unknownTaxList": []
+                      },
+                      "resBookDesigCodeList": [
+                        "Y"
+                      ]
+                    }
+                  ],
+                  "cabinClass": "ECONOMY",
+                  "hasLowestPrice": false,
+                  "order": 1,
+                  "startingPrice": {
+                    "currencyCode": "BRL",
+                    "amount": 5298.81,
+                    "currencySign": "R$",
+                    "currencySignPosition": "LEFT",
+                    "decimalPlaces": 2
+                  },
+                  "status": "AVAILABLE"
+                },
+                "BUSINESS": {
+                  "bookingPriceInfoList": [
+                    {
+                      "brandCode": "BF",
+                      "brandCodeList": [
+                        "BF"
+                      ],
+                      "brandRightList": [
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "8",
+                            "piece": "2"
+                          },
+                          "hasRight": true,
+                          "key": "CARRY_ON_BAGGAGE.ALLOWED",
+                          "order": 1,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CARRY_ON_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 1,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "32",
+                            "piece": "2"
+                          },
+                          "hasRight": true,
+                          "key": "CHECKED_BAGGAGE.PIECE.ALLOWED",
+                          "order": 2,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CHECKED_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "seatType": "brand.right.seattype.standart"
+                          },
+                          "hasRight": true,
+                          "key": "MERGED_SEAT_SELECTION.ALLOWED",
+                          "order": 3,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "MERGED_SEAT_SELECTION",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 3,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "amount": "997.18",
+                            "currency": "BRL"
+                          },
+                          "hasRight": true,
+                          "key": "REISSUE.AMOUNT.ALLOWED_WITH_PENALTY_AMOUNT",
+                          "order": 4,
+                          "rightStatus": "ALLOWED_WITH_PENALTY_AMOUNT",
+                          "rightType": "REISSUE",
+                          "tooltipKey": "brand.tooltip.reissue.chargeable",
+                          "upgradePopupOrder": 5,
+                          "withCharge": true
+                        },
+                        {
+                          "args": {
+                            "amount": "1994.36",
+                            "currency": "BRL"
+                          },
+                          "hasRight": true,
+                          "key": "REFUND.AMOUNT.ALLOWED_WITH_PENALTY_AMOUNT",
+                          "order": 6,
+                          "rightStatus": "ALLOWED_WITH_PENALTY_AMOUNT",
+                          "rightType": "REFUND",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 6,
+                          "withCharge": true
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "FULL_REFUND_IN_24_HOURS.ALLOWED",
+                          "order": 7,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "FULL_REFUND_IN_24_HOURS",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "percentage": "0"
+                          },
+                          "hasRight": true,
+                          "key": "BONUS_MILE.ALLOWED",
+                          "order": 8,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "BONUS_MILE",
+                          "tooltipKey": "brand.tooltip.bonusmile",
+                          "upgradePopupOrder": 7,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "FAST_TRACK.ALLOWED",
+                          "order": 9,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "FAST_TRACK",
+                          "tooltipKey": "brand.tooltip.fasttrack.business",
+                          "upgradePopupOrder": 12,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "MERGED_PRIORITY.ALLOWED",
+                          "order": 10,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "MERGED_PRIORITY",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 18,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "BUSINESS_LOUNGE.ALLOWED",
+                          "order": 11,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "BUSINESS_LOUNGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 11,
+                          "withCharge": false
+                        }
+                      ],
+                      "cabinType": "BUSINESS",
+                      "compareRequired": false,
+                      "differenceWithBestFare": null,
+                      "discountInfo": false,
+                      "dynamicPricingId": null,
+                      "fareBasisCodeList": [
+                        "K"
+                      ],
+                      "fareBreakdown": {
+                        "passengerFareList": [
+                          {
+                            "extraSeatFare": null,
+                            "fuelFare": null,
+                            "passengerTypeCode": "ADT",
+                            "quantity": 1,
+                            "taxAndFeeFare": null,
+                            "ticketingFare": null,
+                            "totalFare": {
+                              "currencyCode": "BRL",
+                              "amount": 18068.90,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            },
+                            "unknownTaxList": []
+                          }
+                        ],
+                        "totalBaseFare": {
+                          "code": "BASE_FARE",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 18068.90,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalFuelFare": {
+                          "code": "FUEL",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 2492.95,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalTicketingFare": null,
+                        "totalTaxAndFeeFare": {
+                          "code": "OTHER",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 68.61,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "extraSeatFare": null,
+                        "unknownTaxList": [
+                          {
+                            "code": "BR",
+                            "fare": {
+                              "currencyCode": "BRL",
+                              "amount": 68.61,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            }
+                          }
+                        ]
+                      },
+                      "grandTotalFare": {
+                        "currencyCode": "BRL",
+                        "amount": 20630.46,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "grandTotalFareWithExtraSeat": null,
+                      "inboundFlightId": null,
+                      "initialDynamicPricingId": null,
+                      "initiallySelected": false,
+                      "originDestinationInformation": null,
+                      "outboundFareBasisCodeList": null,
+                      "outboundResBookDesigCodeList": null,
+                      "recommendationId": 4,
+                      "recommended": false,
+                      "referencePassengerFare": {
+                        "extraSeatFare": null,
+                        "fuelFare": null,
+                        "passengerTypeCode": "ADT",
+                        "quantity": 1,
+                        "taxAndFeeFare": null,
+                        "ticketingFare": null,
+                        "totalFare": {
+                          "currencyCode": "BRL",
+                          "amount": 20630.46,
+                          "currencySign": "R$",
+                          "currencySignPosition": "LEFT",
+                          "decimalPlaces": 2
+                        },
+                        "unknownTaxList": []
+                      },
+                      "resBookDesigCodeList": [
+                        "C"
+                      ]
+                    },
+                    {
+                      "brandCode": "BL",
+                      "brandCodeList": [
+                        "BL"
+                      ],
+                      "brandRightList": [
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "8",
+                            "piece": "2"
+                          },
+                          "hasRight": true,
+                          "key": "CARRY_ON_BAGGAGE.ALLOWED",
+                          "order": 1,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CARRY_ON_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 1,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "32",
+                            "piece": "2"
+                          },
+                          "hasRight": true,
+                          "key": "CHECKED_BAGGAGE.PIECE.ALLOWED",
+                          "order": 2,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CHECKED_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "seatType": "brand.right.seattype.standart"
+                          },
+                          "hasRight": true,
+                          "key": "MERGED_SEAT_SELECTION.ALLOWED",
+                          "order": 3,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "MERGED_SEAT_SELECTION",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 3,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "REISSUE.ALLOWED",
+                          "order": 4,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "REISSUE",
+                          "tooltipKey": "brand.tooltip.reissue.classfeedifference",
+                          "upgradePopupOrder": 5,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "SAME_DAY_CHANGE.ALLOWED",
+                          "order": 5,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "SAME_DAY_CHANGE",
+                          "tooltipKey": "brand.tooltip.samedaychange",
+                          "upgradePopupOrder": 17,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "REFUND.ALLOWED.INTERNATIONAL",
+                          "order": 6,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "REFUND",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 6,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "FULL_REFUND_IN_24_HOURS.ALLOWED",
+                          "order": 7,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "FULL_REFUND_IN_24_HOURS",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "percentage": "30"
+                          },
+                          "hasRight": true,
+                          "key": "BONUS_MILE.ALLOWED",
+                          "order": 8,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "BONUS_MILE",
+                          "tooltipKey": "brand.tooltip.bonusmile",
+                          "upgradePopupOrder": 7,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "FAST_TRACK.ALLOWED",
+                          "order": 9,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "FAST_TRACK",
+                          "tooltipKey": "brand.tooltip.fasttrack.business",
+                          "upgradePopupOrder": 12,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "MERGED_PRIORITY.ALLOWED",
+                          "order": 10,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "MERGED_PRIORITY",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 18,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "BUSINESS_LOUNGE.ALLOWED",
+                          "order": 11,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "BUSINESS_LOUNGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 11,
+                          "withCharge": false
+                        }
+                      ],
+                      "cabinType": "BUSINESS",
+                      "compareRequired": false,
+                      "differenceWithBestFare": null,
+                      "discountInfo": false,
+                      "dynamicPricingId": null,
+                      "fareBasisCodeList": [
+                        "K"
+                      ],
+                      "fareBreakdown": {
+                        "passengerFareList": [
+                          {
+                            "extraSeatFare": null,
+                            "fuelFare": null,
+                            "passengerTypeCode": "ADT",
+                            "quantity": 1,
+                            "taxAndFeeFare": null,
+                            "ticketingFare": null,
+                            "totalFare": {
+                              "currencyCode": "BRL",
+                              "amount": 19813.96,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            },
+                            "unknownTaxList": []
+                          }
+                        ],
+                        "totalBaseFare": {
+                          "code": "BASE_FARE",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 19813.96,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalFuelFare": {
+                          "code": "FUEL",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 2492.95,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalTicketingFare": null,
+                        "totalTaxAndFeeFare": {
+                          "code": "OTHER",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 68.61,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "extraSeatFare": null,
+                        "unknownTaxList": [
+                          {
+                            "code": "BR",
+                            "fare": {
+                              "currencyCode": "BRL",
+                              "amount": 68.61,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            }
+                          }
+                        ]
+                      },
+                      "grandTotalFare": {
+                        "currencyCode": "BRL",
+                        "amount": 22375.52,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "grandTotalFareWithExtraSeat": null,
+                      "inboundFlightId": null,
+                      "initialDynamicPricingId": null,
+                      "initiallySelected": false,
+                      "originDestinationInformation": null,
+                      "outboundFareBasisCodeList": null,
+                      "outboundResBookDesigCodeList": null,
+                      "recommendationId": 5,
+                      "recommended": false,
+                      "referencePassengerFare": {
+                        "extraSeatFare": null,
+                        "fuelFare": null,
+                        "passengerTypeCode": "ADT",
+                        "quantity": 1,
+                        "taxAndFeeFare": null,
+                        "ticketingFare": null,
+                        "totalFare": {
+                          "currencyCode": "BRL",
+                          "amount": 22375.52,
+                          "currencySign": "R$",
+                          "currencySignPosition": "LEFT",
+                          "decimalPlaces": 2
+                        },
+                        "unknownTaxList": []
+                      },
+                      "resBookDesigCodeList": [
+                        "C"
+                      ]
+                    }
+                  ],
+                  "cabinClass": "BUSINESS",
+                  "hasLowestPrice": false,
+                  "order": 2,
+                  "startingPrice": {
+                    "currencyCode": "BRL",
+                    "amount": 20630.46,
+                    "currencySign": "R$",
+                    "currencySignPosition": "LEFT",
+                    "decimalPlaces": 2
+                  },
+                  "status": "AVAILABLE"
+                }
+              },
+              "hasAnyStopOver": false,
+              "hasAnyTourIstanbul": false,
+              "hititOption": false,
+              "journeyDuration": 45300000,
+              "lastSeatCount": {
+                "business": null,
+                "eco": null
+              },
+              "optionId": 1,
+              "portCodeWarnings": [],
+              "redirectType": null,
+              "redirectUrl": null,
+              "segmentList": [
+                {
+                  "arrivalAirportCode": "IST",
+                  "arrivalDateTime": "11-11-2026 11:45",
+                  "arrivalTerminal": null,
+                  "carrierAirline": {
+                    "airlineCode": "TK",
+                    "airlineName": null
+                  },
+                  "codeShareInd": null,
+                  "codeSharingAirline": null,
+                  "comment": null,
+                  "connected": false,
+                  "containsTransitVisaRequiredPort": false,
+                  "departureAirportCode": "GRU",
+                  "departureDateTime": "10-11-2026 17:10",
+                  "departureTerminal": "3",
+                  "domestic": false,
+                  "equipmentCabinType": "WIDE",
+                  "equipmentCode": "359",
+                  "equipmentName": "Airbus A350-900",
+                  "flightCode": {
+                    "airlineCode": "TK",
+                    "flightNumber": "216",
+                    "leaseCode": null
+                  },
+                  "groundDuration": 0,
+                  "journeyDurationInMillis": 45300000,
+                  "rph": "1",
+                  "spaFlight": false,
+                  "stopCount": 0,
+                  "stopoverHotel": false,
+                  "technicalStops": [],
+                  "tourIstanbul": false
+                }
+              ],
+              "selectedBrandCode": null,
+              "soldOut": false,
+              "startingPrice": {
+                "currencyCode": "BRL",
+                "amount": 5298.81,
+                "currencySign": "R$",
+                "currencySignPosition": "LEFT",
+                "decimalPlaces": 2
+              }
+            },
+            {
+              "businessBannerKey": "availabilityBusinessBanner.WIDE",
+              "cabinTextAndTooltip": null,
+              "cheapest": true,
+              "dateDifference": 1,
+              "differenceWithBestFare": null,
+              "excessBaggageAttention": false,
+              "fareCategory": {
+                "ECONOMY": {
+                  "bookingPriceInfoList": [
+                    {
+                      "brandCode": "CL",
+                      "brandCodeList": [
+                        "CL"
+                      ],
+                      "brandRightList": [
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "8",
+                            "piece": "1"
+                          },
+                          "hasRight": true,
+                          "key": "CARRY_ON_BAGGAGE.ALLOWED",
+                          "order": 1,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CARRY_ON_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 1,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": false,
+                          "key": "CHECKED_BAGGAGE.NOT_ALLOWED",
+                          "order": 2,
+                          "rightStatus": "NOT_ALLOWED",
+                          "rightType": "CHECKED_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": false,
+                          "key": "MERGED_SEAT_SELECTION.NOT_ALLOWED",
+                          "order": 3,
+                          "rightStatus": "NOT_ALLOWED",
+                          "rightType": "MERGED_SEAT_SELECTION",
+                          "tooltipKey": "brand.tooltip.preferredseatselection",
+                          "upgradePopupOrder": 3,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "amount": "997.18",
+                            "currency": "BRL"
+                          },
+                          "hasRight": true,
+                          "key": "REISSUE.AMOUNT.ALLOWED_WITH_PENALTY_AMOUNT",
+                          "order": 4,
+                          "rightStatus": "ALLOWED_WITH_PENALTY_AMOUNT",
+                          "rightType": "REISSUE",
+                          "tooltipKey": "brand.tooltip.reissue.classfeedifference",
+                          "upgradePopupOrder": 5,
+                          "withCharge": true
+                        },
+                        {
+                          "args": {
+                            "amount": "1296.33",
+                            "currency": "BRL"
+                          },
+                          "hasRight": true,
+                          "key": "REFUND.AMOUNT.ALLOWED_WITH_PENALTY_AMOUNT",
+                          "order": 6,
+                          "rightStatus": "ALLOWED_WITH_PENALTY_AMOUNT",
+                          "rightType": "REFUND",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 6,
+                          "withCharge": true
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "FULL_REFUND_IN_24_HOURS.ALLOWED",
+                          "order": 7,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "FULL_REFUND_IN_24_HOURS",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "percentage": "0"
+                          },
+                          "hasRight": true,
+                          "key": "BONUS_MILE.ALLOWED",
+                          "order": 8,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "BONUS_MILE",
+                          "tooltipKey": "brand.tooltip.bonusmile",
+                          "upgradePopupOrder": 7,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "amount": "80000",
+                            "currency": "MILE"
+                          },
+                          "hasRight": true,
+                          "key": "BUSINESS_UPGRADE_MILE.AMOUNT.ALLOWED_WITH_CHARGE",
+                          "order": 16,
+                          "rightStatus": "ALLOWED_WITH_CHARGE",
+                          "rightType": "BUSINESS_UPGRADE_MILE",
+                          "tooltipKey": "brand.tooltip.businessupgrademile",
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": true
+                        }
+                      ],
+                      "cabinType": "ECONOMY",
+                      "compareRequired": true,
+                      "differenceWithBestFare": null,
+                      "discountInfo": false,
+                      "dynamicPricingId": null,
+                      "fareBasisCodeList": [
+                        "Q"
+                      ],
+                      "fareBreakdown": {
+                        "passengerFareList": [
+                          {
+                            "extraSeatFare": null,
+                            "fuelFare": null,
+                            "passengerTypeCode": "ADT",
+                            "quantity": 1,
+                            "taxAndFeeFare": null,
+                            "ticketingFare": null,
+                            "totalFare": {
+                              "currencyCode": "BRL",
+                              "amount": 4008.66,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            },
+                            "unknownTaxList": []
+                          }
+                        ],
+                        "totalBaseFare": {
+                          "code": "BASE_FARE",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 4008.66,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalFuelFare": {
+                          "code": "FUEL",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 1221.54,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalTicketingFare": null,
+                        "totalTaxAndFeeFare": {
+                          "code": "OTHER",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 68.61,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "extraSeatFare": {
+                          "code": "EXTRA_SEAT",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 5230.20,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "unknownTaxList": [
+                          {
+                            "code": "BR",
+                            "fare": {
+                              "currencyCode": "BRL",
+                              "amount": 68.61,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            }
+                          }
+                        ]
+                      },
+                      "grandTotalFare": {
+                        "currencyCode": "BRL",
+                        "amount": 5298.81,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "grandTotalFareWithExtraSeat": {
+                        "currencyCode": "BRL",
+                        "amount": 10529.01,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "inboundFlightId": null,
+                      "initialDynamicPricingId": null,
+                      "initiallySelected": false,
+                      "originDestinationInformation": null,
+                      "outboundFareBasisCodeList": null,
+                      "outboundResBookDesigCodeList": null,
+                      "recommendationId": 0,
+                      "recommended": false,
+                      "referencePassengerFare": {
+                        "extraSeatFare": null,
+                        "fuelFare": null,
+                        "passengerTypeCode": "ADT",
+                        "quantity": 1,
+                        "taxAndFeeFare": null,
+                        "ticketingFare": null,
+                        "totalFare": {
+                          "currencyCode": "BRL",
+                          "amount": 5298.81,
+                          "currencySign": "R$",
+                          "currencySignPosition": "LEFT",
+                          "decimalPlaces": 2
+                        },
+                        "unknownTaxList": []
+                      },
+                      "resBookDesigCodeList": [
+                        "Y"
+                      ]
+                    },
+                    {
+                      "brandCode": "LG",
+                      "brandCodeList": [
+                        "LG"
+                      ],
+                      "brandRightList": [
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "8",
+                            "piece": "1"
+                          },
+                          "hasRight": true,
+                          "key": "CARRY_ON_BAGGAGE.ALLOWED",
+                          "order": 1,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CARRY_ON_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 1,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "23",
+                            "piece": "1"
+                          },
+                          "hasRight": true,
+                          "key": "CHECKED_BAGGAGE.PIECE.ALLOWED",
+                          "order": 2,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CHECKED_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": false,
+                          "key": "MERGED_SEAT_SELECTION.NOT_ALLOWED",
+                          "order": 3,
+                          "rightStatus": "NOT_ALLOWED",
+                          "rightType": "MERGED_SEAT_SELECTION",
+                          "tooltipKey": "brand.tooltip.preferredseatselection",
+                          "upgradePopupOrder": 3,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "amount": "648.16",
+                            "currency": "BRL"
+                          },
+                          "hasRight": true,
+                          "key": "REISSUE.AMOUNT.ALLOWED_WITH_PENALTY_AMOUNT",
+                          "order": 4,
+                          "rightStatus": "ALLOWED_WITH_PENALTY_AMOUNT",
+                          "rightType": "REISSUE",
+                          "tooltipKey": "brand.tooltip.reissue.chargeable",
+                          "upgradePopupOrder": 5,
+                          "withCharge": true
+                        },
+                        {
+                          "args": {
+                            "amount": "1296.33",
+                            "currency": "BRL"
+                          },
+                          "hasRight": true,
+                          "key": "REFUND.AMOUNT.ALLOWED_WITH_PENALTY_AMOUNT",
+                          "order": 6,
+                          "rightStatus": "ALLOWED_WITH_PENALTY_AMOUNT",
+                          "rightType": "REFUND",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 6,
+                          "withCharge": true
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "FULL_REFUND_IN_24_HOURS.ALLOWED",
+                          "order": 7,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "FULL_REFUND_IN_24_HOURS",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "percentage": "0"
+                          },
+                          "hasRight": true,
+                          "key": "BONUS_MILE.ALLOWED",
+                          "order": 8,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "BONUS_MILE",
+                          "tooltipKey": "brand.tooltip.bonusmile",
+                          "upgradePopupOrder": 7,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "amount": "75000",
+                            "currency": "MILE"
+                          },
+                          "hasRight": true,
+                          "key": "BUSINESS_UPGRADE_MILE.AMOUNT.ALLOWED_WITH_CHARGE",
+                          "order": 16,
+                          "rightStatus": "ALLOWED_WITH_CHARGE",
+                          "rightType": "BUSINESS_UPGRADE_MILE",
+                          "tooltipKey": "brand.tooltip.businessupgrademile",
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": true
+                        }
+                      ],
+                      "cabinType": "ECONOMY",
+                      "compareRequired": false,
+                      "differenceWithBestFare": null,
+                      "discountInfo": false,
+                      "dynamicPricingId": null,
+                      "fareBasisCodeList": [
+                        "Q"
+                      ],
+                      "fareBreakdown": {
+                        "passengerFareList": [
+                          {
+                            "extraSeatFare": null,
+                            "fuelFare": null,
+                            "passengerTypeCode": "ADT",
+                            "quantity": 1,
+                            "taxAndFeeFare": null,
+                            "ticketingFare": null,
+                            "totalFare": {
+                              "currencyCode": "BRL",
+                              "amount": 4307.81,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            },
+                            "unknownTaxList": []
+                          }
+                        ],
+                        "totalBaseFare": {
+                          "code": "BASE_FARE",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 4307.81,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalFuelFare": {
+                          "code": "FUEL",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 1221.54,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalTicketingFare": null,
+                        "totalTaxAndFeeFare": {
+                          "code": "OTHER",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 68.61,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "extraSeatFare": {
+                          "code": "EXTRA_SEAT",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 5529.35,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "unknownTaxList": [
+                          {
+                            "code": "BR",
+                            "fare": {
+                              "currencyCode": "BRL",
+                              "amount": 68.61,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            }
+                          }
+                        ]
+                      },
+                      "grandTotalFare": {
+                        "currencyCode": "BRL",
+                        "amount": 5597.96,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "grandTotalFareWithExtraSeat": {
+                        "currencyCode": "BRL",
+                        "amount": 11127.31,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "inboundFlightId": null,
+                      "initialDynamicPricingId": null,
+                      "initiallySelected": false,
+                      "originDestinationInformation": null,
+                      "outboundFareBasisCodeList": null,
+                      "outboundResBookDesigCodeList": null,
+                      "recommendationId": 1,
+                      "recommended": false,
+                      "referencePassengerFare": {
+                        "extraSeatFare": null,
+                        "fuelFare": null,
+                        "passengerTypeCode": "ADT",
+                        "quantity": 1,
+                        "taxAndFeeFare": null,
+                        "ticketingFare": null,
+                        "totalFare": {
+                          "currencyCode": "BRL",
+                          "amount": 5597.96,
+                          "currencySign": "R$",
+                          "currencySignPosition": "LEFT",
+                          "decimalPlaces": 2
+                        },
+                        "unknownTaxList": []
+                      },
+                      "resBookDesigCodeList": [
+                        "Y"
+                      ]
+                    },
+                    {
+                      "brandCode": "GN",
+                      "brandCodeList": [
+                        "GN"
+                      ],
+                      "brandRightList": [
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "8",
+                            "piece": "1"
+                          },
+                          "hasRight": true,
+                          "key": "CARRY_ON_BAGGAGE.ALLOWED",
+                          "order": 1,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CARRY_ON_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 1,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "23",
+                            "piece": "2"
+                          },
+                          "hasRight": true,
+                          "key": "CHECKED_BAGGAGE.PIECE.ALLOWED",
+                          "order": 2,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CHECKED_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "seatType": "brand.right.seattype.standart"
+                          },
+                          "hasRight": true,
+                          "key": "MERGED_SEAT_SELECTION.ALLOWED",
+                          "order": 3,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "MERGED_SEAT_SELECTION",
+                          "tooltipKey": "brand.tooltip.preferredseatselection",
+                          "upgradePopupOrder": 3,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "amount": "648.16",
+                            "currency": "BRL"
+                          },
+                          "hasRight": true,
+                          "key": "REISSUE.AMOUNT.ALLOWED_WITH_PENALTY_AMOUNT",
+                          "order": 4,
+                          "rightStatus": "ALLOWED_WITH_PENALTY_AMOUNT",
+                          "rightType": "REISSUE",
+                          "tooltipKey": "brand.tooltip.reissue.classfeedifference",
+                          "upgradePopupOrder": 5,
+                          "withCharge": true
+                        },
+                        {
+                          "args": {
+                            "amount": "1296.33",
+                            "currency": "BRL"
+                          },
+                          "hasRight": true,
+                          "key": "REFUND.AMOUNT.ALLOWED_WITH_PENALTY_AMOUNT",
+                          "order": 6,
+                          "rightStatus": "ALLOWED_WITH_PENALTY_AMOUNT",
+                          "rightType": "REFUND",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 6,
+                          "withCharge": true
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "FULL_REFUND_IN_24_HOURS.ALLOWED",
+                          "order": 7,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "FULL_REFUND_IN_24_HOURS",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "percentage": "15"
+                          },
+                          "hasRight": true,
+                          "key": "BONUS_MILE.ALLOWED",
+                          "order": 8,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "BONUS_MILE",
+                          "tooltipKey": "brand.tooltip.bonusmile",
+                          "upgradePopupOrder": 7,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "amount": "75000",
+                            "currency": "MILE"
+                          },
+                          "hasRight": true,
+                          "key": "BUSINESS_UPGRADE_MILE.AMOUNT.ALLOWED_WITH_CHARGE",
+                          "order": 16,
+                          "rightStatus": "ALLOWED_WITH_CHARGE",
+                          "rightType": "BUSINESS_UPGRADE_MILE",
+                          "tooltipKey": "brand.tooltip.businessupgrademile",
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": true
+                        }
+                      ],
+                      "cabinType": "ECONOMY",
+                      "compareRequired": false,
+                      "differenceWithBestFare": null,
+                      "discountInfo": false,
+                      "dynamicPricingId": null,
+                      "fareBasisCodeList": [
+                        "Q"
+                      ],
+                      "fareBreakdown": {
+                        "passengerFareList": [
+                          {
+                            "extraSeatFare": null,
+                            "fuelFare": null,
+                            "passengerTypeCode": "ADT",
+                            "quantity": 1,
+                            "taxAndFeeFare": null,
+                            "ticketingFare": null,
+                            "totalFare": {
+                              "currencyCode": "BRL",
+                              "amount": 4906.12,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            },
+                            "unknownTaxList": []
+                          }
+                        ],
+                        "totalBaseFare": {
+                          "code": "BASE_FARE",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 4906.12,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalFuelFare": {
+                          "code": "FUEL",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 1221.54,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalTicketingFare": null,
+                        "totalTaxAndFeeFare": {
+                          "code": "OTHER",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 68.61,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "extraSeatFare": {
+                          "code": "EXTRA_SEAT",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 6127.66,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "unknownTaxList": [
+                          {
+                            "code": "BR",
+                            "fare": {
+                              "currencyCode": "BRL",
+                              "amount": 68.61,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            }
+                          }
+                        ]
+                      },
+                      "grandTotalFare": {
+                        "currencyCode": "BRL",
+                        "amount": 6196.27,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "grandTotalFareWithExtraSeat": {
+                        "currencyCode": "BRL",
+                        "amount": 12323.93,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "inboundFlightId": null,
+                      "initialDynamicPricingId": null,
+                      "initiallySelected": false,
+                      "originDestinationInformation": null,
+                      "outboundFareBasisCodeList": null,
+                      "outboundResBookDesigCodeList": null,
+                      "recommendationId": 2,
+                      "recommended": true,
+                      "referencePassengerFare": {
+                        "extraSeatFare": null,
+                        "fuelFare": null,
+                        "passengerTypeCode": "ADT",
+                        "quantity": 1,
+                        "taxAndFeeFare": null,
+                        "ticketingFare": null,
+                        "totalFare": {
+                          "currencyCode": "BRL",
+                          "amount": 6196.27,
+                          "currencySign": "R$",
+                          "currencySignPosition": "LEFT",
+                          "decimalPlaces": 2
+                        },
+                        "unknownTaxList": []
+                      },
+                      "resBookDesigCodeList": [
+                        "Y"
+                      ]
+                    },
+                    {
+                      "brandCode": "FL",
+                      "brandCodeList": [
+                        "FL"
+                      ],
+                      "brandRightList": [
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "8",
+                            "piece": "1"
+                          },
+                          "hasRight": true,
+                          "key": "CARRY_ON_BAGGAGE.ALLOWED",
+                          "order": 1,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CARRY_ON_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 1,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "23",
+                            "piece": "2"
+                          },
+                          "hasRight": true,
+                          "key": "CHECKED_BAGGAGE.PIECE.ALLOWED",
+                          "order": 2,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CHECKED_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "seatType": "brand.right.seattype.standartandpreferred"
+                          },
+                          "hasRight": true,
+                          "key": "MERGED_SEAT_SELECTION.ALLOWED",
+                          "order": 3,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "MERGED_SEAT_SELECTION",
+                          "tooltipKey": "brand.tooltip.preferredseatselection",
+                          "upgradePopupOrder": 3,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "REISSUE.ALLOWED",
+                          "order": 4,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "REISSUE",
+                          "tooltipKey": "brand.tooltip.reissue.classfeedifference",
+                          "upgradePopupOrder": 5,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "SAME_DAY_CHANGE.ALLOWED",
+                          "order": 5,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "SAME_DAY_CHANGE",
+                          "tooltipKey": "brand.tooltip.samedaychange",
+                          "upgradePopupOrder": 17,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "REFUND.ALLOWED.INTERNATIONAL",
+                          "order": 6,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "REFUND",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 6,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "FULL_REFUND_IN_24_HOURS.ALLOWED",
+                          "order": 7,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "FULL_REFUND_IN_24_HOURS",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "percentage": "30"
+                          },
+                          "hasRight": true,
+                          "key": "BONUS_MILE.ALLOWED",
+                          "order": 8,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "BONUS_MILE",
+                          "tooltipKey": "brand.tooltip.bonusmile",
+                          "upgradePopupOrder": 7,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "FAST_TRACK.ALLOWED",
+                          "order": 9,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "FAST_TRACK",
+                          "tooltipKey": "brand.tooltip.fasttrack.economy",
+                          "upgradePopupOrder": 12,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "amount": "75000",
+                            "currency": "MILE"
+                          },
+                          "hasRight": true,
+                          "key": "BUSINESS_UPGRADE_MILE.AMOUNT.ALLOWED_WITH_CHARGE",
+                          "order": 16,
+                          "rightStatus": "ALLOWED_WITH_CHARGE",
+                          "rightType": "BUSINESS_UPGRADE_MILE",
+                          "tooltipKey": "brand.tooltip.businessupgrademile",
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": true
+                        }
+                      ],
+                      "cabinType": "ECONOMY",
+                      "compareRequired": true,
+                      "differenceWithBestFare": null,
+                      "discountInfo": false,
+                      "dynamicPricingId": null,
+                      "fareBasisCodeList": [
+                        "Q"
+                      ],
+                      "fareBreakdown": {
+                        "passengerFareList": [
+                          {
+                            "extraSeatFare": null,
+                            "fuelFare": null,
+                            "passengerTypeCode": "ADT",
+                            "quantity": 1,
+                            "taxAndFeeFare": null,
+                            "ticketingFare": null,
+                            "totalFare": {
+                              "currencyCode": "BRL",
+                              "amount": 5803.58,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            },
+                            "unknownTaxList": []
+                          }
+                        ],
+                        "totalBaseFare": {
+                          "code": "BASE_FARE",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 5803.58,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalFuelFare": {
+                          "code": "FUEL",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 1221.54,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalTicketingFare": null,
+                        "totalTaxAndFeeFare": {
+                          "code": "OTHER",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 68.61,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "extraSeatFare": {
+                          "code": "EXTRA_SEAT",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 7025.12,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "unknownTaxList": [
+                          {
+                            "code": "BR",
+                            "fare": {
+                              "currencyCode": "BRL",
+                              "amount": 68.61,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            }
+                          }
+                        ]
+                      },
+                      "grandTotalFare": {
+                        "currencyCode": "BRL",
+                        "amount": 7093.73,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "grandTotalFareWithExtraSeat": {
+                        "currencyCode": "BRL",
+                        "amount": 14118.85,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "inboundFlightId": null,
+                      "initialDynamicPricingId": null,
+                      "initiallySelected": false,
+                      "originDestinationInformation": null,
+                      "outboundFareBasisCodeList": null,
+                      "outboundResBookDesigCodeList": null,
+                      "recommendationId": 3,
+                      "recommended": false,
+                      "referencePassengerFare": {
+                        "extraSeatFare": null,
+                        "fuelFare": null,
+                        "passengerTypeCode": "ADT",
+                        "quantity": 1,
+                        "taxAndFeeFare": null,
+                        "ticketingFare": null,
+                        "totalFare": {
+                          "currencyCode": "BRL",
+                          "amount": 7093.73,
+                          "currencySign": "R$",
+                          "currencySignPosition": "LEFT",
+                          "decimalPlaces": 2
+                        },
+                        "unknownTaxList": []
+                      },
+                      "resBookDesigCodeList": [
+                        "Y"
+                      ]
+                    }
+                  ],
+                  "cabinClass": "ECONOMY",
+                  "hasLowestPrice": false,
+                  "order": 1,
+                  "startingPrice": {
+                    "currencyCode": "BRL",
+                    "amount": 5298.81,
+                    "currencySign": "R$",
+                    "currencySignPosition": "LEFT",
+                    "decimalPlaces": 2
+                  },
+                  "status": "AVAILABLE"
+                },
+                "BUSINESS": {
+                  "bookingPriceInfoList": [
+                    {
+                      "brandCode": "BF",
+                      "brandCodeList": [
+                        "BF"
+                      ],
+                      "brandRightList": [
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "8",
+                            "piece": "2"
+                          },
+                          "hasRight": true,
+                          "key": "CARRY_ON_BAGGAGE.ALLOWED",
+                          "order": 1,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CARRY_ON_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 1,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "32",
+                            "piece": "2"
+                          },
+                          "hasRight": true,
+                          "key": "CHECKED_BAGGAGE.PIECE.ALLOWED",
+                          "order": 2,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CHECKED_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "seatType": "brand.right.seattype.standart"
+                          },
+                          "hasRight": true,
+                          "key": "MERGED_SEAT_SELECTION.ALLOWED",
+                          "order": 3,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "MERGED_SEAT_SELECTION",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 3,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "amount": "997.18",
+                            "currency": "BRL"
+                          },
+                          "hasRight": true,
+                          "key": "REISSUE.AMOUNT.ALLOWED_WITH_PENALTY_AMOUNT",
+                          "order": 4,
+                          "rightStatus": "ALLOWED_WITH_PENALTY_AMOUNT",
+                          "rightType": "REISSUE",
+                          "tooltipKey": "brand.tooltip.reissue.chargeable",
+                          "upgradePopupOrder": 5,
+                          "withCharge": true
+                        },
+                        {
+                          "args": {
+                            "amount": "1994.36",
+                            "currency": "BRL"
+                          },
+                          "hasRight": true,
+                          "key": "REFUND.AMOUNT.ALLOWED_WITH_PENALTY_AMOUNT",
+                          "order": 6,
+                          "rightStatus": "ALLOWED_WITH_PENALTY_AMOUNT",
+                          "rightType": "REFUND",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 6,
+                          "withCharge": true
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "FULL_REFUND_IN_24_HOURS.ALLOWED",
+                          "order": 7,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "FULL_REFUND_IN_24_HOURS",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "percentage": "0"
+                          },
+                          "hasRight": true,
+                          "key": "BONUS_MILE.ALLOWED",
+                          "order": 8,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "BONUS_MILE",
+                          "tooltipKey": "brand.tooltip.bonusmile",
+                          "upgradePopupOrder": 7,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "FAST_TRACK.ALLOWED",
+                          "order": 9,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "FAST_TRACK",
+                          "tooltipKey": "brand.tooltip.fasttrack.business",
+                          "upgradePopupOrder": 12,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "MERGED_PRIORITY.ALLOWED",
+                          "order": 10,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "MERGED_PRIORITY",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 18,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "BUSINESS_LOUNGE.ALLOWED",
+                          "order": 11,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "BUSINESS_LOUNGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 11,
+                          "withCharge": false
+                        }
+                      ],
+                      "cabinType": "BUSINESS",
+                      "compareRequired": false,
+                      "differenceWithBestFare": null,
+                      "discountInfo": false,
+                      "dynamicPricingId": null,
+                      "fareBasisCodeList": [
+                        "K"
+                      ],
+                      "fareBreakdown": {
+                        "passengerFareList": [
+                          {
+                            "extraSeatFare": null,
+                            "fuelFare": null,
+                            "passengerTypeCode": "ADT",
+                            "quantity": 1,
+                            "taxAndFeeFare": null,
+                            "ticketingFare": null,
+                            "totalFare": {
+                              "currencyCode": "BRL",
+                              "amount": 18068.90,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            },
+                            "unknownTaxList": []
+                          }
+                        ],
+                        "totalBaseFare": {
+                          "code": "BASE_FARE",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 18068.90,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalFuelFare": {
+                          "code": "FUEL",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 2492.95,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalTicketingFare": null,
+                        "totalTaxAndFeeFare": {
+                          "code": "OTHER",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 68.61,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "extraSeatFare": null,
+                        "unknownTaxList": [
+                          {
+                            "code": "BR",
+                            "fare": {
+                              "currencyCode": "BRL",
+                              "amount": 68.61,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            }
+                          }
+                        ]
+                      },
+                      "grandTotalFare": {
+                        "currencyCode": "BRL",
+                        "amount": 20630.46,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "grandTotalFareWithExtraSeat": null,
+                      "inboundFlightId": null,
+                      "initialDynamicPricingId": null,
+                      "initiallySelected": false,
+                      "originDestinationInformation": null,
+                      "outboundFareBasisCodeList": null,
+                      "outboundResBookDesigCodeList": null,
+                      "recommendationId": 4,
+                      "recommended": false,
+                      "referencePassengerFare": {
+                        "extraSeatFare": null,
+                        "fuelFare": null,
+                        "passengerTypeCode": "ADT",
+                        "quantity": 1,
+                        "taxAndFeeFare": null,
+                        "ticketingFare": null,
+                        "totalFare": {
+                          "currencyCode": "BRL",
+                          "amount": 20630.46,
+                          "currencySign": "R$",
+                          "currencySignPosition": "LEFT",
+                          "decimalPlaces": 2
+                        },
+                        "unknownTaxList": []
+                      },
+                      "resBookDesigCodeList": [
+                        "C"
+                      ]
+                    },
+                    {
+                      "brandCode": "BL",
+                      "brandCodeList": [
+                        "BL"
+                      ],
+                      "brandRightList": [
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "8",
+                            "piece": "2"
+                          },
+                          "hasRight": true,
+                          "key": "CARRY_ON_BAGGAGE.ALLOWED",
+                          "order": 1,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CARRY_ON_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 1,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "unit": "PC",
+                            "kilo": "32",
+                            "piece": "2"
+                          },
+                          "hasRight": true,
+                          "key": "CHECKED_BAGGAGE.PIECE.ALLOWED",
+                          "order": 2,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "CHECKED_BAGGAGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "seatType": "brand.right.seattype.standart"
+                          },
+                          "hasRight": true,
+                          "key": "MERGED_SEAT_SELECTION.ALLOWED",
+                          "order": 3,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "MERGED_SEAT_SELECTION",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 3,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "REISSUE.ALLOWED",
+                          "order": 4,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "REISSUE",
+                          "tooltipKey": "brand.tooltip.reissue.classfeedifference",
+                          "upgradePopupOrder": 5,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "SAME_DAY_CHANGE.ALLOWED",
+                          "order": 5,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "SAME_DAY_CHANGE",
+                          "tooltipKey": "brand.tooltip.samedaychange",
+                          "upgradePopupOrder": 17,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "REFUND.ALLOWED.INTERNATIONAL",
+                          "order": 6,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "REFUND",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 6,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "FULL_REFUND_IN_24_HOURS.ALLOWED",
+                          "order": 7,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "FULL_REFUND_IN_24_HOURS",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 2147483647,
+                          "withCharge": false
+                        },
+                        {
+                          "args": {
+                            "percentage": "30"
+                          },
+                          "hasRight": true,
+                          "key": "BONUS_MILE.ALLOWED",
+                          "order": 8,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "BONUS_MILE",
+                          "tooltipKey": "brand.tooltip.bonusmile",
+                          "upgradePopupOrder": 7,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "FAST_TRACK.ALLOWED",
+                          "order": 9,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "FAST_TRACK",
+                          "tooltipKey": "brand.tooltip.fasttrack.business",
+                          "upgradePopupOrder": 12,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "MERGED_PRIORITY.ALLOWED",
+                          "order": 10,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "MERGED_PRIORITY",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 18,
+                          "withCharge": false
+                        },
+                        {
+                          "args": null,
+                          "hasRight": true,
+                          "key": "BUSINESS_LOUNGE.ALLOWED",
+                          "order": 11,
+                          "rightStatus": "ALLOWED",
+                          "rightType": "BUSINESS_LOUNGE",
+                          "tooltipKey": null,
+                          "upgradePopupOrder": 11,
+                          "withCharge": false
+                        }
+                      ],
+                      "cabinType": "BUSINESS",
+                      "compareRequired": false,
+                      "differenceWithBestFare": null,
+                      "discountInfo": false,
+                      "dynamicPricingId": null,
+                      "fareBasisCodeList": [
+                        "K"
+                      ],
+                      "fareBreakdown": {
+                        "passengerFareList": [
+                          {
+                            "extraSeatFare": null,
+                            "fuelFare": null,
+                            "passengerTypeCode": "ADT",
+                            "quantity": 1,
+                            "taxAndFeeFare": null,
+                            "ticketingFare": null,
+                            "totalFare": {
+                              "currencyCode": "BRL",
+                              "amount": 19813.96,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            },
+                            "unknownTaxList": []
+                          }
+                        ],
+                        "totalBaseFare": {
+                          "code": "BASE_FARE",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 19813.96,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalFuelFare": {
+                          "code": "FUEL",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 2492.95,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "totalTicketingFare": null,
+                        "totalTaxAndFeeFare": {
+                          "code": "OTHER",
+                          "fare": {
+                            "currencyCode": "BRL",
+                            "amount": 68.61,
+                            "currencySign": "R$",
+                            "currencySignPosition": "LEFT",
+                            "decimalPlaces": 2
+                          }
+                        },
+                        "extraSeatFare": null,
+                        "unknownTaxList": [
+                          {
+                            "code": "BR",
+                            "fare": {
+                              "currencyCode": "BRL",
+                              "amount": 68.61,
+                              "currencySign": "R$",
+                              "currencySignPosition": "LEFT",
+                              "decimalPlaces": 2
+                            }
+                          }
+                        ]
+                      },
+                      "grandTotalFare": {
+                        "currencyCode": "BRL",
+                        "amount": 22375.52,
+                        "currencySign": "R$",
+                        "currencySignPosition": "LEFT",
+                        "decimalPlaces": 2
+                      },
+                      "grandTotalFareWithExtraSeat": null,
+                      "inboundFlightId": null,
+                      "initialDynamicPricingId": null,
+                      "initiallySelected": false,
+                      "originDestinationInformation": null,
+                      "outboundFareBasisCodeList": null,
+                      "outboundResBookDesigCodeList": null,
+                      "recommendationId": 5,
+                      "recommended": false,
+                      "referencePassengerFare": {
+                        "extraSeatFare": null,
+                        "fuelFare": null,
+                        "passengerTypeCode": "ADT",
+                        "quantity": 1,
+                        "taxAndFeeFare": null,
+                        "ticketingFare": null,
+                        "totalFare": {
+                          "currencyCode": "BRL",
+                          "amount": 22375.52,
+                          "currencySign": "R$",
+                          "currencySignPosition": "LEFT",
+                          "decimalPlaces": 2
+                        },
+                        "unknownTaxList": []
+                      },
+                      "resBookDesigCodeList": [
+                        "C"
+                      ]
+                    }
+                  ],
+                  "cabinClass": "BUSINESS",
+                  "hasLowestPrice": false,
+                  "order": 2,
+                  "startingPrice": {
+                    "currencyCode": "BRL",
+                    "amount": 20630.46,
+                    "currencySign": "R$",
+                    "currencySignPosition": "LEFT",
+                    "decimalPlaces": 2
+                  },
+                  "status": "AVAILABLE"
+                }
+              },
+              "hasAnyStopOver": false,
+              "hasAnyTourIstanbul": false,
+              "hititOption": false,
+              "journeyDuration": 44700000,
+              "lastSeatCount": {
+                "business": null,
+                "eco": null
+              },
+              "optionId": 0,
+              "portCodeWarnings": [],
+              "redirectType": null,
+              "redirectUrl": null,
+              "segmentList": [
+                {
+                  "arrivalAirportCode": "IST",
+                  "arrivalDateTime": "11-11-2026 13:55",
+                  "arrivalTerminal": null,
+                  "carrierAirline": {
+                    "airlineCode": "TK",
+                    "airlineName": null
+                  },
+                  "codeShareInd": null,
+                  "codeSharingAirline": null,
+                  "comment": null,
+                  "connected": false,
+                  "containsTransitVisaRequiredPort": false,
+                  "departureAirportCode": "GRU",
+                  "departureDateTime": "10-11-2026 19:30",
+                  "departureTerminal": "3",
+                  "domestic": false,
+                  "equipmentCabinType": "WIDE",
+                  "equipmentCode": "359",
+                  "equipmentName": "Airbus A350-900",
+                  "flightCode": {
+                    "airlineCode": "TK",
+                    "flightNumber": "16",
+                    "leaseCode": null
+                  },
+                  "groundDuration": 0,
+                  "journeyDurationInMillis": 44700000,
+                  "rph": "0",
+                  "spaFlight": false,
+                  "stopCount": 0,
+                  "stopoverHotel": false,
+                  "technicalStops": [],
+                  "tourIstanbul": false
+                }
+              ],
+              "selectedBrandCode": null,
+              "soldOut": false,
+              "startingPrice": {
+                "currencyCode": "BRL",
+                "amount": 5298.81,
+                "currencySign": "R$",
+                "currencySignPosition": "LEFT",
+                "decimalPlaces": 2
+              }
+            }
+          ],
+          "outboundFlightId": null,
+          "selectedOriginDestinationOption": null,
+          "soldOutAllFlights": false
+        }
+      ],
+      "originalCurrency": "BRL",
+      "pageTicket": "0",
+      "portInformationList": [
+        {
+          "city": {
+            "code": "SAO",
+            "name": "São Paulo"
+          },
+          "code": "GRU",
+          "country": {
+            "code": "BR",
+            "name": "Brasil"
+          }
+        },
+        {
+          "city": {
+            "code": "IST",
+            "name": "Istambul"
+          },
+          "code": "IST",
+          "country": {
+            "code": "TR",
+            "name": "Türkiye"
+          }
+        }
+      ],
+      "priceType": "STANDARD",
+      "referencePassengerType": "ADULT",
+      "showUsAvailabilityBaggageInfo": false,
+      "tripType": "O"
+    },
+    "success": true,
+    "actionCode": null,
+    "actionData": null,
+    "statusDetailList": null
+  }
+}

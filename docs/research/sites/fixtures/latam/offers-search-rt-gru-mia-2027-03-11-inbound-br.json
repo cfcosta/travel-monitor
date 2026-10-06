@@ -1,0 +1,1859 @@
+{
+ "pageable": {
+  "pageNumber": 0,
+  "pageSize": 50,
+  "sort": [
+   {
+    "direction": "ASC",
+    "property": "RECOMMENDED",
+    "ignoreCase": false,
+    "nullHandling": "NATIVE",
+    "ascending": true,
+    "descending": false
+   }
+  ],
+  "offset": 0,
+  "paged": true,
+  "unpaged": false
+ },
+ "totalElements": 45,
+ "totalPages": 1,
+ "last": true,
+ "sort": [
+  {
+   "direction": "ASC",
+   "property": "RECOMMENDED",
+   "ignoreCase": false,
+   "nullHandling": "NATIVE",
+   "ascending": true,
+   "descending": false
+  }
+ ],
+ "numberOfElements": 45,
+ "first": true,
+ "number": 0,
+ "size": 50,
+ "empty": false,
+ "content": [
+  {
+   "summary": {
+    "tags": [
+     "RECOMMENDED",
+     "FASTEST"
+    ],
+    "stopOvers": 0,
+    "duration": 500,
+    "flightCode": "LA8199",
+    "origin": {
+     "departure": "2027-03-11T22:30:00",
+     "departureTime": "22:30",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "destination": {
+     "arrival": "2027-03-12T08:50:00",
+     "arrivalTime": "8:50",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "brands": [
+     {
+      "id": "SL",
+      "offerId": "ca31e3ce257b415131f0e54a77cf559147218f51e9c6bce16f421465cf8ff2b8",
+      "brandText": "LIGHT",
+      "brandDescription": "xp_sales_web_brand_economy_light_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "NLXSL58E",
+      "price": {
+       "currency": "BRL",
+       "amount": 2625.07,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.625,07",
+       "display": "BRL 2.625,07"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 0,
+       "displayCurrency": "R$",
+       "displayAmount": " 0,00",
+       "display": "BRL 0,00"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 2625.07,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.625,07",
+       "display": "BRL 2.625,07"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "KM",
+      "offerId": "d7d0029a6f071e2a22e3940aee7deeaef0eaea2cba4ff3e1efef98cb72f5cab3",
+      "brandText": "STANDARD",
+      "brandDescription": "xp_sales_web_brand_economy_standard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "NLXKM58E",
+      "price": {
+       "currency": "BRL",
+       "amount": 2949.16,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.949,16",
+       "display": "BRL 2.949,16"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 324.09,
+       "displayCurrency": "R$",
+       "displayAmount": " 324,09",
+       "display": "BRL 324,09"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 2949.16,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.949,16",
+       "display": "BRL 2.949,16"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "KD",
+      "offerId": "358f3cddf7bd82b60f1e0b494246f9471922bff8dc9d95cc9c9412c865b79a50",
+      "brandText": "FULL",
+      "brandDescription": "xp_sales_web_brand_economy_full_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "NLXKD58E",
+      "price": {
+       "currency": "BRL",
+       "amount": 3667.13,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.667,13",
+       "display": "BRL 3.667,13"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 1042.06,
+       "displayCurrency": "R$",
+       "displayAmount": " 1.042,06",
+       "display": "BRL 1.042,06"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 3667.13,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.667,13",
+       "display": "BRL 3.667,13"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "EV",
+      "offerId": "8669e8663906e7e4e1b090993406f7383f1a164708cc0208de00b749714de5f7",
+      "brandText": "PREMIUM BUSINESS STANDARD",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessstandard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEV5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 10193.67,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.193,67",
+       "display": "BRL 10.193,67"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 7568.6,
+       "displayCurrency": "R$",
+       "displayAmount": " 7.568,60",
+       "display": "BRL 7.568,60"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 10193.67,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.193,67",
+       "display": "BRL 10.193,67"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 7,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "EJ",
+      "offerId": "e122a62f089258720a08b0583eb0232c72efeb3559517d5eb5a3adb010d6e15b",
+      "brandText": "PREMIUM BUSINESS FULL",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessfull_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEJ5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 11938.73,
+       "displayCurrency": "R$",
+       "displayAmount": " 11.938,73",
+       "display": "BRL 11.938,73"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 9313.66,
+       "displayCurrency": "R$",
+       "displayAmount": " 9.313,66",
+       "display": "BRL 9.313,66"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 11938.73,
+       "displayCurrency": "R$",
+       "displayAmount": " 11.938,73",
+       "display": "BRL 11.938,73"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 7,
+       "lowAvailability": false
+      }
+     }
+    ],
+    "lowestBrandText": "LIGHT",
+    "lowestPrice": {
+     "currency": "BRL",
+     "amount": 2625.07,
+     "displayCurrency": "R$",
+     "displayAmount": " 2.625,07",
+     "display": "BRL 2.625,07"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Brasil"
+    ],
+    "changeOfAirport": false,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 500,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "789",
+     "aircraftLeaseText": "LATAM AIRLINES BRASIL",
+     "flight": {
+      "flightNumber": 8199,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": 8199,
+      "flightOperator": "JJ",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": "3"
+     },
+     "origin": "MIA",
+     "destination": "GRU",
+     "departure": "2027-03-11T22:30:00",
+     "arrival": "2027-03-12T08:50:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 2458.05,
+     "taxes": 167.02,
+     "total": 2625.07
+    },
+    {
+     "fare": 2782.14,
+     "taxes": 167.02,
+     "total": 2949.16
+    },
+    {
+     "fare": 3500.11,
+     "taxes": 167.02,
+     "total": 3667.13
+    },
+    {
+     "fare": 10026.65,
+     "taxes": 167.02,
+     "total": 10193.67
+    },
+    {
+     "fare": 11771.71,
+     "taxes": 167.02,
+     "total": 11938.73
+    }
+   ]
+  },
+  {
+   "summary": {
+    "tags": [
+     "RECOMMENDED"
+    ],
+    "stopOvers": 0,
+    "duration": 505,
+    "flightCode": "LA8195",
+    "origin": {
+     "departure": "2027-03-11T09:20:00",
+     "departureTime": "9:20",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "destination": {
+     "arrival": "2027-03-11T19:45:00",
+     "arrivalTime": "19:45",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "brands": [
+     {
+      "id": "SL",
+      "offerId": "cbae6291bb2a19d3d3615beb8a0f0c78ad073b067285dd9ae074d55ef8fca223",
+      "brandText": "LIGHT",
+      "brandDescription": "xp_sales_web_brand_economy_light_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "NLXSL58E",
+      "price": {
+       "currency": "BRL",
+       "amount": 2625.07,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.625,07",
+       "display": "BRL 2.625,07"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 0,
+       "displayCurrency": "R$",
+       "displayAmount": " 0,00",
+       "display": "BRL 0,00"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 2625.07,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.625,07",
+       "display": "BRL 2.625,07"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "KM",
+      "offerId": "8ab9f3f2fab9a03273424865e8c65106e75522997ccc865e89b7f21cd87f5416",
+      "brandText": "STANDARD",
+      "brandDescription": "xp_sales_web_brand_economy_standard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "NLXKM58E",
+      "price": {
+       "currency": "BRL",
+       "amount": 2949.16,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.949,16",
+       "display": "BRL 2.949,16"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 324.09,
+       "displayCurrency": "R$",
+       "displayAmount": " 324,09",
+       "display": "BRL 324,09"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 2949.16,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.949,16",
+       "display": "BRL 2.949,16"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "KD",
+      "offerId": "ca4d4dd25ba23c7022136e6133568a288ff144adbb6121f0e1b999b2003852b2",
+      "brandText": "FULL",
+      "brandDescription": "xp_sales_web_brand_economy_full_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "NLXKD58E",
+      "price": {
+       "currency": "BRL",
+       "amount": 3667.13,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.667,13",
+       "display": "BRL 3.667,13"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 1042.06,
+       "displayCurrency": "R$",
+       "displayAmount": " 1.042,06",
+       "display": "BRL 1.042,06"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 3667.13,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.667,13",
+       "display": "BRL 3.667,13"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "EV",
+      "offerId": "da6dcaa599da9d09a170d18f95282c985cbd1e9d6305829de813c3db73198373",
+      "brandText": "PREMIUM BUSINESS STANDARD",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessstandard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEV5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 10193.67,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.193,67",
+       "display": "BRL 10.193,67"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 7568.6,
+       "displayCurrency": "R$",
+       "displayAmount": " 7.568,60",
+       "display": "BRL 7.568,60"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 10193.67,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.193,67",
+       "display": "BRL 10.193,67"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 8,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "EJ",
+      "offerId": "ab78e1b398c0be30ed40e0611577a72c8e5ac99775b2712a076ce0529bdb61d1",
+      "brandText": "PREMIUM BUSINESS FULL",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessfull_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEJ5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 11938.73,
+       "displayCurrency": "R$",
+       "displayAmount": " 11.938,73",
+       "display": "BRL 11.938,73"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 9313.66,
+       "displayCurrency": "R$",
+       "displayAmount": " 9.313,66",
+       "display": "BRL 9.313,66"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 11938.73,
+       "displayCurrency": "R$",
+       "displayAmount": " 11.938,73",
+       "display": "BRL 11.938,73"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 8,
+       "lowAvailability": false
+      }
+     }
+    ],
+    "lowestBrandText": "LIGHT",
+    "lowestPrice": {
+     "currency": "BRL",
+     "amount": 2625.07,
+     "displayCurrency": "R$",
+     "displayAmount": " 2.625,07",
+     "display": "BRL 2.625,07"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Brasil"
+    ],
+    "changeOfAirport": false,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 505,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "789",
+     "aircraftLeaseText": "LATAM AIRLINES BRASIL",
+     "flight": {
+      "flightNumber": 8195,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": 8195,
+      "flightOperator": "JJ",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": "3"
+     },
+     "origin": "MIA",
+     "destination": "GRU",
+     "departure": "2027-03-11T09:20:00",
+     "arrival": "2027-03-11T19:45:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 2458.05,
+     "taxes": 167.02,
+     "total": 2625.07
+    },
+    {
+     "fare": 2782.14,
+     "taxes": 167.02,
+     "total": 2949.16
+    },
+    {
+     "fare": 3500.11,
+     "taxes": 167.02,
+     "total": 3667.13
+    },
+    {
+     "fare": 10026.65,
+     "taxes": 167.02,
+     "total": 10193.67
+    },
+    {
+     "fare": 11771.71,
+     "taxes": 167.02,
+     "total": 11938.73
+    }
+   ]
+  },
+  {
+   "summary": {
+    "tags": [],
+    "stopOvers": 0,
+    "duration": 510,
+    "flightCode": "LA8191",
+    "origin": {
+     "departure": "2027-03-11T19:10:00",
+     "departureTime": "19:10",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "destination": {
+     "arrival": "2027-03-12T05:40:00",
+     "arrivalTime": "5:40",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "brands": [
+     {
+      "id": "SL",
+      "offerId": "069192af5e1356adf30230138782117abccf283a9e6f4b4431eb1c76a670037f",
+      "brandText": "LIGHT",
+      "brandDescription": "xp_sales_web_brand_economy_light_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "NLXSL58E",
+      "price": {
+       "currency": "BRL",
+       "amount": 2625.07,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.625,07",
+       "display": "BRL 2.625,07"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 0,
+       "displayCurrency": "R$",
+       "displayAmount": " 0,00",
+       "display": "BRL 0,00"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 2625.07,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.625,07",
+       "display": "BRL 2.625,07"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "KM",
+      "offerId": "6b94d248c0ef6e7d2d23c7d80ca7434278b8092d8707dd824b4565fb04e5ad15",
+      "brandText": "STANDARD",
+      "brandDescription": "xp_sales_web_brand_economy_standard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "NLXKM58E",
+      "price": {
+       "currency": "BRL",
+       "amount": 2949.16,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.949,16",
+       "display": "BRL 2.949,16"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 324.09,
+       "displayCurrency": "R$",
+       "displayAmount": " 324,09",
+       "display": "BRL 324,09"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 2949.16,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.949,16",
+       "display": "BRL 2.949,16"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "KD",
+      "offerId": "4e7158af06749330031c27a43b7095509472be371a632cadbcec45e37405e1b7",
+      "brandText": "FULL",
+      "brandDescription": "xp_sales_web_brand_economy_full_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "NLXKD58E",
+      "price": {
+       "currency": "BRL",
+       "amount": 3667.13,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.667,13",
+       "display": "BRL 3.667,13"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 1042.06,
+       "displayCurrency": "R$",
+       "displayAmount": " 1.042,06",
+       "display": "BRL 1.042,06"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 3667.13,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.667,13",
+       "display": "BRL 3.667,13"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "EV",
+      "offerId": "0721c047b6e420ff988612a7ca95b65bf45d989aba6496c84d09083bbe2b42c1",
+      "brandText": "PREMIUM BUSINESS STANDARD",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessstandard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEV5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 10193.67,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.193,67",
+       "display": "BRL 10.193,67"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 7568.6,
+       "displayCurrency": "R$",
+       "displayAmount": " 7.568,60",
+       "display": "BRL 7.568,60"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 10193.67,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.193,67",
+       "display": "BRL 10.193,67"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 8,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "EJ",
+      "offerId": "f143f31acd1d08a928e1f34b5fec106e34da3428363be5871d9534779deba8c5",
+      "brandText": "PREMIUM BUSINESS FULL",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessfull_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEJ5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 11938.73,
+       "displayCurrency": "R$",
+       "displayAmount": " 11.938,73",
+       "display": "BRL 11.938,73"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 9313.66,
+       "displayCurrency": "R$",
+       "displayAmount": " 9.313,66",
+       "display": "BRL 9.313,66"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 11938.73,
+       "displayCurrency": "R$",
+       "displayAmount": " 11.938,73",
+       "display": "BRL 11.938,73"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 8,
+       "lowAvailability": false
+      }
+     }
+    ],
+    "lowestBrandText": "LIGHT",
+    "lowestPrice": {
+     "currency": "BRL",
+     "amount": 2625.07,
+     "displayCurrency": "R$",
+     "displayAmount": " 2.625,07",
+     "display": "BRL 2.625,07"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Brasil"
+    ],
+    "changeOfAirport": false,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 510,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "773",
+     "aircraftLeaseText": "LATAM AIRLINES BRASIL",
+     "flight": {
+      "flightNumber": 8191,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": 8191,
+      "flightOperator": "JJ",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": "3"
+     },
+     "origin": "MIA",
+     "destination": "GRU",
+     "departure": "2027-03-11T19:10:00",
+     "arrival": "2027-03-12T05:40:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 2458.05,
+     "taxes": 167.02,
+     "total": 2625.07
+    },
+    {
+     "fare": 2782.14,
+     "taxes": 167.02,
+     "total": 2949.16
+    },
+    {
+     "fare": 3500.11,
+     "taxes": 167.02,
+     "total": 3667.13
+    },
+    {
+     "fare": 10026.65,
+     "taxes": 167.02,
+     "total": 10193.67
+    },
+    {
+     "fare": 11771.71,
+     "taxes": 167.02,
+     "total": 11938.73
+    }
+   ]
+  },
+  {
+   "summary": {
+    "tags": [],
+    "stopOvers": 1,
+    "duration": 770,
+    "flightCode": "LA2695",
+    "origin": {
+     "departure": "2027-03-11T16:45:00",
+     "departureTime": "16:45",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "destination": {
+     "arrival": "2027-03-12T07:35:00",
+     "arrivalTime": "7:35",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "brands": [
+     {
+      "id": "SL",
+      "offerId": "3b6c57680471b086e9ab4485f780d897d07786c9ffa2177298634fda315be3e0",
+      "brandText": "LIGHT",
+      "brandDescription": "xp_sales_web_brand_economy_light_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "SLXSLH8E",
+      "price": {
+       "currency": "BRL",
+       "amount": 2854.42,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.854,42",
+       "display": "BRL 2.854,42"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 0,
+       "displayCurrency": "R$",
+       "displayAmount": " 0,00",
+       "display": "BRL 0,00"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 2854.42,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.854,42",
+       "display": "BRL 2.854,42"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 1,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "KM",
+      "offerId": "7e186eaa383c89d39cfedb0172ad7686dfd852965d630633c2f6e51c31051c33",
+      "brandText": "STANDARD",
+      "brandDescription": "xp_sales_web_brand_economy_standard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "SLXKMH8E",
+      "price": {
+       "currency": "BRL",
+       "amount": 3258.28,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.258,28",
+       "display": "BRL 3.258,28"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 403.86,
+       "displayCurrency": "R$",
+       "displayAmount": " 403,86",
+       "display": "BRL 403,86"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 3258.28,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.258,28",
+       "display": "BRL 3.258,28"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 1,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "KD",
+      "offerId": "24b8326cd3728830876eae391182b240e2fb883d309f09a38770d6dc2fe1e227",
+      "brandText": "FULL",
+      "brandDescription": "xp_sales_web_brand_economy_full_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "SLXKDH8E",
+      "price": {
+       "currency": "BRL",
+       "amount": 3871.55,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.871,55",
+       "display": "BRL 3.871,55"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 1017.13,
+       "displayCurrency": "R$",
+       "displayAmount": " 1.017,13",
+       "display": "BRL 1.017,13"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 3871.55,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.871,55",
+       "display": "BRL 3.871,55"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 1,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "EV",
+      "offerId": "fca5f65500c96898687e733679299f8be34752eb34e0760b23bd420446a26caa",
+      "brandText": "PREMIUM BUSINESS STANDARD",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessstandard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEV5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 10193.67,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.193,67",
+       "display": "BRL 10.193,67"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 7339.25,
+       "displayCurrency": "R$",
+       "displayAmount": " 7.339,25",
+       "display": "BRL 7.339,25"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 10193.67,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.193,67",
+       "display": "BRL 10.193,67"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 8,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "EJ",
+      "offerId": "9ca49a0fa739ad78152bf59f206742e70f7a2761f8a8ced7ffc03062add193b0",
+      "brandText": "PREMIUM BUSINESS FULL",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessfull_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEJ5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 11938.73,
+       "displayCurrency": "R$",
+       "displayAmount": " 11.938,73",
+       "display": "BRL 11.938,73"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 9084.31,
+       "displayCurrency": "R$",
+       "displayAmount": " 9.084,31",
+       "display": "BRL 9.084,31"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 11938.73,
+       "displayCurrency": "R$",
+       "displayAmount": " 11.938,73",
+       "display": "BRL 11.938,73"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 8,
+       "lowAvailability": false
+      }
+     }
+    ],
+    "lowestBrandText": "LIGHT",
+    "lowestPrice": {
+     "currency": "BRL",
+     "amount": 2854.42,
+     "displayCurrency": "R$",
+     "displayAmount": " 2.854,42",
+     "display": "BRL 2.854,42"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Perú",
+     "LATAM Airlines Brasil"
+    ],
+    "changeOfAirport": false,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 345,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "763",
+     "aircraftLeaseText": "LATAM AIRLINES PERU",
+     "flight": {
+      "flightNumber": 2695,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": 2695,
+      "flightOperator": "LP",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": null
+     },
+     "origin": "MIA",
+     "destination": "LIM",
+     "departure": "2027-03-11T16:45:00",
+     "arrival": "2027-03-11T22:30:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    },
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 305,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "320",
+     "aircraftLeaseText": "LATAM AIRLINES BRASIL",
+     "flight": {
+      "flightNumber": 8041,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": 8041,
+      "flightOperator": "JJ",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": "3"
+     },
+     "origin": "LIM",
+     "destination": "GRU",
+     "departure": "2027-03-12T00:30:00",
+     "arrival": "2027-03-12T07:35:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 2687.4,
+     "taxes": 167.02,
+     "total": 2854.42
+    },
+    {
+     "fare": 3091.26,
+     "taxes": 167.02,
+     "total": 3258.28
+    },
+    {
+     "fare": 3704.53,
+     "taxes": 167.02,
+     "total": 3871.55
+    },
+    {
+     "fare": 10026.65,
+     "taxes": 167.02,
+     "total": 10193.67
+    },
+    {
+     "fare": 11771.71,
+     "taxes": 167.02,
+     "total": 11938.73
+    }
+   ]
+  },
+  {
+   "summary": {
+    "tags": [],
+    "stopOvers": 1,
+    "duration": 810,
+    "flightCode": "LA2993",
+    "origin": {
+     "departure": "2027-03-11T12:45:00",
+     "departureTime": "12:45",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "destination": {
+     "arrival": "2027-03-12T04:15:00",
+     "arrivalTime": "4:15",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "brands": [
+     {
+      "id": "SL",
+      "offerId": "bef7467049b93b4d3aae8c3a179356e28ed9b060d771d97d1bf4b6e7c94e5776",
+      "brandText": "LIGHT",
+      "brandDescription": "xp_sales_web_brand_economy_light_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "NLXSL58E",
+      "price": {
+       "currency": "BRL",
+       "amount": 2625.07,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.625,07",
+       "display": "BRL 2.625,07"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 0,
+       "displayCurrency": "R$",
+       "displayAmount": " 0,00",
+       "display": "BRL 0,00"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 2625.07,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.625,07",
+       "display": "BRL 2.625,07"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "KM",
+      "offerId": "8b7f685e48974959ef4b5f726cb9a8a9ae6856486f6272ed991acdbd3d13e398",
+      "brandText": "STANDARD",
+      "brandDescription": "xp_sales_web_brand_economy_standard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "NLXKM58E",
+      "price": {
+       "currency": "BRL",
+       "amount": 2949.16,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.949,16",
+       "display": "BRL 2.949,16"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 324.09,
+       "displayCurrency": "R$",
+       "displayAmount": " 324,09",
+       "display": "BRL 324,09"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 2949.16,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.949,16",
+       "display": "BRL 2.949,16"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "KD",
+      "offerId": "ebe3a56cb22a640954b6c4fdc33977e02a177b2fda0c7b1d1507cf72a664e2f2",
+      "brandText": "FULL",
+      "brandDescription": "xp_sales_web_brand_economy_full_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "NLXKD58E",
+      "price": {
+       "currency": "BRL",
+       "amount": 3667.13,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.667,13",
+       "display": "BRL 3.667,13"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 1042.06,
+       "displayCurrency": "R$",
+       "displayAmount": " 1.042,06",
+       "display": "BRL 1.042,06"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 3667.13,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.667,13",
+       "display": "BRL 3.667,13"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     }
+    ],
+    "lowestBrandText": "LIGHT",
+    "lowestPrice": {
+     "currency": "BRL",
+     "amount": 2625.07,
+     "displayCurrency": "R$",
+     "displayAmount": " 2.625,07",
+     "display": "BRL 2.625,07"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Perú"
+    ],
+    "changeOfAirport": false,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 345,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "320",
+     "aircraftLeaseText": "LATAM AIRLINES PERU",
+     "flight": {
+      "flightNumber": 2993,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": 2993,
+      "flightOperator": "LP",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": null
+     },
+     "origin": "MIA",
+     "destination": "LIM",
+     "departure": "2027-03-11T12:45:00",
+     "arrival": "2027-03-11T18:30:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    },
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 300,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "319",
+     "aircraftLeaseText": "LATAM AIRLINES PERU",
+     "flight": {
+      "flightNumber": 2418,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": 2418,
+      "flightOperator": "LP",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": "3"
+     },
+     "origin": "LIM",
+     "destination": "GRU",
+     "departure": "2027-03-11T21:15:00",
+     "arrival": "2027-03-12T04:15:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 2458.05,
+     "taxes": 167.02,
+     "total": 2625.07
+    },
+    {
+     "fare": 2782.14,
+     "taxes": 167.02,
+     "total": 2949.16
+    },
+    {
+     "fare": 3500.11,
+     "taxes": 167.02,
+     "total": 3667.13
+    }
+   ]
+  },
+  {
+   "summary": {
+    "tags": [],
+    "stopOvers": 1,
+    "duration": 835,
+    "flightCode": "LA4403",
+    "origin": {
+     "departure": "2027-03-11T16:25:00",
+     "departureTime": "16:25",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "destination": {
+     "arrival": "2027-03-12T08:20:00",
+     "arrivalTime": "8:20",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "brands": [
+     {
+      "id": "SL",
+      "offerId": "350d8878d073d29517ee70c3d0f55d3867b951319fa496f2c72e0ca24f11474b",
+      "brandText": "LIGHT",
+      "brandDescription": "xp_sales_web_brand_economy_light_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "NLXSL58E",
+      "price": {
+       "currency": "BRL",
+       "amount": 2625.07,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.625,07",
+       "display": "BRL 2.625,07"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 0,
+       "displayCurrency": "R$",
+       "displayAmount": " 0,00",
+       "display": "BRL 0,00"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 2625.07,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.625,07",
+       "display": "BRL 2.625,07"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "KM",
+      "offerId": "96c05a0f8314b67ff07cb36b1d6a98b6cdb990dbbe31e25a5a8e27915ab2bca3",
+      "brandText": "STANDARD",
+      "brandDescription": "xp_sales_web_brand_economy_standard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "NLXKM58E",
+      "price": {
+       "currency": "BRL",
+       "amount": 2949.16,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.949,16",
+       "display": "BRL 2.949,16"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 324.09,
+       "displayCurrency": "R$",
+       "displayAmount": " 324,09",
+       "display": "BRL 324,09"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 2949.16,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.949,16",
+       "display": "BRL 2.949,16"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "KD",
+      "offerId": "fadb5f87aa1a2e27e2f1f3eba1a23706512d04808ce175a03d22b7e8dbfc5352",
+      "brandText": "FULL",
+      "brandDescription": "xp_sales_web_brand_economy_full_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "NLXKD58E",
+      "price": {
+       "currency": "BRL",
+       "amount": 3667.13,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.667,13",
+       "display": "BRL 3.667,13"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 1042.06,
+       "displayCurrency": "R$",
+       "displayAmount": " 1.042,06",
+       "display": "BRL 1.042,06"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 3667.13,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.667,13",
+       "display": "BRL 3.667,13"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     }
+    ],
+    "lowestBrandText": "LIGHT",
+    "lowestPrice": {
+     "currency": "BRL",
+     "amount": 2625.07,
+     "displayCurrency": "R$",
+     "displayAmount": " 2.625,07",
+     "display": "BRL 2.625,07"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Colombia",
+     "Wamos Air"
+    ],
+    "changeOfAirport": false,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 225,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "320",
+     "aircraftLeaseText": "LATAM AIRLINES COLOMBIA",
+     "flight": {
+      "flightNumber": 4403,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": 4403,
+      "flightOperator": "4C",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": "1"
+     },
+     "origin": "MIA",
+     "destination": "BOG",
+     "departure": "2027-03-11T16:25:00",
+     "arrival": "2027-03-11T20:10:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    },
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 385,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "330",
+     "aircraftLeaseText": "WAMOS FOR LATAM AIRLINES GROUP",
+     "flight": {
+      "flightNumber": 4907,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": 4907,
+      "flightOperator": "EB",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": "3"
+     },
+     "origin": "BOG",
+     "destination": "GRU",
+     "departure": "2027-03-11T23:55:00",
+     "arrival": "2027-03-12T08:20:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 2458.05,
+     "taxes": 167.02,
+     "total": 2625.07
+    },
+    {
+     "fare": 2782.14,
+     "taxes": 167.02,
+     "total": 2949.16
+    },
+    {
+     "fare": 3500.11,
+     "taxes": 167.02,
+     "total": 3667.13
+    }
+   ]
+  }
+ ],
+ "promo": {
+  "active": false,
+  "messages": []
+ },
+ "scarcity": {
+  "thresholdEnabled": false
+ },
+ "extraDetails": {
+  "X-latam-Track-Id": "<scrubbed>",
+  "X-latam-App-Session-Id": "<scrubbed>"
+ }
+}

@@ -1,0 +1,593 @@
+{
+ "_note": "NOT a live capture. Mock data embedded in Smiles' own front-end bundle (/mfe-apps/flight-availability/0.32.1138/smiles-flight-availability.js), converted to JSON on 2026-10-06. Live calls were blocked (Akamai 406 on the CORS preflight). Use for field names only; values and dates are the bundle's (2021/2022).",
+ "response": {
+  "isSmFlexActive": true,
+  "hasCalendar": true,
+  "requestedFlightSegmentList": [
+   {
+    "type": "SEGMENT_1",
+    "calendarDayList": [],
+    "flightList": [
+     {
+      "uid": "bh9gjt6yog7",
+      "milesBack": 1400,
+      "milesBackText": "<milesBackText>",
+      "milesFareAvailable": false,
+      "pricingUid": "rd50vrmw7yh",
+      "cabin": "ECONOMIC",
+      "stops": 0,
+      "sourceGDS": "G3",
+      "promotional": false,
+      "mostWanted": false,
+      "recommended": false,
+      "offerType": "OUTLET_OFERTA",
+      "timeStop": {
+       "hours": 0,
+       "minutes": 0
+      },
+      "baggage": {
+       "free": "false",
+       "quantity": 1
+      },
+      "airportStop": "",
+      "hourStop": "",
+      "departure": {
+       "date": "2021-04-14T06:00:00",
+       "airport": {
+        "code": "CNF",
+        "name": "Confins",
+        "city": "Belo Horizonte",
+        "country": "Brasil",
+        "latitude": "-19.63375",
+        "longitude": "-43.968856"
+       }
+      },
+      "arrival": {
+       "date": "2021-04-14T07:20:00",
+       "airport": {
+        "code": "GRU",
+        "name": "Guarulhos",
+        "city": "São Paulo",
+        "country": "Brasil",
+        "latitude": "-23.43",
+        "longitude": "-46.47"
+       }
+      },
+      "airline": {
+       "code": "G3",
+       "name": "GOL (G3)"
+      },
+      "duration": {
+       "hours": 1,
+       "minutes": 20
+      },
+      "legList": [
+       {
+        "cabin": "ECONOMIC",
+        "flightNumber": "4093",
+        "equipment": "738",
+        "stops": 0,
+        "departure": {
+         "date": "2021-04-14T06:00:00",
+         "airport": {
+          "code": "CNF",
+          "name": "Confins",
+          "city": "Belo Horizonte",
+          "country": "Brasil",
+          "timezone": "America/Sao_Paulo",
+          "latitude": "-19.63375",
+          "longitude": "-43.968856"
+         }
+        },
+        "arrival": {
+         "date": "2021-04-14T07:20:00",
+         "airport": {
+          "code": "GRU",
+          "name": "Guarulhos",
+          "city": "São Paulo",
+          "country": "Brasil",
+          "timezone": "America/Sao_Paulo",
+          "latitude": "-23.43",
+          "longitude": "-46.47"
+         }
+        },
+        "marketingAirline": {
+         "code": "G3",
+         "name": "GOL (G3)"
+        },
+        "operationAirline": {
+         "code": "G3",
+         "name": "GOL (G3)"
+        },
+        "aircraftLessor": {
+         "code": "EB",
+         "name": "Wamos Air"
+        },
+        "isConnection": false,
+        "isMainLeg": true,
+        "loadFactor": 0.5376344086021506
+       }
+      ],
+      "fareList": [
+       {
+        "baseMiles": 26500,
+        "g3": {
+         "state": "New",
+         "classOfService": "M",
+         "ruleNumber": "600N",
+         "fareBasisCode": "M00SMBRN",
+         "fareSequence": "1",
+         "fareClassOfService": "M",
+         "productClass": "PQ",
+         "isAllotmentMarketFare": "false",
+         "fareApplicationType": "Route",
+         "sellKey": "0~M~~M00SMBRN~600N~~1~X"
+        },
+        "money": 0,
+        "miles": 26500,
+        "airlineFareAmount": 370,
+        "airlineFare": 370,
+        "loadFactor": 0.5376344086021506,
+        "legListCost": "GRU-CNF",
+        "uid": "hqkhoppk59",
+        "type": "SMILES",
+        "yield": 0.0261094339622642,
+        "yieldSM": 0.02610943396226415,
+        "uidupsell": "bkrqd"
+       },
+       {
+        "baseMiles": 26500,
+        "g3": {
+         "state": "New",
+         "classOfService": "M",
+         "ruleNumber": "600N",
+         "fareBasisCode": "M00SMBRN",
+         "fareSequence": "1",
+         "fareClassOfService": "M",
+         "productClass": "PQ",
+         "isAllotmentMarketFare": "false",
+         "fareApplicationType": "Route",
+         "sellKey": "0~M~~M00SMBRN~600N~~1~X"
+        },
+        "money": 0,
+        "miles": 25800,
+        "airlineFareAmount": 370,
+        "airlineFare": 370,
+        "loadFactor": 0.5376344086021506,
+        "legListCost": "GRU-CNF",
+        "uid": "df7w5t6kbe",
+        "type": "SMILES_CLUB",
+        "yield": 0.0261094339622642,
+        "yieldSM": 0.02610943396226415
+       },
+       {
+        "baseMiles": 26500,
+        "g3": {
+         "state": "New",
+         "classOfService": "M",
+         "ruleNumber": "600N",
+         "fareBasisCode": "M00SMBRN",
+         "fareSequence": "1",
+         "fareClassOfService": "M",
+         "productClass": "PQ",
+         "isAllotmentMarketFare": "false",
+         "fareApplicationType": "Route",
+         "sellKey": "0~M~~M00SMBRN~600N~~1~X"
+        },
+        "money": 426,
+        "miles": 4500,
+        "airlineFareAmount": 370,
+        "airlineFare": 370,
+        "loadFactor": 0.5376344086021506,
+        "legListCost": "GRU-CNF",
+        "uid": "bl5uxoxnka",
+        "type": "SMILES_MONEY_CLUB",
+        "yield": 0.0261094339622642,
+        "yieldSM": 0.02610943396226415,
+        "offer": 1,
+        "fareValue": 0.02073585102,
+        "baseMilesClub": 25000
+       },
+       {
+        "baseMiles": 26500,
+        "g3": {
+         "state": "New",
+         "classOfService": "M",
+         "ruleNumber": "600N",
+         "fareBasisCode": "M00SMBRN",
+         "fareSequence": "1",
+         "fareClassOfService": "M",
+         "productClass": "PQ",
+         "isAllotmentMarketFare": "false",
+         "fareApplicationType": "Route",
+         "sellKey": "0~M~~M00SMBRN~600N~~1~X"
+        },
+        "money": 480,
+        "miles": 7500,
+        "airlineFareAmount": 370,
+        "airlineFare": 370,
+        "loadFactor": 0.5376344086021506,
+        "legListCost": "GRU-CNF",
+        "uid": "uuy2tohj4c",
+        "type": "SMILES_MONEY",
+        "yield": 0.0261094339622642,
+        "yieldSM": 0.02610943396226415,
+        "offer": 1,
+        "fareValue": 0.02498538
+       },
+       {
+        "baseMiles": 26500,
+        "g3": {
+         "state": "New",
+         "classOfService": "M",
+         "ruleNumber": "600N",
+         "fareBasisCode": "M00SMBRN",
+         "fareSequence": "1",
+         "fareClassOfService": "M",
+         "productClass": "PQ",
+         "isAllotmentMarketFare": "false",
+         "fareApplicationType": "Route",
+         "sellKey": "0~M~~M00SMBRN~600N~~1~X"
+        },
+        "money": 350,
+        "miles": 12800,
+        "airlineFareAmount": 370,
+        "airlineFare": 370,
+        "loadFactor": 0.5376344086021506,
+        "legListCost": "GRU-CNF ",
+        "uid": "hkbo1lxmod",
+        "type": "SMILES_MONEY",
+        "yield": 0.0261094339622642,
+        "yieldSM": 0.02610943396226415,
+        "offer": 2,
+        "fareValue": 0.02498538
+       },
+       {
+        "baseMiles": 26500,
+        "g3": {
+         "state": "New",
+         "classOfService": "M",
+         "ruleNumber": "600N",
+         "fareBasisCode": "M00SMBRN",
+         "fareSequence": "1",
+         "fareClassOfService": "M",
+         "productClass": "PQ",
+         "isAllotmentMarketFare": "false",
+         "fareApplicationType": "Route",
+         "sellKey": "0~M~~M00SMBRN~600N~~1~X"
+        },
+        "money": 220,
+        "miles": 18100,
+        "airlineFareAmount": 370,
+        "airlineFare": 370,
+        "loadFactor": 0.5376344086021506,
+        "legListCost": "GRU-CNF",
+        "uid": "swqj73cgnr",
+        "type": "SMILES_MONEY",
+        "yield": 0.0261094339622642,
+        "yieldSM": 0.02610943396226415,
+        "offer": 3,
+        "fareValue": 0.02498538,
+        "uidupsell": "i2u8q"
+       }
+      ],
+      "sellKey": "G3~4093~ ~~CNF~04/14/2021 06:00~GRU~04/14/2021 07:20~",
+      "availableSeats": "4",
+      "currencyRate": 1,
+      "type": "SEGMENT_1"
+     },
+     {
+      "uid": "0dy9ue4ln5al",
+      "milesBack": 1400,
+      "milesBackText": "<milesBackText>",
+      "milesFareAvailable": false,
+      "pricingUid": "gn1il8ct2kr",
+      "cabin": "ECONOMIC",
+      "stops": 0,
+      "sourceGDS": "G3",
+      "recommended": false,
+      "promotional": false,
+      "mostWanted": false,
+      "timeStop": {
+       "hours": 0,
+       "minutes": 0
+      },
+      "baggage": {
+       "free": "false",
+       "quantity": 1
+      },
+      "airportStop": "",
+      "hourStop": "",
+      "departure": {
+       "date": "2021-04-14T19:20:00",
+       "airport": {
+        "code": "CNF",
+        "name": "Confins",
+        "city": "Belo Horizonte",
+        "country": "Brasil",
+        "latitude": "-19.63375",
+        "longitude": "-43.968856"
+       }
+      },
+      "arrival": {
+       "date": "2021-04-14T20:40:00",
+       "airport": {
+        "code": "GRU",
+        "name": "Guarulhos",
+        "city": "São Paulo",
+        "country": "Brasil",
+        "latitude": "-23.43",
+        "longitude": "-46.47"
+       }
+      },
+      "airline": {
+       "code": "G3",
+       "name": "GOL (G3)"
+      },
+      "duration": {
+       "hours": 1,
+       "minutes": 20
+      },
+      "legList": [
+       {
+        "cabin": "ECONOMIC",
+        "flightNumber": "4090",
+        "equipment": "738",
+        "stops": 0,
+        "departure": {
+         "date": "2021-04-14T19:20:00",
+         "airport": {
+          "code": "CNF",
+          "name": "Confins",
+          "city": "Belo Horizonte",
+          "country": "Brasil",
+          "timezone": "America/Sao_Paulo",
+          "latitude": "-19.63375",
+          "longitude": "-43.968856"
+         }
+        },
+        "arrival": {
+         "date": "2021-04-14T20:40:00",
+         "airport": {
+          "code": "GRU",
+          "name": "Guarulhos",
+          "city": "São Paulo",
+          "country": "Brasil",
+          "timezone": "America/Sao_Paulo",
+          "latitude": "-23.43",
+          "longitude": "-46.47"
+         }
+        },
+        "marketingAirline": {
+         "code": "G3",
+         "name": "GOL (G3)"
+        },
+        "operationAirline": {
+         "code": "G3",
+         "name": "GOL (G3)"
+        },
+        "isConnection": false,
+        "isMainLeg": true,
+        "loadFactor": 0
+       }
+      ],
+      "fareList": [
+       {
+        "baseMiles": 26500,
+        "g3": {
+         "state": "New",
+         "classOfService": "M",
+         "ruleNumber": "600N",
+         "fareBasisCode": "M00SMBRN",
+         "fareSequence": "1",
+         "fareClassOfService": "M",
+         "productClass": "PQ",
+         "isAllotmentMarketFare": "false",
+         "fareApplicationType": "Route",
+         "sellKey": "0~M~~M00SMBRN~600N~~1~X"
+        },
+        "money": 0,
+        "miles": 26500,
+        "airlineFareAmount": 370,
+        "airlineFare": 370,
+        "loadFactor": 0,
+        "legListCost": "GRU-CNF",
+        "uid": "f2qr2raeqq",
+        "type": "SMILES",
+        "yield": 0.0261094339622642,
+        "yieldSM": 0.02610943396226415
+       },
+       {
+        "baseMiles": 26500,
+        "g3": {
+         "state": "New",
+         "classOfService": "M",
+         "ruleNumber": "600N",
+         "fareBasisCode": "M00SMBRN",
+         "fareSequence": "1",
+         "fareClassOfService": "M",
+         "productClass": "PQ",
+         "isAllotmentMarketFare": "false",
+         "fareApplicationType": "Route",
+         "sellKey": "0~M~~M00SMBRN~600N~~1~X"
+        },
+        "money": 0,
+        "miles": 25800,
+        "airlineFareAmount": 370,
+        "airlineFare": 370,
+        "loadFactor": 0,
+        "legListCost": "GRU-CNF",
+        "uid": "1k811bg6ob",
+        "type": "SMILES_CLUB",
+        "yield": 0.0261094339622642,
+        "yieldSM": 0.02610943396226415
+       },
+       {
+        "baseMiles": 26500,
+        "g3": {
+         "state": "New",
+         "classOfService": "M",
+         "ruleNumber": "600N",
+         "fareBasisCode": "M00SMBRN",
+         "fareSequence": "1",
+         "fareClassOfService": "M",
+         "productClass": "PQ",
+         "isAllotmentMarketFare": "false",
+         "fareApplicationType": "Route",
+         "sellKey": "0~M~~M00SMBRN~600N~~1~X"
+        },
+        "money": 426,
+        "miles": 4500,
+        "airlineFareAmount": 370,
+        "airlineFare": 370,
+        "loadFactor": 0,
+        "legListCost": "GRU-CNF",
+        "uid": "fcnbax860t",
+        "type": "SMILES_MONEY_CLUB",
+        "yield": 0.0261094339622642,
+        "yieldSM": 0.02610943396226415,
+        "offer": 1,
+        "fareValue": 0.02073585102,
+        "baseMilesClub": 25000
+       },
+       {
+        "baseMiles": 26500,
+        "g3": {
+         "state": "New",
+         "classOfService": "M",
+         "ruleNumber": "600N",
+         "fareBasisCode": "M00SMBRN",
+         "fareSequence": "1",
+         "fareClassOfService": "M",
+         "productClass": "PQ",
+         "isAllotmentMarketFare": "false",
+         "fareApplicationType": "Route",
+         "sellKey": "0~M~~M00SMBRN~600N~~ 1~X"
+        },
+        "money": 480,
+        "miles": 7500,
+        "airlineFareAmount": 370,
+        "airlineFare": 370,
+        "loadFactor": 0,
+        "legListCost": "GRU-CNF",
+        "uid": "8tpcqoquqo",
+        "type": "SMILES_MONEY",
+        "yield": 0.0261094339622642,
+        "yieldSM": 0.02610943396226415,
+        "offer": 1,
+        "fareValue": 0.02498538
+       },
+       {
+        "baseMiles": 26500,
+        "g3": {
+         "state": "New",
+         "classOfService": "M",
+         "ruleNumber": "600N",
+         "fareBasisCode": "M00SMBRN",
+         "fareSequence": "1",
+         "fareClassOfService": "M",
+         "productClass": "PQ",
+         "isAllotmentMarketFare": "false",
+         "fareApplicationType": "Route",
+         "sellKey": "0~M~~M00SMBRN~600N~~1~X"
+        },
+        "money": 350,
+        "miles": 12800,
+        "airlineFareAmount": 370,
+        "airlineFare": 370,
+        "loadFactor": 0,
+        "legListCost": "GRU-CNF",
+        "uid": "iisv4ge0co",
+        "type": "SMILES_MONEY",
+        "yield": 0.0261094339622642,
+        "yieldSM": 0.02610943396226415,
+        "offer": 2,
+        "fareValue": 0.02498538
+       },
+       {
+        "baseMiles": 26500,
+        "g3": {
+         "state": "New",
+         "classOfService": "M",
+         "ruleNumber": "600N",
+         "fareBasisCode": "M00SMBRN",
+         "fareSequence": "1",
+         "fareClassOfService": "M",
+         "productClass": "PQ",
+         "isAllotmentMarketFare": "false",
+         "fareApplicationType": "Route",
+         "sellKey": "0~M~~M00SMBRN~600N~~1~X"
+        },
+        "money": 220,
+        "miles": 18100,
+        "airlineFareAmount": 370,
+        "airlineFare": 370,
+        "loadFactor": 0,
+        "legListCost": "GRU-CNF",
+        "uid": "iw6s3vc46f",
+        "type": "SMILES_MONEY",
+        "yield": 0.0261094339622642,
+        "yieldSM": 0.02610943396226415,
+        "offer": 3,
+        "fareValue": 0.02498538
+       }
+      ],
+      "sellKey": "G3~4090~ ~~CNF~04/14/2021 19:20~GRU~04/14/2021 20:40~",
+      "availableSeats": "4",
+      "currencyRate": 1,
+      "type": "SEGMENT_1"
+     }
+    ],
+    "airports": {
+     "departureAirportList": [
+      {
+       "code": "CNF",
+       "name": "Confins",
+       "city": "Belo Horizonte",
+       "country": "Brasil",
+       "timezone": "America/Sao_Paulo",
+       "latitude": "-19.63375",
+       "longitude": "-43.968856"
+      }
+     ],
+     "arrivalAirportList": [
+      {
+       "code": "GRU",
+       "name": "Guarulhos",
+       "city": "São Paulo",
+       "country": "Brasil",
+       "timezone": "America/Sao_Paulo",
+       "latitude": "-23.43",
+       "longitude": "-46.47"
+      }
+     ]
+    },
+    "companyList": [
+     {
+      "code": "G3",
+      "name": "GOL (G3)"
+     }
+    ],
+    "cabinList": [
+     "ECONOMIC"
+    ],
+    "bestPricing": {
+     "miles": 25800,
+     "fare": {
+      "type": "SMILES_CLUB"
+     }
+    }
+   }
+  ],
+  "resultType": "G3",
+  "hasG3": true,
+  "hasAvianca": false,
+  "hasCongener": false,
+  "tripTypeRequest": "ONE_WAY",
+  "passenger": {
+   "adults": "1",
+   "children": "0",
+   "infants": "0"
+  }
+ }
+}

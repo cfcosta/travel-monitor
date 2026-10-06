@@ -1,0 +1,23 @@
+{
+  "method": "POST",
+  "url": "https://ibisservices.iberia.com/api/sse-avm/rs/v2/calendar/ribbon",
+  "body": {
+    "slices": [
+      {
+        "origin": "GRU",
+        "destination": "MAD",
+        "date": "2026-11-10",
+        "daysAfter": 3,
+        "daysBefore": 3
+      }
+    ],
+    "passengers": [
+      {
+        "passengerType": "ADULT",
+        "count": 1
+      }
+    ],
+    "marketCode": "BR",
+    "preferredCabin": "ECONOMY"
+  }
+}

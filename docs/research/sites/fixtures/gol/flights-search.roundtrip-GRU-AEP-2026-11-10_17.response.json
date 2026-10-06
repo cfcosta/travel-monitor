@@ -1,0 +1,4195 @@
+{
+ "execution": "4ff65e1a-00ee-4f73-a59c-e0b75d2468b2",
+ "offers": [
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T09:40:00",
+    "arrival": "2026-11-10T12:40:00",
+    "stops": 0,
+    "totalDuration": 180,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "AEP",
+     "departure": "2026-11-10T09:40:00",
+     "arrival": "2026-11-10T12:40:00",
+     "duration": 180,
+     "flightNumber": 7640,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7640,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -549933003,
+     "brandId": "LI",
+     "fareBasis": "WNACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 2202.57,
+      "fare": 2133.96,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -915666036,
+     "brandId": "CL",
+     "fareBasis": "WNACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 2302.29,
+      "fare": 2233.68,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -821208915,
+     "brandId": "FL",
+     "fareBasis": "WNACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 2362.12,
+      "fare": 2293.51,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -237749446,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1788.74,
+      "fare": 1720.13,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T14:15:00",
+    "arrival": "2026-11-10T17:20:00",
+    "stops": 0,
+    "totalDuration": 185,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "AEP",
+     "departure": "2026-11-10T14:15:00",
+     "arrival": "2026-11-10T17:20:00",
+     "duration": 185,
+     "flightNumber": 7642,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7642,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -1307578452,
+     "brandId": "LI",
+     "fareBasis": "YNACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 3728.26,
+      "fare": 3659.65,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1399297184,
+     "brandId": "CL",
+     "fareBasis": "YNACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 3827.97,
+      "fare": 3759.36,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1493754305,
+     "brandId": "FL",
+     "fareBasis": "YNACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 3887.8,
+      "fare": 3819.19,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1543226542,
+     "brandId": "PR",
+     "fareBasis": "CNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 4037.38,
+      "fare": 3968.77,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T18:00:00",
+    "arrival": "2026-11-10T21:00:00",
+    "stops": 0,
+    "totalDuration": 180,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "AEP",
+     "departure": "2026-11-10T18:00:00",
+     "arrival": "2026-11-10T21:00:00",
+     "duration": 180,
+     "flightNumber": 7644,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7644,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 1433184574,
+     "brandId": "LI",
+     "fareBasis": "ANACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1330.04,
+      "fare": 1261.43,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1067451541,
+     "brandId": "CL",
+     "fareBasis": "ANACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1429.76,
+      "fare": 1361.15,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1161908662,
+     "brandId": "FL",
+     "fareBasis": "ANACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1489.59,
+      "fare": 1420.98,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -2008947726,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1788.74,
+      "fare": 1720.13,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T22:40:00",
+    "arrival": "2026-11-11T01:40:00",
+    "stops": 0,
+    "totalDuration": 180,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "AEP",
+     "departure": "2026-11-10T22:40:00",
+     "arrival": "2026-11-11T01:40:00",
+     "duration": 180,
+     "flightNumber": 7648,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7648,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -1277053758,
+     "brandId": "LI",
+     "fareBasis": "PNACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1908.4,
+      "fare": 1839.79,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1642786791,
+     "brandId": "CL",
+     "fareBasis": "PNACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 2008.12,
+      "fare": 1939.51,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1548329670,
+     "brandId": "FL",
+     "fareBasis": "PNACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 2067.95,
+      "fare": 1999.34,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 446960050,
+     "brandId": "PR",
+     "fareBasis": "LNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 2511.7,
+      "fare": 2443.09,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T17:05:00",
+    "arrival": "2026-11-10T23:00:00",
+    "stops": 1,
+    "totalDuration": 355,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3",
+     "AR"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "POA",
+     "departure": "2026-11-10T17:05:00",
+     "arrival": "2026-11-10T18:50:00",
+     "duration": 105,
+     "flightNumber": 1238,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1238,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "POA",
+     "destination": "AEP",
+     "departure": "2026-11-10T21:05:00",
+     "arrival": "2026-11-10T23:00:00",
+     "duration": 115,
+     "flightNumber": 3246,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1233,
+     "operatingAirlineCode": "AR",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 1271176939,
+     "brandId": "LI",
+     "fareBasis": "ANACAB2R",
+     "price": {
+      "currency": "BRL",
+      "total": 2148.59,
+      "fare": 1994.36,
+      "taxes": 154.23,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1788279650,
+     "brandId": "CL",
+     "fareBasis": "ANACAB3R",
+     "price": {
+      "currency": "BRL",
+      "total": 2348.02,
+      "fare": 2193.79,
+      "taxes": 154.23,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1678951862,
+     "brandId": "FL",
+     "fareBasis": "ANACAB4R",
+     "price": {
+      "currency": "BRL",
+      "total": 2323.09,
+      "fare": 2168.86,
+      "taxes": 154.23,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T19:15:00",
+    "arrival": "2026-11-11T02:00:00",
+    "stops": 1,
+    "totalDuration": 405,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "GIG",
+     "departure": "2026-11-10T19:15:00",
+     "arrival": "2026-11-10T20:20:00",
+     "duration": 65,
+     "flightNumber": 1378,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1378,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "AEP",
+     "departure": "2026-11-10T22:35:00",
+     "arrival": "2026-11-11T02:00:00",
+     "duration": 205,
+     "flightNumber": 7592,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7592,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 420707685,
+     "brandId": "LI",
+     "fareBasis": "PNACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1939.13,
+      "fare": 1839.79,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -2145592961,
+     "brandId": "CL",
+     "fareBasis": "PNACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 2038.85,
+      "fare": 1939.51,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1325635467,
+     "brandId": "FL",
+     "fareBasis": "PNACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 2098.68,
+      "fare": 1999.34,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 585811250,
+     "brandId": "PR",
+     "fareBasis": "LNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 2542.43,
+      "fare": 2443.09,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T05:25:00",
+    "arrival": "2026-11-10T13:00:00",
+    "stops": 1,
+    "totalDuration": 455,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "GIG",
+     "departure": "2026-11-10T05:25:00",
+     "arrival": "2026-11-10T06:25:00",
+     "duration": 60,
+     "flightNumber": 1562,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1562,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "AEP",
+     "departure": "2026-11-10T09:35:00",
+     "arrival": "2026-11-10T13:00:00",
+     "duration": 205,
+     "flightNumber": 7652,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7652,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 661286577,
+     "brandId": "LI",
+     "fareBasis": "PNACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1939.13,
+      "fare": 1839.79,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1905014069,
+     "brandId": "CL",
+     "fareBasis": "PNACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 2038.85,
+      "fare": 1939.51,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1566214359,
+     "brandId": "FL",
+     "fareBasis": "PNACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 2098.68,
+      "fare": 1999.34,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 826390142,
+     "brandId": "PR",
+     "fareBasis": "LNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 2542.43,
+      "fare": 2443.09,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T17:10:00",
+    "arrival": "2026-11-11T02:00:00",
+    "stops": 1,
+    "totalDuration": 530,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "GIG",
+     "departure": "2026-11-10T17:10:00",
+     "arrival": "2026-11-10T18:15:00",
+     "duration": 65,
+     "flightNumber": 1358,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1358,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "AEP",
+     "departure": "2026-11-10T22:35:00",
+     "arrival": "2026-11-11T02:00:00",
+     "duration": 205,
+     "flightNumber": 7592,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7592,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 1663477681,
+     "brandId": "LI",
+     "fareBasis": "PNACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1939.13,
+      "fare": 1839.79,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -902822965,
+     "brandId": "CL",
+     "fareBasis": "PNACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 2038.85,
+      "fare": 1939.51,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1726561833,
+     "brandId": "FL",
+     "fareBasis": "PNACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 2098.68,
+      "fare": 1999.34,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1828581246,
+     "brandId": "PR",
+     "fareBasis": "LNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 2542.43,
+      "fare": 2443.09,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T13:15:00",
+    "arrival": "2026-11-10T23:00:00",
+    "stops": 1,
+    "totalDuration": 585,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3",
+     "AR"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "POA",
+     "departure": "2026-11-10T13:15:00",
+     "arrival": "2026-11-10T15:00:00",
+     "duration": 105,
+     "flightNumber": 1236,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1236,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "POA",
+     "destination": "AEP",
+     "departure": "2026-11-10T21:05:00",
+     "arrival": "2026-11-10T23:00:00",
+     "duration": 115,
+     "flightNumber": 3246,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1233,
+     "operatingAirlineCode": "AR",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -522084001,
+     "brandId": "LI",
+     "fareBasis": "ANACAB2R",
+     "price": {
+      "currency": "BRL",
+      "total": 2148.59,
+      "fare": 1994.36,
+      "taxes": 154.23,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -4981290,
+     "brandId": "CL",
+     "fareBasis": "ANACAB3R",
+     "price": {
+      "currency": "BRL",
+      "total": 2348.02,
+      "fare": 2193.79,
+      "taxes": 154.23,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 822754494,
+     "brandId": "FL",
+     "fareBasis": "ANACAB4R",
+     "price": {
+      "currency": "BRL",
+      "total": 2323.09,
+      "fare": 2168.86,
+      "taxes": 154.23,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T22:05:00",
+    "arrival": "2026-11-11T08:00:00",
+    "stops": 1,
+    "totalDuration": 595,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "REC",
+     "departure": "2026-11-10T22:05:00",
+     "arrival": "2026-11-11T01:15:00",
+     "duration": 190,
+     "flightNumber": 1560,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1560,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "REC",
+     "destination": "AEP",
+     "departure": "2026-11-11T02:25:00",
+     "arrival": "2026-11-11T08:00:00",
+     "duration": 335,
+     "flightNumber": 7620,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7620,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 605950678,
+     "brandId": "LI",
+     "fareBasis": "ANACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1397.8,
+      "fare": 1261.43,
+      "taxes": 136.37,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1960349968,
+     "brandId": "CL",
+     "fareBasis": "ANACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1497.52,
+      "fare": 1361.15,
+      "taxes": 136.37,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1510878460,
+     "brandId": "FL",
+     "fareBasis": "ANACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1557.35,
+      "fare": 1420.98,
+      "taxes": 136.37,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1814604045,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1856.5,
+      "fare": 1720.13,
+      "taxes": 136.37,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T09:05:00",
+    "arrival": "2026-11-10T19:30:00",
+    "stops": 1,
+    "totalDuration": 625,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "FLN",
+     "departure": "2026-11-10T09:05:00",
+     "arrival": "2026-11-10T10:25:00",
+     "duration": 80,
+     "flightNumber": 1140,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1140,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "FLN",
+     "destination": "AEP",
+     "departure": "2026-11-10T17:15:00",
+     "arrival": "2026-11-10T19:30:00",
+     "duration": 135,
+     "flightNumber": 7692,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7692,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 552957580,
+     "brandId": "LI",
+     "fareBasis": "ENACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1554.92,
+      "fare": 1411,
+      "taxes": 143.92,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -2013343066,
+     "brandId": "CL",
+     "fareBasis": "ENACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1654.64,
+      "fare": 1510.72,
+      "taxes": 143.92,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1457885362,
+     "brandId": "FL",
+     "fareBasis": "ENACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1714.47,
+      "fare": 1570.55,
+      "taxes": 143.92,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -204614848,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1864.05,
+      "fare": 1720.13,
+      "taxes": 143.92,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T22:05:00",
+    "arrival": "2026-11-11T09:20:00",
+    "stops": 1,
+    "totalDuration": 675,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "GIG",
+     "departure": "2026-11-10T22:05:00",
+     "arrival": "2026-11-10T23:10:00",
+     "duration": 65,
+     "flightNumber": 1380,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1380,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "AEP",
+     "departure": "2026-11-11T06:00:00",
+     "arrival": "2026-11-11T09:20:00",
+     "duration": 200,
+     "flightNumber": 7226,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7226,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -914074117,
+     "brandId": "LI",
+     "fareBasis": "ANACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1360.77,
+      "fare": 1261.43,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 814592533,
+     "brandId": "CL",
+     "fareBasis": "ANACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1460.49,
+      "fare": 1361.15,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -9146335,
+     "brandId": "FL",
+     "fareBasis": "ANACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1520.32,
+      "fare": 1420.98,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 294579250,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1819.47,
+      "fare": 1720.13,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T13:45:00",
+    "arrival": "2026-11-11T02:00:00",
+    "stops": 1,
+    "totalDuration": 735,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "GIG",
+     "departure": "2026-11-10T13:45:00",
+     "arrival": "2026-11-10T14:50:00",
+     "duration": 65,
+     "flightNumber": 1376,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1376,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "AEP",
+     "departure": "2026-11-10T22:35:00",
+     "arrival": "2026-11-11T02:00:00",
+     "duration": 205,
+     "flightNumber": 7592,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7592,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 649127641,
+     "brandId": "LI",
+     "fareBasis": "PNACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1939.13,
+      "fare": 1839.79,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1917173005,
+     "brandId": "CL",
+     "fareBasis": "PNACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 2038.85,
+      "fare": 1939.51,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1554055423,
+     "brandId": "FL",
+     "fareBasis": "PNACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 2098.68,
+      "fare": 1999.34,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 814231206,
+     "brandId": "PR",
+     "fareBasis": "LNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 2542.43,
+      "fare": 2443.09,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T13:35:00",
+    "arrival": "2026-11-11T02:00:00",
+    "stops": 1,
+    "totalDuration": 745,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "GIG",
+     "departure": "2026-11-10T13:35:00",
+     "arrival": "2026-11-10T14:40:00",
+     "duration": 65,
+     "flightNumber": 1556,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1556,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "AEP",
+     "departure": "2026-11-10T22:35:00",
+     "arrival": "2026-11-11T02:00:00",
+     "duration": 205,
+     "flightNumber": 7592,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7592,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -989388303,
+     "brandId": "LI",
+     "fareBasis": "PNACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1939.13,
+      "fare": 1839.79,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 739278347,
+     "brandId": "CL",
+     "fareBasis": "PNACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 2038.85,
+      "fare": 1939.51,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -84460521,
+     "brandId": "FL",
+     "fareBasis": "PNACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 2098.68,
+      "fare": 1999.34,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -824284738,
+     "brandId": "PR",
+     "fareBasis": "LNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 2542.43,
+      "fare": 2443.09,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T22:55:00",
+    "arrival": "2026-11-11T11:20:00",
+    "stops": 1,
+    "totalDuration": 745,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3",
+     "AR"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "CWB",
+     "departure": "2026-11-10T22:55:00",
+     "arrival": "2026-11-10T23:55:00",
+     "duration": 60,
+     "flightNumber": 1174,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1174,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "CWB",
+     "destination": "AEP",
+     "departure": "2026-11-11T08:50:00",
+     "arrival": "2026-11-11T11:20:00",
+     "duration": 150,
+     "flightNumber": 3064,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1227,
+     "operatingAirlineCode": "AR",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -1296404830,
+     "brandId": "LI",
+     "fareBasis": "ENACAB2R",
+     "price": {
+      "currency": "BRL",
+      "total": 1772.23,
+      "fare": 1650.33,
+      "taxes": 121.9,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -779302119,
+     "brandId": "CL",
+     "fareBasis": "ENACAB3R",
+     "price": {
+      "currency": "BRL",
+      "total": 1971.66,
+      "fare": 1849.76,
+      "taxes": 121.9,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -272698181,
+     "brandId": "FL",
+     "fareBasis": "ENACAB4R",
+     "price": {
+      "currency": "BRL",
+      "total": 1956.71,
+      "fare": 1834.81,
+      "taxes": 121.9,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1225127934,
+     "brandId": "PR",
+     "fareBasis": "CNACAB5R",
+     "price": {
+      "currency": "BRL",
+      "total": 4614.19,
+      "fare": 4492.29,
+      "taxes": 121.9,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T09:15:00",
+    "arrival": "2026-11-10T23:00:00",
+    "stops": 1,
+    "totalDuration": 825,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3",
+     "AR"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "POA",
+     "departure": "2026-11-10T09:15:00",
+     "arrival": "2026-11-10T11:00:00",
+     "duration": 105,
+     "flightNumber": 1234,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1234,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "POA",
+     "destination": "AEP",
+     "departure": "2026-11-10T21:05:00",
+     "arrival": "2026-11-10T23:00:00",
+     "duration": 115,
+     "flightNumber": 3246,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1233,
+     "operatingAirlineCode": "AR",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -395189933,
+     "brandId": "LI",
+     "fareBasis": "ANACAB2R",
+     "price": {
+      "currency": "BRL",
+      "total": 2148.59,
+      "fare": 1994.36,
+      "taxes": 154.23,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 121912778,
+     "brandId": "CL",
+     "fareBasis": "ANACAB3R",
+     "price": {
+      "currency": "BRL",
+      "total": 2348.02,
+      "fare": 2193.79,
+      "taxes": 154.23,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 949648562,
+     "brandId": "FL",
+     "fareBasis": "ANACAB4R",
+     "price": {
+      "currency": "BRL",
+      "total": 2323.09,
+      "fare": 2168.86,
+      "taxes": 154.23,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T19:15:00",
+    "arrival": "2026-11-11T09:20:00",
+    "stops": 1,
+    "totalDuration": 845,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "GIG",
+     "departure": "2026-11-10T19:15:00",
+     "arrival": "2026-11-10T20:20:00",
+     "duration": 65,
+     "flightNumber": 1378,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1378,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "AEP",
+     "departure": "2026-11-11T06:00:00",
+     "arrival": "2026-11-11T09:20:00",
+     "duration": 200,
+     "flightNumber": 7226,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7226,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -598653199,
+     "brandId": "LI",
+     "fareBasis": "ANACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1360.77,
+      "fare": 1261.43,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1130013451,
+     "brandId": "CL",
+     "fareBasis": "ANACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1460.49,
+      "fare": 1361.15,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 306274583,
+     "brandId": "FL",
+     "fareBasis": "ANACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1520.32,
+      "fare": 1420.98,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 610000168,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1819.47,
+      "fare": 1720.13,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T21:40:00",
+    "arrival": "2026-11-11T13:00:00",
+    "stops": 1,
+    "totalDuration": 920,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "BSB",
+     "departure": "2026-11-10T21:40:00",
+     "arrival": "2026-11-10T23:25:00",
+     "duration": 105,
+     "flightNumber": 1462,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1462,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "BSB",
+     "destination": "AEP",
+     "departure": "2026-11-11T09:20:00",
+     "arrival": "2026-11-11T13:00:00",
+     "duration": 220,
+     "flightNumber": 7708,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7708,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 475648684,
+     "brandId": "LI",
+     "fareBasis": "ANACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1371.96,
+      "fare": 1261.43,
+      "taxes": 110.53,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -2090651962,
+     "brandId": "CL",
+     "fareBasis": "ANACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1471.68,
+      "fare": 1361.15,
+      "taxes": 110.53,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1380576466,
+     "brandId": "FL",
+     "fareBasis": "ANACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1531.51,
+      "fare": 1420.98,
+      "taxes": 110.53,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1684302051,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1830.66,
+      "fare": 1720.13,
+      "taxes": 110.53,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T17:10:00",
+    "arrival": "2026-11-11T09:20:00",
+    "stops": 1,
+    "totalDuration": 970,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "GIG",
+     "departure": "2026-11-10T17:10:00",
+     "arrival": "2026-11-10T18:15:00",
+     "duration": 65,
+     "flightNumber": 1358,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1358,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "AEP",
+     "departure": "2026-11-11T06:00:00",
+     "arrival": "2026-11-11T09:20:00",
+     "duration": 200,
+     "flightNumber": 7226,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7226,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 644116797,
+     "brandId": "LI",
+     "fareBasis": "ANACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1360.77,
+      "fare": 1261.43,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1922183849,
+     "brandId": "CL",
+     "fareBasis": "ANACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1460.49,
+      "fare": 1361.15,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1549044579,
+     "brandId": "FL",
+     "fareBasis": "ANACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1520.32,
+      "fare": 1420.98,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1852770164,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1819.47,
+      "fare": 1720.13,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T17:50:00",
+    "arrival": "2026-11-11T11:20:00",
+    "stops": 1,
+    "totalDuration": 1050,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3",
+     "AR"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "CWB",
+     "departure": "2026-11-10T17:50:00",
+     "arrival": "2026-11-10T18:55:00",
+     "duration": 65,
+     "flightNumber": 1172,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1172,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "CWB",
+     "destination": "AEP",
+     "departure": "2026-11-11T08:50:00",
+     "arrival": "2026-11-11T11:20:00",
+     "duration": 150,
+     "flightNumber": 3064,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1227,
+     "operatingAirlineCode": "AR",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 972069622,
+     "brandId": "LI",
+     "fareBasis": "ENACAB2R",
+     "price": {
+      "currency": "BRL",
+      "total": 1772.23,
+      "fare": 1650.33,
+      "taxes": 121.9,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1489172333,
+     "brandId": "CL",
+     "fareBasis": "ENACAB3R",
+     "price": {
+      "currency": "BRL",
+      "total": 1971.66,
+      "fare": 1849.76,
+      "taxes": 121.9,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1995776271,
+     "brandId": "FL",
+     "fareBasis": "ENACAB4R",
+     "price": {
+      "currency": "BRL",
+      "total": 1956.71,
+      "fare": 1834.81,
+      "taxes": 121.9,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1043346518,
+     "brandId": "PR",
+     "fareBasis": "CNACAB5R",
+     "price": {
+      "currency": "BRL",
+      "total": 4614.19,
+      "fare": 4492.29,
+      "taxes": 121.9,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T18:25:00",
+    "arrival": "2026-11-11T13:00:00",
+    "stops": 1,
+    "totalDuration": 1115,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "BSB",
+     "departure": "2026-11-10T18:25:00",
+     "arrival": "2026-11-10T20:05:00",
+     "duration": 100,
+     "flightNumber": 1443,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1443,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "BSB",
+     "destination": "AEP",
+     "departure": "2026-11-11T09:20:00",
+     "arrival": "2026-11-11T13:00:00",
+     "duration": 220,
+     "flightNumber": 7708,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7708,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 272485598,
+     "brandId": "LI",
+     "fareBasis": "ANACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1371.96,
+      "fare": 1261.43,
+      "taxes": 110.53,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 2001152248,
+     "brandId": "CL",
+     "fareBasis": "ANACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1471.68,
+      "fare": 1361.15,
+      "taxes": 110.53,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1177413380,
+     "brandId": "FL",
+     "fareBasis": "ANACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1531.51,
+      "fare": 1420.98,
+      "taxes": 110.53,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1481138965,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1830.66,
+      "fare": 1720.13,
+      "taxes": 110.53,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T13:45:00",
+    "arrival": "2026-11-11T09:20:00",
+    "stops": 1,
+    "totalDuration": 1175,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "GIG",
+     "departure": "2026-11-10T13:45:00",
+     "arrival": "2026-11-10T14:50:00",
+     "duration": 65,
+     "flightNumber": 1376,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1376,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "AEP",
+     "departure": "2026-11-11T06:00:00",
+     "arrival": "2026-11-11T09:20:00",
+     "duration": 200,
+     "flightNumber": 7226,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7226,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -370233243,
+     "brandId": "LI",
+     "fareBasis": "ANACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1360.77,
+      "fare": 1261.43,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1358433407,
+     "brandId": "CL",
+     "fareBasis": "ANACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1460.49,
+      "fare": 1361.15,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 534694539,
+     "brandId": "FL",
+     "fareBasis": "ANACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1520.32,
+      "fare": 1420.98,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 838420124,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1819.47,
+      "fare": 1720.13,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T16:25:00",
+    "arrival": "2026-11-11T13:00:00",
+    "stops": 1,
+    "totalDuration": 1235,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "BSB",
+     "departure": "2026-11-10T16:25:00",
+     "arrival": "2026-11-10T18:10:00",
+     "duration": 105,
+     "flightNumber": 1458,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1458,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "BSB",
+     "destination": "AEP",
+     "departure": "2026-11-11T09:20:00",
+     "arrival": "2026-11-11T13:00:00",
+     "duration": 220,
+     "flightNumber": 7708,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7708,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -2087916714,
+     "brandId": "LI",
+     "fareBasis": "ANACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1371.96,
+      "fare": 1261.43,
+      "taxes": 110.53,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -359250064,
+     "brandId": "CL",
+     "fareBasis": "ANACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1471.68,
+      "fare": 1361.15,
+      "taxes": 110.53,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1182988932,
+     "brandId": "FL",
+     "fareBasis": "ANACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1531.51,
+      "fare": 1420.98,
+      "taxes": 110.53,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -879263347,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1830.66,
+      "fare": 1720.13,
+      "taxes": 110.53,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T22:50:00",
+    "arrival": "2026-11-11T19:30:00",
+    "stops": 1,
+    "totalDuration": 1240,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "FLN",
+     "departure": "2026-11-10T22:50:00",
+     "arrival": "2026-11-11T00:10:00",
+     "duration": 80,
+     "flightNumber": 1154,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1154,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "FLN",
+     "destination": "AEP",
+     "departure": "2026-11-11T17:15:00",
+     "arrival": "2026-11-11T19:30:00",
+     "duration": 135,
+     "flightNumber": 7692,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7692,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -1678131813,
+     "brandId": "LI",
+     "fareBasis": "ANACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1405.35,
+      "fare": 1261.43,
+      "taxes": 143.92,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 50534837,
+     "brandId": "CL",
+     "fareBasis": "ANACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1505.07,
+      "fare": 1361.15,
+      "taxes": 143.92,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -773204031,
+     "brandId": "FL",
+     "fareBasis": "ANACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1564.9,
+      "fare": 1420.98,
+      "taxes": 143.92,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -469478446,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1864.05,
+      "fare": 1720.13,
+      "taxes": 143.92,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T09:05:00",
+    "arrival": "2026-11-11T08:00:00",
+    "stops": 1,
+    "totalDuration": 1375,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "REC",
+     "departure": "2026-11-10T09:05:00",
+     "arrival": "2026-11-10T12:15:00",
+     "duration": 190,
+     "flightNumber": 1586,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1586,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "REC",
+     "destination": "AEP",
+     "departure": "2026-11-11T02:25:00",
+     "arrival": "2026-11-11T08:00:00",
+     "duration": 335,
+     "flightNumber": 7620,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7620,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -1624447759,
+     "brandId": "LI",
+     "fareBasis": "ENACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1547.37,
+      "fare": 1411,
+      "taxes": 136.37,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 104218891,
+     "brandId": "CL",
+     "fareBasis": "ENACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1647.09,
+      "fare": 1510.72,
+      "taxes": 136.37,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -719519977,
+     "brandId": "FL",
+     "fareBasis": "ENACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1706.92,
+      "fare": 1570.55,
+      "taxes": 136.37,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1912947109,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1856.5,
+      "fare": 1720.13,
+      "taxes": 136.37,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T09:10:00",
+    "arrival": "2026-11-11T11:20:00",
+    "stops": 1,
+    "totalDuration": 1570,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3",
+     "AR"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "CWB",
+     "departure": "2026-11-10T09:10:00",
+     "arrival": "2026-11-10T10:20:00",
+     "duration": 70,
+     "flightNumber": 1168,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1168,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "CWB",
+     "destination": "AEP",
+     "departure": "2026-11-11T08:50:00",
+     "arrival": "2026-11-11T11:20:00",
+     "duration": 150,
+     "flightNumber": 3064,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1227,
+     "operatingAirlineCode": "AR",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 325760512,
+     "brandId": "LI",
+     "fareBasis": "ENACAB2R",
+     "price": {
+      "currency": "BRL",
+      "total": 1772.23,
+      "fare": 1650.33,
+      "taxes": 121.9,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 842863223,
+     "brandId": "CL",
+     "fareBasis": "ENACAB3R",
+     "price": {
+      "currency": "BRL",
+      "total": 1971.66,
+      "fare": 1849.76,
+      "taxes": 121.9,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1349467161,
+     "brandId": "FL",
+     "fareBasis": "ENACAB4R",
+     "price": {
+      "currency": "BRL",
+      "total": 1956.71,
+      "fare": 1834.81,
+      "taxes": 121.9,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 397037408,
+     "brandId": "PR",
+     "fareBasis": "CNACAB5R",
+     "price": {
+      "currency": "BRL",
+      "total": 4614.19,
+      "fare": 4492.29,
+      "taxes": 121.9,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T16:55:00",
+    "arrival": "2026-11-11T19:30:00",
+    "stops": 1,
+    "totalDuration": 1595,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "FLN",
+     "departure": "2026-11-10T16:55:00",
+     "arrival": "2026-11-10T18:10:00",
+     "duration": 75,
+     "flightNumber": 1142,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1142,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "FLN",
+     "destination": "AEP",
+     "departure": "2026-11-11T17:15:00",
+     "arrival": "2026-11-11T19:30:00",
+     "duration": 135,
+     "flightNumber": 7692,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7692,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -1031207051,
+     "brandId": "LI",
+     "fareBasis": "ANACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1405.35,
+      "fare": 1261.43,
+      "taxes": 143.92,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 697459599,
+     "brandId": "CL",
+     "fareBasis": "ANACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1505.07,
+      "fare": 1361.15,
+      "taxes": 143.92,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -126279269,
+     "brandId": "FL",
+     "fareBasis": "ANACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1564.9,
+      "fare": 1420.98,
+      "taxes": 143.92,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 177446316,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1864.05,
+      "fare": 1720.13,
+      "taxes": 143.92,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T10:05:00",
+    "arrival": "2026-11-11T13:00:00",
+    "stops": 1,
+    "totalDuration": 1615,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "BSB",
+     "departure": "2026-11-10T10:05:00",
+     "arrival": "2026-11-10T11:50:00",
+     "duration": 105,
+     "flightNumber": 1456,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1456,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "BSB",
+     "destination": "AEP",
+     "departure": "2026-11-11T09:20:00",
+     "arrival": "2026-11-11T13:00:00",
+     "duration": 220,
+     "flightNumber": 7708,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7708,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -2119644598,
+     "brandId": "LI",
+     "fareBasis": "ANACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1371.96,
+      "fare": 1261.43,
+      "taxes": 110.53,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -390977948,
+     "brandId": "CL",
+     "fareBasis": "ANACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1471.68,
+      "fare": 1361.15,
+      "taxes": 110.53,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1214716816,
+     "brandId": "FL",
+     "fareBasis": "ANACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1531.51,
+      "fare": 1420.98,
+      "taxes": 110.53,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -910991231,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1830.66,
+      "fare": 1720.13,
+      "taxes": 110.53,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T09:05:00",
+    "arrival": "2026-11-10T19:30:00",
+    "stops": 2,
+    "totalDuration": 625,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "GIG",
+     "departure": "2026-11-10T09:05:00",
+     "arrival": "2026-11-10T10:10:00",
+     "duration": 65,
+     "flightNumber": 1374,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1374,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "FLN",
+     "departure": "2026-11-10T12:30:00",
+     "arrival": "2026-11-10T14:15:00",
+     "duration": 105,
+     "flightNumber": 1988,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1988,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "FLN",
+     "destination": "AEP",
+     "departure": "2026-11-10T17:15:00",
+     "arrival": "2026-11-10T19:30:00",
+     "duration": 135,
+     "flightNumber": 7692,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7692,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 1426215911,
+     "brandId": "LI",
+     "fareBasis": "ENACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1554.92,
+      "fare": 1411,
+      "taxes": 143.92,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1203063664,
+     "brandId": "CL",
+     "fareBasis": "ENACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1654.64,
+      "fare": 1510.72,
+      "taxes": 143.92,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -340699821,
+     "brandId": "FL",
+     "fareBasis": "ENACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1714.47,
+      "fare": 1570.55,
+      "taxes": 143.92,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 230879870,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1864.05,
+      "fare": 1720.13,
+      "taxes": 143.92,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T19:15:00",
+    "arrival": "2026-11-11T08:00:00",
+    "stops": 2,
+    "totalDuration": 765,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "GIG",
+     "departure": "2026-11-10T19:15:00",
+     "arrival": "2026-11-10T20:20:00",
+     "duration": 65,
+     "flightNumber": 1378,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1378,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "REC",
+     "departure": "2026-11-10T21:25:00",
+     "arrival": "2026-11-11T00:15:00",
+     "duration": 170,
+     "flightNumber": 1884,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1884,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "REC",
+     "destination": "AEP",
+     "departure": "2026-11-11T02:25:00",
+     "arrival": "2026-11-11T08:00:00",
+     "duration": 335,
+     "flightNumber": 7620,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7620,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 1482340995,
+     "brandId": "LI",
+     "fareBasis": "ANACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1397.8,
+      "fare": 1261.43,
+      "taxes": 136.37,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1259188748,
+     "brandId": "CL",
+     "fareBasis": "ANACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1497.52,
+      "fare": 1361.15,
+      "taxes": 136.37,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -284574737,
+     "brandId": "FL",
+     "fareBasis": "ANACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1557.35,
+      "fare": 1420.98,
+      "taxes": 136.37,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1150393081,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1856.5,
+      "fare": 1720.13,
+      "taxes": 136.37,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T18:25:00",
+    "arrival": "2026-11-11T08:00:00",
+    "stops": 2,
+    "totalDuration": 815,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "BSB",
+     "departure": "2026-11-10T18:25:00",
+     "arrival": "2026-11-10T20:05:00",
+     "duration": 100,
+     "flightNumber": 1443,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1443,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "BSB",
+     "destination": "REC",
+     "departure": "2026-11-10T21:25:00",
+     "arrival": "2026-11-10T23:55:00",
+     "duration": 150,
+     "flightNumber": 1702,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1702,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "REC",
+     "destination": "AEP",
+     "departure": "2026-11-11T02:25:00",
+     "arrival": "2026-11-11T08:00:00",
+     "duration": 335,
+     "flightNumber": 7620,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7620,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -208080729,
+     "brandId": "LI",
+     "fareBasis": "ANACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1397.8,
+      "fare": 1261.43,
+      "taxes": 136.37,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -431232976,
+     "brandId": "CL",
+     "fareBasis": "ANACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1497.52,
+      "fare": 1361.15,
+      "taxes": 136.37,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1974996461,
+     "brandId": "FL",
+     "fareBasis": "ANACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1557.35,
+      "fare": 1420.98,
+      "taxes": 136.37,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -540028643,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1856.5,
+      "fare": 1720.13,
+      "taxes": 136.37,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T23:10:00",
+    "arrival": "2026-11-12T09:20:00",
+    "stops": 2,
+    "totalDuration": 2050,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "JPA",
+     "departure": "2026-11-10T23:10:00",
+     "arrival": "2026-11-11T02:20:00",
+     "duration": 190,
+     "flightNumber": 1644,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1644,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "JPA",
+     "destination": "GIG",
+     "departure": "2026-11-11T03:45:00",
+     "arrival": "2026-11-11T06:45:00",
+     "duration": 180,
+     "flightNumber": 2073,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 2073,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "AEP",
+     "departure": "2026-11-12T06:00:00",
+     "arrival": "2026-11-12T09:20:00",
+     "duration": 200,
+     "flightNumber": 7226,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7226,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 303500670,
+     "brandId": "LI",
+     "fareBasis": "ANACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1360.77,
+      "fare": 1261.43,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 80348423,
+     "brandId": "CL",
+     "fareBasis": "ANACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1460.49,
+      "fare": 1361.15,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1463415062,
+     "brandId": "FL",
+     "fareBasis": "ANACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1520.32,
+      "fare": 1420.98,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -28447244,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1819.47,
+      "fare": 1720.13,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T23:05:00",
+    "arrival": "2026-11-12T09:20:00",
+    "stops": 2,
+    "totalDuration": 2055,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "NAT",
+     "departure": "2026-11-10T23:05:00",
+     "arrival": "2026-11-11T02:25:00",
+     "duration": 200,
+     "flightNumber": 1680,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1680,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "NAT",
+     "destination": "GIG",
+     "departure": "2026-11-11T03:40:00",
+     "arrival": "2026-11-11T06:50:00",
+     "duration": 190,
+     "flightNumber": 1969,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1969,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "AEP",
+     "departure": "2026-11-12T06:00:00",
+     "arrival": "2026-11-12T09:20:00",
+     "duration": 200,
+     "flightNumber": 7226,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7226,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -1293650721,
+     "brandId": "LI",
+     "fareBasis": "ENACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1510.34,
+      "fare": 1411,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1516802968,
+     "brandId": "CL",
+     "fareBasis": "ENACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1610.06,
+      "fare": 1510.72,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1234400843,
+     "brandId": "FL",
+     "fareBasis": "ENACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1669.89,
+      "fare": 1570.55,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1805980534,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1819.47,
+      "fare": 1720.13,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T23:00:00",
+    "arrival": "2026-11-12T09:20:00",
+    "stops": 2,
+    "totalDuration": 2060,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "BEL",
+     "departure": "2026-11-10T23:00:00",
+     "arrival": "2026-11-11T02:35:00",
+     "duration": 215,
+     "flightNumber": 1520,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1520,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "BEL",
+     "destination": "GIG",
+     "departure": "2026-11-11T03:05:00",
+     "arrival": "2026-11-11T06:40:00",
+     "duration": 215,
+     "flightNumber": 2009,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 2009,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "AEP",
+     "departure": "2026-11-12T06:00:00",
+     "arrival": "2026-11-12T09:20:00",
+     "duration": 200,
+     "flightNumber": 7226,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7226,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -897221682,
+     "brandId": "LI",
+     "fareBasis": "ANACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1360.77,
+      "fare": 1261.43,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1120373929,
+     "brandId": "CL",
+     "fareBasis": "ANACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1460.49,
+      "fare": 1361.15,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1630829882,
+     "brandId": "FL",
+     "fareBasis": "ANACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1520.32,
+      "fare": 1420.98,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1229169596,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1819.47,
+      "fare": 1720.13,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T22:50:00",
+    "arrival": "2026-11-12T09:20:00",
+    "stops": 2,
+    "totalDuration": 2070,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "FLN",
+     "departure": "2026-11-10T22:50:00",
+     "arrival": "2026-11-11T00:10:00",
+     "duration": 80,
+     "flightNumber": 1154,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1154,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "FLN",
+     "destination": "GIG",
+     "departure": "2026-11-11T05:35:00",
+     "arrival": "2026-11-11T07:05:00",
+     "duration": 90,
+     "flightNumber": 1987,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1987,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "AEP",
+     "departure": "2026-11-12T06:00:00",
+     "arrival": "2026-11-12T09:20:00",
+     "duration": 200,
+     "flightNumber": 7226,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 7226,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 1771353222,
+     "brandId": "LI",
+     "fareBasis": "ANACAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1360.77,
+      "fare": 1261.43,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1548200975,
+     "brandId": "CL",
+     "fareBasis": "ANACAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1460.49,
+      "fare": 1361.15,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 4437490,
+     "brandId": "FL",
+     "fareBasis": "ANACAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1520.32,
+      "fare": 1420.98,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1439405308,
+     "brandId": "PR",
+     "fareBasis": "FNACAG5J",
+     "price": {
+      "currency": "BRL",
+      "total": 1819.47,
+      "fare": 1720.13,
+      "taxes": 99.34,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T07:00:00",
+    "arrival": "2026-11-10T10:00:00",
+    "stops": 0,
+    "totalDuration": 180,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "AR"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "AEP",
+     "departure": "2026-11-10T07:00:00",
+     "arrival": "2026-11-10T10:00:00",
+     "duration": 180,
+     "flightNumber": 3003,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1241,
+     "operatingAirlineCode": "AR",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -542691059,
+     "brandId": "LI",
+     "fareBasis": "PNACAB2R",
+     "price": {
+      "currency": "BRL",
+      "total": 1554.4,
+      "fare": 1485.79,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -422339300,
+     "brandId": "CL",
+     "fareBasis": "PNACAB3R",
+     "price": {
+      "currency": "BRL",
+      "total": 1853.56,
+      "fare": 1784.95,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 2101727980,
+     "brandId": "FL",
+     "fareBasis": "PNACAB4R",
+     "price": {
+      "currency": "BRL",
+      "total": 2077.92,
+      "fare": 2009.31,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T10:40:00",
+    "arrival": "2026-11-10T13:40:00",
+    "stops": 0,
+    "totalDuration": 180,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "AR"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "AEP",
+     "departure": "2026-11-10T10:40:00",
+     "arrival": "2026-11-10T13:40:00",
+     "duration": 180,
+     "flightNumber": 3001,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1243,
+     "operatingAirlineCode": "AR",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 1632378258,
+     "brandId": "LI",
+     "fareBasis": "WNACAB2R",
+     "price": {
+      "currency": "BRL",
+      "total": 1783.75,
+      "fare": 1715.14,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1752730017,
+     "brandId": "CL",
+     "fareBasis": "WNACAB3R",
+     "price": {
+      "currency": "BRL",
+      "total": 2082.91,
+      "fare": 2014.3,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -18169999,
+     "brandId": "FL",
+     "fareBasis": "WNACAB4R",
+     "price": {
+      "currency": "BRL",
+      "total": 2307.27,
+      "fare": 2238.66,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T12:50:00",
+    "arrival": "2026-11-10T15:50:00",
+    "stops": 0,
+    "totalDuration": 180,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "AR"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "AEP",
+     "departure": "2026-11-10T12:50:00",
+     "arrival": "2026-11-10T15:50:00",
+     "duration": 180,
+     "flightNumber": 3005,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1245,
+     "operatingAirlineCode": "AR",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -1573446608,
+     "brandId": "LI",
+     "fareBasis": "WNACAB2R",
+     "price": {
+      "currency": "BRL",
+      "total": 1783.75,
+      "fare": 1715.14,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1453094849,
+     "brandId": "CL",
+     "fareBasis": "WNACAB3R",
+     "price": {
+      "currency": "BRL",
+      "total": 2082.91,
+      "fare": 2014.3,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1070972431,
+     "brandId": "FL",
+     "fareBasis": "WNACAB4R",
+     "price": {
+      "currency": "BRL",
+      "total": 2307.27,
+      "fare": 2238.66,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "AEP",
+    "departure": "2026-11-10T15:40:00",
+    "arrival": "2026-11-10T18:40:00",
+    "stops": 0,
+    "totalDuration": 180,
+    "isInternational": true,
+    "operatingAirlineCode": [
+     "AR"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "EZE"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "AEP",
+     "departure": "2026-11-10T15:40:00",
+     "arrival": "2026-11-10T18:40:00",
+     "duration": 180,
+     "flightNumber": 3007,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1247,
+     "operatingAirlineCode": "AR",
+     "aircraftLeaseText": "",
+     "equipment": "7M8",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 1703308,
+     "brandId": "LI",
+     "fareBasis": "WNACAB2R",
+     "price": {
+      "currency": "BRL",
+      "total": 1783.75,
+      "fare": 1715.14,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 122055067,
+     "brandId": "CL",
+     "fareBasis": "WNACAB3R",
+     "price": {
+      "currency": "BRL",
+      "total": 2082.91,
+      "fare": 2014.3,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1648844949,
+     "brandId": "FL",
+     "fareBasis": "WNACAB4R",
+     "price": {
+      "currency": "BRL",
+      "total": 2307.27,
+      "fare": 2238.66,
+      "taxes": 68.61,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  }
+ ],
+ "selectedOffers": [],
+ "alternateDateOffers": [
+  {
+   "hasValue": true,
+   "departure": "2026-11-07T07:00:00",
+   "price": 1120.63
+  },
+  {
+   "hasValue": true,
+   "departure": "2026-11-08T15:40:00",
+   "price": 1120.63
+  },
+  {
+   "hasValue": true,
+   "departure": "2026-11-09T22:45:00",
+   "price": 2148.59
+  },
+  {
+   "hasValue": true,
+   "departure": "2026-11-10T18:00:00",
+   "price": 1330.04
+  },
+  {
+   "hasValue": true,
+   "departure": "2026-11-11T14:15:00",
+   "price": 1180.46
+  },
+  {
+   "hasValue": true,
+   "departure": "2026-11-12T20:20:00",
+   "price": 1120.63
+  },
+  {
+   "hasValue": true,
+   "departure": "2026-11-13T07:00:00",
+   "price": 1005.95
+  }
+ ],
+ "error": null,
+ "errorSabreResponse": null
+}

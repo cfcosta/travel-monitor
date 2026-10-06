@@ -1,0 +1,247 @@
+{
+ "contextMetadata": {
+  "language": "pt",
+  "country": "BR",
+  "currencies": [
+   {
+    "code": "BRL",
+    "description": "Real (Brasil)",
+    "symbol": "BRL",
+    "alignment": "R",
+    "groupingSeparator": ".",
+    "decimalSeparator": ",",
+    "decimals": 2,
+    "recommendedDisplay": "symbol"
+   }
+  ]
+ },
+ "inbound": null,
+ "outbound": {
+  "destination": "MAD",
+  "origin": "GRU",
+  "destinationCity": {
+   "code": "MAD",
+   "description": "Madrid",
+   "countryCode": "ES",
+   "country": {
+    "code": "ES",
+    "description": "Espanha"
+   }
+  },
+  "originCity": {
+   "code": "GRU",
+   "description": "S\u00e3o Paulo Guarulhos Intl",
+   "countryCode": "BR",
+   "country": {
+    "code": "BR",
+    "description": "Brasil"
+   }
+  }
+ },
+ "availability": true,
+ "specialDiscountsApplied": [],
+ "calendarRibbon": {
+  "inBoundRow": null,
+  "outBoundRow": {
+   "cells": [
+    {
+     "adultPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "perPassengerPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "totalPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "fareFamily": "",
+     "bestPrice": true,
+     "available": true,
+     "boundDate": "2026-11-07",
+     "selectedDate": false
+    },
+    {
+     "adultPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "perPassengerPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "totalPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "fareFamily": "",
+     "bestPrice": true,
+     "available": true,
+     "boundDate": "2026-11-08",
+     "selectedDate": false
+    },
+    {
+     "adultPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "perPassengerPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "totalPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "fareFamily": "",
+     "bestPrice": true,
+     "available": true,
+     "boundDate": "2026-11-09",
+     "selectedDate": false
+    },
+    {
+     "adultPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "perPassengerPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "totalPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "fareFamily": "",
+     "bestPrice": true,
+     "available": true,
+     "boundDate": "2026-11-10",
+     "selectedDate": true
+    },
+    {
+     "adultPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "perPassengerPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "totalPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "fareFamily": "",
+     "bestPrice": true,
+     "available": true,
+     "boundDate": "2026-11-11",
+     "selectedDate": false
+    },
+    {
+     "adultPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "perPassengerPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "totalPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "fareFamily": "",
+     "bestPrice": true,
+     "available": true,
+     "boundDate": "2026-11-12",
+     "selectedDate": false
+    },
+    {
+     "adultPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "perPassengerPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "totalPrice": {
+      "fare": null,
+      "tax": null,
+      "total": 4236.82,
+      "currency": "BRL",
+      "ticketingFee": 0
+     },
+     "fareFamily": "",
+     "bestPrice": true,
+     "available": true,
+     "boundDate": "2026-11-13",
+     "selectedDate": false
+    }
+   ]
+  }
+ },
+ "flightRatio": "Largo Radio"
+}

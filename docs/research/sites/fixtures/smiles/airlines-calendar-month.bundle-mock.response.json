@@ -1,0 +1,60 @@
+{
+ "_note": "NOT a live capture. Mock data embedded in Smiles' own front-end bundle (/mfe-apps/flight-availability/0.32.1138/smiles-flight-availability.js), converted to JSON on 2026-10-06. Live calls were blocked (Akamai 406 on the CORS preflight). Use for field names only; values and dates are the bundle's (2021/2022).",
+ "response": {
+  "calendarSegmentList": [
+   {
+    "type": "SEGMENT_1",
+    "departure": {
+     "date": "2022-11-15",
+     "airport": {
+      "code": "GRU",
+      "name": "guarulhos",
+      "city": "são paulo",
+      "country": "brasil"
+     }
+    },
+    "arrival": {
+     "date": "2022-11-31",
+     "airport": {
+      "code": "RIO",
+      "name": "vira copos",
+      "city": "rio de janeiro",
+      "country": "brazil"
+     }
+    },
+    "calendarDayList": [
+     {
+      "date": "2022-11-01",
+      "isLowestPrice": true,
+      "miles": 10000,
+      "priceRange": 1,
+      "fare": {
+       "type": "SMILES_CLUB"
+      }
+     },
+     {
+      "date": "2022-11-02",
+      "isLowestPrice": false,
+      "miles": 0,
+      "priceRange": 1,
+      "fare": {
+       "type": " "
+      }
+     },
+     {
+      "date": "2022-11-03",
+      "isLowestPrice": false,
+      "priceRange": 1
+     }
+    ]
+   }
+  ],
+  "calendarStatus": "ENABLED",
+  "resultType": "g3",
+  "hasCongener": false,
+  "hasAvianca": false,
+  "hasG3": true,
+  "hasCalendar": true,
+  "tripType": "ONE_WAY"
+ }
+}

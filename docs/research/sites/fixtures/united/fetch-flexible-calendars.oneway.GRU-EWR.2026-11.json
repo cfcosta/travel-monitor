@@ -1,0 +1,219 @@
+{
+ "Data": {
+  "CartId": "00000000-0000-0000-0000-000000000000",
+  "CalendarPriceCells": [
+   {
+    "Cheapest": true,
+    "Date": "2026-11-10",
+    "Fare": 3549.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Cheapest": true,
+    "Date": "2026-11-11",
+    "Fare": 3549.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Cheapest": true,
+    "Date": "2026-11-12",
+    "Fare": 3549.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Date": "2026-11-13",
+    "Fare": 3739.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Date": "2026-11-14",
+    "Fare": 3739.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Date": "2026-11-15",
+    "Fare": 3739.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Cheapest": true,
+    "Date": "2026-11-16",
+    "Fare": 3549.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Cheapest": true,
+    "Date": "2026-11-17",
+    "Fare": 3549.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Cheapest": true,
+    "Date": "2026-11-18",
+    "Fare": 3549.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Cheapest": true,
+    "Date": "2026-11-19",
+    "Fare": 3549.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Date": "2026-11-20",
+    "Fare": 3739.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Date": "2026-11-21",
+    "Fare": 3739.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Date": "2026-11-22",
+    "Fare": 3739.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Cheapest": true,
+    "Date": "2026-11-23",
+    "Fare": 3549.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Cheapest": true,
+    "Date": "2026-11-24",
+    "Fare": 3549.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Cheapest": true,
+    "Date": "2026-11-25",
+    "Fare": 3549.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Cheapest": true,
+    "Date": "2026-11-26",
+    "Fare": 3549.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Date": "2026-11-27",
+    "Fare": 3739.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Date": "2026-11-28",
+    "Fare": 4001.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Date": "2026-11-29",
+    "Fare": 3767.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Cheapest": true,
+    "Date": "2026-11-30",
+    "Fare": 3549.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Cheapest": true,
+    "Date": "2026-12-01",
+    "Fare": 3549.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Cheapest": true,
+    "Date": "2026-12-02",
+    "Fare": 3549.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Cheapest": true,
+    "Date": "2026-12-03",
+    "Fare": 3549.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Date": "2026-12-04",
+    "Fare": 3739.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Date": "2026-12-05",
+    "Fare": 3739.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Date": "2026-12-06",
+    "Fare": 3739.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Cheapest": true,
+    "Date": "2026-12-07",
+    "Fare": 3549.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Cheapest": true,
+    "Date": "2026-12-08",
+    "Fare": 3549.0,
+    "CurrencyCode": "BRL"
+   },
+   {
+    "Cheapest": true,
+    "Date": "2026-12-09",
+    "Fare": 3549.0,
+    "CurrencyCode": "BRL"
+   }
+  ],
+  "LastResultId": "REDACTED",
+  "Timings": [
+   {
+    "Name": "Boombox query time",
+    "TimeMilliseconds": "1846"
+   },
+   {
+    "Name": "TranslateTravelerType",
+    "TimeMilliseconds": "000000.01",
+    "DTStart": "20261006_055504.981"
+   },
+   {
+    "Name": "UNMR Validation",
+    "TimeMilliseconds": "000000.01",
+    "DTStart": "20261006_055504.981"
+   },
+   {
+    "Name": "Origin Destination Validation",
+    "TimeMilliseconds": "000000.03",
+    "DTStart": "20261006_055504.981"
+   },
+   {
+    "Name": "ShopRequest Validation",
+    "TimeMilliseconds": "000000.01",
+    "DTStart": "20261006_055504.981"
+   },
+   {
+    "Name": "Young Adult Age Validation",
+    "TimeMilliseconds": "000000.00",
+    "DTStart": "20261006_055504.981"
+   },
+   {
+    "Name": "Input Validation",
+    "TimeMilliseconds": "000000.05",
+    "DTStart": "20261006_055504.981"
+   },
+   {
+    "Name": "Flexible Calendar - Total Call",
+    "TimeMilliseconds": "001849.04",
+    "DTStart": "20261006_055504.981"
+   }
+  ],
+  "Status": 1,
+  "LastTripIndexRequested": 1
+ }
+}

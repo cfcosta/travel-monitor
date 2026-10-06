@@ -1,0 +1,138 @@
+{
+  "captured": "2026-10-06",
+  "site": "www.turkishairlines.com/pt-br",
+  "method": "POST",
+  "url": "https://www.turkishairlines.com/api/v1/availability/cheapest-prices",
+  "status": 200,
+  "request": {
+    "selectedBookerSearch": "O",
+    "selectedCabinClass": "ECONOMY",
+    "moduleType": "TICKETING",
+    "passengerTypeList": [
+      {
+        "quantity": 1,
+        "code": "ADULT"
+      }
+    ],
+    "originDestinationInformationList": [
+      {
+        "destinationAirportCode": "IST",
+        "destinationMultiPort": false,
+        "originAirportCode": "GRU",
+        "originMultiPort": false,
+        "departureDate": "10-11-2026",
+        "destinationCountryCode": "TR",
+        "originCountryCode": "BR",
+        "destinationDomestic": true,
+        "originDomestic": false,
+        "originCity": "São Paulo",
+        "destinationCity": "Istambul",
+        "originCityCode": "SAO",
+        "destinationCityCode": "IST"
+      }
+    ],
+    "savedDate": "2026-10-06T05:57:36.731Z"
+  },
+  "response": {
+    "data": {
+      "allPricesCheapest": false,
+      "dailyPriceList": [
+        {
+          "date": "07-11-2026",
+          "bestPrice": true,
+          "price": {
+            "currencyCode": "BRL",
+            "amount": 5298.81,
+            "currencySign": "R$",
+            "currencySignPosition": "LEFT",
+            "decimalPlaces": 2
+          },
+          "rate": "0.48",
+          "soldOut": false
+        },
+        {
+          "date": "08-11-2026",
+          "bestPrice": false,
+          "price": {
+            "currencyCode": "BRL",
+            "amount": 5548.10,
+            "currencySign": "R$",
+            "currencySignPosition": "LEFT",
+            "decimalPlaces": 2
+          },
+          "rate": "0.52",
+          "soldOut": false
+        },
+        {
+          "date": "09-11-2026",
+          "bestPrice": true,
+          "price": {
+            "currencyCode": "BRL",
+            "amount": 5298.81,
+            "currencySign": "R$",
+            "currencySignPosition": "LEFT",
+            "decimalPlaces": 2
+          },
+          "rate": "0.48",
+          "soldOut": false
+        },
+        {
+          "date": "10-11-2026",
+          "bestPrice": true,
+          "price": {
+            "currencyCode": "BRL",
+            "amount": 5298.81,
+            "currencySign": "R$",
+            "currencySignPosition": "LEFT",
+            "decimalPlaces": 2
+          },
+          "rate": "0.48",
+          "soldOut": false
+        },
+        {
+          "date": "11-11-2026",
+          "bestPrice": true,
+          "price": {
+            "currencyCode": "BRL",
+            "amount": 5298.81,
+            "currencySign": "R$",
+            "currencySignPosition": "LEFT",
+            "decimalPlaces": 2
+          },
+          "rate": "0.48",
+          "soldOut": false
+        },
+        {
+          "date": "12-11-2026",
+          "bestPrice": true,
+          "price": {
+            "currencyCode": "BRL",
+            "amount": 5298.81,
+            "currencySign": "R$",
+            "currencySignPosition": "LEFT",
+            "decimalPlaces": 2
+          },
+          "rate": "0.48",
+          "soldOut": false
+        },
+        {
+          "date": "13-11-2026",
+          "bestPrice": true,
+          "price": {
+            "currencyCode": "BRL",
+            "amount": 5298.81,
+            "currencySign": "R$",
+            "currencySignPosition": "LEFT",
+            "decimalPlaces": 2
+          },
+          "rate": "0.48",
+          "soldOut": false
+        }
+      ]
+    },
+    "success": true,
+    "actionCode": null,
+    "actionData": null,
+    "statusDetailList": null
+  }
+}

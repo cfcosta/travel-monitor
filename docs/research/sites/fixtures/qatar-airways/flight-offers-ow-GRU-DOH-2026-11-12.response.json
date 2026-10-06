@@ -1,0 +1,3387 @@
+{
+ "alertMessages": [],
+ "flightOffers": [
+  {
+   "origin": {
+    "iataCode": "GRU"
+   },
+   "destination": {
+    "iataCode": "DOH"
+   },
+   "duration": 49500,
+   "arrivalDaysDifference": 0,
+   "numberOfStops": 0,
+   "segments": [
+    {
+     "flightId": "SEG-QR774-GRUDOH-2026-11-12-0210",
+     "flightNumber": "QR774",
+     "vehicle": {
+      "code": "351",
+      "name": "Airbus A350-1000",
+      "type": "AIRCRAFT",
+      "shortName": "A351"
+     },
+     "departure": {
+      "origin": {
+       "iataCode": "GRU"
+      },
+      "dateTime": "2026-11-12T02:10:00"
+     },
+     "arrival": {
+      "destination": {
+       "iataCode": "DOH"
+      },
+      "dateTime": "2026-11-12T21:55:00",
+      "daysDifference": 0
+     },
+     "duration": 49500,
+     "qSuiteEquipped": true,
+     "onTimePerformance": {
+      "createdDate": "2026-09-23",
+      "referredDate": "2026-08",
+      "cancelled": 0.0,
+      "delayed30mins": 6.45,
+      "delayed60mins": 0.0
+     },
+     "stops": [],
+     "operatorLogo": {
+      "operatorCode": "QR"
+     },
+     "operatingAirlineName": "Qatar Airways",
+     "flightFeatures": [
+      {
+       "type": "QSUITE",
+       "availableOnCabinTypes": [
+        "BUSINESS"
+       ]
+      },
+      {
+       "type": "STARLINK",
+       "availableOnCabinTypes": [
+        "ECONOMY",
+        "BUSINESS",
+        "FIRST"
+       ]
+      }
+     ]
+    }
+   ],
+   "fareOffers": [
+    {
+     "boundId": "BC1-1-1I0QRZ_8BHAHSIXYFN9CHOXCUB0OHPFUKCE",
+     "availableSeats": 9,
+     "price": {
+      "base": 3993.7,
+      "total": 4700.74,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_CLASSIC",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "3691"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_WITH_CONDITIONS.FF_FEATURE",
+       "parameters": [
+        "1"
+       ]
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "SEAT_SELECTION",
+       "localizationKey": "SEAT_SELECTION.CHARGED.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "ECONOMY_A350"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": true,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 628.21,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_4XNECCIY3VXB2IX9YHCQDBYUGXJK",
+     "availableSeats": 9,
+     "price": {
+      "base": 4696.71,
+      "total": 5403.75,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_CONVENIENCE",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "5536"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_WITH_CONDITIONS.FF_FEATURE",
+       "parameters": [
+        "1"
+       ]
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "STANDARD_SEAT",
+       "localizationKey": "STANDARD_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "PREFERRED_SEAT",
+       "localizationKey": "PREFERRED_SEAT.CHARGED.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "ECONOMY_A350"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 628.21,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_DOUHU07HGF8LFKEIGVNELNMUFJW4",
+     "availableSeats": 9,
+     "price": {
+      "base": 10465.4,
+      "total": 11172.44,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_COMFORT",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "7381"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "STANDARD_SEAT",
+       "localizationKey": "STANDARD_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "PREFERRED_SEAT",
+       "localizationKey": "PREFERRED_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "ECONOMY_A350"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 628.21,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_IVFRTDYGMG331LPA3UK82JMS9V8W",
+     "availableSeats": 7,
+     "price": {
+      "base": 33111.36,
+      "total": 34606.18,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "BUSINESS_COMFORT",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "12917"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_WITH_CONDITIONS.FF_FEATURE",
+       "parameters": [
+        "1"
+       ]
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "32"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "2",
+        "15"
+       ]
+      },
+      {
+       "type": "SEAT_SELECTION",
+       "localizationKey": "SEAT_SELECTION.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "LOUNGE_ACCESS",
+       "localizationKey": "LOUNGE_ACCESS.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "QSUITE"
+     },
+     "cabinType": "BUSINESS",
+     "cabinImages": [
+      {
+       "cabinImageId": "QSUITE",
+       "segmentIds": [
+        "SEG-QR774-GRUDOH-2026-11-12-0210"
+       ]
+      }
+     ],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 1415.99,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_U3ULXSWFIEVQ7J5U0A4UOVGRBK2A",
+     "availableSeats": 9,
+     "price": {
+      "base": 39184.18,
+      "total": 40679.0,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "BUSINESS_ELITE",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "14762"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "32"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "2",
+        "15"
+       ]
+      },
+      {
+       "type": "SEAT_SELECTION",
+       "localizationKey": "SEAT_SELECTION.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "LOUNGE_ACCESS",
+       "localizationKey": "LOUNGE_ACCESS.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "QSUITE"
+     },
+     "cabinType": "BUSINESS",
+     "cabinImages": [
+      {
+       "cabinImageId": "QSUITE",
+       "segmentIds": [
+        "SEG-QR774-GRUDOH-2026-11-12-0210"
+       ]
+      }
+     ],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 1415.99,
+      "currencyCode": "BRL"
+     }
+    }
+   ],
+   "operatorLogos": [
+    {
+     "operatorCode": "QR"
+    }
+   ],
+   "tags": [
+    "LOWEST_FARE",
+    "QSUITE",
+    "STARLINK"
+   ],
+   "airportChanges": [],
+   "promotionalOffer": false
+  },
+  {
+   "origin": {
+    "iataCode": "GRU"
+   },
+   "destination": {
+    "iataCode": "DOH"
+   },
+   "duration": 49200,
+   "arrivalDaysDifference": 1,
+   "numberOfStops": 0,
+   "segments": [
+    {
+     "flightId": "SEG-QR786-GRUDOH-2026-11-12-1100",
+     "flightNumber": "QR786",
+     "vehicle": {
+      "code": "77L",
+      "name": "Boeing 777-200LR",
+      "type": "AIRCRAFT",
+      "shortName": "B772"
+     },
+     "departure": {
+      "origin": {
+       "iataCode": "GRU"
+      },
+      "dateTime": "2026-11-12T11:00:00"
+     },
+     "arrival": {
+      "destination": {
+       "iataCode": "DOH"
+      },
+      "dateTime": "2026-11-13T06:40:00",
+      "daysDifference": 1
+     },
+     "duration": 49200,
+     "qSuiteEquipped": true,
+     "onTimePerformance": {
+      "createdDate": "2026-09-23",
+      "referredDate": "2026-08",
+      "cancelled": 41.94,
+      "delayed30mins": 44.44,
+      "delayed60mins": 16.67
+     },
+     "stops": [],
+     "operatorLogo": {
+      "operatorCode": "QR"
+     },
+     "operatingAirlineName": "Qatar Airways",
+     "flightFeatures": [
+      {
+       "type": "QSUITE",
+       "availableOnCabinTypes": [
+        "BUSINESS"
+       ]
+      },
+      {
+       "type": "STARLINK",
+       "availableOnCabinTypes": [
+        "ECONOMY",
+        "BUSINESS",
+        "FIRST"
+       ]
+      }
+     ]
+    }
+   ],
+   "fareOffers": [
+    {
+     "boundId": "BC1-1-1I0QRZ_D9RK90X8VL5LIRRH2T5IDUTT9IAJ",
+     "availableSeats": 9,
+     "price": {
+      "base": 3993.7,
+      "total": 4700.74,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_CLASSIC",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "3691"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_WITH_CONDITIONS.FF_FEATURE",
+       "parameters": [
+        "1"
+       ]
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "SEAT_SELECTION",
+       "localizationKey": "SEAT_SELECTION.CHARGED.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "ECONOMY_B777"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": true,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 628.21,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_NV40QQYXSND93JUNQH7EBJRNXTUL",
+     "availableSeats": 9,
+     "price": {
+      "base": 4696.71,
+      "total": 5403.75,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_CONVENIENCE",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "5536"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_WITH_CONDITIONS.FF_FEATURE",
+       "parameters": [
+        "1"
+       ]
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "STANDARD_SEAT",
+       "localizationKey": "STANDARD_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "PREFERRED_SEAT",
+       "localizationKey": "PREFERRED_SEAT.CHARGED.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "ECONOMY_B777"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 628.21,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_D6LE826HXUPFXLC6K3FC6HCAJ3EW",
+     "availableSeats": 9,
+     "price": {
+      "base": 10465.4,
+      "total": 11172.44,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_COMFORT",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "7381"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "STANDARD_SEAT",
+       "localizationKey": "STANDARD_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "PREFERRED_SEAT",
+       "localizationKey": "PREFERRED_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "ECONOMY_B777"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 628.21,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_TKY4SKOGYK8WS72NX7YC7RRD6OX9",
+     "availableSeats": 9,
+     "price": {
+      "base": 33111.36,
+      "total": 34606.18,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "BUSINESS_COMFORT",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "12917"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_WITH_CONDITIONS.FF_FEATURE",
+       "parameters": [
+        "1"
+       ]
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "32"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "2",
+        "15"
+       ]
+      },
+      {
+       "type": "SEAT_SELECTION",
+       "localizationKey": "SEAT_SELECTION.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "LOUNGE_ACCESS",
+       "localizationKey": "LOUNGE_ACCESS.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "QSUITE"
+     },
+     "cabinType": "BUSINESS",
+     "cabinImages": [
+      {
+       "cabinImageId": "QSUITE",
+       "segmentIds": [
+        "SEG-QR786-GRUDOH-2026-11-12-1100"
+       ]
+      }
+     ],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 1415.99,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_BJS3EMU9RCUFKRESCZ39CBSSE379",
+     "availableSeats": 9,
+     "price": {
+      "base": 39184.18,
+      "total": 40679.0,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "BUSINESS_ELITE",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "14762"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "32"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "2",
+        "15"
+       ]
+      },
+      {
+       "type": "SEAT_SELECTION",
+       "localizationKey": "SEAT_SELECTION.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "LOUNGE_ACCESS",
+       "localizationKey": "LOUNGE_ACCESS.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "QSUITE"
+     },
+     "cabinType": "BUSINESS",
+     "cabinImages": [
+      {
+       "cabinImageId": "QSUITE",
+       "segmentIds": [
+        "SEG-QR786-GRUDOH-2026-11-12-1100"
+       ]
+      }
+     ],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 1415.99,
+      "currencyCode": "BRL"
+     }
+    }
+   ],
+   "operatorLogos": [
+    {
+     "operatorCode": "QR"
+    }
+   ],
+   "tags": [
+    "LOWEST_FARE",
+    "QSUITE",
+    "STARLINK"
+   ],
+   "airportChanges": [],
+   "promotionalOffer": false
+  },
+  {
+   "origin": {
+    "iataCode": "GRU"
+   },
+   "destination": {
+    "iataCode": "DOH"
+   },
+   "duration": 48900,
+   "arrivalDaysDifference": 1,
+   "numberOfStops": 0,
+   "segments": [
+    {
+     "flightId": "SEG-QR780-GRUDOH-2026-11-12-2025",
+     "flightNumber": "QR780",
+     "vehicle": {
+      "code": "351",
+      "name": "Airbus A350-1000",
+      "type": "AIRCRAFT",
+      "shortName": "A351"
+     },
+     "departure": {
+      "origin": {
+       "iataCode": "GRU"
+      },
+      "dateTime": "2026-11-12T20:25:00"
+     },
+     "arrival": {
+      "destination": {
+       "iataCode": "DOH"
+      },
+      "dateTime": "2026-11-13T16:00:00",
+      "daysDifference": 1
+     },
+     "duration": 48900,
+     "qSuiteEquipped": true,
+     "onTimePerformance": {
+      "createdDate": "2026-09-23",
+      "referredDate": "2026-08",
+      "cancelled": 0.0,
+      "delayed30mins": 3.23,
+      "delayed60mins": 0.0
+     },
+     "stops": [],
+     "operatorLogo": {
+      "operatorCode": "QR"
+     },
+     "operatingAirlineName": "Qatar Airways",
+     "flightFeatures": [
+      {
+       "type": "QSUITE",
+       "availableOnCabinTypes": [
+        "BUSINESS"
+       ]
+      },
+      {
+       "type": "STARLINK",
+       "availableOnCabinTypes": [
+        "ECONOMY",
+        "BUSINESS",
+        "FIRST"
+       ]
+      }
+     ]
+    }
+   ],
+   "fareOffers": [
+    {
+     "boundId": "BC1-1-1I0QRZ_Z5M4BEH5KMEDZI54GKG7EGQRWFFW",
+     "availableSeats": 9,
+     "price": {
+      "base": 3993.7,
+      "total": 4700.74,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_CLASSIC",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "3691"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_WITH_CONDITIONS.FF_FEATURE",
+       "parameters": [
+        "1"
+       ]
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "SEAT_SELECTION",
+       "localizationKey": "SEAT_SELECTION.CHARGED.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "ECONOMY_A350"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": true,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 628.21,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_3HIVNY5J925HI1Z02W6KZT9WEU5P",
+     "availableSeats": 9,
+     "price": {
+      "base": 4696.71,
+      "total": 5403.75,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_CONVENIENCE",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "5536"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_WITH_CONDITIONS.FF_FEATURE",
+       "parameters": [
+        "1"
+       ]
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "STANDARD_SEAT",
+       "localizationKey": "STANDARD_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "PREFERRED_SEAT",
+       "localizationKey": "PREFERRED_SEAT.CHARGED.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "ECONOMY_A350"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 628.21,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_B0H1Y99EIUVTU1QTVKAELFA6LF3G",
+     "availableSeats": 9,
+     "price": {
+      "base": 10465.4,
+      "total": 11172.44,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_COMFORT",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "7381"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "STANDARD_SEAT",
+       "localizationKey": "STANDARD_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "PREFERRED_SEAT",
+       "localizationKey": "PREFERRED_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "ECONOMY_A350"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 628.21,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_M5AVKO1ZT331B0ZMOXY8WK6FF075",
+     "availableSeats": 9,
+     "price": {
+      "base": 33111.36,
+      "total": 34606.18,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "BUSINESS_COMFORT",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "12917"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_WITH_CONDITIONS.FF_FEATURE",
+       "parameters": [
+        "1"
+       ]
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "32"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "2",
+        "15"
+       ]
+      },
+      {
+       "type": "SEAT_SELECTION",
+       "localizationKey": "SEAT_SELECTION.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "LOUNGE_ACCESS",
+       "localizationKey": "LOUNGE_ACCESS.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "QSUITE"
+     },
+     "cabinType": "BUSINESS",
+     "cabinImages": [
+      {
+       "cabinImageId": "QSUITE",
+       "segmentIds": [
+        "SEG-QR780-GRUDOH-2026-11-12-2025"
+       ]
+      }
+     ],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 1415.99,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_42J4UEOEJ3YVZ6CRDPMRRW333T4A",
+     "availableSeats": 9,
+     "price": {
+      "base": 39184.18,
+      "total": 40679.0,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "BUSINESS_ELITE",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "14762"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "32"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "2",
+        "15"
+       ]
+      },
+      {
+       "type": "SEAT_SELECTION",
+       "localizationKey": "SEAT_SELECTION.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "LOUNGE_ACCESS",
+       "localizationKey": "LOUNGE_ACCESS.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "QSUITE"
+     },
+     "cabinType": "BUSINESS",
+     "cabinImages": [
+      {
+       "cabinImageId": "QSUITE",
+       "segmentIds": [
+        "SEG-QR780-GRUDOH-2026-11-12-2025"
+       ]
+      }
+     ],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 1415.99,
+      "currencyCode": "BRL"
+     }
+    }
+   ],
+   "operatorLogos": [
+    {
+     "operatorCode": "QR"
+    }
+   ],
+   "tags": [
+    "LOWEST_FARE",
+    "QSUITE",
+    "STARLINK"
+   ],
+   "airportChanges": [],
+   "promotionalOffer": false
+  },
+  {
+   "origin": {
+    "iataCode": "GRU"
+   },
+   "destination": {
+    "iataCode": "DOH"
+   },
+   "duration": 66000,
+   "arrivalDaysDifference": 1,
+   "numberOfStops": 1,
+   "segments": [
+    {
+     "flightId": "SEG-QR5272-GRUMAD-2026-11-12-2335",
+     "flightNumber": "QR5272",
+     "vehicle": {
+      "code": "789",
+      "name": "Boeing 787-9",
+      "type": "AIRCRAFT",
+      "shortName": "B789"
+     },
+     "departure": {
+      "origin": {
+       "iataCode": "GRU"
+      },
+      "dateTime": "2026-11-12T23:35:00"
+     },
+     "arrival": {
+      "destination": {
+       "iataCode": "MAD"
+      },
+      "dateTime": "2026-11-13T13:40:00",
+      "daysDifference": 1
+     },
+     "duration": 36300,
+     "connectionTime": 6000,
+     "qSuiteEquipped": false,
+     "stops": [],
+     "operatorLogo": {
+      "operatorCode": "LA"
+     },
+     "operatingAirlineName": "LATAM Airlines Brasil",
+     "flightFeatures": []
+    },
+    {
+     "flightId": "SEG-QR150-MADDOH-2026-11-13-1520",
+     "flightNumber": "QR150",
+     "vehicle": {
+      "code": "789",
+      "name": "Boeing 787-9",
+      "type": "AIRCRAFT",
+      "shortName": "B789"
+     },
+     "departure": {
+      "origin": {
+       "iataCode": "MAD"
+      },
+      "dateTime": "2026-11-13T15:20:00"
+     },
+     "arrival": {
+      "destination": {
+       "iataCode": "DOH"
+      },
+      "dateTime": "2026-11-13T23:55:00",
+      "daysDifference": 0
+     },
+     "duration": 23700,
+     "qSuiteEquipped": false,
+     "stops": [],
+     "operatorLogo": {
+      "operatorCode": "QR"
+     },
+     "operatingAirlineName": "Qatar Airways",
+     "flightFeatures": []
+    }
+   ],
+   "fareOffers": [
+    {
+     "boundId": "BC1-1-1I0QRZ_329IC8G2IMRB6JKBTQALLV0LQPQG",
+     "availableSeats": 5,
+     "price": {
+      "base": 6990.23,
+      "total": 7845.28,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_CONVENIENCE",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "2484"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_WITH_CONDITIONS.FF_FEATURE",
+       "parameters": [
+        "1"
+       ]
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "STANDARD_SEAT",
+       "localizationKey": "STANDARD_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "PREFERRED_SEAT",
+       "localizationKey": "PREFERRED_SEAT.CHARGED.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "CODE_SHARE"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 683.05,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_TS5A83X5O2O7PL1XL16B8AHK3ITY",
+     "availableSeats": 9,
+     "price": {
+      "base": 12709.05,
+      "total": 13564.1,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_COMFORT",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "3312"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "STANDARD_SEAT",
+       "localizationKey": "STANDARD_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "PREFERRED_SEAT",
+       "localizationKey": "PREFERRED_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "CODE_SHARE"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 683.05,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_T06GS2SN0F2DVIW75ZA40UG68R2C",
+     "availableSeats": 2,
+     "price": {
+      "base": 40400.74,
+      "total": 42068.5,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "BUSINESS_COMFORT",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "5796"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_WITH_CONDITIONS.FF_FEATURE",
+       "parameters": [
+        "1"
+       ]
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "32"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "2",
+        "15"
+       ]
+      },
+      {
+       "type": "SEAT_SELECTION",
+       "localizationKey": "SEAT_SELECTION.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "LOUNGE_ACCESS",
+       "localizationKey": "LOUNGE_ACCESS.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "CODE_SHARE"
+     },
+     "cabinType": "BUSINESS",
+     "cabinImages": [
+      {
+       "cabinImageId": "QR_BUSINESS_B787-9",
+       "segmentIds": [
+        "SEG-QR5272-GRUMAD-2026-11-12-2335",
+        "SEG-QR150-MADDOH-2026-11-13-1520"
+       ]
+      }
+     ],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 1495.76,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_OH7K1UCO53J0SYLB4SLO6PNPI69L",
+     "availableSeats": 3,
+     "price": {
+      "base": 44120.22,
+      "total": 45787.98,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "BUSINESS_ELITE",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "6624"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "32"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "2",
+        "15"
+       ]
+      },
+      {
+       "type": "SEAT_SELECTION",
+       "localizationKey": "SEAT_SELECTION.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "LOUNGE_ACCESS",
+       "localizationKey": "LOUNGE_ACCESS.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "CODE_SHARE"
+     },
+     "cabinType": "BUSINESS",
+     "cabinImages": [
+      {
+       "cabinImageId": "QR_BUSINESS_B787-9",
+       "segmentIds": [
+        "SEG-QR5272-GRUMAD-2026-11-12-2335",
+        "SEG-QR150-MADDOH-2026-11-13-1520"
+       ]
+      }
+     ],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 1495.76,
+      "currencyCode": "BRL"
+     }
+    }
+   ],
+   "operatorLogos": [
+    {
+     "operatorCode": "LA"
+    },
+    {
+     "operatorCode": "QR"
+    }
+   ],
+   "tags": [],
+   "airportChanges": [],
+   "promotionalOffer": false
+  },
+  {
+   "origin": {
+    "iataCode": "GRU"
+   },
+   "destination": {
+    "iataCode": "DOH"
+   },
+   "duration": 70200,
+   "arrivalDaysDifference": 1,
+   "numberOfStops": 1,
+   "segments": [
+    {
+     "flightId": "SEG-QR5087-GRUMAD-2026-11-12-1510",
+     "flightNumber": "QR5087",
+     "vehicle": {
+      "code": "332",
+      "name": "Airbus A330-200",
+      "type": "AIRCRAFT",
+      "shortName": "A332"
+     },
+     "departure": {
+      "origin": {
+       "iataCode": "GRU"
+      },
+      "dateTime": "2026-11-12T15:10:00"
+     },
+     "arrival": {
+      "destination": {
+       "iataCode": "MAD"
+      },
+      "dateTime": "2026-11-13T05:30:00",
+      "daysDifference": 1
+     },
+     "duration": 37200,
+     "connectionTime": 9300,
+     "qSuiteEquipped": false,
+     "stops": [],
+     "operatorLogo": {
+      "operatorCode": "IB"
+     },
+     "operatingAirlineName": "Iberia",
+     "flightFeatures": []
+    },
+    {
+     "flightId": "SEG-QR148-MADDOH-2026-11-13-0805",
+     "flightNumber": "QR148",
+     "vehicle": {
+      "code": "789",
+      "name": "Boeing 787-9",
+      "type": "AIRCRAFT",
+      "shortName": "B789"
+     },
+     "departure": {
+      "origin": {
+       "iataCode": "MAD"
+      },
+      "dateTime": "2026-11-13T08:05:00"
+     },
+     "arrival": {
+      "destination": {
+       "iataCode": "DOH"
+      },
+      "dateTime": "2026-11-13T16:40:00",
+      "daysDifference": 0
+     },
+     "duration": 23700,
+     "qSuiteEquipped": false,
+     "stops": [],
+     "operatorLogo": {
+      "operatorCode": "QR"
+     },
+     "operatingAirlineName": "Qatar Airways",
+     "flightFeatures": []
+    }
+   ],
+   "fareOffers": [
+    {
+     "boundId": "BC1-1-1I0QRZ_3956MWAK48NCN7S0OEBU59JZXNKL",
+     "availableSeats": 9,
+     "price": {
+      "base": 5190.32,
+      "total": 6045.37,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_CLASSIC",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "1656"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_WITH_CONDITIONS.FF_FEATURE",
+       "parameters": [
+        "1"
+       ]
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "SEAT_SELECTION",
+       "localizationKey": "SEAT_SELECTION.CHARGED.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "CODE_SHARE"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 683.05,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_CVTDPR7QHI9Z454DESSM9ZP4ML06",
+     "availableSeats": 9,
+     "price": {
+      "base": 5893.33,
+      "total": 6748.38,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_CONVENIENCE",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "2484"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_WITH_CONDITIONS.FF_FEATURE",
+       "parameters": [
+        "1"
+       ]
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "STANDARD_SEAT",
+       "localizationKey": "STANDARD_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "PREFERRED_SEAT",
+       "localizationKey": "PREFERRED_SEAT.CHARGED.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "CODE_SHARE"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 683.05,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_95620J9BRUOS32FIHCSN7SL6VO6T",
+     "availableSeats": 9,
+     "price": {
+      "base": 12709.05,
+      "total": 13564.1,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_COMFORT",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "3312"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "STANDARD_SEAT",
+       "localizationKey": "STANDARD_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "PREFERRED_SEAT",
+       "localizationKey": "PREFERRED_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "CODE_SHARE"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 683.05,
+      "currencyCode": "BRL"
+     }
+    }
+   ],
+   "operatorLogos": [
+    {
+     "operatorCode": "IB"
+    },
+    {
+     "operatorCode": "QR"
+    }
+   ],
+   "tags": [],
+   "airportChanges": [],
+   "promotionalOffer": false
+  },
+  {
+   "origin": {
+    "iataCode": "GRU"
+   },
+   "destination": {
+    "iataCode": "DOH"
+   },
+   "duration": 73800,
+   "arrivalDaysDifference": 1,
+   "numberOfStops": 1,
+   "segments": [
+    {
+     "flightId": "SEG-QR5208-GRUMAD-2026-11-12-2125",
+     "flightNumber": "QR5208",
+     "vehicle": {
+      "code": "773",
+      "name": "Boeing 777-300",
+      "type": "AIRCRAFT",
+      "shortName": "B773"
+     },
+     "departure": {
+      "origin": {
+       "iataCode": "GRU"
+      },
+      "dateTime": "2026-11-12T21:25:00"
+     },
+     "arrival": {
+      "destination": {
+       "iataCode": "MAD"
+      },
+      "dateTime": "2026-11-13T11:30:00",
+      "daysDifference": 1
+     },
+     "duration": 36300,
+     "connectionTime": 13800,
+     "qSuiteEquipped": false,
+     "stops": [],
+     "operatorLogo": {
+      "operatorCode": "LA"
+     },
+     "operatingAirlineName": "LATAM Airlines Brasil",
+     "flightFeatures": []
+    },
+    {
+     "flightId": "SEG-QR150-MADDOH-2026-11-13-1520",
+     "flightNumber": "QR150",
+     "vehicle": {
+      "code": "789",
+      "name": "Boeing 787-9",
+      "type": "AIRCRAFT",
+      "shortName": "B789"
+     },
+     "departure": {
+      "origin": {
+       "iataCode": "MAD"
+      },
+      "dateTime": "2026-11-13T15:20:00"
+     },
+     "arrival": {
+      "destination": {
+       "iataCode": "DOH"
+      },
+      "dateTime": "2026-11-13T23:55:00",
+      "daysDifference": 0
+     },
+     "duration": 23700,
+     "qSuiteEquipped": false,
+     "stops": [],
+     "operatorLogo": {
+      "operatorCode": "QR"
+     },
+     "operatingAirlineName": "Qatar Airways",
+     "flightFeatures": []
+    }
+   ],
+   "fareOffers": [
+    {
+     "boundId": "BC1-1-1I0QRZ_VOJH7LNQW54NBDN1OMBJQAHERGF2",
+     "availableSeats": 5,
+     "price": {
+      "base": 6990.23,
+      "total": 7845.28,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_CONVENIENCE",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "2484"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_WITH_CONDITIONS.FF_FEATURE",
+       "parameters": [
+        "1"
+       ]
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "STANDARD_SEAT",
+       "localizationKey": "STANDARD_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "PREFERRED_SEAT",
+       "localizationKey": "PREFERRED_SEAT.CHARGED.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "CODE_SHARE"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 683.05,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_RTE3F8260IN6HE9ST17AQRNBJ5J8",
+     "availableSeats": 9,
+     "price": {
+      "base": 12709.05,
+      "total": 13564.1,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_COMFORT",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "3312"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "STANDARD_SEAT",
+       "localizationKey": "STANDARD_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "PREFERRED_SEAT",
+       "localizationKey": "PREFERRED_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "CODE_SHARE"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 683.05,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_Z27CWW63QMPB6LHCI0IP91Q1OLB7",
+     "availableSeats": 2,
+     "price": {
+      "base": 40400.74,
+      "total": 42068.5,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "BUSINESS_COMFORT",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "5796"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_WITH_CONDITIONS.FF_FEATURE",
+       "parameters": [
+        "1"
+       ]
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "32"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "2",
+        "15"
+       ]
+      },
+      {
+       "type": "SEAT_SELECTION",
+       "localizationKey": "SEAT_SELECTION.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "LOUNGE_ACCESS",
+       "localizationKey": "LOUNGE_ACCESS.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "CODE_SHARE"
+     },
+     "cabinType": "BUSINESS",
+     "cabinImages": [
+      {
+       "cabinImageId": "QR_BUSINESS_B777",
+       "segmentIds": [
+        "SEG-QR5208-GRUMAD-2026-11-12-2125"
+       ]
+      },
+      {
+       "cabinImageId": "QR_BUSINESS_B787-9",
+       "segmentIds": [
+        "SEG-QR150-MADDOH-2026-11-13-1520"
+       ]
+      }
+     ],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 1495.76,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_3X2Y1BAG6E9HH30VMPMQ07LB1AMM",
+     "availableSeats": 3,
+     "price": {
+      "base": 44120.22,
+      "total": 45787.98,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "BUSINESS_ELITE",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "6624"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "32"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "2",
+        "15"
+       ]
+      },
+      {
+       "type": "SEAT_SELECTION",
+       "localizationKey": "SEAT_SELECTION.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "LOUNGE_ACCESS",
+       "localizationKey": "LOUNGE_ACCESS.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "CODE_SHARE"
+     },
+     "cabinType": "BUSINESS",
+     "cabinImages": [
+      {
+       "cabinImageId": "QR_BUSINESS_B777",
+       "segmentIds": [
+        "SEG-QR5208-GRUMAD-2026-11-12-2125"
+       ]
+      },
+      {
+       "cabinImageId": "QR_BUSINESS_B787-9",
+       "segmentIds": [
+        "SEG-QR150-MADDOH-2026-11-13-1520"
+       ]
+      }
+     ],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 1495.76,
+      "currencyCode": "BRL"
+     }
+    }
+   ],
+   "operatorLogos": [
+    {
+     "operatorCode": "LA"
+    },
+    {
+     "operatorCode": "QR"
+    }
+   ],
+   "tags": [],
+   "airportChanges": [],
+   "promotionalOffer": false
+  },
+  {
+   "origin": {
+    "iataCode": "GRU"
+   },
+   "destination": {
+    "iataCode": "DOH"
+   },
+   "duration": 77100,
+   "arrivalDaysDifference": 1,
+   "numberOfStops": 1,
+   "segments": [
+    {
+     "flightId": "SEG-QR8064-GRUMAD-2026-11-12-2030",
+     "flightNumber": "QR8064",
+     "vehicle": {
+      "code": "333",
+      "name": "Airbus A330-300",
+      "type": "AIRCRAFT",
+      "shortName": "A333"
+     },
+     "departure": {
+      "origin": {
+       "iataCode": "GRU"
+      },
+      "dateTime": "2026-11-12T20:30:00"
+     },
+     "arrival": {
+      "destination": {
+       "iataCode": "MAD"
+      },
+      "dateTime": "2026-11-13T10:50:00",
+      "daysDifference": 1
+     },
+     "duration": 37200,
+     "connectionTime": 16200,
+     "qSuiteEquipped": false,
+     "stops": [],
+     "operatorLogo": {
+      "operatorCode": "IB"
+     },
+     "operatingAirlineName": "Iberia",
+     "flightFeatures": []
+    },
+    {
+     "flightId": "SEG-QR150-MADDOH-2026-11-13-1520",
+     "flightNumber": "QR150",
+     "vehicle": {
+      "code": "789",
+      "name": "Boeing 787-9",
+      "type": "AIRCRAFT",
+      "shortName": "B789"
+     },
+     "departure": {
+      "origin": {
+       "iataCode": "MAD"
+      },
+      "dateTime": "2026-11-13T15:20:00"
+     },
+     "arrival": {
+      "destination": {
+       "iataCode": "DOH"
+      },
+      "dateTime": "2026-11-13T23:55:00",
+      "daysDifference": 0
+     },
+     "duration": 23700,
+     "qSuiteEquipped": false,
+     "stops": [],
+     "operatorLogo": {
+      "operatorCode": "QR"
+     },
+     "operatingAirlineName": "Qatar Airways",
+     "flightFeatures": []
+    }
+   ],
+   "fareOffers": [
+    {
+     "boundId": "BC1-1-1I0QRZ_FXNO2478XRDG4XTJXV0GNDRZQNXH",
+     "availableSeats": 5,
+     "price": {
+      "base": 6990.23,
+      "total": 7845.28,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_CONVENIENCE",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "2484"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_WITH_CONDITIONS.FF_FEATURE",
+       "parameters": [
+        "1"
+       ]
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "STANDARD_SEAT",
+       "localizationKey": "STANDARD_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "PREFERRED_SEAT",
+       "localizationKey": "PREFERRED_SEAT.CHARGED.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "CODE_SHARE"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 683.05,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_X4TUFORKGX94QW912F59I1VLYW5L",
+     "availableSeats": 9,
+     "price": {
+      "base": 12709.05,
+      "total": 13564.1,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_COMFORT",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "3312"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "STANDARD_SEAT",
+       "localizationKey": "STANDARD_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "PREFERRED_SEAT",
+       "localizationKey": "PREFERRED_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "CODE_SHARE"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 683.05,
+      "currencyCode": "BRL"
+     }
+    }
+   ],
+   "operatorLogos": [
+    {
+     "operatorCode": "IB"
+    },
+    {
+     "operatorCode": "QR"
+    }
+   ],
+   "tags": [],
+   "airportChanges": [],
+   "promotionalOffer": false
+  },
+  {
+   "origin": {
+    "iataCode": "GRU"
+   },
+   "destination": {
+    "iataCode": "DOH"
+   },
+   "duration": 82500,
+   "arrivalDaysDifference": 1,
+   "numberOfStops": 1,
+   "segments": [
+    {
+     "flightId": "SEG-QR5233-GRUBCN-2026-11-12-1825",
+     "flightNumber": "QR5233",
+     "vehicle": {
+      "code": "789",
+      "name": "Boeing 787-9",
+      "type": "AIRCRAFT",
+      "shortName": "B789"
+     },
+     "departure": {
+      "origin": {
+       "iataCode": "GRU"
+      },
+      "dateTime": "2026-11-12T18:25:00"
+     },
+     "arrival": {
+      "destination": {
+       "iataCode": "BCN"
+      },
+      "dateTime": "2026-11-13T09:00:00",
+      "daysDifference": 1
+     },
+     "duration": 38100,
+     "connectionTime": 22800,
+     "qSuiteEquipped": false,
+     "stops": [],
+     "operatorLogo": {
+      "operatorCode": "LA"
+     },
+     "operatingAirlineName": "LATAM Airlines Brasil",
+     "flightFeatures": []
+    },
+    {
+     "flightId": "SEG-QR146-BCNDOH-2026-11-13-1520",
+     "flightNumber": "QR146",
+     "vehicle": {
+      "code": "789",
+      "name": "Boeing 787-9",
+      "type": "AIRCRAFT",
+      "shortName": "B789"
+     },
+     "departure": {
+      "origin": {
+       "iataCode": "BCN"
+      },
+      "dateTime": "2026-11-13T15:20:00"
+     },
+     "arrival": {
+      "destination": {
+       "iataCode": "DOH"
+      },
+      "dateTime": "2026-11-13T23:20:00",
+      "daysDifference": 0
+     },
+     "duration": 21600,
+     "qSuiteEquipped": false,
+     "stops": [],
+     "operatorLogo": {
+      "operatorCode": "QR"
+     },
+     "operatingAirlineName": "Qatar Airways",
+     "flightFeatures": []
+    }
+   ],
+   "fareOffers": [
+    {
+     "boundId": "BC1-1-1I0QRZ_P8Y4FWCAZ9SL3Q0NGDX06UUZKDOL",
+     "availableSeats": 9,
+     "price": {
+      "base": 12709.05,
+      "total": 13550.34,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_COMFORT",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "3020"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "STANDARD_SEAT",
+       "localizationKey": "STANDARD_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "PREFERRED_SEAT",
+       "localizationKey": "PREFERRED_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "CODE_SHARE"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 683.05,
+      "currencyCode": "BRL"
+     }
+    }
+   ],
+   "operatorLogos": [
+    {
+     "operatorCode": "LA"
+    },
+    {
+     "operatorCode": "QR"
+    }
+   ],
+   "tags": [],
+   "airportChanges": [],
+   "promotionalOffer": false
+  },
+  {
+   "origin": {
+    "iataCode": "GRU"
+   },
+   "destination": {
+    "iataCode": "DOH"
+   },
+   "duration": 90300,
+   "arrivalDaysDifference": 2,
+   "numberOfStops": 1,
+   "segments": [
+    {
+     "flightId": "SEG-QR5272-GRUMAD-2026-11-12-2335",
+     "flightNumber": "QR5272",
+     "vehicle": {
+      "code": "789",
+      "name": "Boeing 787-9",
+      "type": "AIRCRAFT",
+      "shortName": "B789"
+     },
+     "departure": {
+      "origin": {
+       "iataCode": "GRU"
+      },
+      "dateTime": "2026-11-12T23:35:00"
+     },
+     "arrival": {
+      "destination": {
+       "iataCode": "MAD"
+      },
+      "dateTime": "2026-11-13T13:40:00",
+      "daysDifference": 1
+     },
+     "duration": 36300,
+     "connectionTime": 30300,
+     "qSuiteEquipped": false,
+     "stops": [],
+     "operatorLogo": {
+      "operatorCode": "LA"
+     },
+     "operatingAirlineName": "LATAM Airlines Brasil",
+     "flightFeatures": []
+    },
+    {
+     "flightId": "SEG-QR152-MADDOH-2026-11-13-2205",
+     "flightNumber": "QR152",
+     "vehicle": {
+      "code": "789",
+      "name": "Boeing 787-9",
+      "type": "AIRCRAFT",
+      "shortName": "B789"
+     },
+     "departure": {
+      "origin": {
+       "iataCode": "MAD"
+      },
+      "dateTime": "2026-11-13T22:05:00"
+     },
+     "arrival": {
+      "destination": {
+       "iataCode": "DOH"
+      },
+      "dateTime": "2026-11-14T06:40:00",
+      "daysDifference": 1
+     },
+     "duration": 23700,
+     "qSuiteEquipped": false,
+     "stops": [],
+     "operatorLogo": {
+      "operatorCode": "QR"
+     },
+     "operatingAirlineName": "Qatar Airways",
+     "flightFeatures": []
+    }
+   ],
+   "fareOffers": [
+    {
+     "boundId": "BC1-1-1I0QRZ_N1K64RSBPNFTR8J0F3WXEDNX744V",
+     "availableSeats": 5,
+     "price": {
+      "base": 6990.23,
+      "total": 7845.28,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_CONVENIENCE",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "2484"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_WITH_CONDITIONS.FF_FEATURE",
+       "parameters": [
+        "1"
+       ]
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "STANDARD_SEAT",
+       "localizationKey": "STANDARD_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "PREFERRED_SEAT",
+       "localizationKey": "PREFERRED_SEAT.CHARGED.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "CODE_SHARE"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 683.05,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_21CKOQE0K4NSJ9QM1CSLQMZHDF94",
+     "availableSeats": 9,
+     "price": {
+      "base": 12709.05,
+      "total": 13564.1,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "ECONOMY_COMFORT",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "3312"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "23"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "1",
+        "7"
+       ]
+      },
+      {
+       "type": "STANDARD_SEAT",
+       "localizationKey": "STANDARD_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "PREFERRED_SEAT",
+       "localizationKey": "PREFERRED_SEAT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "UPGRADE_WITH_QMILES",
+       "localizationKey": "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "CODE_SHARE"
+     },
+     "cabinType": "ECONOMY",
+     "cabinImages": [],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 683.05,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_OIVAMU5G8N9QEYZ9KJ2DJW741COK",
+     "availableSeats": 2,
+     "price": {
+      "base": 40400.74,
+      "total": 42068.5,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "BUSINESS_COMFORT",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "5796"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_WITH_CONDITIONS.FF_FEATURE",
+       "parameters": [
+        "1"
+       ]
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "32"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "2",
+        "15"
+       ]
+      },
+      {
+       "type": "SEAT_SELECTION",
+       "localizationKey": "SEAT_SELECTION.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "LOUNGE_ACCESS",
+       "localizationKey": "LOUNGE_ACCESS.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "CODE_SHARE"
+     },
+     "cabinType": "BUSINESS",
+     "cabinImages": [
+      {
+       "cabinImageId": "QR_BUSINESS_B787-9",
+       "segmentIds": [
+        "SEG-QR5272-GRUMAD-2026-11-12-2335",
+        "SEG-QR152-MADDOH-2026-11-13-2205"
+       ]
+      }
+     ],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 1495.76,
+      "currencyCode": "BRL"
+     }
+    },
+    {
+     "boundId": "BC1-1-1I0QRZ_W8Y40XV7LWHAJBGMPDL38D6OETY4",
+     "availableSeats": 4,
+     "price": {
+      "base": 44120.22,
+      "total": 45787.98,
+      "currencyCode": "BRL"
+     },
+     "fareFamilyCode": "BUSINESS_ELITE",
+     "fareFamilyFeatures": [
+      {
+       "type": "EARNED_MILES",
+       "localizationKey": "EARNED_MILES.FF_FEATURE",
+       "parameters": [
+        "6624"
+       ]
+      },
+      {
+       "type": "CHANGE_PENALTY",
+       "localizationKey": "CHANGE_PENALTY.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "REFUND_PAYMENT",
+       "localizationKey": "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "CHECKIN_BAGGAGE",
+       "localizationKey": "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE",
+       "parameters": [
+        "2",
+        "32"
+       ]
+      },
+      {
+       "type": "HAND_BAGGAGE",
+       "localizationKey": "HAND_BAGGAGE.FF_FEATURE",
+       "parameters": [
+        "2",
+        "15"
+       ]
+      },
+      {
+       "type": "SEAT_SELECTION",
+       "localizationKey": "SEAT_SELECTION.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      },
+      {
+       "type": "LOUNGE_ACCESS",
+       "localizationKey": "LOUNGE_ACCESS.FREE_OF_CHARGE.FF_FEATURE",
+       "parameters": []
+      }
+     ],
+     "cabinImage": {
+      "id": "CODE_SHARE"
+     },
+     "cabinType": "BUSINESS",
+     "cabinImages": [
+      {
+       "cabinImageId": "QR_BUSINESS_B787-9",
+       "segmentIds": [
+        "SEG-QR5272-GRUMAD-2026-11-12-2335",
+        "SEG-QR152-MADDOH-2026-11-13-2205"
+       ]
+      }
+     ],
+     "mixedCabin": false,
+     "mixedCabins": [],
+     "isLowestFare": false,
+     "isPromotionalOffer": false,
+     "totalYqYrTax": {
+      "amount": 1495.76,
+      "currencyCode": "BRL"
+     }
+    }
+   ],
+   "operatorLogos": [
+    {
+     "operatorCode": "LA"
+    },
+    {
+     "operatorCode": "QR"
+    }
+   ],
+   "tags": [],
+   "airportChanges": [],
+   "promotionalOffer": false
+  }
+ ],
+ "currencies": [
+  {
+   "code": "QAR",
+   "local": false
+  },
+  {
+   "code": "AUD",
+   "local": false
+  },
+  {
+   "code": "CAD",
+   "local": false
+  },
+  {
+   "code": "EUR",
+   "local": false
+  },
+  {
+   "code": "GBP",
+   "local": false
+  },
+  {
+   "code": "HKD",
+   "local": false
+  },
+  {
+   "code": "IDR",
+   "local": false
+  },
+  {
+   "code": "SGD",
+   "local": false
+  },
+  {
+   "code": "USD",
+   "local": false
+  },
+  {
+   "code": "AED",
+   "local": false
+  },
+  {
+   "code": "CHF",
+   "local": false
+  },
+  {
+   "code": "SAR",
+   "local": false
+  },
+  {
+   "code": "PLN",
+   "local": false
+  },
+  {
+   "code": "CZK",
+   "local": false
+  },
+  {
+   "code": "CNY",
+   "local": false
+  },
+  {
+   "code": "KWD",
+   "local": false
+  },
+  {
+   "code": "KRW",
+   "local": false
+  },
+  {
+   "code": "BRL",
+   "local": true
+  }
+ ],
+ "dictionaries": {
+  "localization": {
+   "SEAT_SELECTION.FREE_OF_CHARGE.FF_FEATURE": "Seleção de assento incluída",
+   "currency.BRL": "Real brasileiro",
+   "EARNED_MILES.FF_FEATURE": "Ganhe {0} Avios",
+   "tag.STARLINK": "Wi-Fi Starlink",
+   "currency.CHF": "Franco suíço",
+   "PREFERRED_SEAT.CHARGED.FF_FEATURE": "Assento Preferencial por uma taxa",
+   "station.MAD": "Aeroporto Adolfo Suarez Madrid-Barajas",
+   "CHECKIN_BAGGAGE.PIECE.KG.FF_FEATURE": "Bagagem despachada: {0, plural, one {# peça, {1} kg} many {# peças, {1} kg cada} other {# peças, {1} kg cada}}",
+   "UPGRADE_WITH_QMILES.ELIGIBLE.FF_FEATURE": "Faça upgrade com Avios",
+   "currency.CZK": "Coroa tcheca",
+   "SEAT_SELECTION.CHARGED.FF_FEATURE": "Escolha de assento mediante uma taxa",
+   "fare_family.BUSINESS_COMFORT": "Comfort",
+   "LOUNGE_ACCESS.FREE_OF_CHARGE.FF_FEATURE": "Incluído o acesso ao lounge",
+   "fare_family.BUSINESS_ELITE": "Elite",
+   "CHANGE_PENALTY.FREE_OF_CHARGE.FF_FEATURE": "Faça alterações ilimitadas",
+   "CHANGE_PENALTY.FREE_WITH_CONDITIONS.FF_FEATURE": "Flexibilidade para fazer {0, plural, one {# alteração} many {# alterações} other {# alterações}}",
+   "city.BCN": "Barcelona",
+   "currency.SGD": "Dólar singapuriano",
+   "station.BCN": "Aeroporto Internacional de Barcelona",
+   "currency.EUR": "Euro",
+   "city.MAD": "Madri",
+   "REFUND_PAYMENT.FREE_OF_CHARGE.FF_FEATURE": "Cancele a qualquer momento sem taxas",
+   "fare_family.ECONOMY_CLASSIC": "Classic",
+   "fare_family.ECONOMY_COMFORT": "Comfort",
+   "currency.CAD": "Dólar canadense",
+   "currency.USD": "Dólar americano",
+   "HAND_BAGGAGE.FF_FEATURE": "Bagagem de mão: {0, plural, one {# peça, {1} kg} many {# peças, total {1} kg} other {# peças, total {1} kg}}",
+   "PREFERRED_SEAT.FREE_OF_CHARGE.FF_FEATURE": "Seleção de Assento Preferencial incluída",
+   "city.DOH": "Doha",
+   "currency.HKD": "Dólar da RAE de Hong Kong",
+   "currency.AED": "Dirhan dos Emirados Árabes Unidos",
+   "station.DOH": "Aeroporto Internacional Hamad",
+   "tag.QSUITE": "Qsuite",
+   "currency.PLN": "Zloti polaco",
+   "currency.GBP": "Libra esterlina",
+   "currency.IDR": "Rupia indonésia",
+   "STANDARD_SEAT.FREE_OF_CHARGE.FF_FEATURE": "Seleção de assento padrão incluída",
+   "currency.KWD": "Dinar kuwaitiano",
+   "tag.LOWEST_FARE": "Tarifa mais barata",
+   "city.GRU": "São Paulo",
+   "fare_family.ECONOMY_CONVENIENCE": "Convenience",
+   "currency.CNY": "Renminbi",
+   "currency.AUD": "Dólar australiano",
+   "currency.KRW": "Won sul-coreano",
+   "currency.QAR": "Rial catariano",
+   "currency.SAR": "Rial saudita",
+   "station.GRU": "Aeroporto Internacional de Guarulhos"
+  },
+  "assets": {
+   "logo.operator.LA": "https://www.qatarairways.com/content/dam/images/icons/flight/ic_nav_LatamAirlineGroup.svg",
+   "logo.operator.QR": "https://www.qatarairways.com/content/dam/images/icons/flight/ic_nav_qatar_airways.svg",
+   "logo.operator.IB": "https://www.qatarairways.com/content/dam/images/icons/flight/ic_nav_IberiaAirlines.svg"
+  }
+ },
+ "viaStations": [
+  "BCN",
+  "MAD"
+ ],
+ "requestStationDetails": {
+  "GRU": {
+   "countryCode": "BR"
+  },
+  "DOH": {
+   "countryCode": "QA"
+  }
+ },
+ "usdExchangeRate": 0.20056559
+}

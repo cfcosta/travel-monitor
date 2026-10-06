@@ -1,0 +1,1843 @@
+{
+ "execution": "dd119c6e-0ede-4d0d-92b8-6aa0e0f485a1",
+ "offers": [
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "SSA",
+    "departure": "2026-11-10T10:05:00",
+    "arrival": "2026-11-10T12:25:00",
+    "stops": 0,
+    "totalDuration": 140,
+    "isInternational": false,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "FEC",
+     "IOS",
+     "BPS"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "SSA",
+     "departure": "2026-11-10T10:05:00",
+     "arrival": "2026-11-10T12:25:00",
+     "duration": 140,
+     "flightNumber": 1690,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1690,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 2014284061,
+     "brandId": "LI",
+     "fareBasis": "ENHAAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1929.65,
+      "fare": 1893.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -335566984,
+     "brandId": "CL",
+     "fareBasis": "ENHAAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 2065.65,
+      "fare": 2029.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1365327572,
+     "brandId": "FL",
+     "fareBasis": "ENHAAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 2187.65,
+      "fare": 2151.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "SSA",
+    "departure": "2026-11-10T11:40:00",
+    "arrival": "2026-11-10T14:00:00",
+    "stops": 0,
+    "totalDuration": 140,
+    "isInternational": false,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "FEC",
+     "IOS",
+     "BPS"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "SSA",
+     "departure": "2026-11-10T11:40:00",
+     "arrival": "2026-11-10T14:00:00",
+     "duration": 140,
+     "flightNumber": 1352,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1352,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -1345191507,
+     "brandId": "LI",
+     "fareBasis": "NNJAAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1185.65,
+      "fare": 1149.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1354430108,
+     "brandId": "CL",
+     "fareBasis": "NNJAAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1304.65,
+      "fare": 1268.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1491641144,
+     "brandId": "FL",
+     "fareBasis": "NNJAAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1410.65,
+      "fare": 1374.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "SSA",
+    "departure": "2026-11-10T14:25:00",
+    "arrival": "2026-11-10T16:45:00",
+    "stops": 0,
+    "totalDuration": 140,
+    "isInternational": false,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "FEC",
+     "IOS",
+     "BPS"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "SSA",
+     "departure": "2026-11-10T14:25:00",
+     "arrival": "2026-11-10T16:45:00",
+     "duration": 140,
+     "flightNumber": 1692,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1692,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -194839397,
+     "brandId": "LI",
+     "fareBasis": "ONJAAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 828.65,
+      "fare": 792.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1790185078,
+     "brandId": "CL",
+     "fareBasis": "ONJAAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 947.65,
+      "fare": 911.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1652974042,
+     "brandId": "FL",
+     "fareBasis": "ONJAAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1053.65,
+      "fare": 1017.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "SSA",
+    "departure": "2026-11-10T17:00:00",
+    "arrival": "2026-11-10T19:25:00",
+    "stops": 0,
+    "totalDuration": 145,
+    "isInternational": false,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "FEC",
+     "IOS",
+     "BPS"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "SSA",
+     "departure": "2026-11-10T17:00:00",
+     "arrival": "2026-11-10T19:25:00",
+     "duration": 145,
+     "flightNumber": 1356,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1356,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 80138529,
+     "brandId": "LI",
+     "fareBasis": "ONJAAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 828.65,
+      "fare": 792.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1515207152,
+     "brandId": "CL",
+     "fareBasis": "ONJAAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 947.65,
+      "fare": 911.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1377996116,
+     "brandId": "FL",
+     "fareBasis": "ONJAAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1053.65,
+      "fare": 1017.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "SSA",
+    "departure": "2026-11-10T10:00:00",
+    "arrival": "2026-11-10T13:40:00",
+    "stops": 1,
+    "totalDuration": 220,
+    "isInternational": false,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "FEC",
+     "IOS",
+     "BPS"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "VIX",
+     "departure": "2026-11-10T10:00:00",
+     "arrival": "2026-11-10T11:30:00",
+     "duration": 90,
+     "flightNumber": 1384,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1384,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "VIX",
+     "destination": "SSA",
+     "departure": "2026-11-10T12:10:00",
+     "arrival": "2026-11-10T13:40:00",
+     "duration": 90,
+     "flightNumber": 2179,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 2179,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 791788475,
+     "brandId": "LI",
+     "fareBasis": "BNJAAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 970.65,
+      "fare": 934.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -2106456851,
+     "brandId": "CL",
+     "fareBasis": "BNJAAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1089.65,
+      "fare": 1053.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -712985840,
+     "brandId": "FL",
+     "fareBasis": "BNJAAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1195.65,
+      "fare": 1159.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "SSA",
+    "departure": "2026-11-10T16:30:00",
+    "arrival": "2026-11-10T20:35:00",
+    "stops": 1,
+    "totalDuration": 245,
+    "isInternational": false,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "FEC",
+     "IOS",
+     "BPS"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "CNF",
+     "departure": "2026-11-10T16:30:00",
+     "arrival": "2026-11-10T17:45:00",
+     "duration": 75,
+     "flightNumber": 1486,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1486,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "CNF",
+     "destination": "SSA",
+     "departure": "2026-11-10T18:55:00",
+     "arrival": "2026-11-10T20:35:00",
+     "duration": 100,
+     "flightNumber": 1951,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1951,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 471504075,
+     "brandId": "LI",
+     "fareBasis": "ONJAAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 828.65,
+      "fare": 792.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1868226045,
+     "brandId": "CL",
+     "fareBasis": "ONJAAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 947.65,
+      "fare": 911.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1033270240,
+     "brandId": "FL",
+     "fareBasis": "ONJAAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1053.65,
+      "fare": 1017.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "SSA",
+    "departure": "2026-11-10T09:15:00",
+    "arrival": "2026-11-10T13:30:00",
+    "stops": 1,
+    "totalDuration": 255,
+    "isInternational": false,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "FEC",
+     "IOS",
+     "BPS"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "GYN",
+     "departure": "2026-11-10T09:15:00",
+     "arrival": "2026-11-10T10:55:00",
+     "duration": 100,
+     "flightNumber": 1490,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1490,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GYN",
+     "destination": "SSA",
+     "departure": "2026-11-10T11:30:00",
+     "arrival": "2026-11-10T13:30:00",
+     "duration": 120,
+     "flightNumber": 1905,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1905,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -1829090277,
+     "brandId": "LI",
+     "fareBasis": "ANIAAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1618.65,
+      "fare": 1582.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -432368307,
+     "brandId": "CL",
+     "fareBasis": "ANIAAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1737.65,
+      "fare": 1701.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 961102704,
+     "brandId": "FL",
+     "fareBasis": "ANIAAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1843.65,
+      "fare": 1807.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "SSA",
+    "departure": "2026-11-10T09:20:00",
+    "arrival": "2026-11-10T13:35:00",
+    "stops": 1,
+    "totalDuration": 255,
+    "isInternational": false,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "FEC",
+     "IOS",
+     "BPS"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "CNF",
+     "departure": "2026-11-10T09:20:00",
+     "arrival": "2026-11-10T10:35:00",
+     "duration": 75,
+     "flightNumber": 1482,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1482,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "CNF",
+     "destination": "SSA",
+     "departure": "2026-11-10T11:50:00",
+     "arrival": "2026-11-10T13:35:00",
+     "duration": 105,
+     "flightNumber": 1947,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1947,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -264168863,
+     "brandId": "LI",
+     "fareBasis": "WNFAAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 2801.65,
+      "fare": 2765.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1023159697,
+     "brandId": "CL",
+     "fareBasis": "WNFAAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 2937.65,
+      "fare": 2901.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 362566226,
+     "brandId": "FL",
+     "fareBasis": "WNFAAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 3059.65,
+      "fare": 3023.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "SSA",
+    "departure": "2026-11-10T13:45:00",
+    "arrival": "2026-11-10T18:05:00",
+    "stops": 1,
+    "totalDuration": 260,
+    "isInternational": false,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "FEC",
+     "IOS",
+     "BPS"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "GIG",
+     "departure": "2026-11-10T13:45:00",
+     "arrival": "2026-11-10T14:50:00",
+     "duration": 65,
+     "flightNumber": 1376,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1376,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "SSA",
+     "departure": "2026-11-10T16:00:00",
+     "arrival": "2026-11-10T18:05:00",
+     "duration": 125,
+     "flightNumber": 1882,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1882,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 1623821647,
+     "brandId": "LI",
+     "fareBasis": "ANIAAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1618.65,
+      "fare": 1582.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1274423679,
+     "brandId": "CL",
+     "fareBasis": "ANIAAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1737.65,
+      "fare": 1701.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 119047332,
+     "brandId": "FL",
+     "fareBasis": "ANIAAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1843.65,
+      "fare": 1807.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "SSA",
+    "departure": "2026-11-10T13:35:00",
+    "arrival": "2026-11-10T18:05:00",
+    "stops": 1,
+    "totalDuration": 270,
+    "isInternational": false,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "FEC",
+     "IOS",
+     "BPS"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "GIG",
+     "departure": "2026-11-10T13:35:00",
+     "arrival": "2026-11-10T14:40:00",
+     "duration": 65,
+     "flightNumber": 1556,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1556,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "SSA",
+     "departure": "2026-11-10T16:00:00",
+     "arrival": "2026-11-10T18:05:00",
+     "duration": 125,
+     "flightNumber": 1882,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1882,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 1694218727,
+     "brandId": "LI",
+     "fareBasis": "ANIAAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1618.65,
+      "fare": 1582.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1204026599,
+     "brandId": "CL",
+     "fareBasis": "ANIAAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1737.65,
+      "fare": 1701.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 189444412,
+     "brandId": "FL",
+     "fareBasis": "ANIAAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1843.65,
+      "fare": 1807.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "SSA",
+    "departure": "2026-11-10T09:20:00",
+    "arrival": "2026-11-10T14:00:00",
+    "stops": 1,
+    "totalDuration": 280,
+    "isInternational": false,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "FEC",
+     "IOS",
+     "BPS"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "MCZ",
+     "departure": "2026-11-10T09:20:00",
+     "arrival": "2026-11-10T12:10:00",
+     "duration": 170,
+     "flightNumber": 1668,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1668,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "MCZ",
+     "destination": "SSA",
+     "departure": "2026-11-10T12:50:00",
+     "arrival": "2026-11-10T14:00:00",
+     "duration": 70,
+     "flightNumber": 1917,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1917,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 657342795,
+     "brandId": "LI",
+     "fareBasis": "YNAAAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 3411.65,
+      "fare": 3375.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -101648039,
+     "brandId": "CL",
+     "fareBasis": "YNAAAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 3547.65,
+      "fare": 3511.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1284077884,
+     "brandId": "FL",
+     "fareBasis": "YNAAAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 3669.65,
+      "fare": 3633.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "SSA",
+    "departure": "2026-11-10T18:25:00",
+    "arrival": "2026-11-10T23:15:00",
+    "stops": 1,
+    "totalDuration": 290,
+    "isInternational": false,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "FEC",
+     "IOS",
+     "BPS"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "BSB",
+     "departure": "2026-11-10T18:25:00",
+     "arrival": "2026-11-10T20:05:00",
+     "duration": 100,
+     "flightNumber": 1443,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1443,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "BSB",
+     "destination": "SSA",
+     "departure": "2026-11-10T21:20:00",
+     "arrival": "2026-11-10T23:15:00",
+     "duration": 115,
+     "flightNumber": 1720,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1720,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 710429717,
+     "brandId": "LI",
+     "fareBasis": "ONJAAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 828.65,
+      "fare": 792.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 2107151687,
+     "brandId": "CL",
+     "fareBasis": "ONJAAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 947.65,
+      "fare": 911.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -794344598,
+     "brandId": "FL",
+     "fareBasis": "ONJAAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1053.65,
+      "fare": 1017.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "SSA",
+    "departure": "2026-11-10T06:00:00",
+    "arrival": "2026-11-10T11:00:00",
+    "stops": 1,
+    "totalDuration": 300,
+    "isInternational": false,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "FEC",
+     "IOS",
+     "BPS"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "BSB",
+     "departure": "2026-11-10T06:00:00",
+     "arrival": "2026-11-10T07:45:00",
+     "duration": 105,
+     "flightNumber": 1454,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1454,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "BSB",
+     "destination": "SSA",
+     "departure": "2026-11-10T09:00:00",
+     "arrival": "2026-11-10T11:00:00",
+     "duration": 120,
+     "flightNumber": 1716,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1716,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -1139502835,
+     "brandId": "LI",
+     "fareBasis": "ANIAAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1618.65,
+      "fare": 1582.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 257219135,
+     "brandId": "CL",
+     "fareBasis": "ANIAAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1737.65,
+      "fare": 1701.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1650690146,
+     "brandId": "FL",
+     "fareBasis": "ANIAAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1843.65,
+      "fare": 1807.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "SSA",
+    "departure": "2026-11-10T09:05:00",
+    "arrival": "2026-11-10T14:05:00",
+    "stops": 1,
+    "totalDuration": 300,
+    "isInternational": false,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "FEC",
+     "IOS",
+     "BPS"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "GIG",
+     "departure": "2026-11-10T09:05:00",
+     "arrival": "2026-11-10T10:10:00",
+     "duration": 65,
+     "flightNumber": 1374,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1374,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "SSA",
+     "departure": "2026-11-10T12:00:00",
+     "arrival": "2026-11-10T14:05:00",
+     "duration": 125,
+     "flightNumber": 1890,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1890,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": 440144209,
+     "brandId": "LI",
+     "fareBasis": "UNIAAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1530.65,
+      "fare": 1494.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1836866179,
+     "brandId": "CL",
+     "fareBasis": "UNIAAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1649.65,
+      "fare": 1613.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -1064630106,
+     "brandId": "FL",
+     "fareBasis": "UNIAAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1755.65,
+      "fare": 1719.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "SSA",
+    "departure": "2026-11-10T17:10:00",
+    "arrival": "2026-11-10T22:20:00",
+    "stops": 1,
+    "totalDuration": 310,
+    "isInternational": false,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "FEC",
+     "IOS",
+     "BPS"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "GIG",
+     "departure": "2026-11-10T17:10:00",
+     "arrival": "2026-11-10T18:15:00",
+     "duration": 65,
+     "flightNumber": 1358,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1358,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "SSA",
+     "departure": "2026-11-10T20:15:00",
+     "arrival": "2026-11-10T22:20:00",
+     "duration": 125,
+     "flightNumber": 1232,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1232,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -1328495839,
+     "brandId": "LI",
+     "fareBasis": "ANIAAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1618.65,
+      "fare": 1582.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 68226131,
+     "brandId": "CL",
+     "fareBasis": "ANIAAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1737.65,
+      "fare": 1701.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1461697142,
+     "brandId": "FL",
+     "fareBasis": "ANIAAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1843.65,
+      "fare": 1807.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "SSA",
+    "departure": "2026-11-10T05:25:00",
+    "arrival": "2026-11-10T10:45:00",
+    "stops": 1,
+    "totalDuration": 320,
+    "isInternational": false,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "FEC",
+     "IOS",
+     "BPS"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "GIG",
+     "departure": "2026-11-10T05:25:00",
+     "arrival": "2026-11-10T06:25:00",
+     "duration": 60,
+     "flightNumber": 1562,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1562,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "SSA",
+     "departure": "2026-11-10T08:40:00",
+     "arrival": "2026-11-10T10:45:00",
+     "duration": 125,
+     "flightNumber": 1888,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1888,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -722182739,
+     "brandId": "LI",
+     "fareBasis": "ANIAAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1618.65,
+      "fare": 1582.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 674539231,
+     "brandId": "CL",
+     "fareBasis": "ANIAAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1737.65,
+      "fare": 1701.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 2068010242,
+     "brandId": "FL",
+     "fareBasis": "ANIAAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1843.65,
+      "fare": 1807.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "SSA",
+    "departure": "2026-11-10T16:25:00",
+    "arrival": "2026-11-10T23:15:00",
+    "stops": 1,
+    "totalDuration": 410,
+    "isInternational": false,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "FEC",
+     "IOS",
+     "BPS"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "BSB",
+     "departure": "2026-11-10T16:25:00",
+     "arrival": "2026-11-10T18:10:00",
+     "duration": 105,
+     "flightNumber": 1458,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1458,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "BSB",
+     "destination": "SSA",
+     "departure": "2026-11-10T21:20:00",
+     "arrival": "2026-11-10T23:15:00",
+     "duration": 115,
+     "flightNumber": 1720,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1720,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -1562734067,
+     "brandId": "LI",
+     "fareBasis": "ONJAAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 828.65,
+      "fare": 792.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -166012097,
+     "brandId": "CL",
+     "fareBasis": "ONJAAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 947.65,
+      "fare": 911.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 1227458914,
+     "brandId": "FL",
+     "fareBasis": "ONJAAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1053.65,
+      "fare": 1017.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "SSA",
+    "departure": "2026-11-10T13:45:00",
+    "arrival": "2026-11-10T22:20:00",
+    "stops": 1,
+    "totalDuration": 515,
+    "isInternational": false,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "FEC",
+     "IOS",
+     "BPS"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "GIG",
+     "departure": "2026-11-10T13:45:00",
+     "arrival": "2026-11-10T14:50:00",
+     "duration": 65,
+     "flightNumber": 1376,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1376,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "SSA",
+     "departure": "2026-11-10T20:15:00",
+     "arrival": "2026-11-10T22:20:00",
+     "duration": 125,
+     "flightNumber": 1232,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1232,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -1974684471,
+     "brandId": "LI",
+     "fareBasis": "ANIAAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1618.65,
+      "fare": 1582.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -577962501,
+     "brandId": "CL",
+     "fareBasis": "ANIAAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1737.65,
+      "fare": 1701.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 815508510,
+     "brandId": "FL",
+     "fareBasis": "ANIAAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1843.65,
+      "fare": 1807.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  },
+  {
+   "itinerary": {
+    "origin": "GRU",
+    "destination": "SSA",
+    "departure": "2026-11-10T05:25:00",
+    "arrival": "2026-11-10T14:05:00",
+    "stops": 1,
+    "totalDuration": 520,
+    "isInternational": false,
+    "operatingAirlineCode": [
+     "G3"
+    ],
+    "airlineCode": [
+     "G3"
+    ],
+    "relatedDestinationAirports": [
+     "FEC",
+     "IOS",
+     "BPS"
+    ]
+   },
+   "segments": [
+    {
+     "origin": "GRU",
+     "destination": "GIG",
+     "departure": "2026-11-10T05:25:00",
+     "arrival": "2026-11-10T06:25:00",
+     "duration": 60,
+     "flightNumber": 1562,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1562,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    },
+    {
+     "origin": "GIG",
+     "destination": "SSA",
+     "departure": "2026-11-10T12:00:00",
+     "arrival": "2026-11-10T14:05:00",
+     "duration": 125,
+     "flightNumber": 1890,
+     "airlineCode": "G3",
+     "operatingFlightNumber": 1890,
+     "operatingAirlineCode": "G3",
+     "aircraftLeaseText": "",
+     "equipment": "738",
+     "equipmentConfiguration": "",
+     "equipmentTypeName": "",
+     "equipmentANACTTag": ""
+    }
+   ],
+   "fareFamily": [
+    {
+     "shoppingBasketHashCode": -1914311337,
+     "brandId": "LI",
+     "fareBasis": "UNIAAG2J",
+     "price": {
+      "currency": "BRL",
+      "total": 1530.65,
+      "fare": 1494.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": -517589367,
+     "brandId": "CL",
+     "fareBasis": "UNIAAG3J",
+     "price": {
+      "currency": "BRL",
+      "total": 1649.65,
+      "fare": 1613.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    },
+    {
+     "shoppingBasketHashCode": 875881644,
+     "brandId": "FL",
+     "fareBasis": "UNIAAG4J",
+     "price": {
+      "currency": "BRL",
+      "total": 1755.65,
+      "fare": 1719.9,
+      "taxes": 35.75,
+      "totalWithoutDiscount": 0,
+      "hasDiscount": false
+     }
+    }
+   ],
+   "exceptionPartnerTag": null
+  }
+ ],
+ "selectedOffers": [],
+ "alternateDateOffers": [
+  {
+   "hasValue": true,
+   "departure": "2026-11-07T11:40:00",
+   "price": 828.65
+  },
+  {
+   "hasValue": true,
+   "departure": "2026-11-08T14:20:00",
+   "price": 828.65
+  },
+  {
+   "hasValue": true,
+   "departure": "2026-11-09T17:00:00",
+   "price": 970.65
+  },
+  {
+   "hasValue": true,
+   "departure": "2026-11-10T14:25:00",
+   "price": 828.65
+  },
+  {
+   "hasValue": true,
+   "departure": "2026-11-11T17:00:00",
+   "price": 828.65
+  },
+  {
+   "hasValue": true,
+   "departure": "2026-11-12T14:25:00",
+   "price": 828.65
+  },
+  {
+   "hasValue": true,
+   "departure": "2026-11-13T14:25:00",
+   "price": 828.65
+  }
+ ],
+ "error": null,
+ "errorSabreResponse": null
+}

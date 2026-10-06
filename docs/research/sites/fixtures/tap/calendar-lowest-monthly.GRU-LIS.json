@@ -1,0 +1,58 @@
+{
+ "status": null,
+ "errors": [],
+ "timeService": null,
+ "timeBackend": null,
+ "monthlyLowestPrices": {
+  "data": [
+   {
+    "month": 1,
+    "price": 2647.04
+   },
+   {
+    "month": 2,
+    "price": 2647.04
+   },
+   {
+    "month": 3,
+    "price": 2647.04
+   },
+   {
+    "month": 4,
+    "price": 2647.04
+   },
+   {
+    "month": 5,
+    "price": 2647.04
+   },
+   {
+    "month": 6,
+    "price": 2647.04
+   },
+   {
+    "month": 7,
+    "price": 2647.04
+   },
+   {
+    "month": 8,
+    "price": 2647.04
+   },
+   {
+    "month": 9,
+    "price": 3007.24
+   },
+   {
+    "month": 10,
+    "price": 2647.04
+   },
+   {
+    "month": 11,
+    "price": 2647.04
+   },
+   {
+    "month": 12,
+    "price": 2647.04
+   }
+  ]
+ }
+}

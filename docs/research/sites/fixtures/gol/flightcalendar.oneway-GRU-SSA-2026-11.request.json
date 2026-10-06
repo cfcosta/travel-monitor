@@ -1,0 +1,25 @@
+{
+ "method": "POST",
+ "url": "https://bff-flight.voegol.com.br/flightcalendar",
+ "headers": [
+  "Content-Type: application/json",
+  "authorization: Bearer <anonymous token from gol-auth-api create-token>"
+ ],
+ "body": {
+  "baseSelect": {
+   "origin": "GRU",
+   "destination": "SSA"
+  },
+  "calendar": {
+   "month": 11,
+   "quantity": 2,
+   "year": 2026
+  },
+  "currencyCode": "BRL",
+  "pax": {
+   "numAdt": 1,
+   "numChd": 0,
+   "numInf": 0
+  }
+ }
+}

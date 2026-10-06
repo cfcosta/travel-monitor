@@ -1,0 +1,31 @@
+{
+  "page": "https://www.aa.com/homePage.do?locale=pt_BR",
+  "captured": "2026-10-06",
+  "form": {
+    "id": "reservationFlightSearchForm",
+    "action": "https://www.aa.com/booking/find-flights",
+    "method": "post",
+    "fields": [
+      {"name": "tripType", "values": ["roundTrip", "oneWay"]},
+      {"name": "redeemMiles", "type": "checkbox", "label": "Resgatar milhas"},
+      {"name": "originAirport"},
+      {"name": "destinationAirport"},
+      {"name": "adultOrSeniorPassengerCount", "values": ["1", "2", "3", "4", "5", "6", "7", "8", "9"]},
+      {"name": "departDate", "format": "dd/mm/aaaa"},
+      {"name": "returnDate", "format": "dd/mm/aaaa"},
+      {"name": "serviceclass", "values": ["coach", "business", "first"]},
+      {"name": "dateFormat"},
+      {"name": "showMoreOptions"},
+      {"name": "fromSearchPage"},
+      {"name": "accountId"}
+    ]
+  },
+  "cookies_set_on_first_load": ["aka_state_code", "aka_cr_code", "aka_lc_code", "bm_sc", "bm_so", "bm_sz", "bm_lso", "_abck"],
+  "results_page_challenge": {
+    "url": "https://www.aa.com/booking/choose-flights/1?sid=<uuid>&locale=pt_BR",
+    "title": "Challenge Validation",
+    "iframe": "https://www.aa.com/challenge-assets/v7/captcha.html",
+    "extra_cookie": "sec_cpt",
+    "text": "Please confirm you're a human / I'm not a robot / Continue"
+  }
+}

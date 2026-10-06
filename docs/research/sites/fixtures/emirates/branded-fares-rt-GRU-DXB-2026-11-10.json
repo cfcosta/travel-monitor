@@ -1,0 +1,3253 @@
+{
+ "id": "<scrubbed>",
+ "currency": {
+  "sale": {
+   "code": "BRL",
+   "scale": 2
+  },
+  "priced": {
+   "code": "USD",
+   "scale": 2
+  }
+ },
+ "percentageMarket": false,
+ "lowestFare": {
+  "total": [
+   {
+    "amount": 7552.11,
+    "type": "CASH"
+   }
+  ],
+  "taxTotal": [
+   {
+    "amount": 1992.84,
+    "type": "CASH"
+   }
+  ]
+ },
+ "responseProvider": "VAYANT",
+ "totalOptionsCount": 6,
+ "isServiceChargeApplicable": false,
+ "bounds": [
+  {
+   "id": "<scrubbed>",
+   "type": "OUTBOUND",
+   "origin": "GRU",
+   "destination": "DXB",
+   "count": 3,
+   "applicableFilters": [
+    "ALL",
+    "DIRECT_FLIGHTS",
+    "EMIRATES_ONLY"
+   ],
+   "filterApplied": "ALL",
+   "applicableSorts": [
+    "PRICE",
+    "ARRIVAL_TIME",
+    "DEPARTURE_TIME",
+    "DURATION",
+    "MILES_EARNED"
+   ],
+   "sortApplied": "PRICE",
+   "availableCabins": [
+    "Y",
+    "W",
+    "J",
+    "F"
+   ],
+   "applicableCabinBrands": [
+    {
+     "cabinClass": "Y",
+     "fareBrand": "SAVER"
+    },
+    {
+     "cabinClass": "Y",
+     "fareBrand": "FLEX"
+    },
+    {
+     "cabinClass": "Y",
+     "fareBrand": "FLEXPLUS"
+    },
+    {
+     "cabinClass": "W",
+     "fareBrand": "FLEXPLUS"
+    },
+    {
+     "cabinClass": "J",
+     "fareBrand": "SPECIAL"
+    },
+    {
+     "cabinClass": "J",
+     "fareBrand": "SAVER"
+    },
+    {
+     "cabinClass": "J",
+     "fareBrand": "FLEX"
+    },
+    {
+     "cabinClass": "J",
+     "fareBrand": "FLEXPLUS"
+    },
+    {
+     "cabinClass": "F",
+     "fareBrand": "FLEX"
+    },
+    {
+     "cabinClass": "F",
+     "fareBrand": "FLEXPLUS"
+    }
+   ],
+   "availableOperatingCarriers": [
+    "EK",
+    "TP"
+   ],
+   "navigationPreviousDate": {
+    "date": "2026-11-09",
+    "applicable": true
+   },
+   "navigationNextDate": {
+    "date": "2026-11-11",
+    "applicable": true
+   },
+   "options": [
+    {
+     "id": "GRU_DXB_EK262_2143637996",
+     "numberOfConnections": 0,
+     "ondDuration": "14H5M",
+     "travelDays": 0,
+     "airSegments": [
+      {
+       "id": "GRU_DXB_EK262",
+       "carrierCode": "EK",
+       "flightNumber": "262",
+       "segmentType": "FLT",
+       "sequenceNumber": 1,
+       "departure": "GRU",
+       "arrival": "DXB",
+       "departureDateTime": "2026-11-10T01:30:00",
+       "arrivalDateTime": "2026-11-10T22:35:00",
+       "aircraftType": "388",
+       "stopOver": false,
+       "operatingCarrierCode": "EK",
+       "marketingCarrierCode": "EK",
+       "duration": "14H5M",
+       "ond": "GRUDXB",
+       "connection": false,
+       "minutesToDepart": 0,
+       "dayChangeCount": 0,
+       "newSegmentNumber": 0,
+       "rewardUpgradesAvailability": [
+        {
+         "cabinClass": "W",
+         "available": false
+        },
+        {
+         "cabinClass": "J",
+         "available": false
+        },
+        {
+         "cabinClass": "F",
+         "available": false
+        }
+       ]
+      }
+     ],
+     "cabins": [
+      {
+       "id": "GRU_DXB_EK262_2143637996_Y",
+       "status": "AVAILABLE",
+       "cabinClass": "Y",
+       "brandInformation": [
+        {
+         "id": "GRU_DXB_EK262_2143637996_Y_SAVER",
+         "status": "SOLD_OUT",
+         "fareBrand": "SAVER",
+         "cabinClass": "Y",
+         "brandIndicator": "P"
+        },
+        {
+         "id": "GRU_DXB_EK262_2143637996_Y_FLEX",
+         "status": "AVAILABLE",
+         "fareBasisCode": "ULEESBR4",
+         "lowestCabinPrice": true,
+         "lowestBoundPrice": true,
+         "seatsAvailable": 9,
+         "fareBrand": "FLEX",
+         "cabinClass": "Y",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_W_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_Y_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_GRU_EK261_2081075828_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEX"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "U",
+           "airSegment": "GRU_DXB_EK262"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_DXB_EK262"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 4104.32,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 938.28,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 862.56,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "ULEESBR4",
+             "total": [
+              {
+               "amount": 4104.32,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 938.28,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 75.72,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 862.56,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 3166.04,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 635,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 3166.04,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 635,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "S"
+        },
+        {
+         "id": "GRU_DXB_EK262_2143637996_Y_FLEXPLUS",
+         "status": "AVAILABLE",
+         "fareBasisCode": "XLRZFBR4",
+         "lowestCabinPrice": false,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 9,
+         "fareBrand": "FLEXPLUS",
+         "cabinClass": "Y",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_W_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_Y_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_GRU_EK261_2081075828_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEX"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "X",
+           "airSegment": "GRU_DXB_EK262"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_DXB_EK262"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 7833.78,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 938.28,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 862.56,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "XLRZFBR4",
+             "total": [
+              {
+               "amount": 7833.78,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 938.28,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 75.72,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 862.56,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 6895.5,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 1383,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 6895.5,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 1383,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "F"
+        }
+       ]
+      },
+      {
+       "id": "GRU_DXB_EK262_2143637996_W",
+       "status": "AVAILABLE",
+       "cabinClass": "W",
+       "brandInformation": [
+        {
+         "id": "GRU_DXB_EK262_2143637996_W_FLEXPLUS",
+         "status": "AVAILABLE",
+         "fareBasisCode": "ELPZFBR4",
+         "lowestCabinPrice": true,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 9,
+         "fareBrand": "FLEXPLUS",
+         "cabinClass": "W",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_W_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_Y_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_GRU_EK261_2081075828_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEX"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "E",
+           "airSegment": "GRU_DXB_EK262"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_DXB_EK262"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 8078.09,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 938.28,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 862.56,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "ELPZFBR4",
+             "total": [
+              {
+               "amount": 8078.09,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 938.28,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 75.72,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 862.56,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 7139.81,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 1432,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 7139.81,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 1432,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "F"
+        }
+       ]
+      },
+      {
+       "id": "GRU_DXB_EK262_2143637996_J",
+       "status": "AVAILABLE",
+       "cabinClass": "J",
+       "brandInformation": [
+        {
+         "id": "GRU_DXB_EK262_2143637996_J_SPECIAL",
+         "status": "SOLD_OUT",
+         "fareBrand": "SPECIAL",
+         "cabinClass": "J",
+         "brandIndicator": "R"
+        },
+        {
+         "id": "GRU_DXB_EK262_2143637996_J_SAVER",
+         "status": "SOLD_OUT",
+         "fareBrand": "SAVER",
+         "cabinClass": "J",
+         "brandIndicator": "P"
+        },
+        {
+         "id": "GRU_DXB_EK262_2143637996_J_FLEX",
+         "status": "AVAILABLE",
+         "fareBasisCode": "IEEESBR4",
+         "lowestCabinPrice": true,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 9,
+         "fareBrand": "FLEX",
+         "cabinClass": "J",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_W_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEX",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_Y_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_GRU_EK261_2081075828_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEX"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "I",
+           "airSegment": "GRU_DXB_EK262"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_DXB_EK262"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 17895.32,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 4089.36,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 4013.64,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "IEEESBR4",
+             "total": [
+              {
+               "amount": 17895.32,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 4089.36,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 75.72,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 4013.64,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 13805.96,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 2769,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 13805.96,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 2769,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "S"
+        },
+        {
+         "id": "GRU_DXB_EK262_2143637996_J_FLEXPLUS",
+         "status": "AVAILABLE",
+         "fareBasisCode": "CRRZFBR4",
+         "lowestCabinPrice": false,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 9,
+         "fareBrand": "FLEXPLUS",
+         "cabinClass": "J",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_W_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEX",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_Y_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_GRU_EK261_2081075828_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEX"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "C",
+           "airSegment": "GRU_DXB_EK262"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_DXB_EK262"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 23160.43,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 4089.36,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 4013.64,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "CRRZFBR4",
+             "total": [
+              {
+               "amount": 23160.43,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 4089.36,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 75.72,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 4013.64,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 19071.07,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 3825,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 19071.07,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 3825,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "F"
+        }
+       ]
+      },
+      {
+       "id": "GRU_DXB_EK262_2143637996_F",
+       "status": "AVAILABLE",
+       "cabinClass": "F",
+       "brandInformation": [
+        {
+         "id": "GRU_DXB_EK262_2143637996_F_FLEX",
+         "status": "AVAILABLE",
+         "fareBasisCode": "AEEESBR4",
+         "lowestCabinPrice": true,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 6,
+         "fareBrand": "FLEX",
+         "cabinClass": "F",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_F_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEX",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "A",
+           "airSegment": "GRU_DXB_EK262"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_DXB_EK262"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 43338.36,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 4089.36,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 4013.64,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "AEEESBR4",
+             "total": [
+              {
+               "amount": 43338.36,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 4089.36,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 75.72,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 4013.64,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 39249,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 7872,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 39249,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 7872,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "S"
+        },
+        {
+         "id": "GRU_DXB_EK262_2143637996_F_FLEXPLUS",
+         "status": "AVAILABLE",
+         "fareBasisCode": "FRRZFBR4",
+         "lowestCabinPrice": false,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 6,
+         "fareBrand": "FLEXPLUS",
+         "cabinClass": "F",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_F_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEX",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "F",
+           "airSegment": "GRU_DXB_EK262"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_DXB_EK262"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 61357.41,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 4089.36,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 4013.64,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "FRRZFBR4",
+             "total": [
+              {
+               "amount": 61357.41,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 4089.36,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 75.72,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 4013.64,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 57268.05,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 11486,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 57268.05,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 11486,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "F"
+        }
+       ]
+      }
+     ],
+     "groupType": "PRIMARY",
+     "groupTypeWithCarrier": "EK_AVAILABLE"
+    },
+    {
+     "id": "GRU_LIS_LIS_DXB_EK4815_EK192_358541756",
+     "numberOfConnections": 1,
+     "ondDuration": "20H15M",
+     "travelDays": 0,
+     "airSegments": [
+      {
+       "id": "GRU_LIS_EK4815",
+       "carrierCode": "EK",
+       "flightNumber": "4815",
+       "segmentType": "FLT",
+       "sequenceNumber": 1,
+       "departure": "GRU",
+       "arrival": "LIS",
+       "departureDateTime": "2026-11-10T21:45:00",
+       "arrivalDateTime": "2026-11-11T10:35:00",
+       "aircraftType": "339",
+       "stopOver": false,
+       "operatingCarrierCode": "TP",
+       "marketingCarrierCode": "EK",
+       "duration": "9H50M",
+       "ond": "GRUDXB",
+       "connection": false,
+       "minutesToDepart": 0,
+       "dayChangeCount": 1,
+       "newSegmentNumber": 0,
+       "rewardUpgradesAvailability": [
+        {
+         "cabinClass": "W",
+         "available": false
+        },
+        {
+         "cabinClass": "J",
+         "available": false
+        },
+        {
+         "cabinClass": "F",
+         "available": false
+        }
+       ]
+      },
+      {
+       "id": "LIS_DXB_EK192",
+       "carrierCode": "EK",
+       "flightNumber": "192",
+       "segmentType": "FLT",
+       "sequenceNumber": 2,
+       "departure": "LIS",
+       "arrival": "DXB",
+       "departureDateTime": "2026-11-11T13:35:00",
+       "arrivalDateTime": "2026-11-12T01:00:00",
+       "aircraftType": "77W",
+       "stopOver": false,
+       "operatingCarrierCode": "EK",
+       "marketingCarrierCode": "EK",
+       "duration": "7H25M",
+       "ond": "GRUDXB",
+       "connection": true,
+       "connectionLayover": "3H0M",
+       "minutesToDepart": 0,
+       "dayChangeCount": 1,
+       "newSegmentNumber": 0,
+       "rewardUpgradesAvailability": [
+        {
+         "cabinClass": "W",
+         "available": false
+        },
+        {
+         "cabinClass": "J",
+         "available": false
+        },
+        {
+         "cabinClass": "F",
+         "available": false
+        }
+       ]
+      }
+     ],
+     "cabins": [
+      {
+       "id": "GRU_LIS_LIS_DXB_EK4815_EK192_358541756_Y",
+       "status": "AVAILABLE",
+       "cabinClass": "Y",
+       "brandInformation": [
+        {
+         "id": "GRU_LIS_LIS_DXB_EK4815_EK192_358541756_Y_SAVER",
+         "status": "AVAILABLE",
+         "fareBasisCode": "LLEIPBR4",
+         "lowestCabinPrice": true,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 4,
+         "fareBrand": "SAVER",
+         "cabinClass": "Y",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_W_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_Y_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEX"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "L",
+           "airSegment": "GRU_LIS_EK4815"
+          },
+          {
+           "rbd": "L",
+           "airSegment": "LIS_DXB_EK192"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_LIS_EK4815",
+           "LIS_DXB_EK192"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 7738.51,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 1132.19,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 862.55,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "LLEIPBR4",
+             "total": [
+              {
+               "amount": 7738.51,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 1132.19,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 269.64,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 862.55,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 6606.32,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 1325,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 6606.32,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 1325,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "P"
+        },
+        {
+         "id": "GRU_LIS_LIS_DXB_EK4815_EK192_358541756_Y_FLEX",
+         "status": "AVAILABLE",
+         "fareBasisCode": "KLEESBR4",
+         "lowestCabinPrice": false,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 4,
+         "fareBrand": "FLEX",
+         "cabinClass": "Y",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_W_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_Y_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_GRU_EK261_2081075828_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEX"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "K",
+           "airSegment": "GRU_LIS_EK4815"
+          },
+          {
+           "rbd": "K",
+           "airSegment": "LIS_DXB_EK192"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_LIS_EK4815",
+           "LIS_DXB_EK192"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 9692.98,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 1132.19,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 862.55,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "KLEESBR4",
+             "total": [
+              {
+               "amount": 9692.98,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 1132.19,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 269.64,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 862.55,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 8560.79,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 1717,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 8560.79,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 1717,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "S"
+        },
+        {
+         "id": "GRU_LIS_LIS_DXB_EK4815_EK192_358541756_Y_FLEXPLUS",
+         "status": "AVAILABLE",
+         "fareBasisCode": "XLRZFBR4",
+         "lowestCabinPrice": false,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 4,
+         "fareBrand": "FLEXPLUS",
+         "cabinClass": "Y",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_W_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_Y_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_GRU_EK261_2081075828_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEX"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "X",
+           "airSegment": "GRU_LIS_EK4815"
+          },
+          {
+           "rbd": "X",
+           "airSegment": "LIS_DXB_EK192"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_LIS_EK4815",
+           "LIS_DXB_EK192"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 16543.61,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 1132.19,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 862.55,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "XLRZFBR4",
+             "total": [
+              {
+               "amount": 16543.61,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 1132.19,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 269.64,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 862.55,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 15411.42,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 3091,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 15411.42,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 3091,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "F"
+        }
+       ]
+      },
+      {
+       "id": "GRU_LIS_LIS_DXB_EK4815_EK192_358541756_W",
+       "status": "SOLD_OUT",
+       "cabinClass": "W"
+      },
+      {
+       "id": "GRU_LIS_LIS_DXB_EK4815_EK192_358541756_J",
+       "status": "AVAILABLE",
+       "cabinClass": "J",
+       "brandInformation": [
+        {
+         "id": "GRU_LIS_LIS_DXB_EK4815_EK192_358541756_J_SPECIAL",
+         "status": "SOLD_OUT",
+         "fareBrand": "SPECIAL",
+         "cabinClass": "J",
+         "brandIndicator": "R"
+        },
+        {
+         "id": "GRU_LIS_LIS_DXB_EK4815_EK192_358541756_J_SAVER",
+         "status": "SOLD_OUT",
+         "fareBrand": "SAVER",
+         "cabinClass": "J",
+         "brandIndicator": "P"
+        },
+        {
+         "id": "GRU_LIS_LIS_DXB_EK4815_EK192_358541756_J_FLEX",
+         "status": "AVAILABLE",
+         "fareBasisCode": "IEEESBR4",
+         "lowestCabinPrice": true,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 4,
+         "fareBrand": "FLEX",
+         "cabinClass": "J",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_W_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEX",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_Y_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_GRU_EK261_2081075828_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEX"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "I",
+           "airSegment": "GRU_LIS_EK4815"
+          },
+          {
+           "rbd": "I",
+           "airSegment": "LIS_DXB_EK192"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_LIS_EK4815",
+           "LIS_DXB_EK192"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 39533.59,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 4283.28,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 4013.64,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "IEEESBR4",
+             "total": [
+              {
+               "amount": 39533.59,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 4283.28,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 269.64,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 4013.64,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 35250.31,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 7070,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 35250.31,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 7070,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "S"
+        },
+        {
+         "id": "GRU_LIS_LIS_DXB_EK4815_EK192_358541756_J_FLEXPLUS",
+         "status": "AVAILABLE",
+         "fareBasisCode": "CRRZFBR4",
+         "lowestCabinPrice": false,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 4,
+         "fareBrand": "FLEXPLUS",
+         "cabinClass": "J",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_W_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEX",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_Y_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_GRU_EK261_2081075828_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEX"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "C",
+           "airSegment": "GRU_LIS_EK4815"
+          },
+          {
+           "rbd": "C",
+           "airSegment": "LIS_DXB_EK192"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_LIS_EK4815",
+           "LIS_DXB_EK192"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 45167.66,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 4283.28,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 4013.64,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "CRRZFBR4",
+             "total": [
+              {
+               "amount": 45167.66,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 4283.28,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 269.64,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 4013.64,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 40884.38,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 8200,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 40884.38,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 8200,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "F"
+        }
+       ]
+      },
+      {
+       "id": "GRU_LIS_LIS_DXB_EK4815_EK192_358541756_F",
+       "status": "PARTIALLY_AVAILABLE",
+       "cabinClass": "F",
+       "brandInformation": [
+        {
+         "id": "GRU_LIS_LIS_DXB_EK4815_EK192_358541756_F_FLEX",
+         "status": "AVAILABLE",
+         "fareBasisCode": "AEEESBR4",
+         "lowestCabinPrice": true,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 4,
+         "fareBrand": "FLEX",
+         "cabinClass": "F",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_F_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEX",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "C",
+           "airSegment": "GRU_LIS_EK4815"
+          },
+          {
+           "rbd": "A",
+           "airSegment": "LIS_DXB_EK192"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_LIS_EK4815",
+           "LIS_DXB_EK192"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 64483.04,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 4283.28,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 4013.64,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "AEEESBR4",
+             "total": [
+              {
+               "amount": 64483.04,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 4283.28,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 269.64,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 4013.64,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 60199.76,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 12074,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 60199.76,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 12074,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "S"
+        },
+        {
+         "id": "GRU_LIS_LIS_DXB_EK4815_EK192_358541756_F_FLEXPLUS",
+         "status": "AVAILABLE",
+         "fareBasisCode": "FRRZFBR4",
+         "lowestCabinPrice": false,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 4,
+         "fareBrand": "FLEXPLUS",
+         "cabinClass": "F",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_F_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEX",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "J",
+           "airSegment": "GRU_LIS_EK4815"
+          },
+          {
+           "rbd": "F",
+           "airSegment": "LIS_DXB_EK192"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_LIS_EK4815",
+           "LIS_DXB_EK192"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 82651.65,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 4283.28,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 4013.64,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "FRRZFBR4",
+             "total": [
+              {
+               "amount": 82651.65,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 4283.28,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 269.64,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 4013.64,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 78368.37,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 15718,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 78368.37,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 15718,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "F"
+        }
+       ],
+       "partialCabins": [
+        {
+         "cabin": "J",
+         "airSegment": "GRU_LIS_EK4815"
+        },
+        {
+         "cabin": "F",
+         "airSegment": "LIS_DXB_EK192"
+        }
+       ]
+      }
+     ],
+     "groupType": "OTHER",
+     "groupTypeWithCarrier": "OAL_AVAILABLE"
+    },
+    {
+     "id": "GRU_LIS_LIS_DXB_EK4815_EK194_82418052",
+     "numberOfConnections": 1,
+     "ondDuration": "27H30M",
+     "travelDays": 1,
+     "airSegments": [
+      {
+       "id": "GRU_LIS_EK4815",
+       "carrierCode": "EK",
+       "flightNumber": "4815",
+       "segmentType": "FLT",
+       "sequenceNumber": 1,
+       "departure": "GRU",
+       "arrival": "LIS",
+       "departureDateTime": "2026-11-10T21:45:00",
+       "arrivalDateTime": "2026-11-11T10:35:00",
+       "aircraftType": "339",
+       "stopOver": false,
+       "operatingCarrierCode": "TP",
+       "marketingCarrierCode": "EK",
+       "duration": "9H50M",
+       "ond": "GRUDXB",
+       "connection": false,
+       "minutesToDepart": 0,
+       "dayChangeCount": 1,
+       "newSegmentNumber": 0,
+       "rewardUpgradesAvailability": [
+        {
+         "cabinClass": "W",
+         "available": false
+        },
+        {
+         "cabinClass": "J",
+         "available": false
+        },
+        {
+         "cabinClass": "F",
+         "available": false
+        }
+       ]
+      },
+      {
+       "id": "LIS_DXB_EK194",
+       "carrierCode": "EK",
+       "flightNumber": "194",
+       "segmentType": "FLT",
+       "sequenceNumber": 2,
+       "departure": "LIS",
+       "arrival": "DXB",
+       "departureDateTime": "2026-11-11T20:45:00",
+       "arrivalDateTime": "2026-11-12T08:15:00",
+       "aircraftType": "77W",
+       "stopOver": false,
+       "operatingCarrierCode": "EK",
+       "marketingCarrierCode": "EK",
+       "duration": "7H30M",
+       "ond": "GRUDXB",
+       "connection": true,
+       "connectionLayover": "10H10M",
+       "minutesToDepart": 0,
+       "dayChangeCount": 1,
+       "newSegmentNumber": 0,
+       "rewardUpgradesAvailability": [
+        {
+         "cabinClass": "W",
+         "available": false
+        },
+        {
+         "cabinClass": "J",
+         "available": false
+        },
+        {
+         "cabinClass": "F",
+         "available": false
+        }
+       ]
+      }
+     ],
+     "cabins": [
+      {
+       "id": "GRU_LIS_LIS_DXB_EK4815_EK194_82418052_Y",
+       "status": "AVAILABLE",
+       "cabinClass": "Y",
+       "brandInformation": [
+        {
+         "id": "GRU_LIS_LIS_DXB_EK4815_EK194_82418052_Y_SAVER",
+         "status": "AVAILABLE",
+         "fareBasisCode": "LLEIPBR4",
+         "lowestCabinPrice": true,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 1,
+         "fareBrand": "SAVER",
+         "cabinClass": "Y",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_W_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_Y_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEX"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "L",
+           "airSegment": "GRU_LIS_EK4815"
+          },
+          {
+           "rbd": "L",
+           "airSegment": "LIS_DXB_EK194"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_LIS_EK4815",
+           "LIS_DXB_EK194"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 7738.51,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 1132.19,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 862.55,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "LLEIPBR4",
+             "total": [
+              {
+               "amount": 7738.51,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 1132.19,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 269.64,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 862.55,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 6606.32,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 1325,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 6606.32,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 1325,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "P"
+        },
+        {
+         "id": "GRU_LIS_LIS_DXB_EK4815_EK194_82418052_Y_FLEX",
+         "status": "AVAILABLE",
+         "fareBasisCode": "KLEESBR4",
+         "lowestCabinPrice": false,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 4,
+         "fareBrand": "FLEX",
+         "cabinClass": "Y",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_W_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_Y_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_GRU_EK261_2081075828_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEX"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "K",
+           "airSegment": "GRU_LIS_EK4815"
+          },
+          {
+           "rbd": "K",
+           "airSegment": "LIS_DXB_EK194"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_LIS_EK4815",
+           "LIS_DXB_EK194"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 9692.98,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 1132.19,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 862.55,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "KLEESBR4",
+             "total": [
+              {
+               "amount": 9692.98,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 1132.19,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 269.64,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 862.55,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 8560.79,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 1717,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 8560.79,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 1717,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "S"
+        },
+        {
+         "id": "GRU_LIS_LIS_DXB_EK4815_EK194_82418052_Y_FLEXPLUS",
+         "status": "AVAILABLE",
+         "fareBasisCode": "XLRZFBR4",
+         "lowestCabinPrice": false,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 4,
+         "fareBrand": "FLEXPLUS",
+         "cabinClass": "Y",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_W_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_Y_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_GRU_EK261_2081075828_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEX"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "X",
+           "airSegment": "GRU_LIS_EK4815"
+          },
+          {
+           "rbd": "X",
+           "airSegment": "LIS_DXB_EK194"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_LIS_EK4815",
+           "LIS_DXB_EK194"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 16543.61,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 1132.19,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 862.55,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "XLRZFBR4",
+             "total": [
+              {
+               "amount": 16543.61,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 1132.19,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 269.64,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 862.55,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 15411.42,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 3091,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 15411.42,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 3091,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "F"
+        }
+       ]
+      },
+      {
+       "id": "GRU_LIS_LIS_DXB_EK4815_EK194_82418052_W",
+       "status": "SOLD_OUT",
+       "cabinClass": "W"
+      },
+      {
+       "id": "GRU_LIS_LIS_DXB_EK4815_EK194_82418052_J",
+       "status": "AVAILABLE",
+       "cabinClass": "J",
+       "brandInformation": [
+        {
+         "id": "GRU_LIS_LIS_DXB_EK4815_EK194_82418052_J_SPECIAL",
+         "status": "AVAILABLE",
+         "fareBasisCode": "HEEERBR4",
+         "lowestCabinPrice": true,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 4,
+         "fareBrand": "SPECIAL",
+         "cabinClass": "J",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_W_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_Y_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_GRU_EK261_2081075828_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEX"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "H",
+           "airSegment": "GRU_LIS_EK4815"
+          },
+          {
+           "rbd": "H",
+           "airSegment": "LIS_DXB_EK194"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_LIS_EK4815",
+           "LIS_DXB_EK194"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 29546.84,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 4283.28,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 4013.64,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "HEEERBR4",
+             "total": [
+              {
+               "amount": 29546.84,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 4283.28,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 269.64,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 4013.64,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 25263.56,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 5067,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 25263.56,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 5067,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "R"
+        },
+        {
+         "id": "GRU_LIS_LIS_DXB_EK4815_EK194_82418052_J_SAVER",
+         "status": "AVAILABLE",
+         "fareBasisCode": "OEEEPBR4",
+         "lowestCabinPrice": false,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 4,
+         "fareBrand": "SAVER",
+         "cabinClass": "J",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_W_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEX",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_Y_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_GRU_EK261_2081075828_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEX"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "O",
+           "airSegment": "GRU_LIS_EK4815"
+          },
+          {
+           "rbd": "O",
+           "airSegment": "LIS_DXB_EK194"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_LIS_EK4815",
+           "LIS_DXB_EK194"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 30633.76,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 4283.28,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 4013.64,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "OEEEPBR4",
+             "total": [
+              {
+               "amount": 30633.76,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 4283.28,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 269.64,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 4013.64,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 26350.48,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 5285,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 26350.48,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 5285,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "P"
+        },
+        {
+         "id": "GRU_LIS_LIS_DXB_EK4815_EK194_82418052_J_FLEX",
+         "status": "AVAILABLE",
+         "fareBasisCode": "IEEESBR4",
+         "lowestCabinPrice": false,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 4,
+         "fareBrand": "FLEX",
+         "cabinClass": "J",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_W_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEX",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_Y_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_GRU_EK261_2081075828_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEX"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "I",
+           "airSegment": "GRU_LIS_EK4815"
+          },
+          {
+           "rbd": "I",
+           "airSegment": "LIS_DXB_EK194"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_LIS_EK4815",
+           "LIS_DXB_EK194"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 39533.59,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 4283.28,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 4013.64,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "IEEESBR4",
+             "total": [
+              {
+               "amount": 39533.59,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 4283.28,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 269.64,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 4013.64,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 35250.31,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 7070,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 35250.31,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 7070,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "S"
+        },
+        {
+         "id": "GRU_LIS_LIS_DXB_EK4815_EK194_82418052_J_FLEXPLUS",
+         "status": "AVAILABLE",
+         "fareBasisCode": "CRRZFBR4",
+         "lowestCabinPrice": false,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 4,
+         "fareBrand": "FLEXPLUS",
+         "cabinClass": "J",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_W_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEX",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_Y_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_GRU_EK261_2081075828_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_Y_FLEX",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_Y_FLEX"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "C",
+           "airSegment": "GRU_LIS_EK4815"
+          },
+          {
+           "rbd": "C",
+           "airSegment": "LIS_DXB_EK194"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_LIS_EK4815",
+           "LIS_DXB_EK194"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 45167.66,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 4283.28,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 4013.64,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "CRRZFBR4",
+             "total": [
+              {
+               "amount": 45167.66,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 4283.28,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 269.64,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 4013.64,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 40884.38,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 8200,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 40884.38,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 8200,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "F"
+        }
+       ]
+      },
+      {
+       "id": "GRU_LIS_LIS_DXB_EK4815_EK194_82418052_F",
+       "status": "PARTIALLY_AVAILABLE",
+       "cabinClass": "F",
+       "brandInformation": [
+        {
+         "id": "GRU_LIS_LIS_DXB_EK4815_EK194_82418052_F_FLEX",
+         "status": "AVAILABLE",
+         "fareBasisCode": "AEEESBR4",
+         "lowestCabinPrice": true,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 4,
+         "fareBrand": "FLEX",
+         "cabinClass": "F",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_F_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEX",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "C",
+           "airSegment": "GRU_LIS_EK4815"
+          },
+          {
+           "rbd": "A",
+           "airSegment": "LIS_DXB_EK194"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_LIS_EK4815",
+           "LIS_DXB_EK194"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 64483.04,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 4283.28,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 4013.64,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "AEEESBR4",
+             "total": [
+              {
+               "amount": 64483.04,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 4283.28,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 269.64,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 4013.64,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 60199.76,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 12074,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 60199.76,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 12074,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "S"
+        },
+        {
+         "id": "GRU_LIS_LIS_DXB_EK4815_EK194_82418052_F_FLEXPLUS",
+         "status": "AVAILABLE",
+         "fareBasisCode": "FRRZFBR4",
+         "lowestCabinPrice": false,
+         "lowestBoundPrice": false,
+         "seatsAvailable": 4,
+         "fareBrand": "FLEXPLUS",
+         "cabinClass": "F",
+         "combinableWith": [
+          "DXB_GRU_EK261_2081075828_F_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_F_FLEX",
+          "DXB_GRU_EK261_2081075828_J_FLEXPLUS",
+          "DXB_GRU_EK261_2081075828_J_FLEX",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK193_EK4814_120348616_J_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_F_FLEXPLUS",
+          "DXB_LIS_LIS_GRU_EK191_EK4814_1306705724_J_FLEXPLUS"
+         ],
+         "reservationClass": [
+          {
+           "rbd": "J",
+           "airSegment": "GRU_LIS_EK4815"
+          },
+          {
+           "rbd": "F",
+           "airSegment": "LIS_DXB_EK194"
+          }
+         ],
+         "marketingInformation": {
+          "origin": "GRU",
+          "destination": "DXB",
+          "marketingAirline": "EK",
+          "associatedSegments": [
+           "GRU_LIS_EK4815",
+           "LIS_DXB_EK194"
+          ]
+         },
+         "priceDetails": {
+          "summary": {
+           "total": [
+            {
+             "amount": 82651.65,
+             "type": "CASH"
+            }
+           ],
+           "taxTotal": [
+            {
+             "amount": 4283.28,
+             "type": "CASH"
+            }
+           ],
+           "fuelSurchargeTotal": [
+            {
+             "amount": 4013.64,
+             "type": "CASH"
+            }
+           ],
+           "personTypes": [
+            {
+             "quantity": 1,
+             "personType": "ADT",
+             "fareBasis": "FRRZFBR4",
+             "total": [
+              {
+               "amount": 82651.65,
+               "type": "CASH"
+              }
+             ],
+             "taxTotal": [
+              {
+               "amount": 4283.28,
+               "type": "CASH"
+              }
+             ],
+             "taxTotalExcludingYQ": [
+              {
+               "amount": 269.64,
+               "type": "CASH"
+              }
+             ],
+             "fuelSurchargeTotal": [
+              {
+               "amount": 4013.64,
+               "type": "CASH"
+              }
+             ],
+             "baseFare": [
+              {
+               "amount": 78368.37,
+               "type": "CASH"
+              }
+             ],
+             "equivalentBase": [
+              {
+               "amount": 15718,
+               "type": "CASH",
+               "currency": "USD"
+              }
+             ]
+            }
+           ],
+           "baseTotal": [
+            {
+             "amount": 78368.37,
+             "type": "CASH"
+            }
+           ],
+           "equivalentBase": [
+            {
+             "amount": 15718,
+             "type": "CASH",
+             "currency": "USD"
+            }
+           ]
+          }
+         },
+         "brandIndicator": "F"
+        }
+       ],
+       "partialCabins": [
+        {
+         "cabin": "J",
+         "airSegment": "GRU_LIS_EK4815"
+        },
+        {
+         "cabin": "F",
+         "airSegment": "LIS_DXB_EK194"
+        }
+       ]
+      }
+     ],
+     "groupType": "OTHER",
+     "groupTypeWithCarrier": "OAL_AVAILABLE"
+    }
+   ],
+   "cabinApplied": "Y",
+   "nextAvailableCabin": ""
+  }
+ ],
+ "transactionId": "<scrubbed>",
+ "flightSearchId": "<scrubbed>",
+ "analyticsProps": {
+  "isSearchChanged": true,
+  "searchMethod": "GENERAL",
+  "searchDetails": "",
+  "flightSearchId": "<scrubbed>"
+ },
+ "headers": {
+  "ek-page-size": "10",
+  "ek-current-page": "1",
+  "ek-total-pages": "1",
+  "ek-record-count": "3"
+ }
+}

@@ -1,0 +1,26 @@
+{
+ "channel": "WEB_DESKTOP",
+ "itineraries": [
+  {
+   "origin": "GRU",
+   "destination": "DOH",
+   "departureDate": "2026-11-10",
+   "isRequested": true
+  },
+  {
+   "origin": "DOH",
+   "destination": "GRU",
+   "departureDate": "2026-11-17",
+   "isRequested": false
+  }
+ ],
+ "cabinClass": "ECONOMY",
+ "ignoreInvalidPromoCode": true,
+ "passengers": [
+  {
+   "type": "ADT",
+   "count": 1
+  }
+ ],
+ "flexibility": 3
+}

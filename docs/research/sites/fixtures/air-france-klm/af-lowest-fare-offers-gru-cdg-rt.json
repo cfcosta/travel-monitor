@@ -1,0 +1,413 @@
+{
+  "captured": "2026-10-06",
+  "site": "wwws.airfrance.com.br",
+  "method": "POST",
+  "url": "/gql/v1?bookingFlow=LEISURE&operationName=SharedSearchLowestFareOffersForSearchQuery",
+  "status": 200,
+  "request": {
+    "operationName": "SharedSearchLowestFareOffersForSearchQuery",
+    "variables": {
+      "lowestFareOffersRequest": {
+        "bookingFlow": "LEISURE",
+        "withUpsellCabins": true,
+        "passengers": [
+          {
+            "id": 1,
+            "type": "ADT"
+          }
+        ],
+        "commercialCabins": [
+          "ECONOMY"
+        ],
+        "type": "DAY",
+        "requestedConnections": [
+          {
+            "departureDate": "2026-11-10",
+            "dateInterval": "2026-11-07/2026-11-13",
+            "origin": {
+              "type": "AIRPORT",
+              "code": "GRU"
+            },
+            "destination": {
+              "type": "AIRPORT",
+              "code": "CDG"
+            }
+          },
+          {
+            "departureDate": "2026-11-17",
+            "dateInterval": "2026-11-13/2026-11-19",
+            "origin": {
+              "type": "AIRPORT",
+              "code": "CDG"
+            },
+            "destination": {
+              "type": "AIRPORT",
+              "code": "GRU"
+            }
+          }
+        ]
+      },
+      "activeConnection": 0,
+      "searchStateUuid": "1ce1c732-1a57-4c80-b780-a1e3d7bf7c97",
+      "bookingFlow": "LEISURE"
+    },
+    "extensions": {
+      "hashcash": {
+        "version": 2,
+        "timestamp": "2026-10-06T05:50:36.502Z",
+        "hash": "1ac99581243ada34cc01585add1ace77c2276d3a7a2ce475ba64960656cbd528-2014"
+      },
+      "persistedQuery": {
+        "version": 1,
+        "sha256Hash": "da21c63708940f578da4e9fb30c1fdf41ae6e7bf4fe8851257c351d66b5dff80"
+      }
+    }
+  },
+  "response": {
+    "data": {
+      "lowestFareOffers": {
+        "contextInformation": null,
+        "disclaimer": {
+          "displayPriceText": "Preços em BRL. Taxas e adicionais inclusos. Não se aplicam tarifa de emissão mas pode ser aplicado um adicional de cartão de crédito. Os preços apresentados são calculados ao câmbio do dia e podem variar conforme a disponibilidade. Você verá o valor final ao selecionar sua forma de pagamento. As condições do bilhete variam conforme a base tarifária. Pague em até 4 vezes sem juros no cartão de crédito. Preços válidos para compras no site airfrance.com.br.",
+          "totalPriceText": "Preços em BRL. Taxas e adicionais inclusos. Não se aplicam tarifa de emissão mas pode ser aplicado um adicional de cartão de crédito. Os preços apresentados são calculados ao câmbio do dia e podem variar conforme a disponibilidade. Você verá o valor final ao selecionar sua forma de pagamento. As condições do bilhete variam conforme a base tarifária. Pague em até 4 vezes sem juros no cartão de crédito. Preços válidos para compras no site airfrance.com.br.",
+          "__typename": "LowestOffersDisclaimer"
+        },
+        "lowestOffers": [
+          {
+            "connections": [
+              {
+                "price": {
+                  "amount": 2400.14,
+                  "currencyCode": "BRL",
+                  "__typename": "Money"
+                },
+                "tax": null,
+                "__typename": "LowestOffersFlightProductConnection"
+              },
+              {
+                "price": {
+                  "amount": 2400.13,
+                  "currencyCode": "BRL",
+                  "__typename": "Money"
+                },
+                "tax": null,
+                "__typename": "LowestOffersFlightProductConnection"
+              }
+            ],
+            "currency": "BRL",
+            "displayPrice": 2400.14,
+            "displayPriceItinerary": 4800.27,
+            "flightDate": "2026-11-07",
+            "isPromoFare": true,
+            "noFlight": false,
+            "promoFareTitle": "Tarifa Promo",
+            "resourceIds": {
+              "availableOffers": "/a/v3/available-offers?d=q0aZpIHlXZTORnVmipUhtHYF1UdA7RhzAtHgiicWs34DW4IYSa6uxdZvhSjCHEUyQLTjIEqwD3hA5HBOL0GksTftq9EGnI0MjMx0DQ11DczhvclqyISKe1AorIkBT1y1KCPNUIXOLu5YFCJax7GIhg_EZfHQQZ9YYNzgcI6hGbpzsNuCxTnY3U2Uc2JrAQ==826ee8dcda6",
+              "__typename": "LowestOffersFlightProductLinks"
+            },
+            "splitTaxDetails": null,
+            "totalPrice": 2400.14,
+            "totalPriceItinerary": 4800.27,
+            "totalTaxDetails": null,
+            "destination": {
+              "code": "CDG",
+              "__typename": "LowestOffersStation"
+            },
+            "origin": {
+              "code": "GRU",
+              "__typename": "LowestOffersStation"
+            },
+            "__typename": "LowestOffersFlightProduct"
+          },
+          {
+            "connections": [
+              {
+                "price": {
+                  "amount": 2395.47,
+                  "currencyCode": "BRL",
+                  "__typename": "Money"
+                },
+                "tax": null,
+                "__typename": "LowestOffersFlightProductConnection"
+              },
+              {
+                "price": {
+                  "amount": 2395.45,
+                  "currencyCode": "BRL",
+                  "__typename": "Money"
+                },
+                "tax": null,
+                "__typename": "LowestOffersFlightProductConnection"
+              }
+            ],
+            "currency": "BRL",
+            "displayPrice": 2395.47,
+            "displayPriceItinerary": 4790.92,
+            "flightDate": "2026-11-08",
+            "isPromoFare": true,
+            "noFlight": false,
+            "promoFareTitle": "Tarifa Promo",
+            "resourceIds": {
+              "availableOffers": "/a/v3/available-offers?d=q0aZpIHlXZTORnVmipUhtHYF1UdA7RhzAtHgiicWs34DW4IYSa6uxdZvhSjCHEUyQLTjIEqwD3hA5HBOL0GksTftq9EGnI0MjMx0DQ11DSzgvclqyISKe1AorIkBT1y1KCPNUIXOLu5YFCJax7GIhg_EZfHQQZ9YYNzgcI6hObpzsNuCxTnY3U2Uc2JrAQ==6dea62ffc6c",
+              "__typename": "LowestOffersFlightProductLinks"
+            },
+            "splitTaxDetails": null,
+            "totalPrice": 2395.47,
+            "totalPriceItinerary": 4790.92,
+            "totalTaxDetails": null,
+            "destination": {
+              "code": "CDG",
+              "__typename": "LowestOffersStation"
+            },
+            "origin": {
+              "code": "GRU",
+              "__typename": "LowestOffersStation"
+            },
+            "__typename": "LowestOffersFlightProduct"
+          },
+          {
+            "connections": [
+              {
+                "price": {
+                  "amount": 2395.47,
+                  "currencyCode": "BRL",
+                  "__typename": "Money"
+                },
+                "tax": null,
+                "__typename": "LowestOffersFlightProductConnection"
+              },
+              {
+                "price": {
+                  "amount": 2395.45,
+                  "currencyCode": "BRL",
+                  "__typename": "Money"
+                },
+                "tax": null,
+                "__typename": "LowestOffersFlightProductConnection"
+              }
+            ],
+            "currency": "BRL",
+            "displayPrice": 2395.47,
+            "displayPriceItinerary": 4790.92,
+            "flightDate": "2026-11-09",
+            "isPromoFare": true,
+            "noFlight": false,
+            "promoFareTitle": "Tarifa Promo",
+            "resourceIds": {
+              "availableOffers": "/a/v3/available-offers?d=q0aZpIHlXZTORnVmipUhtHYF1UdA7RhzAtHgiicWs34DW4IYSa6uxdZvhSjCHEUyQLTjIEqwD3hA5HBOL0GksTftq9EGnI0MjMx0DQ11DSzhvclqyISKe1AorIkBT1y1KCPNUIXOLu5YFCJax7GIhg_EZfHQQZ9YYNzgcI6hObpzsNuCxTnY3U2Uc2JrAQ==9561bd1a5d7",
+              "__typename": "LowestOffersFlightProductLinks"
+            },
+            "splitTaxDetails": null,
+            "totalPrice": 2395.47,
+            "totalPriceItinerary": 4790.92,
+            "totalTaxDetails": null,
+            "destination": {
+              "code": "CDG",
+              "__typename": "LowestOffersStation"
+            },
+            "origin": {
+              "code": "GRU",
+              "__typename": "LowestOffersStation"
+            },
+            "__typename": "LowestOffersFlightProduct"
+          },
+          {
+            "connections": [
+              {
+                "price": {
+                  "amount": 2442.93,
+                  "currencyCode": "BRL",
+                  "__typename": "Money"
+                },
+                "tax": null,
+                "__typename": "LowestOffersFlightProductConnection"
+              },
+              {
+                "price": {
+                  "amount": 2378.13,
+                  "currencyCode": "BRL",
+                  "__typename": "Money"
+                },
+                "tax": null,
+                "__typename": "LowestOffersFlightProductConnection"
+              }
+            ],
+            "currency": "BRL",
+            "displayPrice": 2442.93,
+            "displayPriceItinerary": 4821.06,
+            "flightDate": "2026-11-10",
+            "isPromoFare": true,
+            "noFlight": false,
+            "promoFareTitle": "Tarifa Promo",
+            "resourceIds": {
+              "availableOffers": "/a/v3/available-offers?d=q0aZpIHlXZTORnVmipUhtHYF1UdA7RhzAtHgiicWs34DW4IYSa6uxdZvhSjCHEUyQLTjIEqwD3hA5HBOL0GksTftq9EGnI0MjMx0DQ11DQ3gvclqyISKe1AorIkBT1y1KCPNUIXOLu5YFCJax7GIhg_EZfHQQZ9YYNzgco4lunOw24LFOdjdTZRzYmsB06ba00e488d",
+              "__typename": "LowestOffersFlightProductLinks"
+            },
+            "splitTaxDetails": null,
+            "totalPrice": 2442.93,
+            "totalPriceItinerary": 4821.06,
+            "totalTaxDetails": null,
+            "destination": {
+              "code": "CDG",
+              "__typename": "LowestOffersStation"
+            },
+            "origin": {
+              "code": "GRU",
+              "__typename": "LowestOffersStation"
+            },
+            "__typename": "LowestOffersFlightProduct"
+          },
+          {
+            "connections": [
+              {
+                "price": {
+                  "amount": 2375.63,
+                  "currencyCode": "BRL",
+                  "__typename": "Money"
+                },
+                "tax": null,
+                "__typename": "LowestOffersFlightProductConnection"
+              },
+              {
+                "price": {
+                  "amount": 2375.62,
+                  "currencyCode": "BRL",
+                  "__typename": "Money"
+                },
+                "tax": null,
+                "__typename": "LowestOffersFlightProductConnection"
+              }
+            ],
+            "currency": "BRL",
+            "displayPrice": 2375.63,
+            "displayPriceItinerary": 4751.25,
+            "flightDate": "2026-11-11",
+            "isPromoFare": true,
+            "noFlight": false,
+            "promoFareTitle": "Tarifa Promo",
+            "resourceIds": {
+              "availableOffers": "/a/v3/available-offers?d=q0aZpIHlXZTORnVmipUhtHYF1UdA7RhzAtHgiicWs34DW4IYSa6uxdZvhSjCHEUyQLTjIEqwD3hA5HBOL0GksTftq9EGnI0MjMx0DQ2BCN6brIZMqLgHhcKaGPDEVYsy0gxV6OzijkUhonUci2j4QFwWDx30iQXGDS7nWKI7B7stWJyD3d1EOSe2FgA=5b3703d078d",
+              "__typename": "LowestOffersFlightProductLinks"
+            },
+            "splitTaxDetails": null,
+            "totalPrice": 2375.63,
+            "totalPriceItinerary": 4751.25,
+            "totalTaxDetails": null,
+            "destination": {
+              "code": "CDG",
+              "__typename": "LowestOffersStation"
+            },
+            "origin": {
+              "code": "GRU",
+              "__typename": "LowestOffersStation"
+            },
+            "__typename": "LowestOffersFlightProduct"
+          },
+          {
+            "connections": [
+              {
+                "price": {
+                  "amount": 2375.63,
+                  "currencyCode": "BRL",
+                  "__typename": "Money"
+                },
+                "tax": null,
+                "__typename": "LowestOffersFlightProductConnection"
+              },
+              {
+                "price": {
+                  "amount": 2375.62,
+                  "currencyCode": "BRL",
+                  "__typename": "Money"
+                },
+                "tax": null,
+                "__typename": "LowestOffersFlightProductConnection"
+              }
+            ],
+            "currency": "BRL",
+            "displayPrice": 2375.63,
+            "displayPriceItinerary": 4751.25,
+            "flightDate": "2026-11-12",
+            "isPromoFare": true,
+            "noFlight": false,
+            "promoFareTitle": "Tarifa Promo",
+            "resourceIds": {
+              "availableOffers": "/a/v3/available-offers?d=q0aZpIHlXZTORnVmipUhtHYF1UdA7RhzAtHgiicWs34DW4IYSa6uxdZvhSjCHEUyQLTjIEqwD3hA5HBOL0GksTftq9EGnI0MjMx0DQ11gdUbrDdZDZlQcQ8KhTUx4ImrFmWkGarQ2cUdi0JE6zgW0fCBuCweOugTC4wbXM6xRHcOdluwOAe7u4lyTmwtAA==b89ad84e5eb",
+              "__typename": "LowestOffersFlightProductLinks"
+            },
+            "splitTaxDetails": null,
+            "totalPrice": 2375.63,
+            "totalPriceItinerary": 4751.25,
+            "totalTaxDetails": null,
+            "destination": {
+              "code": "CDG",
+              "__typename": "LowestOffersStation"
+            },
+            "origin": {
+              "code": "GRU",
+              "__typename": "LowestOffersStation"
+            },
+            "__typename": "LowestOffersFlightProduct"
+          },
+          {
+            "connections": [
+              {
+                "price": {
+                  "amount": 2849.99,
+                  "currencyCode": "BRL",
+                  "__typename": "Money"
+                },
+                "tax": null,
+                "__typename": "LowestOffersFlightProductConnection"
+              },
+              {
+                "price": {
+                  "amount": 2456.1,
+                  "currencyCode": "BRL",
+                  "__typename": "Money"
+                },
+                "tax": null,
+                "__typename": "LowestOffersFlightProductConnection"
+              }
+            ],
+            "currency": "BRL",
+            "displayPrice": 2849.99,
+            "displayPriceItinerary": 5306.09,
+            "flightDate": "2026-11-13",
+            "isPromoFare": true,
+            "noFlight": false,
+            "promoFareTitle": "Tarifa Promo",
+            "resourceIds": {
+              "availableOffers": "/a/v3/available-offers?d=q0aZpIHlXZTORnVmipUhtHYF1UdA7RhzAtHgiicWs34DW4IYSa6uxdZvhSjCHEUyQLTjIEqwD3hA5HBOL0GksTftq9EGnI0MjMx0DQ11gVUbrDdZDZlQcQ8KhTUx4ImrFmWkGarQ2cUdi0JE6zgW0fCBuCweOugTC4wbXM6xRHcOdluwOAe7u4lyTmwtAA==66e66e2aa44",
+              "__typename": "LowestOffersFlightProductLinks"
+            },
+            "splitTaxDetails": null,
+            "totalPrice": 2849.99,
+            "totalPriceItinerary": 5306.09,
+            "totalTaxDetails": null,
+            "destination": {
+              "code": "CDG",
+              "__typename": "LowestOffersStation"
+            },
+            "origin": {
+              "code": "GRU",
+              "__typename": "LowestOffersStation"
+            },
+            "__typename": "LowestOffersFlightProduct"
+          }
+        ],
+        "resourceIds": {
+          "self": "/a/v3/lowest-fare-offers?d=q0aZ24HlZJTuR3VmipUhtL4F1VBA7RhTCdHwcisWs9YDWYYYg66uxeg61WLr3oKdh32MF1avIRp-EMXYx04gcjgnrSDS2PsC1dA-ZjVkLsY9KBTW8IAnsFqUQWqoQmcXdywKEW3mWLQxdyMDIzNdQ0NdA3N9GBNY3SLaTBA3xkNHkmKBkYjqMOz2YXEYdh8gOwynnbFQfaAqDmMYCdQQhAzYxdYCAA==9b5bbb3299b&dateInterval=",
+          "__typename": "LowestOffersResponseLinks"
+        },
+        "warning": null,
+        "__typename": "LowestOffersResponse"
+      }
+    },
+    "extensions": {
+      "aviatoCacheControl": {
+        "hasPrivateData": true
+      }
+    }
+  }
+}

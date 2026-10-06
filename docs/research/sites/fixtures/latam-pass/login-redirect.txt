@@ -1,0 +1,20 @@
+2026-10-06, user's Chrome, not logged in to LATAM.
+
+Loaded:
+  https://www.latamairlines.com/br/pt/oferta-voos?origin=GRU&outbound=2026-11-10T12%3A00%3A00.000Z&destination=LIS&inbound=null&adt=1&chd=0&inf=0&trip=OW&cabin=Economy&redemption=true&sort=RECOMMENDED
+
+Ended at (state value removed):
+  https://auth.latamairlines.com/u/login/identifier?state=<removed>&ui_locales=pt
+
+Page text:
+  Insira seu usuário
+  Dê preferência ao seu número LATAM Pass ao inserir seus dados:
+  Email, CPF ou Número de cliente
+  Continuar
+  Criar conta
+  Não consegue entrar em sua conta? Recupere o acesso
+
+XHR/fetch seen on auth.latamairlines.com (hook):
+  POST 201 https://auth.latamairlines.com/<obfuscated path>   (Akamai Bot Manager sensor)
+  GET  200 https://c.go-mpulse.net/api/config.json?...        (Akamai mPulse)
+No /bff/air-offers call was made before the redirect.

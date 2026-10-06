@@ -1,0 +1,48 @@
+{
+ "faresFromCalendar": [
+  {
+   "date": "2026-11-07",
+   "lowestPrice": 3843.16,
+   "currencyCode": "BRL"
+  },
+  {
+   "date": "2026-11-08",
+   "lowestPrice": 3643.73,
+   "currencyCode": "BRL"
+  },
+  {
+   "date": "2026-11-09",
+   "lowestPrice": 3329.62,
+   "currencyCode": "BRL"
+  },
+  {
+   "date": "2026-11-10",
+   "lowestPrice": 3329.62,
+   "currencyCode": "BRL"
+  },
+  {
+   "date": "2026-11-11",
+   "lowestPrice": 3329.62,
+   "currencyCode": "BRL"
+  },
+  {
+   "date": "2026-11-12",
+   "lowestPrice": 3329.62,
+   "currencyCode": "BRL"
+  },
+  {
+   "date": "2026-11-13",
+   "lowestPrice": 3843.16,
+   "currencyCode": "BRL"
+  }
+ ],
+ "moreDates": [],
+ "requestStationDetails": {
+  "GRU": {
+   "countryCode": "BR"
+  },
+  "DOH": {
+   "countryCode": "QA"
+  }
+ }
+}

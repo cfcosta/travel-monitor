@@ -1,0 +1,1439 @@
+{
+ "disabledDays": [],
+ "days": [
+  {
+   "calendar": [
+    {
+     "month": "2027-03",
+     "origin": "GRU",
+     "destination": "MIA",
+     "travelType": "ROUNDTRIP",
+     "direction": "OUTBOUND",
+     "minimum": {
+      "amount": 1583.44,
+      "currency": "BRL"
+     },
+     "maximum": {
+      "amount": 5318.45,
+      "currency": "BRL"
+     },
+     "average": {
+      "amount": 2839,
+      "currency": "BRL"
+     },
+     "detailsCalendar": [
+      {
+       "date": "2027-03-01",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-02",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-03",
+       "fare": {
+        "amount": 2737.9,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,7K",
+       "percentile": 0.31,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-04",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-05",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-06",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-07",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-08",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-09",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-10",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-11",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-12",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-13",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-14",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-15",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-16",
+       "fare": {
+        "amount": 2915.51,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.36,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-17",
+       "fare": {
+        "amount": 2915.51,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.36,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-18",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-19",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-20",
+       "fare": {
+        "amount": 3129.68,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-21",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-22",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-23",
+       "fare": {
+        "amount": 2774.46,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.32,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-24",
+       "fare": {
+        "amount": 2915.51,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.36,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-25",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-26",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-27",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-28",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-29",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-30",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-31",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      }
+     ]
+    },
+    {
+     "month": "2027-03",
+     "origin": "GRU",
+     "destination": "MIA",
+     "travelType": "ROUNDTRIP",
+     "direction": "INBOUND",
+     "minimum": {
+      "amount": 1392.12,
+      "currency": "BRL"
+     },
+     "maximum": {
+      "amount": 4690.43,
+      "currency": "BRL"
+     },
+     "average": {
+      "amount": 2805,
+      "currency": "BRL"
+     },
+     "detailsCalendar": [
+      {
+       "date": "2027-03-01",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-02",
+       "fare": {
+        "amount": 2692.86,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,7K",
+       "percentile": 0.39,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-03",
+       "fare": {
+        "amount": 2750.32,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-04",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-05",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-06",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-07",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-08",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-09",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-10",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-11",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-12",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-13",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-14",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-15",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-16",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-17",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-18",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-19",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-20",
+       "fare": {
+        "amount": 2948.82,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.47,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-21",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-22",
+       "fare": {
+        "amount": 2708.52,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,7K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-23",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-24",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-25",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-26",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-27",
+       "fare": {
+        "amount": 3011.51,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.49,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-28",
+       "fare": {
+        "amount": 3011.5,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.49,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-29",
+       "fare": {
+        "amount": 2765.98,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.42,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-30",
+       "fare": {
+        "amount": 2692.86,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,7K",
+       "percentile": 0.39,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-03-31",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "calendar": [
+    {
+     "month": "2027-04",
+     "origin": "GRU",
+     "destination": "MIA",
+     "travelType": "ROUNDTRIP",
+     "direction": "OUTBOUND",
+     "minimum": {
+      "amount": 1583.44,
+      "currency": "BRL"
+     },
+     "maximum": {
+      "amount": 5318.45,
+      "currency": "BRL"
+     },
+     "average": {
+      "amount": 2839,
+      "currency": "BRL"
+     },
+     "detailsCalendar": [
+      {
+       "date": "2027-04-01",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-02",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-03",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-04",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-05",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-06",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-07",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-08",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-09",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-10",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-11",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-12",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-13",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-14",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-15",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-16",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-17",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-18",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-19",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-20",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-21",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-22",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-23",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-24",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-25",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-26",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-27",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-28",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-29",
+       "fare": {
+        "amount": 2863.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,9K",
+       "percentile": 0.34,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-30",
+       "fare": {
+        "amount": 3072.22,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3,1K",
+       "percentile": 0.4,
+       "enabled": true,
+       "lowPrice": false
+      }
+     ]
+    },
+    {
+     "month": "2027-04",
+     "origin": "GRU",
+     "destination": "MIA",
+     "travelType": "ROUNDTRIP",
+     "direction": "INBOUND",
+     "minimum": {
+      "amount": 1392.12,
+      "currency": "BRL"
+     },
+     "maximum": {
+      "amount": 4690.43,
+      "currency": "BRL"
+     },
+     "average": {
+      "amount": 2805,
+      "currency": "BRL"
+     },
+     "detailsCalendar": [
+      {
+       "date": "2027-04-01",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-02",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-03",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-04",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-05",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-06",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-07",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-08",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-09",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-10",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-11",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-12",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-13",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-14",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-15",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-16",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-17",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-18",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-19",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-20",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-21",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-22",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-23",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-24",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-25",
+       "fare": {
+        "amount": 2964.49,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-26",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-27",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-28",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-29",
+       "fare": {
+        "amount": 2750.31,
+        "currency": "BRL"
+       },
+       "formattedAmount": "2,8K",
+       "percentile": 0.41,
+       "enabled": true,
+       "lowPrice": false
+      },
+      {
+       "date": "2027-04-30",
+       "fare": {
+        "amount": 2959.27,
+        "currency": "BRL"
+       },
+       "formattedAmount": "3K",
+       "percentile": 0.48,
+       "enabled": true,
+       "lowPrice": false
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,36 @@
+{
+  "_note": "Request headers the page sets on its BFF calls (captured by wrapping XMLHttpRequest.setRequestHeader), 2026-10-06. Per-session ids and tokens replaced by placeholders. Cookies are sent by the browser and are not listed.",
+  "calendar_extended": {
+    "url": "GET /bff/air-offers/v2/calendar?origin=MIA&destination=GRU&month=3&year=2027&isRoundTrip=false&extended=true",
+    "headers": {
+      "Accept": "application/json, text/plain, */*",
+      "X-latam-Application-Country": "BR",
+      "X-latam-Application-Lang": "pt",
+      "X-latam-Application-Oc": "br",
+      "X-latam-Client-Name": "web-air-offers",
+      "X-latam-Application-Name": "web-air-offers",
+      "X-latam-Track-Id": "<uuid v4>",
+      "X-latam-Request-Id": "<uuid v4>",
+      "X-latam-App-Session-Id": "<uuid v4>",
+      "X-latam-Action-Name": "search-result.flightselection.offers-date-carousel-prices"
+    }
+  },
+  "offers_search": {
+    "url": "GET /bff/air-offers/v2/offers/search?origin=MIA&destination=GRU&outFrom=2027-03-11&inFrom=null&adult=1&child=0&infant=0&cabinType=Economy&redemption=false&sort=RECOMMENDED&locale=pt-br&outOfferId=null&inOfferId=null&outFlightDate=null&inFlightDate=null&(utm_*, kayakclickid, idMetasearch = undefined)",
+    "headers": {
+      "Accept": "application/json, text/plain, */*",
+      "X-latam-Application-Country": "BR",
+      "X-latam-Application-Lang": "pt",
+      "X-latam-Application-Oc": "br",
+      "X-latam-Client-Name": "web-air-offers",
+      "X-latam-Application-Name": "web-air-offers",
+      "X-latam-Track-Id": "<uuid v4>",
+      "X-latam-Request-Id": "<uuid v4>",
+      "X-latam-App-Session-Id": "<uuid v4>",
+      "X-latam-Action-Name": "search-result.flightselection.offers-search",
+      "x-latam-device-width": "1607",
+      "x-latam-search-token": "<HS512 JWT, 20 min lifetime; payload {country, language, origin, destination, message, iat, exp}>",
+      "x-latam-captcha-token": "<reCAPTCHA token, ~2 KB, prefix 0cAFcWeA>"
+    }
+  }
+}

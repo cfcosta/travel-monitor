@@ -1,0 +1,59 @@
+{
+ "SearchTypeSelection": 1,
+ "SortType": "bestmatches",
+ "SortTypeDescending": false,
+ "Trips": [
+  {
+   "Origin": "GRU",
+   "Destination": "EWR",
+   "DepartDate": "2026-11-10",
+   "Index": 1,
+   "TripIndex": 1,
+   "SearchRadiusMilesOrigin": 0,
+   "SearchRadiusMilesDestination": 0,
+   "DepartTimeApprox": 0,
+   "SearchFiltersIn": {
+    "FareFamily": "ECONOMY",
+    "AirportsStop": null,
+    "AirportsStopToAvoid": null,
+    "ShopIndicators": {
+     "IsTravelCreditsApplied": false,
+     "IsDoveFlow": true,
+     "DisableBasicEconomy": false,
+     "DisableBasicPremium": false
+    }
+   }
+  }
+ ],
+ "CabinPreferenceMain": "economy",
+ "PaxInfoList": [
+  {
+   "PaxType": 1
+  }
+ ],
+ "AwardTravel": false,
+ "NGRP": false,
+ "CalendarLengthOfStay": 0,
+ "PetCount": 0,
+ "RecentSearchKey": "GRUEWR11/10/2026",
+ "CalendarFilters": {
+  "Filters": {
+   "PriceScheduleOptions": {
+    "Stops": 1
+   }
+  }
+ },
+ "Characteristics": [
+  {
+   "Code": "SOFT_LOGGED_IN",
+   "Value": false
+  },
+  {
+   "Code": "UsePassedCartId",
+   "Value": false
+  }
+ ],
+ "FareType": "Refundable",
+ "BuildHashValue": "true",
+ "EnableBasicPremiumProducts": true
+}

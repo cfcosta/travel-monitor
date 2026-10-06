@@ -1,0 +1,1183 @@
+{
+ "pageable": {
+  "pageNumber": 0,
+  "pageSize": 50,
+  "sort": [
+   {
+    "direction": "ASC",
+    "property": "RECOMMENDED",
+    "ignoreCase": false,
+    "nullHandling": "NATIVE",
+    "ascending": true,
+    "descending": false
+   }
+  ],
+  "offset": 0,
+  "paged": true,
+  "unpaged": false
+ },
+ "totalElements": 44,
+ "totalPages": 1,
+ "last": true,
+ "sort": [
+  {
+   "direction": "ASC",
+   "property": "RECOMMENDED",
+   "ignoreCase": false,
+   "nullHandling": "NATIVE",
+   "ascending": true,
+   "descending": false
+  }
+ ],
+ "numberOfElements": 44,
+ "first": true,
+ "number": 0,
+ "size": 50,
+ "empty": false,
+ "content": [
+  {
+   "summary": {
+    "tags": [
+     "RECOMMENDED",
+     "CHEAPEST",
+     "FASTEST"
+    ],
+    "stopOvers": 0,
+    "duration": 500,
+    "flightCode": "LA8198",
+    "origin": {
+     "departure": "2027-03-04T12:25:00",
+     "departureTime": "12:25",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "destination": {
+     "arrival": "2027-03-04T18:45:00",
+     "arrivalTime": "18:45",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "brands": [
+     {
+      "id": "EV",
+      "offerId": "0b25d678648451616a3a7eafca43262d1d7e2562ac14552b9800cd60e20f06a1",
+      "brandText": "PREMIUM BUSINESS STANDARD",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessstandard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEV5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 10304.6,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.304,60",
+       "display": "BRL 10.304,60"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 0,
+       "displayCurrency": "R$",
+       "displayAmount": " 0,00",
+       "display": "BRL 0,00"
+      },
+      "lowestPriceBrand": "EV",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 10304.6,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.304,60",
+       "display": "BRL 10.304,60"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 8,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "EJ",
+      "offerId": "5574973cc197e7b92e1cb1f4b37d3fb3b3e0933b0b72021ce39bb66b6b9db753",
+      "brandText": "PREMIUM BUSINESS FULL",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessfull_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEJ5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 12049.66,
+       "displayCurrency": "R$",
+       "displayAmount": " 12.049,66",
+       "display": "BRL 12.049,66"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 1745.06,
+       "displayCurrency": "R$",
+       "displayAmount": " 1.745,06",
+       "display": "BRL 1.745,06"
+      },
+      "lowestPriceBrand": "EV",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 12049.66,
+       "displayCurrency": "R$",
+       "displayAmount": " 12.049,66",
+       "display": "BRL 12.049,66"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 8,
+       "lowAvailability": false
+      }
+     }
+    ],
+    "lowestBrandText": "PREMIUM BUSINESS STANDARD",
+    "lowestPrice": {
+     "currency": "BRL",
+     "amount": 10304.6,
+     "displayCurrency": "R$",
+     "displayAmount": " 10.304,60",
+     "display": "BRL 10.304,60"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Brasil"
+    ],
+    "changeOfAirport": false,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 500,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "789",
+     "aircraftLeaseText": "LATAM AIRLINES BRASIL",
+     "flight": {
+      "flightNumber": 8198,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": 8198,
+      "flightOperator": "JJ",
+      "stopAirports": [],
+      "departureTerminal": "3",
+      "arrivalTerminal": null
+     },
+     "origin": "GRU",
+     "destination": "MIA",
+     "departure": "2027-03-04T12:25:00",
+     "arrival": "2027-03-04T18:45:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 10026.64,
+     "taxes": 277.96,
+     "total": 10304.6
+    },
+    {
+     "fare": 11771.7,
+     "taxes": 277.96,
+     "total": 12049.66
+    }
+   ]
+  },
+  {
+   "summary": {
+    "tags": [
+     "RECOMMENDED",
+     "CHEAPEST"
+    ],
+    "stopOvers": 0,
+    "duration": 505,
+    "flightCode": "LA8194",
+    "origin": {
+     "departure": "2027-03-04T10:15:00",
+     "departureTime": "10:15",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "destination": {
+     "arrival": "2027-03-04T16:40:00",
+     "arrivalTime": "16:40",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "brands": [
+     {
+      "id": "EV",
+      "offerId": "ad45e8238f5c371a3bc6a633aa99c0867e9da78c15dc7aa53ec8343353fcfb69",
+      "brandText": "PREMIUM BUSINESS STANDARD",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessstandard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEV5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 10304.6,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.304,60",
+       "display": "BRL 10.304,60"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 0,
+       "displayCurrency": "R$",
+       "displayAmount": " 0,00",
+       "display": "BRL 0,00"
+      },
+      "lowestPriceBrand": "EV",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 10304.6,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.304,60",
+       "display": "BRL 10.304,60"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "EJ",
+      "offerId": "9b5bb1eb3d575b0dc6872923af9580302597ed9d9a4b4b6a4f70d5a4b6b9e90c",
+      "brandText": "PREMIUM BUSINESS FULL",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessfull_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEJ5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 12049.66,
+       "displayCurrency": "R$",
+       "displayAmount": " 12.049,66",
+       "display": "BRL 12.049,66"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 1745.06,
+       "displayCurrency": "R$",
+       "displayAmount": " 1.745,06",
+       "display": "BRL 1.745,06"
+      },
+      "lowestPriceBrand": "EV",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 12049.66,
+       "displayCurrency": "R$",
+       "displayAmount": " 12.049,66",
+       "display": "BRL 12.049,66"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     }
+    ],
+    "lowestBrandText": "PREMIUM BUSINESS STANDARD",
+    "lowestPrice": {
+     "currency": "BRL",
+     "amount": 10304.6,
+     "displayCurrency": "R$",
+     "displayAmount": " 10.304,60",
+     "display": "BRL 10.304,60"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Brasil"
+    ],
+    "changeOfAirport": false,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 505,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "773",
+     "aircraftLeaseText": "LATAM AIRLINES BRASIL",
+     "flight": {
+      "flightNumber": 8194,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": 8194,
+      "flightOperator": "JJ",
+      "stopAirports": [],
+      "departureTerminal": "3",
+      "arrivalTerminal": null
+     },
+     "origin": "GRU",
+     "destination": "MIA",
+     "departure": "2027-03-04T10:15:00",
+     "arrival": "2027-03-04T16:40:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 10026.64,
+     "taxes": 277.96,
+     "total": 10304.6
+    },
+    {
+     "fare": 11771.7,
+     "taxes": 277.96,
+     "total": 12049.66
+    }
+   ]
+  },
+  {
+   "summary": {
+    "tags": [
+     "CHEAPEST"
+    ],
+    "stopOvers": 0,
+    "duration": 505,
+    "flightCode": "LA8190",
+    "origin": {
+     "departure": "2027-03-04T23:00:00",
+     "departureTime": "23:00",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "destination": {
+     "arrival": "2027-03-05T05:25:00",
+     "arrivalTime": "5:25",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "brands": [
+     {
+      "id": "EV",
+      "offerId": "78bae894f6f67cd835eb96f9494acbb2a3995a8febba930e5af371a6b1044723",
+      "brandText": "PREMIUM BUSINESS STANDARD",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessstandard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEV5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 10304.6,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.304,60",
+       "display": "BRL 10.304,60"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 0,
+       "displayCurrency": "R$",
+       "displayAmount": " 0,00",
+       "display": "BRL 0,00"
+      },
+      "lowestPriceBrand": "EV",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 10304.6,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.304,60",
+       "display": "BRL 10.304,60"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "EJ",
+      "offerId": "5a7d432a4a7e19216db7ecfb4d46ab34eab087ed82c52b68736c8c7aad6d25b4",
+      "brandText": "PREMIUM BUSINESS FULL",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessfull_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEJ5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 12049.66,
+       "displayCurrency": "R$",
+       "displayAmount": " 12.049,66",
+       "display": "BRL 12.049,66"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 1745.06,
+       "displayCurrency": "R$",
+       "displayAmount": " 1.745,06",
+       "display": "BRL 1.745,06"
+      },
+      "lowestPriceBrand": "EV",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 12049.66,
+       "displayCurrency": "R$",
+       "displayAmount": " 12.049,66",
+       "display": "BRL 12.049,66"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     }
+    ],
+    "lowestBrandText": "PREMIUM BUSINESS STANDARD",
+    "lowestPrice": {
+     "currency": "BRL",
+     "amount": 10304.6,
+     "displayCurrency": "R$",
+     "displayAmount": " 10.304,60",
+     "display": "BRL 10.304,60"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Brasil"
+    ],
+    "changeOfAirport": false,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 505,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "789",
+     "aircraftLeaseText": "LATAM AIRLINES BRASIL",
+     "flight": {
+      "flightNumber": 8190,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": 8190,
+      "flightOperator": "JJ",
+      "stopAirports": [],
+      "departureTerminal": "3",
+      "arrivalTerminal": null
+     },
+     "origin": "GRU",
+     "destination": "MIA",
+     "departure": "2027-03-04T23:00:00",
+     "arrival": "2027-03-05T05:25:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 10026.64,
+     "taxes": 277.96,
+     "total": 10304.6
+    },
+    {
+     "fare": 11771.7,
+     "taxes": 277.96,
+     "total": 12049.66
+    }
+   ]
+  },
+  {
+   "summary": {
+    "tags": [
+     "CHEAPEST"
+    ],
+    "stopOvers": 1,
+    "duration": 765,
+    "flightCode": "LA8004",
+    "origin": {
+     "departure": "2027-03-04T03:35:00",
+     "departureTime": "3:35",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "destination": {
+     "arrival": "2027-03-04T14:20:00",
+     "arrivalTime": "14:20",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "brands": [
+     {
+      "id": "EV",
+      "offerId": "602777458fb3767fa12b0032838a65fbf48b5bcba2b502b43b51b4c5d9e17d04",
+      "brandText": "PREMIUM BUSINESS STANDARD",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessstandard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEV5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 10304.6,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.304,60",
+       "display": "BRL 10.304,60"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 0,
+       "displayCurrency": "R$",
+       "displayAmount": " 0,00",
+       "display": "BRL 0,00"
+      },
+      "lowestPriceBrand": "EV",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 10304.6,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.304,60",
+       "display": "BRL 10.304,60"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "EJ",
+      "offerId": "b6a39404459f88011cc847aca1752fe5eddddaf787576b24426c27e96af4f689",
+      "brandText": "PREMIUM BUSINESS FULL",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessfull_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEJ5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 12049.66,
+       "displayCurrency": "R$",
+       "displayAmount": " 12.049,66",
+       "display": "BRL 12.049,66"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 1745.06,
+       "displayCurrency": "R$",
+       "displayAmount": " 1.745,06",
+       "display": "BRL 1.745,06"
+      },
+      "lowestPriceBrand": "EV",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 12049.66,
+       "displayCurrency": "R$",
+       "displayAmount": " 12.049,66",
+       "display": "BRL 12.049,66"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     }
+    ],
+    "lowestBrandText": "PREMIUM BUSINESS STANDARD",
+    "lowestPrice": {
+     "currency": "BRL",
+     "amount": 10304.6,
+     "displayCurrency": "R$",
+     "displayAmount": " 10.304,60",
+     "display": "BRL 10.304,60"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Brasil",
+     "LATAM Airlines Perú"
+    ],
+    "changeOfAirport": false,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 310,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "320",
+     "aircraftLeaseText": "LATAM AIRLINES BRASIL",
+     "flight": {
+      "flightNumber": 8004,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": 8004,
+      "flightOperator": "JJ",
+      "stopAirports": [],
+      "departureTerminal": "3",
+      "arrivalTerminal": null
+     },
+     "origin": "GRU",
+     "destination": "LIM",
+     "departure": "2027-03-04T03:35:00",
+     "arrival": "2027-03-04T06:45:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    },
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 360,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "763",
+     "aircraftLeaseText": "LATAM AIRLINES PERU",
+     "flight": {
+      "flightNumber": 2698,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": 2698,
+      "flightOperator": "LP",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": null
+     },
+     "origin": "LIM",
+     "destination": "MIA",
+     "departure": "2027-03-04T08:20:00",
+     "arrival": "2027-03-04T14:20:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 10026.64,
+     "taxes": 277.96,
+     "total": 10304.6
+    },
+    {
+     "fare": 11771.7,
+     "taxes": 277.96,
+     "total": 12049.66
+    }
+   ]
+  },
+  {
+   "summary": {
+    "tags": [
+     "CHEAPEST"
+    ],
+    "stopOvers": 1,
+    "duration": 775,
+    "flightCode": "LA8040",
+    "origin": {
+     "departure": "2027-03-04T19:15:00",
+     "departureTime": "19:15",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "destination": {
+     "arrival": "2027-03-05T06:10:00",
+     "arrivalTime": "6:10",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "brands": [
+     {
+      "id": "EV",
+      "offerId": "722061375e026eeeabc5680180131e48ad8ca26d13ed222be0c88b4c55527238",
+      "brandText": "PREMIUM BUSINESS STANDARD",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessstandard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEV5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 10304.6,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.304,60",
+       "display": "BRL 10.304,60"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 0,
+       "displayCurrency": "R$",
+       "displayAmount": " 0,00",
+       "display": "BRL 0,00"
+      },
+      "lowestPriceBrand": "EV",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 10304.6,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.304,60",
+       "display": "BRL 10.304,60"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "EJ",
+      "offerId": "26cb3b8018f9718b554c77092fa168b3a8bfa372ebb09aaaab49137f1cf3544b",
+      "brandText": "PREMIUM BUSINESS FULL",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessfull_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEJ5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 12049.66,
+       "displayCurrency": "R$",
+       "displayAmount": " 12.049,66",
+       "display": "BRL 12.049,66"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 1745.06,
+       "displayCurrency": "R$",
+       "displayAmount": " 1.745,06",
+       "display": "BRL 1.745,06"
+      },
+      "lowestPriceBrand": "EV",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 12049.66,
+       "displayCurrency": "R$",
+       "displayAmount": " 12.049,66",
+       "display": "BRL 12.049,66"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      }
+     }
+    ],
+    "lowestBrandText": "PREMIUM BUSINESS STANDARD",
+    "lowestPrice": {
+     "currency": "BRL",
+     "amount": 10304.6,
+     "displayCurrency": "R$",
+     "displayAmount": " 10.304,60",
+     "display": "BRL 10.304,60"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Brasil",
+     "LATAM Airlines Perú"
+    ],
+    "changeOfAirport": false,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 310,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "320",
+     "aircraftLeaseText": "LATAM AIRLINES BRASIL",
+     "flight": {
+      "flightNumber": 8040,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": 8040,
+      "flightOperator": "JJ",
+      "stopAirports": [],
+      "departureTerminal": "3",
+      "arrivalTerminal": null
+     },
+     "origin": "GRU",
+     "destination": "LIM",
+     "departure": "2027-03-04T19:15:00",
+     "arrival": "2027-03-04T22:25:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    },
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 355,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "763",
+     "aircraftLeaseText": "LATAM AIRLINES PERU",
+     "flight": {
+      "flightNumber": 2480,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": 2480,
+      "flightOperator": "LP",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": null
+     },
+     "origin": "LIM",
+     "destination": "MIA",
+     "departure": "2027-03-05T00:15:00",
+     "arrival": "2027-03-05T06:10:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 10026.64,
+     "taxes": 277.96,
+     "total": 10304.6
+    },
+    {
+     "fare": 11771.7,
+     "taxes": 277.96,
+     "total": 12049.66
+    }
+   ]
+  },
+  {
+   "summary": {
+    "tags": [
+     "CHEAPEST"
+    ],
+    "stopOvers": 1,
+    "duration": 945,
+    "flightCode": "LA2944",
+    "origin": {
+     "departure": "2027-03-04T16:25:00",
+     "departureTime": "16:25",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "destination": {
+     "arrival": "2027-03-05T06:10:00",
+     "arrivalTime": "6:10",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "brands": [
+     {
+      "id": "EV",
+      "offerId": "4f1a59332ad51c3d08c74a917e01d7286c62a82ae362ded614773c97dbec8533",
+      "brandText": "PREMIUM BUSINESS STANDARD",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessstandard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEV5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 10304.6,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.304,60",
+       "display": "BRL 10.304,60"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 0,
+       "displayCurrency": "R$",
+       "displayAmount": " 0,00",
+       "display": "BRL 0,00"
+      },
+      "lowestPriceBrand": "EV",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 10304.6,
+       "displayCurrency": "R$",
+       "displayAmount": " 10.304,60",
+       "display": "BRL 10.304,60"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 7,
+       "lowAvailability": false
+      }
+     },
+     {
+      "id": "EJ",
+      "offerId": "55296fa1f7078cf8b7b3f0ae4473e5b5c35d61181f009d10ddbef36f8f9ab5c6",
+      "brandText": "PREMIUM BUSINESS FULL",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessfull_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ZLEEJ5GE",
+      "price": {
+       "currency": "BRL",
+       "amount": 12049.66,
+       "displayCurrency": "R$",
+       "displayAmount": " 12.049,66",
+       "display": "BRL 12.049,66"
+      },
+      "lowestPriceDifference": {
+       "currency": "BRL",
+       "amount": 1745.06,
+       "displayCurrency": "R$",
+       "displayAmount": " 1.745,06",
+       "display": "BRL 1.745,06"
+      },
+      "lowestPriceBrand": "EV",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "BRL",
+       "amount": 12049.66,
+       "displayCurrency": "R$",
+       "displayAmount": " 12.049,66",
+       "display": "BRL 12.049,66"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 7,
+       "lowAvailability": false
+      }
+     }
+    ],
+    "lowestBrandText": "PREMIUM BUSINESS STANDARD",
+    "lowestPrice": {
+     "currency": "BRL",
+     "amount": 10304.6,
+     "displayCurrency": "R$",
+     "displayAmount": " 10.304,60",
+     "display": "BRL 10.304,60"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Perú"
+    ],
+    "changeOfAirport": false,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 305,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "763",
+     "aircraftLeaseText": "LATAM AIRLINES PERU",
+     "flight": {
+      "flightNumber": 2944,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": 2944,
+      "flightOperator": "LP",
+      "stopAirports": [],
+      "departureTerminal": "3",
+      "arrivalTerminal": null
+     },
+     "origin": "GRU",
+     "destination": "LIM",
+     "departure": "2027-03-04T16:25:00",
+     "arrival": "2027-03-04T19:30:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    },
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 355,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "763",
+     "aircraftLeaseText": "LATAM AIRLINES PERU",
+     "flight": {
+      "flightNumber": 2480,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": 2480,
+      "flightOperator": "LP",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": null
+     },
+     "origin": "LIM",
+     "destination": "MIA",
+     "departure": "2027-03-05T00:15:00",
+     "arrival": "2027-03-05T06:10:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 10026.64,
+     "taxes": 277.96,
+     "total": 10304.6
+    },
+    {
+     "fare": 11771.7,
+     "taxes": 277.96,
+     "total": 12049.66
+    }
+   ]
+  }
+ ],
+ "promo": {
+  "active": false,
+  "messages": []
+ },
+ "scarcity": {
+  "thresholdEnabled": false
+ },
+ "extraDetails": {
+  "X-latam-Track-Id": "<scrubbed>",
+  "X-latam-App-Session-Id": "<scrubbed>"
+ }
+}
