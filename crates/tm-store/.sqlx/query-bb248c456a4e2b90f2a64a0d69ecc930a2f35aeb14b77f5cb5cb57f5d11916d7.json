@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO heartbeat (id, pid, updated_at, state, next_check,\n                 loads_today, budget, next_check_at, check_family_id,\n                 check_query_id, check_reason_json, check_started_at)\n             VALUES (1, ?1, ?2, ?3, ?4, ?5, ?6, ?7, NULL, NULL, NULL, NULL)\n             ON CONFLICT (id) DO UPDATE SET\n                 pid = excluded.pid,\n                 updated_at = excluded.updated_at,\n                 state = excluded.state,\n                 next_check = excluded.next_check,\n                 loads_today = excluded.loads_today,\n                 budget = excluded.budget,\n                 next_check_at = excluded.next_check_at,\n                 check_family_id = NULL,\n                 check_query_id = NULL,\n                 check_reason_json = NULL,\n                 check_started_at = NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 7
+    },
+    "nullable": []
+  },
+  "hash": "bb248c456a4e2b90f2a64a0d69ecc930a2f35aeb14b77f5cb5cb57f5d11916d7"
+}

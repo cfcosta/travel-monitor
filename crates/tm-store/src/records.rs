@@ -273,13 +273,19 @@ pub enum RequestKind {
     ConfirmDeal {
         deal: DealId,
     },
-    /// Pause the headless browser so the app can open the profile for a
-    /// miles login (0024).
+    /// Pause the program's site so the app can open that site's
+    /// profile for a miles login (0024, 0062). Every other site keeps
+    /// running.
     OpenLogin {
         program: String,
     },
-    /// The login window closed; resume.
-    CloseLogin,
+    /// The login window closed: check the program's profile for a
+    /// session and resume its site. `None` (an app before 0062) resumes
+    /// every paused site.
+    CloseLogin {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        program: Option<String>,
+    },
     ReloadConfig,
 }
 
@@ -291,7 +297,7 @@ impl RequestKind {
             RequestKind::CheckFamily { .. } => "check_family",
             RequestKind::ConfirmDeal { .. } => "confirm_deal",
             RequestKind::OpenLogin { .. } => "open_login",
-            RequestKind::CloseLogin => "close_login",
+            RequestKind::CloseLogin { .. } => "close_login",
             RequestKind::ReloadConfig => "reload_config",
         }
     }
@@ -318,15 +324,56 @@ pub struct RequestRecord {
     pub detail: Option<String>,
 }
 
-/// The daily page-load budget (DECISIONS.md 0039).
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct BudgetState {
+/// One site's daily page-load budget (DECISIONS.md 0039, 0060): a row
+/// of `site_budgets`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SiteBudget {
+    /// [`tm_domain::Source::site`]: `google_flights`, `airline:TP`.
+    pub site: String,
+    /// Where the budget starts; a configuration that changes it resets
+    /// `daily_budget` to it.
+    pub start_budget: u32,
+    /// The budget in force (ramped or halved).
     pub daily_budget: u32,
+    /// The most the ramp may raise it to.
+    pub max_daily_budget: u32,
     pub loads_today: u32,
     /// The day `loads_today` counts.
     pub day: NaiveDate,
-    /// The last time the budget was raised.
+    /// The start of the current block-free stretch (the last ramp step,
+    /// block or reset).
     pub last_ramp_at: Option<DateTime<Utc>>,
+}
+
+impl SiteBudget {
+    /// A site's budget before anything was spent on it: its limits,
+    /// nothing counted on `day`.
+    pub fn new(
+        site: impl Into<String>,
+        limits: tm_domain::SiteLimits,
+        day: NaiveDate,
+    ) -> Self {
+        let limits = limits.normalized();
+        Self {
+            site: site.into(),
+            start_budget: limits.start,
+            daily_budget: limits.start,
+            max_daily_budget: limits.max,
+            loads_today: 0,
+            day,
+            last_ramp_at: None,
+        }
+    }
+
+    /// The loads counted on `today`: none when the row counts another
+    /// day.
+    pub fn loads_on(&self, today: NaiveDate) -> u32 {
+        if self.day == today {
+            self.loads_today
+        } else {
+            0
+        }
+    }
 }
 
 /// A CAPTCHA, "unusual traffic" page or block (DECISIONS.md 0039).
@@ -348,24 +395,38 @@ pub struct ExchangeRate {
     pub at: DateTime<Utc>,
 }
 
-/// The daemon's status, for the app's status chip. Written when a check
-/// starts and when it ends, and every 30 s otherwise (DECISIONS.md
-/// 0057).
+/// The daemon's status, for the app's status chip, written every 30 s
+/// and when the daemon starts and stops (DECISIONS.md 0057). What each
+/// site is doing is in [`SiteStatus`] (0062).
 #[derive(Debug, Clone, PartialEq)]
 pub struct Heartbeat {
     pub pid: u32,
     pub updated_at: DateTime<Utc>,
-    /// Free text: `"running"`, `"checking"`, `"paused for login: …"`,
-    /// `"stopped"`.
+    /// Free text: `"starting"`, `"running"`, `"stopped"`.
     pub state: String,
     /// Free text describing the next check.
     pub next_check: Option<String>,
     /// When the daemon looks for work again, if it knows.
     pub next_check_at: Option<DateTime<Utc>>,
-    /// The check in progress, while `state` is `"checking"`.
-    pub check: Option<CheckInProgress>,
+    /// Loads today and today's budgets, summed over the sites.
     pub loads_today: u32,
     pub budget: u32,
+}
+
+/// What one site's worker is doing (DECISIONS.md 0057, 0062): a row of
+/// `site_status`, written when its check starts and ends and when its
+/// state changes.
+#[derive(Debug, Clone, PartialEq)]
+pub struct SiteStatus {
+    pub site: String,
+    pub updated_at: DateTime<Utc>,
+    /// `"idle"`, `"checking"`, `"paused for login: smiles"`,
+    /// `"cooling down"`, `"browser unavailable"`, `"stopped"`.
+    pub state: String,
+    /// When the site looks for work again, if it knows.
+    pub next_check_at: Option<DateTime<Utc>>,
+    /// The check in progress, while `state` is `"checking"`.
+    pub check: Option<CheckInProgress>,
 }
 
 /// The check the daemon is running (DECISIONS.md 0057). The family

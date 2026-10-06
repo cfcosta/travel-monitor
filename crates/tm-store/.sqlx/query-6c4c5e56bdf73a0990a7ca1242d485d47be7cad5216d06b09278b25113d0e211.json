@@ -1,0 +1,98 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT pid, updated_at AS \"updated_at: DateTime<Utc>\", state,\n                      next_check, loads_today, budget,\n                      next_check_at AS \"next_check_at: DateTime<Utc>\"\n               FROM heartbeat WHERE id = 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "pid",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "heartbeat",
+            "name": "pid"
+          }
+        }
+      },
+      {
+        "name": "updated_at: DateTime<Utc>",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "heartbeat",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "name": "state",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "heartbeat",
+            "name": "state"
+          }
+        }
+      },
+      {
+        "name": "next_check",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "heartbeat",
+            "name": "next_check"
+          }
+        }
+      },
+      {
+        "name": "loads_today",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "heartbeat",
+            "name": "loads_today"
+          }
+        }
+      },
+      {
+        "name": "budget",
+        "ordinal": 5,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "heartbeat",
+            "name": "budget"
+          }
+        }
+      },
+      {
+        "name": "next_check_at: DateTime<Utc>",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "heartbeat",
+            "name": "next_check_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "6c4c5e56bdf73a0990a7ca1242d485d47be7cad5216d06b09278b25113d0e211"
+}

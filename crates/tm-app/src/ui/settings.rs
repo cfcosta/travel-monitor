@@ -97,8 +97,8 @@ impl Field {
             Field::CardSpread => "Card spread, %",
             Field::DealThreshold => "Deal threshold, %",
             Field::RandomShare => "Random checks, %",
-            Field::DailyBudget => "Page loads per day",
-            Field::MaxDailyBudget => "Most loads per day",
+            Field::DailyBudget => "Google Flights loads per day",
+            Field::MaxDailyBudget => "Google Flights most per day",
             Field::MinInterval => "Check at most every, h",
             Field::MaxInterval => "Check at least every, h",
         }
@@ -739,7 +739,68 @@ impl TravelMonitor {
                 div()
                     .text_size(px(12.))
                     .text_color(color(theme::TEXT_FAINT))
-                    .child("Log in opens the daemon's Chromium profile in a window, after the daemon pauses its own browser. Log in by hand (2FA included), then close the window; no password is stored (0024)."),
+                    .child("Log in opens the program's own Chromium profile in a window, after the daemon pauses that program's site; every other site keeps running. Log in by hand (2FA included), then close the window; no password is stored (0024, 0062)."),
+            );
+        let site_rows: Vec<Div> = s
+            .daemon
+            .sites
+            .iter()
+            .map(|site| {
+                let budget = match (site.budget, site.max_budget) {
+                    (Some(b), Some(m)) => format!(
+                        "{}/{} · max {}",
+                        format::thousands(site.loads_today),
+                        format::thousands(b),
+                        format::thousands(m)
+                    ),
+                    _ => "no loads yet".to_owned(),
+                };
+                div()
+                    .flex()
+                    .items_center()
+                    .gap(px(10.))
+                    .py(px(6.))
+                    .border_t_1()
+                    .border_color(color(theme::ROW_RULE_FAINT))
+                    .text_size(px(13.))
+                    .child(
+                        div().w(px(90.)).flex_none().child(site.label.clone()),
+                    )
+                    .child(
+                        div()
+                            .flex_1()
+                            .min_w_0()
+                            .truncate()
+                            .text_color(color(theme::TEXT_MUTED))
+                            .child(if site.state.is_empty() {
+                                "–".to_owned()
+                            } else {
+                                site.state.clone()
+                            }),
+                    )
+                    .child(widgets::mono(fonts, budget).flex_none())
+            })
+            .collect();
+        let no_sites = site_rows.is_empty().then(|| {
+            div()
+                .text_size(px(13.))
+                .text_color(color(theme::TEXT_FAINT))
+                .child("The daemon has not run yet.")
+        });
+        let sites = card("Site budgets")
+            .debug_selector(|| "site-budgets".into())
+            .child(
+                div()
+                    .flex()
+                    .flex_col()
+                    .children(no_sites)
+                    .children(site_rows),
+            )
+            .child(
+                div()
+                    .text_size(px(12.))
+                    .text_color(color(theme::TEXT_FAINT))
+                    .child("Each site has its own daily budget, ramp and backoff, and its own browser (0060, 0062). Google Flights' is set above (or by the daemon's --budget); other sites start at 300 loads a day and ramp to 1,000, or follow the daemon's --site-budget."),
             );
 
         div()
@@ -771,6 +832,7 @@ impl TravelMonitor {
                             .flex_col()
                             .gap(px(20.))
                             .child(pos)
+                            .child(sites)
                             .child(miles),
                     ),
             )

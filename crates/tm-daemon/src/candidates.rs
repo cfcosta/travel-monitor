@@ -101,8 +101,8 @@ pub struct Context {
     /// The destination code of each route, for [`Only::destination`];
     /// sweeps map to `None`.
     pub destinations: HashMap<RouteId, Option<String>>,
-    /// The browser is paused for a login.
-    pub paused: bool,
+    /// Sites paused for a login (0024, 0062).
+    pub paused: HashSet<String>,
     pub only: Only,
     /// The home point of sale, for bootstrap ranks (0049).
     pub home_pos: Option<PosId>,
@@ -137,7 +137,7 @@ pub fn eligibility(family: &FamilyRecord, cx: &Context) -> Result<(), Skip> {
     if !selected(family, cx) {
         return Err(Skip::NotSelected);
     }
-    if cx.paused {
+    if cx.paused.contains(&family.site) {
         return Err(Skip::Paused);
     }
     if cx.cooling.contains(&family.site) {
@@ -206,9 +206,10 @@ pub fn core_interval(
 }
 
 /// The candidates for `plan_tick`, and how many families each reason
-/// left out (for the log).
-pub fn build(
-    families: &[FamilyRecord],
+/// left out (for the log). A site's worker passes its own site's
+/// families only (0062).
+pub fn build<'a>(
+    families: impl IntoIterator<Item = &'a FamilyRecord>,
     cx: &Context,
 ) -> (Vec<Candidate>, BTreeMap<Skip, usize>) {
     let mut out = Vec::new();
@@ -230,6 +231,17 @@ pub fn build(
         }
     }
     (out, skipped)
+}
+
+/// Whether `site` has a reader in the daemon: Google Flights and the
+/// scripted airline sites (0050, 0051). Other sites only ever pause for
+/// a login.
+pub fn has_reader(site: &str) -> bool {
+    match Source::from_site(site) {
+        Some(Source::GoogleFlights) => true,
+        Some(source) => sites::scripted(&source),
+        None => false,
+    }
 }
 
 /// Families of a route for a manual "check now" (0046): every eligible
@@ -404,10 +416,16 @@ mod tests {
         assert_eq!(ids, vec![3]);
         assert_eq!(skipped.get(&Skip::CoolingDown), Some(&1));
 
-        cx.paused = true;
+        // A login pauses its own site only (0062).
+        cx.paused.insert("airline:TP".into());
         let (cands, skipped) = build(&families, &cx);
         assert!(cands.is_empty());
-        assert_eq!(skipped.get(&Skip::Paused), Some(&2));
+        assert_eq!(skipped.get(&Skip::Paused), Some(&1));
+        assert_eq!(skipped.get(&Skip::CoolingDown), Some(&1));
+        cx.cooling.clear();
+        let (cands, _) = build(&families, &cx);
+        let ids: Vec<i64> = cands.iter().map(|c| c.family.0).collect();
+        assert_eq!(ids, vec![1]);
     }
 
     #[test]

@@ -17,7 +17,6 @@ fn beat(minute: u32) -> Heartbeat {
         state: "running".into(),
         next_check: None,
         next_check_at: None,
-        check: None,
         loads_today: 0,
         budget: 300,
     }

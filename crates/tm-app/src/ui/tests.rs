@@ -22,6 +22,7 @@ use crate::{
         DaemonStatus,
         Request,
         RowStatus,
+        SiteRow,
         Tone,
         fake::FakeBackend,
     },
@@ -334,11 +335,7 @@ fn the_check_in_progress_comes_and_goes(cx: &mut TestAppContext) {
     );
     let running = view.read_with(&cx, |tm, _| {
         let s = tm.snapshot.as_ref().expect("snapshot");
-        s.daemon
-            .check
-            .as_ref()
-            .and_then(|c| c.query)
-            .expect("its query")
+        s.daemon.checks[0].query.expect("its query")
     });
 
     fake.set_checking(None);
@@ -348,7 +345,7 @@ fn the_check_in_progress_comes_and_goes(cx: &mut TestAppContext) {
     assert!(cx.debug_bounds("now-checking").is_none());
     assert_eq!(
         status(&view, &mut cx),
-        "idle · next in 4 min · 212/4800 loads"
+        "idle · next in 4 min · Google 212/4,800 · TAP 40/300"
     );
     let at = cx.executor().now();
     view.read_with(&cx, |tm, _| {
@@ -377,19 +374,19 @@ fn the_clock_moves_relative_times(cx: &mut TestAppContext) {
     // The fake's next check is 15:04; the clock reads 15:01:01.
     assert_eq!(
         status(&view, &mut cx),
-        "idle · next in 3 min · 212/4800 loads"
+        "idle · next in 3 min · Google 212/4,800 · TAP 40/300"
     );
     advance(&mut cx, Duration::from_secs(30));
     assert_eq!(
         status(&view, &mut cx),
-        "idle · next in 2 min · 212/4800 loads"
+        "idle · next in 2 min · Google 212/4,800 · TAP 40/300"
     );
     advance(&mut cx, Duration::from_secs(30));
     assert_eq!(fake.snapshots(), before + 1);
     // Its heartbeat is from 14:59:56; at 15:02:01 that is stale.
     assert_eq!(
         status(&view, &mut cx),
-        "stale · seen 2 min ago · 212/4800 loads"
+        "stale · seen 2 min ago · Google 212/4,800 · TAP 40/300"
     );
 }
 
@@ -435,23 +432,24 @@ fn status_lines() {
     assert_eq!(status_line(&d, t).1, "daemon not seen");
     d.heartbeat = Some(t - chrono::Duration::minutes(5));
     d.state = "running".into();
+    // No site has spent yet: the totals.
     assert_eq!(
         status_line(&d, t).1,
-        "stale · seen 5 min ago · 212/1200 loads"
+        "stale · seen 5 min ago · 212/1,200 loads"
     );
     d.heartbeat = Some(t - chrono::Duration::seconds(3));
     d.next_check_at = Some(t + chrono::Duration::seconds(45));
-    assert_eq!(status_line(&d, t).1, "idle · next in 45 s · 212/1200 loads");
+    assert_eq!(
+        status_line(&d, t).1,
+        "idle · next in 45 s · 212/1,200 loads"
+    );
     d.blocks_today = 2;
     assert!(status_line(&d, t).1.ends_with("· 2 blocks"));
     d.blocks_today = 0;
-    d.state = "paused for login: smiles".into();
-    assert_eq!(
-        status_line(&d, t).1,
-        "paused for login: smiles · 212/1200 loads"
-    );
-    d.state = "checking".into();
-    d.check = Some(CurrentCheck {
+    d.state = "stopped".into();
+    assert_eq!(status_line(&d, t).1, "stopped · 212/1,200 loads");
+    d.state = "running".into();
+    let check = CurrentCheck {
         query: Some(7),
         route: "SAO→LIS".into(),
         cabin: Cabin::Economy,
@@ -460,17 +458,131 @@ fn status_lines() {
         site: None,
         reason: "Scheduled · score 0.41".into(),
         started_at: t - chrono::Duration::seconds(12),
-    });
+    };
+    d.checks = vec![check.clone()];
     let (_, text, checking) = status_line(&d, t);
     assert_eq!(text, "checking SAO→LIS · economy · outbound · BR · 12 s");
     assert!(checking);
     // A long check is not stale while it is younger than ten minutes.
     d.heartbeat = Some(t - chrono::Duration::minutes(4));
     assert!(status_line(&d, t).2);
-    // Check columns left by a daemon that no longer says "checking".
-    d.state = "running".into();
+    // Check rows left by a daemon that stopped.
+    d.state = "stopped".into();
     d.heartbeat = Some(t);
+    assert!(status_line(&d, t).1.starts_with("stopped"));
+    d.state = "running".into();
+    d.checks.clear();
     assert!(status_line(&d, t).1.starts_with("idle"));
+}
+
+/// Several sites at once (0060, 0062): every running check, each site's
+/// loads and budget today, and the sites paused for a login.
+#[test]
+fn status_lines_with_several_sites() {
+    let t = now();
+    let site =
+        |site: &str, label: &str, loads, budget: Option<u32>, state: &str| {
+            SiteRow {
+                site: site.into(),
+                label: label.into(),
+                state: state.into(),
+                loads_today: loads,
+                budget,
+                max_budget: budget.map(|b| b * 2),
+            }
+        };
+    let mut d = DaemonStatus {
+        heartbeat: Some(t - chrono::Duration::seconds(3)),
+        state: "running".into(),
+        next_check_at: Some(t + chrono::Duration::seconds(45)),
+        sites: vec![
+            site("google_flights", "Google", 1234, Some(4800), "idle"),
+            site("airline:TP", "TAP", 40, Some(300), "idle"),
+            site(
+                "miles:smiles",
+                "Smiles",
+                0,
+                None,
+                "paused for login: smiles",
+            ),
+        ],
+        loads_today: 1274,
+        budget: 5100,
+        ..DaemonStatus::default()
+    };
+    assert_eq!(
+        status_line(&d, t).1,
+        "idle · next in 45 s · Google 1,234/4,800 · TAP 40/300 · Smiles paused for login"
+    );
+    let check = |site: Option<&str>, route: &str, secs| CurrentCheck {
+        query: Some(secs),
+        route: route.into(),
+        cabin: Cabin::Economy,
+        kind: "outbound".into(),
+        pos: "BR".into(),
+        site: site.map(str::to_owned),
+        reason: "Scheduled".into(),
+        started_at: t - chrono::Duration::seconds(secs),
+    };
+    d.checks =
+        vec![check(None, "SAO→LIS", 12), check(Some("TAP"), "SAO→MAD", 3)];
+    let (_, text, checking) = status_line(&d, t);
+    assert_eq!(
+        text,
+        "checking Google SAO→LIS 12 s, TAP SAO→MAD 3 s · Smiles paused for login"
+    );
+    assert!(checking);
+    // One check on another site names it.
+    d.checks = vec![check(Some("TAP"), "SAO→MAD", 3)];
+    assert_eq!(
+        status_line(&d, t).1,
+        "checking SAO→MAD · economy · outbound · BR · TAP · 3 s · Smiles paused for login"
+    );
+}
+
+/// The activity screen heads its log with one "Now checking" row per
+/// busy site, and shows each site's budget (0060, 0062).
+#[gpui::test]
+fn every_running_check_has_a_row(cx: &mut TestAppContext) {
+    let Opened {
+        view, mut cx, fake, ..
+    } = open(cx, FakeBackend::at(now()));
+    go(&view, &mut cx, Screen::Activity);
+    assert!(cx.debug_bounds("now-checking").is_some());
+    assert!(cx.debug_bounds("now-checking-1").is_none());
+    assert!(cx.debug_bounds("site-budget-google_flights").is_some());
+    assert!(cx.debug_bounds("site-budget-airline:TP").is_some());
+
+    let tap = CurrentCheck {
+        query: None,
+        route: "SAO→LIS".into(),
+        cabin: Cabin::Economy,
+        kind: "return".into(),
+        pos: "BR".into(),
+        site: Some("TAP".into()),
+        reason: "Manual".into(),
+        started_at: now() - chrono::Duration::seconds(3),
+    };
+    let google = view.read_with(&cx, |tm, _| {
+        tm.snapshot.as_ref().expect("snapshot").daemon.checks[0].clone()
+    });
+    fake.set_checks(vec![google, tap]);
+    advance(&mut cx, Duration::from_millis(250));
+    cx.update(|window, _| window.refresh());
+    cx.run_until_parked();
+    assert!(cx.debug_bounds("now-checking").is_some());
+    assert!(cx.debug_bounds("now-checking-1").is_some());
+    assert!(
+        status(&view, &mut cx)
+            .starts_with("checking Google SAO→MIA 12 s, TAP SAO→LIS 3 s")
+    );
+
+    fake.set_checks(Vec::new());
+    advance(&mut cx, Duration::from_millis(250));
+    cx.update(|window, _| window.refresh());
+    cx.run_until_parked();
+    assert!(cx.debug_bounds("now-checking").is_none());
+    assert!(cx.debug_bounds("now-checking-1").is_none());
 }
 
 /// What counts as new between two snapshots of the same view.

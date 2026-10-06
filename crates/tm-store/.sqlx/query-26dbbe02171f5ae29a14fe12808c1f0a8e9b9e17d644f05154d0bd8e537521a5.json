@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO site_budgets (site, start_budget, daily_budget,\n             max_daily_budget, loads_today, day, last_ramp_at)\n         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)\n         ON CONFLICT (site) DO UPDATE SET\n             start_budget = excluded.start_budget,\n             daily_budget = excluded.daily_budget,\n             max_daily_budget = excluded.max_daily_budget,\n             loads_today = excluded.loads_today,\n             day = excluded.day,\n             last_ramp_at = excluded.last_ramp_at",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 7
+    },
+    "nullable": []
+  },
+  "hash": "26dbbe02171f5ae29a14fe12808c1f0a8e9b9e17d644f05154d0bd8e537521a5"
+}

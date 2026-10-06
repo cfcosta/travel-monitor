@@ -15,8 +15,9 @@
 //! - Other airline sites and miles programs have no reader (0052,
 //!   0059).
 //!
-//! Each point of sale has its own browser context (isolated cookies,
-//! 0033).
+//! Each site has its own Chromium profile and process ([`site_config`],
+//! 0062); inside it, each point of sale has its own browser context
+//! (isolated cookies, 0033).
 
 use std::{collections::HashMap, time::Duration};
 
@@ -101,6 +102,27 @@ const CONSENT_JS: &str = r#"(() => {
   el.click();
   return true;
 })()"#;
+
+/// The Chromium of `site`, from the daemon's `base` configuration: its
+/// profile is `<base profile>/<site slug>`
+/// ([`tm_browser::profile::site_profile_dir`]), the directory the app's
+/// login window opens for that site. A fixed `--cdp-port` goes to Google
+/// Flights; every other site picks a free port, so the processes never
+/// collide.
+pub fn site_config(base: &ChromiumConfig, site: &str) -> ChromiumConfig {
+    ChromiumConfig {
+        user_data_dir: tm_browser::profile::site_profile_dir(
+            &base.user_data_dir,
+            site,
+        ),
+        port: if site == tm_domain::GOOGLE_FLIGHTS {
+            base.port
+        } else {
+            0
+        },
+        ..base.clone()
+    }
+}
 
 struct Running {
     chromium: Chromium,
@@ -941,5 +963,35 @@ impl Sources for BrowserSources {
     async fn resolve(&mut self, job: &ResolveJob) -> Fetch<Option<String>> {
         let t = self.timeouts;
         on_page!(self, job.pos, |page| resolve_on(&page, job, t).await)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::*;
+
+    /// Each site gets its own profile; only Google Flights keeps a fixed
+    /// DevTools port (0062).
+    #[test]
+    fn each_site_has_its_own_profile_and_port() {
+        let mut base = ChromiumConfig::new("/bin/chromium", "/data/chromium");
+        base.port = 9333;
+        base.headless = false;
+        let google = site_config(&base, "google_flights");
+        assert_eq!(
+            google.user_data_dir,
+            PathBuf::from("/data/chromium/google_flights")
+        );
+        assert_eq!(google.port, 9333);
+        assert!(!google.headless);
+        let tap = site_config(&base, "airline:TP");
+        assert_eq!(
+            tap.user_data_dir,
+            PathBuf::from("/data/chromium/airline-tp")
+        );
+        assert_eq!(tap.port, 0);
+        assert_eq!(tap.binary, base.binary);
     }
 }

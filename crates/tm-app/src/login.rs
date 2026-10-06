@@ -1,8 +1,13 @@
-//! Miles logins (DECISIONS.md 0024): the daemon's Chromium profile is
-//! opened in a visible window so the person logs in by hand. A profile
-//! can be open in one process only, so the app first asks the daemon to
-//! pause its headless browser (`OpenLogin`), waits for it, opens the
-//! window, and asks it to resume (`CloseLogin`) when the window closes.
+//! Miles logins (DECISIONS.md 0024, 0062): the program's own Chromium
+//! profile, the one the daemon uses for that site
+//! (`<profile-dir>/miles-<program>`,
+//! [`tm_browser::profile::site_profile_dir`]), is opened in a visible
+//! window so the person logs in by hand. A profile can be open in one
+//! process only, so the app first asks the daemon to pause that site
+//! (`OpenLogin`), waits for it, opens the window, and asks it to resume
+//! (`CloseLogin`) when the window closes. Every other site keeps
+//! running. Logins made in the shared profile before 0062 are not
+//! carried over.
 //!
 //! The window passes the daemon's profile flags
 //! ([`tm_browser::profile_args`]), so the cookies it writes are the ones
@@ -25,9 +30,10 @@ use crate::{
     ui::TravelMonitor,
 };
 
-/// Where the daemon's profile is and which Chromium opens it.
+/// Where the daemon's profiles are and which Chromium opens them.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoginConfig {
+    /// The daemon's `--profile-dir`: every site's profile is under it.
     pub profile_dir: PathBuf,
     pub chromium: PathBuf,
 }
@@ -57,11 +63,23 @@ impl LoginConfig {
         }
     }
 
-    /// The command line of the login window: the daemon's profile with
-    /// the daemon's profile flags, visible and without DevTools.
-    pub fn args(&self, url: &str) -> Vec<String> {
-        let mut args =
-            vec![format!("--user-data-dir={}", self.profile_dir.display())];
+    /// The profile of `program`'s site: the directory the daemon's
+    /// Chromium for that site uses (0062).
+    pub fn program_dir(&self, program: &str) -> PathBuf {
+        let site = tm_domain::Source::Miles {
+            program: program.to_owned(),
+        }
+        .site();
+        tm_browser::profile::site_profile_dir(&self.profile_dir, &site)
+    }
+
+    /// The command line of `program`'s login window: its site's profile
+    /// with the daemon's profile flags, visible and without DevTools.
+    pub fn args(&self, program: &str, url: &str) -> Vec<String> {
+        let mut args = vec![format!(
+            "--user-data-dir={}",
+            self.program_dir(program).display()
+        )];
         args.extend(tm_browser::profile_args().iter().map(|&a| a.to_owned()));
         args.extend([
             "--no-first-run".to_owned(),
@@ -161,9 +179,9 @@ pub async fn wait_for(
     }
 }
 
-/// The whole login, on tokio: pause the daemon (when it runs), open
-/// the window, wait for it to close, check the profile for a session,
-/// resume the daemon.
+/// The whole login, on tokio: pause the program's site (when the daemon
+/// runs), open the window on that site's profile, wait for it to close,
+/// check the profile for a session, resume the site.
 pub async fn run(
     backend: SharedBackend,
     config: LoginConfig,
@@ -177,27 +195,29 @@ pub async fn run(
             wait_for(&backend, ticket, PAUSE_TIMEOUT, Duration::from_secs(1))
                 .await
         {
-            let _ = backend.enqueue(Request::CloseLogin).await;
+            let _ = backend.enqueue(Request::CloseLogin(program.clone())).await;
             return Err(error);
         }
     }
     let window = async {
-        std::fs::create_dir_all(&config.profile_dir).with_context(|| {
-            format!("cannot create {}", config.profile_dir.display())
-        })?;
+        let profile = config.program_dir(&program);
+        std::fs::create_dir_all(&profile)
+            .with_context(|| format!("cannot create {}", profile.display()))?;
         let status = tokio::process::Command::new(&config.chromium)
-            .args(config.args(login_url(&program)))
+            .args(config.args(&program, login_url(&program)))
             .status()
             .await
             .with_context(|| {
                 format!("cannot start {}", config.chromium.display())
             })?;
         tracing::info!("login window for {program} closed ({status})");
-        anyhow::Ok(check_session(&config.profile_dir, &program).await)
+        anyhow::Ok(check_session(&profile, &program).await)
     }
     .await;
     if daemon_running {
-        backend.enqueue(Request::CloseLogin).await?;
+        backend
+            .enqueue(Request::CloseLogin(program.clone()))
+            .await?;
     }
     window
 }
@@ -229,7 +249,7 @@ impl TravelMonitor {
         ));
         self.show_toast(
             if running {
-                "Pausing the daemon's browser…"
+                "Pausing the daemon's browser for this program…"
             } else {
                 "Opening the login window…"
             },
@@ -271,8 +291,16 @@ mod tests {
         );
         assert_eq!(c.profile_dir, PathBuf::from("/p"));
         assert_eq!(c.chromium, PathBuf::from("/bin/chromium"));
-        let args = c.args("https://example.com");
-        assert_eq!(args[0], "--user-data-dir=/p");
+        let args = c.args("smiles", "https://example.com");
+        // The program's own profile, as the daemon opens it (0062).
+        assert_eq!(args[0], "--user-data-dir=/p/miles-smiles");
+        assert_eq!(
+            c.program_dir("latam_pass"),
+            tm_browser::profile::site_profile_dir(
+                Path::new("/p"),
+                "miles:latam_pass"
+            )
+        );
         assert_eq!(
             args.last().map(String::as_str),
             Some("https://example.com")
@@ -285,7 +313,7 @@ mod tests {
     #[test]
     fn the_window_passes_every_profile_flag() {
         let c = LoginConfig::resolve(Some("/p".into()), Some("c".into()));
-        let args = c.args("https://example.com");
+        let args = c.args("smiles", "https://example.com");
         for flag in tm_browser::profile_args() {
             assert!(args.iter().any(|a| a == flag), "{flag} missing");
         }
@@ -348,8 +376,12 @@ mod tests {
         assert_eq!(session, Session::Missing, "an empty profile");
         assert_eq!(
             fake.requests(),
-            vec![Request::OpenLogin("smiles".into()), Request::CloseLogin]
+            vec![
+                Request::OpenLogin("smiles".into()),
+                Request::CloseLogin("smiles".into())
+            ]
         );
+        assert!(dir.join("miles-smiles").is_dir(), "the program's profile");
         let _ = std::fs::remove_dir_all(dir);
     }
 
@@ -406,7 +438,10 @@ mod tests {
             "--headless=new".to_owned(),
             "--remote-debugging-port=0".to_owned(),
         ];
-        args.extend(config.args(&format!("http://127.0.0.1:{port}/login")));
+        args.extend(
+            config.args("smiles", &format!("http://127.0.0.1:{port}/login")),
+        );
+        let site_profile = config.program_dir("smiles");
         let window = Chromium::launch_with(&config.chromium, args)
             .await
             .expect("login window");
@@ -426,12 +461,12 @@ mod tests {
         window.shutdown().await.expect("close the window");
 
         assert_eq!(
-            check_session(profile.path(), "smiles").await,
+            check_session(&site_profile, "smiles").await,
             Session::Missing,
             "no cookie on smiles.com.br"
         );
         let jar = tm_browser::profile::login_cookies(
-            profile.path(),
+            &site_profile,
             &["127.0.0.1"],
             Utc::now(),
         )
@@ -439,9 +474,13 @@ mod tests {
         .expect("jar");
         assert!(jar.iter().any(|c| c.name == "tm_login"), "{jar:?}");
 
+        // The daemon's Chromium for Smiles' site (0062).
         let daemon = Chromium::launch(ChromiumConfig::new(
             &config.chromium,
-            profile.path(),
+            tm_browser::profile::site_profile_dir(
+                profile.path(),
+                "miles:smiles",
+            ),
         ))
         .await
         .expect("daemon's Chromium");

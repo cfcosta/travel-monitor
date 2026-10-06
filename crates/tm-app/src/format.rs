@@ -7,6 +7,19 @@ use tm_domain::Money;
 pub const MINUS: char = '\u{2212}';
 
 /// `R$3,932` (whole units, as Google shows them).
+/// `4,800`: a count with thousands separators.
+pub fn thousands(n: u32) -> String {
+    let digits = n.to_string();
+    let mut out = String::with_capacity(digits.len() + digits.len() / 3);
+    for (i, c) in digits.chars().enumerate() {
+        if i > 0 && (digits.len() - i).is_multiple_of(3) {
+            out.push(',');
+        }
+        out.push(c);
+    }
+    out
+}
+
 pub fn money(price: &Money) -> String {
     price.to_string()
 }
@@ -242,6 +255,15 @@ mod tests {
             elapsed(start + chrono::Duration::minutes(14), start),
             "14 min"
         );
+    }
+
+    #[test]
+    fn counts_have_separators() {
+        assert_eq!(thousands(0), "0");
+        assert_eq!(thousands(300), "300");
+        assert_eq!(thousands(4800), "4,800");
+        assert_eq!(thousands(12_000), "12,000");
+        assert_eq!(thousands(1_234_567), "1,234,567");
     }
 
     #[test]

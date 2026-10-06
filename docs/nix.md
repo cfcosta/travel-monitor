@@ -49,7 +49,8 @@ The options are documented in `nix/hm-module.nix`. The main ones:
 | `databasePath` | `$XDG_DATA_HOME/travel-monitor/tm.db` |
 | `profileDir` | `$XDG_DATA_HOME/travel-monitor/chromium` |
 | `chromium.package` / `.headless` / `.port` | `pkgs.chromium` / `true` / `0` (free port) |
-| `budget.daily` / `budget.max` | `300` / `2000` |
+| `budget.daily` / `budget.max` (Google Flights, 0060) | `4800` / `12000` (0065) |
+| `budget.sites` (other sites, `--site-budget`) | `{ }` (300, ramping to 1,000) |
 | `logLevel` | `"info"` (`RUST_LOG`) |
 | `extraArgs`, `environment` | `[ ]`, `{ }` |
 
@@ -72,8 +73,11 @@ not set. As a standalone home-manager it cannot tell, so check with
 - Database: `~/.local/share/travel-monitor/tm.db` (with its `-wal` and
   `-shm` files). The daemon writes it; the app reads it and writes
   configuration and requests (0040, 0046).
-- Chromium profile: `~/.local/share/travel-monitor/chromium`. Miles
-  logins are kept here (0024).
+- Chromium profiles: `~/.local/share/travel-monitor/chromium/<site>`,
+  one per site (`google_flights`, `airline-tp`, `miles-smiles`, …), each
+  with its own browser process (0062). Miles logins are kept in the
+  program's own profile (0024); logins from the shared profile used
+  before 0062 are not carried over.
 - Logs: `journalctl --user -u travel-monitor -f`.
 
 Both directories are created when the service starts. The service runs
@@ -87,7 +91,8 @@ systemctl --user restart travel-monitor
 ```
 
 It runs `tmd --db … --profile-dir … --chromium … --cdp-port … --budget …
---max-budget …` (plus `--headed` when the browser is not headless, and
+--max-budget …` (plus `--site-budget site=daily:max` for each of
+`budget.sites`, `--headed` when the browser is not headless, and
 `extraArgs`), restarts on failure, and starts with the user manager
 (`default.target`).
 

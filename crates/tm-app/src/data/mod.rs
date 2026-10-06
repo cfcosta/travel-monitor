@@ -209,20 +209,63 @@ pub struct FeedItem {
     pub tone: Tone,
 }
 
-/// The daemon's heartbeat, budget and blocks (0039), for the status
-/// chip.
+/// The daemon's heartbeat, its sites' budgets and checks, and blocks
+/// (0039, 0057, 0060, 0062), for the status chip and the activity
+/// screen.
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct DaemonStatus {
     pub heartbeat: Option<DateTime<Utc>>,
+    /// The process's state: `"running"`, `"starting"`, `"stopped"`.
     pub state: String,
     pub next_check: Option<String>,
-    /// When the daemon looks for work again (0057).
+    /// When the first idle site looks for work again (0057).
     pub next_check_at: Option<DateTime<Utc>>,
-    /// The check running now (0057).
-    pub check: Option<CurrentCheck>,
+    /// The checks running now, at most one per site (0062), Google
+    /// Flights first.
+    pub checks: Vec<CurrentCheck>,
+    /// Each site's budget and state, Google Flights first (0060).
+    pub sites: Vec<SiteRow>,
+    /// Loads today and today's budgets, over every site.
     pub loads_today: u32,
     pub budget: u32,
     pub blocks_today: u32,
+}
+
+/// One site as the daemon runs it: its budget today and what its worker
+/// is doing (0060, 0062).
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct SiteRow {
+    /// `google_flights`, `airline:TP`, `miles:smiles`.
+    pub site: String,
+    /// `Google`, `TAP`, `Smiles`.
+    pub label: String,
+    /// `idle`, `checking`, `cooling down`, `paused for login: smiles`,
+    /// `browser unavailable`, `stopped`; empty when the site has no
+    /// worker.
+    pub state: String,
+    pub loads_today: u32,
+    /// Today's budget; `None` for a site that never spent a load.
+    pub budget: Option<u32>,
+    /// The most its ramp may reach.
+    pub max_budget: Option<u32>,
+}
+
+impl SiteRow {
+    /// `Google 1,234/4,800`, for a site with a budget.
+    pub fn loads(&self) -> Option<String> {
+        self.budget.map(|b| {
+            format!(
+                "{} {}/{}",
+                self.label,
+                crate::format::thousands(self.loads_today),
+                crate::format::thousands(b)
+            )
+        })
+    }
+
+    pub fn is_paused(&self) -> bool {
+        self.state.starts_with("paused")
+    }
 }
 
 /// The check the daemon is running, as the status chip and the activity
@@ -238,7 +281,7 @@ pub struct CurrentCheck {
     pub kind: String,
     /// The point of sale's country: `BR`.
     pub pos: String,
-    /// Another site than Google Flights: `airline:TP`.
+    /// Another site than Google Flights, by its label: `TAP`.
     pub site: Option<String>,
     /// `Scheduled · score 0.41`.
     pub reason: String,
@@ -268,19 +311,20 @@ pub enum Live<'a> {
     Missing,
     /// No heartbeat for a while; when the last one was.
     Stale(DateTime<Utc>),
-    /// Paused for a login, or stopped: the daemon's own words.
+    /// Stopped or starting: the daemon's own words.
     Paused(&'a str),
-    Checking(&'a CurrentCheck),
-    /// Between checks; when it looks for work again, if known.
+    /// One check per busy site (0062), never empty.
+    Checking(&'a [CurrentCheck]),
+    /// No site checking; when the first looks for work again, if known.
     Idle(Option<DateTime<Utc>>),
 }
 
 impl DaemonStatus {
     pub fn health(&self, now: DateTime<Utc>) -> Health {
-        let limit = if self.checking().is_some() {
-            CHECK_STALE_AFTER_SECS
-        } else {
+        let limit = if self.checking().is_empty() {
             STALE_AFTER_SECS
+        } else {
+            CHECK_STALE_AFTER_SECS
         };
         match self.heartbeat {
             None => Health::Missing,
@@ -289,10 +333,25 @@ impl DaemonStatus {
         }
     }
 
-    /// The check in progress, trusted only while the state says so (a
-    /// daemon built before 0057 leaves the columns alone).
-    pub fn checking(&self) -> Option<&CurrentCheck> {
-        self.check.as_ref().filter(|_| self.state == "checking")
+    /// The checks in progress, trusted only while the daemon runs (a
+    /// stopped daemon's sites say so themselves, but an old row might
+    /// not).
+    pub fn checking(&self) -> &[CurrentCheck] {
+        if matches!(self.state.as_str(), "running" | "checking") {
+            &self.checks
+        } else {
+            &[]
+        }
+    }
+
+    /// The sites with a budget, Google Flights first.
+    pub fn budgets(&self) -> impl Iterator<Item = &SiteRow> {
+        self.sites.iter().filter(|s| s.budget.is_some())
+    }
+
+    /// The sites paused for a login (0024, 0062).
+    pub fn paused_sites(&self) -> impl Iterator<Item = &SiteRow> {
+        self.sites.iter().filter(|s| s.is_paused())
     }
 
     pub fn live(&self, now: DateTime<Utc>) -> Live<'_> {
@@ -300,8 +359,9 @@ impl DaemonStatus {
             (Health::Missing, _) | (_, None) => Live::Missing,
             (Health::Stale, Some(at)) => Live::Stale(at),
             (Health::Running, Some(_)) => {
-                if let Some(check) = self.checking() {
-                    Live::Checking(check)
+                let checks = self.checking();
+                if !checks.is_empty() {
+                    Live::Checking(checks)
                 } else if matches!(self.state.as_str(), "running" | "") {
                     Live::Idle(self.next_check_at)
                 } else {
@@ -416,8 +476,10 @@ pub struct SnapshotQuery {
 pub enum Request {
     CheckRoute(RouteId),
     ConfirmDeal(DealId),
+    /// Pause the program's site for a login window (0024, 0062).
     OpenLogin(String),
-    CloseLogin,
+    /// The program's login window closed.
+    CloseLogin(String),
     ReloadConfig,
 }
 

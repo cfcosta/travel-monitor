@@ -6,7 +6,10 @@
     reason = "#[tokio::test] expands to block_on: a test is the runtime's entry point"
 )]
 
-use std::sync::{Arc, Mutex, OnceLock};
+use std::{
+    sync::{Arc, Mutex, OnceLock},
+    time::{Duration, Instant},
+};
 
 use async_trait::async_trait;
 use chrono::{DateTime, Days, NaiveDate, TimeDelta, Utc};
@@ -42,26 +45,37 @@ use tm_domain::{
     QueryOutcome,
     QueryReason,
     RouteId,
+    SiteLimits,
     Source,
 };
 use tm_gflights::rpc::{ExploreDestination, Seller, SellerOffer};
 use tm_store::{
     DealFilter,
-    Heartbeat,
     LoginState,
     RequestKind,
     RequestStatus,
+    SiteStatus,
     Store,
 };
 use tokio::sync::watch;
 
-type Answer<J, T> = Box<dyn FnMut(&J) -> Fetch<T> + Send>;
+type Answer<J, T> = Box<dyn Fn(&J) -> Fetch<T> + Send + Sync>;
 
-/// What the fake saw and answers with.
+/// One fetch, timed: which site ran what, from when to when.
+#[derive(Debug, Clone)]
+struct Span {
+    site: String,
+    start: Instant,
+    end: Instant,
+}
+
+/// What the fakes saw, every site's together.
 #[derive(Default)]
 struct Log {
-    starts: usize,
-    stops: usize,
+    /// The site of each browser start and stop.
+    starts: Vec<String>,
+    stops: Vec<String>,
+    spans: Vec<Span>,
     calendar: Vec<CalendarJob>,
     explore: Vec<ExploreJob>,
     tap: Vec<TapJob>,
@@ -69,42 +83,67 @@ struct Log {
     resolve: Vec<ResolveJob>,
 }
 
-struct Fake {
-    running: bool,
-    log: Arc<Mutex<Log>>,
+/// How every site's fake answers.
+struct Answers {
     calendar: Answer<CalendarJob, Vec<Cell>>,
     explore: Answer<ExploreJob, Vec<ExploreDestination>>,
     tap: Answer<TapJob, Vec<Cell>>,
     confirm: Answer<ConfirmJob, Option<Confirmation>>,
+    /// How long a calendar or TAP fetch takes.
+    delay: Duration,
 }
 
-impl Fake {
-    fn new(log: Arc<Mutex<Log>>) -> Self {
+impl Default for Answers {
+    fn default() -> Self {
         Self {
-            running: false,
-            log,
             calendar: Box::new(|_| Fetch::ok(Vec::new(), 2)),
             explore: Box::new(|_| Fetch::ok(Vec::new(), 1)),
             tap: Box::new(|_| Fetch::ok(Vec::new(), 1)),
             confirm: Box::new(|_| Fetch::ok(None, 1)),
+            delay: Duration::ZERO,
         }
     }
 }
 
-fn log(fake: &Fake) -> std::sync::MutexGuard<'_, Log> {
-    fake.log.lock().expect("the log lock")
+/// One site's sources (0062): the daemon makes one per site.
+struct Fake {
+    site: String,
+    running: bool,
+    log: Arc<Mutex<Log>>,
+    answers: Arc<Answers>,
+}
+
+impl Fake {
+    fn log(&self) -> std::sync::MutexGuard<'_, Log> {
+        self.log.lock().expect("the log lock")
+    }
+
+    /// Waits the fetch's delay and records its span.
+    async fn timed(&self) {
+        let start = Instant::now();
+        if !self.answers.delay.is_zero() {
+            tokio::time::sleep(self.answers.delay).await;
+        }
+        self.log().spans.push(Span {
+            site: self.site.clone(),
+            start,
+            end: Instant::now(),
+        });
+    }
 }
 
 #[async_trait]
 impl Sources for Fake {
     async fn start(&mut self, _: &[PointOfSale]) -> anyhow::Result<()> {
-        log(self).starts += 1;
+        let site = self.site.clone();
+        self.log().starts.push(site);
         self.running = true;
         Ok(())
     }
     async fn stop(&mut self) {
         if self.running {
-            log(self).stops += 1;
+            let site = self.site.clone();
+            self.log().stops.push(site);
         }
         self.running = false;
     }
@@ -112,29 +151,36 @@ impl Sources for Fake {
         self.running
     }
     async fn calendar(&mut self, job: &CalendarJob) -> Fetch<Vec<Cell>> {
-        log(self).calendar.push(job.clone());
-        (self.calendar)(job)
+        assert_eq!(self.site, "google_flights");
+        self.log().calendar.push(job.clone());
+        self.timed().await;
+        (self.answers.calendar)(job)
     }
     async fn explore(
         &mut self,
         job: &ExploreJob,
     ) -> Fetch<Vec<ExploreDestination>> {
-        log(self).explore.push(job.clone());
-        (self.explore)(job)
+        assert_eq!(self.site, "google_flights");
+        self.log().explore.push(job.clone());
+        (self.answers.explore)(job)
     }
     async fn tap(&mut self, job: &TapJob) -> Fetch<Vec<Cell>> {
-        log(self).tap.push(job.clone());
-        (self.tap)(job)
+        assert_eq!(self.site, "airline:TP");
+        self.log().tap.push(job.clone());
+        self.timed().await;
+        (self.answers.tap)(job)
     }
     async fn confirm(
         &mut self,
         job: &ConfirmJob,
     ) -> Fetch<Option<Confirmation>> {
-        log(self).confirm.push(job.clone());
-        (self.confirm)(job)
+        assert_eq!(self.site, "google_flights");
+        self.log().confirm.push(job.clone());
+        (self.answers.confirm)(job)
     }
     async fn resolve(&mut self, job: &ResolveJob) -> Fetch<Option<String>> {
-        log(self).resolve.push(job.clone());
+        assert_eq!(self.site, "google_flights");
+        self.log().resolve.push(job.clone());
         // "Flights to Rio de Janeiro" → "/m/rio-de-janeiro".
         let name = job
             .url
@@ -154,32 +200,55 @@ struct Harness {
     _stop: watch::Sender<bool>,
 }
 
-async fn harness(only: Only, tweak: impl FnOnce(&mut Fake)) -> Harness {
-    harness_on(only, tweak, None).await
-}
-
-/// [`harness`], with the daemon reading logins from `profile_dir`.
-async fn harness_on(
-    only: Only,
-    tweak: impl FnOnce(&mut Fake),
-    profile_dir: Option<std::path::PathBuf>,
-) -> Harness {
-    let store = Store::open_in_memory().await.expect("opens");
-    let log = Arc::new(Mutex::new(Log::default()));
-    let mut fake = Fake::new(Arc::clone(&log));
-    tweak(&mut fake);
-    let config = Config {
+/// The test configuration: one tick at a time, no pauses, Google
+/// Flights at 300 loads a day.
+fn test_config(only: Only) -> Config {
+    Config {
         once: true,
         only,
         pace: (0, 0),
         seed: Some(7),
         budget: Some(300),
         max_budget: Some(2000),
-        profile_dir,
         ..Config::default()
-    };
+    }
+}
+
+/// A daemon over a fresh in-memory store whose sites answer with
+/// `answers`. Not started.
+async fn daemon(
+    config: Config,
+    answers: Answers,
+) -> (Daemon<Fake>, Arc<Mutex<Log>>, watch::Sender<bool>, Store) {
+    let log = Arc::new(Mutex::new(Log::default()));
+    let answers = Arc::new(answers);
     let (stop, shutdown) = watch::channel(false);
-    let mut daemon = Daemon::new(store, fake, config, shutdown);
+    let store = Store::open_in_memory().await.expect("opens");
+    let sources = {
+        let log = Arc::clone(&log);
+        move |site: &str| Fake {
+            site: site.to_owned(),
+            running: false,
+            log: Arc::clone(&log),
+            answers: Arc::clone(&answers),
+        }
+    };
+    let daemon = Daemon::new(store.clone(), sources, config, shutdown);
+    (daemon, log, stop, store)
+}
+
+async fn harness(only: Only, tweak: impl FnOnce(&mut Answers)) -> Harness {
+    harness_with(test_config(only), tweak).await
+}
+
+/// [`harness`] with a configuration of its own.
+async fn harness_with(
+    config: Config,
+    tweak: impl FnOnce(&mut Answers),
+) -> Harness {
+    let mut answers = Answers::default();
+    tweak(&mut answers);
+    let (mut daemon, log, stop, _) = daemon(config, answers).await;
     daemon.startup().await.expect("starts");
     Harness {
         daemon,
@@ -195,6 +264,24 @@ impl Harness {
 
     fn log(&self) -> std::sync::MutexGuard<'_, Log> {
         self.log.lock().expect("the log lock")
+    }
+
+    async fn site_budget(&self, site: &str) -> tm_store::SiteBudget {
+        self.store()
+            .site_budget(site)
+            .await
+            .expect("reads")
+            .expect("the site has a budget")
+    }
+
+    async fn status(&self, site: &str) -> SiteStatus {
+        self.store()
+            .site_statuses()
+            .await
+            .expect("reads")
+            .into_iter()
+            .find(|s| s.site == site)
+            .expect("the site has a status")
     }
 }
 
@@ -305,7 +392,8 @@ async fn past_check(
 #[tokio::test]
 async fn startup_seeds_and_learns_freebase_ids() {
     let h = harness(Only::default(), |_| {}).await;
-    assert_eq!(h.log().starts, 1);
+    // Only Google Flights had work: learning the IDs (0062).
+    assert_eq!(h.log().starts, ["google_flights"]);
     // The seeded cities without an ID: RIO, BUE, NYC, PAR, LON, ROM, TYO,
     // MIL and SEL (SAO and WAS are seeded with theirs).
     assert_eq!(h.log().resolve.len(), 9);
@@ -324,28 +412,37 @@ async fn startup_seeds_and_learns_freebase_ids() {
         .expect("a heartbeat");
     assert_eq!(beat.state, "running");
     assert_eq!(beat.budget, 300);
-    // One page load per city learned.
+    // One page load per city learned, counted on Google Flights.
     assert_eq!(beat.loads_today, 9);
+    let google = h.site_budget("google_flights").await;
+    assert_eq!((google.daily_budget, google.loads_today), (300, 9));
+    // A worker per site with a reader and eligible families.
+    assert_eq!(h.daemon.sites(), ["airline:TP", "google_flights"]);
+    assert_eq!(h.status("google_flights").await.state, "idle");
+    assert_eq!(h.status("airline:TP").await.state, "idle");
 }
 
-/// The heartbeat says what is being checked while the source runs, and
-/// goes back to idle when it is done (0057).
+/// The site's status says what it checks while the source runs, and
+/// goes back to idle when it is done (0057, 0062).
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-async fn a_check_writes_start_and_end_heartbeats() {
+async fn a_check_writes_start_and_end_statuses() {
     let slot: Arc<OnceLock<Store>> = Arc::new(OnceLock::new());
-    let during: Arc<Mutex<Vec<Heartbeat>>> = Arc::default();
+    let during: Arc<Mutex<Vec<SiteStatus>>> = Arc::default();
     let mut h = harness(Only::default(), |fake| {
         let (slot, during) = (Arc::clone(&slot), Arc::clone(&during));
         fake.calendar = Box::new(move |_| {
             // What the app would read while the page loads.
             if let Some(store) = slot.get() {
-                let beat = tokio::task::block_in_place(|| {
+                let statuses = tokio::task::block_in_place(|| {
                     tokio::runtime::Handle::current()
-                        .block_on(store.heartbeat())
+                        .block_on(store.site_statuses())
                 })
-                .expect("reads")
-                .expect("a heartbeat");
-                during.lock().expect("lock").push(beat);
+                .expect("reads");
+                let google = statuses
+                    .into_iter()
+                    .find(|s| s.site == "google_flights")
+                    .expect("Google Flights' status");
+                during.lock().expect("lock").push(google);
             }
             Fetch::ok(Vec::new(), 2)
         });
@@ -354,25 +451,20 @@ async fn a_check_writes_start_and_end_heartbeats() {
     let store = h.store().clone();
     assert!(slot.set(store.clone()).is_ok());
     let lis = leg(&store, "LIS", Leg::Outbound).await;
-    let before = store
-        .heartbeat()
-        .await
-        .expect("reads")
-        .expect("a heartbeat");
-    assert_eq!(before.state, "running");
+    let before = h.status("google_flights").await;
+    assert_eq!(before.state, "idle");
     assert_eq!(before.check, None);
 
-    let world = h.daemon.world().await.expect("loads");
     h.daemon
-        .run_check(lis, QueryReason::Manual, &world)
+        .run_check(lis, QueryReason::Manual)
         .await
         .expect("checks");
 
     let during = during.lock().expect("lock").clone();
     assert_eq!(during.len(), 1, "the source ran once");
-    let beat = &during[0];
-    assert_eq!(beat.state, "checking");
-    let check = beat.check.as_ref().expect("the check in progress");
+    let status = &during[0];
+    assert_eq!(status.state, "checking");
+    let check = status.check.as_ref().expect("the check in progress");
     assert_eq!(check.family, lis);
     assert_eq!(check.reason, QueryReason::Manual);
     assert!(check.started_at >= before.updated_at);
@@ -380,19 +472,31 @@ async fn a_check_writes_start_and_end_heartbeats() {
     assert_eq!(check.query, Some(logged[0].id));
     assert!(logged[0].finished_at.is_some());
 
-    let after = store
-        .heartbeat()
-        .await
-        .expect("reads")
-        .expect("a heartbeat");
-    assert_eq!(after.state, "running");
+    let after = h.status("google_flights").await;
+    assert_eq!(after.state, "idle");
     assert_eq!(after.check, None);
-    assert!(after.updated_at >= beat.updated_at);
+    assert!(after.updated_at >= status.updated_at);
+    // The other site was not touched.
+    assert_eq!(h.status("airline:TP").await.check, None);
 }
 
+/// A login pauses its own site only (0062): Google Flights and TAP keep
+/// checking while Smiles' profile is open.
 #[tokio::test]
-async fn requests_pause_resume_and_check() {
-    let mut h = harness(Only::default(), |_| {}).await;
+async fn a_login_pauses_only_its_site() {
+    let mut h = harness_with(
+        Config {
+            budget: Some(60),
+            max_budget: Some(60),
+            site_budgets: vec![(
+                "airline:TP".into(),
+                SiteLimits { start: 20, max: 20 },
+            )],
+            ..test_config(Only::default())
+        },
+        |_| {},
+    )
+    .await;
     let store = h.store().clone();
     let lis = leg(&store, "LIS", Leg::Outbound).await;
 
@@ -403,36 +507,52 @@ async fn requests_pause_resume_and_check() {
         .await
         .expect("enqueues");
     h.daemon.process_requests().await.expect("processes");
-    assert!(h.daemon.is_paused());
-    assert_eq!(h.log().stops, 1);
+    assert!(h.daemon.is_paused("miles:smiles"));
+    assert!(!h.daemon.is_paused("google_flights"));
+    assert_eq!(h.daemon.paused_sites(), ["miles:smiles"]);
+    // Nothing else closed its browser.
+    assert!(h.log().stops.is_empty());
     let r = store.request(open).await.expect("reads").expect("exists");
     assert_eq!(r.status, RequestStatus::Done);
+    assert_eq!(
+        h.status("miles:smiles").await.state,
+        "paused for login: smiles"
+    );
+    assert_eq!(h.status("google_flights").await.state, "idle");
     let beat = store
         .heartbeat()
         .await
         .expect("reads")
         .expect("a heartbeat");
-    assert_eq!(beat.state, "paused for login: smiles");
+    assert_eq!(beat.state, "running");
 
-    // While paused, checks wait and the tick does nothing.
+    // While Smiles is paused, Google Flights' manual checks and every
+    // site's tick run.
     let check = store
         .enqueue(&RequestKind::CheckFamily { family: lis })
         .await
         .expect("enqueues");
     h.daemon.process_requests().await.expect("processes");
-    h.daemon.run_manual().await.expect("runs");
-    h.daemon.tick().await.expect("ticks");
-    assert!(h.log().calendar.is_empty());
+    h.daemon.run_manual().await;
+    assert_eq!(h.log().calendar.len(), 1);
     let r = store.request(check).await.expect("reads").expect("exists");
-    assert_eq!(r.status, RequestStatus::Claimed);
+    assert_eq!(r.status, RequestStatus::Done);
+    let recent = store.recent_queries(1).await.expect("reads");
+    assert_eq!(recent[0].family, lis);
+    assert_eq!(recent[0].reason, QueryReason::Manual);
+    h.daemon.tick().await.expect("ticks");
+    assert!(h.log().calendar.len() > 1);
+    assert!(!h.log().tap.is_empty());
+    assert!(h.daemon.is_paused("miles:smiles"));
 
     let close = store
-        .enqueue(&RequestKind::CloseLogin)
+        .enqueue(&RequestKind::CloseLogin {
+            program: Some("smiles".into()),
+        })
         .await
         .expect("enqueues");
     h.daemon.process_requests().await.expect("processes");
-    assert!(!h.daemon.is_paused());
-    assert_eq!(h.log().starts, 2);
+    assert!(h.daemon.paused_sites().is_empty());
     let smiles = store
         .list_miles_programs()
         .await
@@ -451,22 +571,9 @@ async fn requests_pause_resume_and_check() {
             .status,
         RequestStatus::Done
     );
-
-    // The deferred check runs first, as a manual query.
-    h.daemon.run_manual().await.expect("runs");
-    assert_eq!(h.log().calendar.len(), 1);
-    assert_eq!(
-        store
-            .request(check)
-            .await
-            .expect("reads")
-            .expect("exists")
-            .status,
-        RequestStatus::Done
-    );
-    let recent = store.recent_queries(1).await.expect("reads");
-    assert_eq!(recent[0].family, lis);
-    assert_eq!(recent[0].reason, QueryReason::Manual);
+    assert_eq!(h.status("miles:smiles").await.state, "idle");
+    // Smiles has no reader: it never started a browser.
+    assert!(!h.log().starts.iter().any(|s| s == "miles:smiles"));
 
     let reload = store
         .enqueue(&RequestKind::ReloadConfig)
@@ -498,18 +605,28 @@ async fn requests_pause_resume_and_check() {
         RequestStatus::Failed
     );
 
-    // A route check queues every eligible family of the route.
+    // A route check queues every eligible family of the route, on each
+    // site, and is done when the last site finishes.
     let ssa = route(&store, "SSA").await;
     let before = h.log().calendar.len();
-    store
+    let request = store
         .enqueue(&RequestKind::CheckRoute { route: ssa })
         .await
         .expect("enqueues");
     h.daemon.process_requests().await.expect("processes");
-    h.daemon.run_manual().await.expect("runs");
+    h.daemon.run_manual().await;
     // Domestic: economy only; legs and round trip under four points of
     // sale. Airline and miles families other than TAP have no reader.
     assert_eq!(h.log().calendar.len() - before, 12);
+    assert_eq!(
+        store
+            .request(request)
+            .await
+            .expect("reads")
+            .expect("exists")
+            .status,
+        RequestStatus::Done
+    );
 }
 
 #[tokio::test]
@@ -550,7 +667,7 @@ async fn a_tick_checks_records_and_learns() {
     assert_eq!(f.state.checks, 1);
     assert_eq!(f.state.last_min_price_minor, Some(200_000));
     assert!(f.state.last_check.is_some());
-    let budget = store.budget().await.expect("reads").expect("a budget");
+    let budget = h.site_budget("google_flights").await;
     assert_eq!(budget.loads_today, 4);
 
     // Checked within the minimum interval: the next tick leaves it.
@@ -588,9 +705,15 @@ async fn a_block_backs_off() {
     assert_eq!(blocks.len(), 1);
     assert_eq!(blocks[0].site, "google_flights");
     assert_eq!(blocks[0].detail, "unusual traffic page");
-    let budget = store.budget().await.expect("reads").expect("a budget");
+    let budget = h.site_budget("google_flights").await;
     assert_eq!(budget.daily_budget, 150);
-    // The block is per site: TAP's legs on the route still run after it.
+    // The block is per site: TAP's legs on the route still run after it,
+    // on TAP's own budget (0060).
+    let tap = h.site_budget("airline:TP").await;
+    assert_eq!(tap.daily_budget, 300);
+    assert!(tap.loads_today > 0);
+    assert_eq!(h.status("google_flights").await.state, "cooling down");
+    assert_eq!(h.status("airline:TP").await.state, "idle");
     let recent = store.recent_queries(20).await.expect("reads");
     let blocked: Vec<_> = recent
         .iter()
@@ -677,9 +800,8 @@ async fn deals_are_found_and_confirmed() {
     past_check(&store, ret_id, now - TimeDelta::hours(1), first, 20, 1_000)
         .await;
 
-    let world = h.daemon.world().await.expect("loads");
     h.daemon
-        .run_check(out_id, QueryReason::Manual, &world)
+        .run_check(out_id, QueryReason::Manual)
         .await
         .expect("checks");
 
@@ -737,9 +859,8 @@ async fn deals_are_found_and_confirmed() {
     assert_eq!(trip_state.rt_discount_n, 2);
 
     // The same check again finds the same trips: already known.
-    let world = h.daemon.world().await.expect("loads");
     h.daemon
-        .run_check(out_id, QueryReason::Manual, &world)
+        .run_check(out_id, QueryReason::Manual)
         .await
         .expect("checks");
     assert_eq!(h.log().confirm.len(), 2);
@@ -774,9 +895,8 @@ async fn a_rejected_confirmation_does_not_alert() {
         past_check(&store, out_id, at, first, 20, 1_000).await;
         past_check(&store, ret_id, at, first, 20, 1_000).await;
     }
-    let world = h.daemon.world().await.expect("loads");
     h.daemon
-        .run_check(out_id, QueryReason::Manual, &world)
+        .run_check(out_id, QueryReason::Manual)
         .await
         .expect("checks");
     let deals = store
@@ -913,7 +1033,7 @@ async fn sites_without_a_reader_load_nothing() {
         .await
         .expect("sets");
     let world = h.daemon.world().await.expect("loads");
-    let cx = h.daemon.context(&world, Utc::now());
+    let cx = h.daemon.context(&world, Utc::now()).await.expect("builds");
     let before = store.recent_queries(100).await.expect("reads").len();
     for id in [miles, airline] {
         let f = world
@@ -926,7 +1046,7 @@ async fn sites_without_a_reader_load_nothing() {
             Err(tm_daemon::candidates::Skip::Unprobed)
         );
         h.daemon
-            .run_check(id, QueryReason::Manual, &world)
+            .run_check(id, QueryReason::Manual)
             .await
             .expect("checks");
         let state = store.family(id).await.expect("reads").expect("exists");
@@ -971,7 +1091,7 @@ async fn tap_legs_run_and_record_cells() {
     let store = h.store().clone();
     // TAP's legs are candidates; its round trips are not.
     let world = h.daemon.world().await.expect("loads");
-    let cx = h.daemon.context(&world, Utc::now());
+    let cx = h.daemon.context(&world, Utc::now()).await.expect("builds");
     let tap_families: Vec<_> = world
         .families
         .iter()
@@ -994,7 +1114,7 @@ async fn tap_legs_run_and_record_cells() {
     );
 
     h.daemon
-        .run_check(outbound, QueryReason::Manual, &world)
+        .run_check(outbound, QueryReason::Manual)
         .await
         .expect("checks");
     {
@@ -1063,13 +1183,20 @@ async fn cookie_jar(profile: &std::path::Path, cookies: &[(&str, &str)]) {
     c.close().await.expect("closes");
 }
 
-/// After the login window, the daemon records what the profile holds,
-/// not that the window closed (0024).
+/// After the login window, the daemon records what the program's own
+/// profile holds (`<profile-dir>/miles-smiles`, 0062), not that the
+/// window closed (0024, 0064).
 #[tokio::test]
 async fn closing_the_login_records_the_profiles_session() {
     let profile = tempfile::tempdir().expect("tempdir");
-    let mut h =
-        harness_on(Only::default(), |_| {}, Some(profile.path().into())).await;
+    let mut h = harness_with(
+        Config {
+            profile_dir: Some(profile.path().into()),
+            ..test_config(Only::default())
+        },
+        |_| {},
+    )
+    .await;
     let store = h.store().clone();
     let smiles_state = async |store: &Store| {
         store
@@ -1081,23 +1208,37 @@ async fn closing_the_login_records_the_profiles_session() {
             .expect("smiles")
             .login_state
     };
-    for (cookies, expected) in [
+    // A session in the old shared profile (before 0062) is not read.
+    cookie_jar(profile.path(), &[("www.smiles.com.br", "token")]).await;
+    let smiles_profile =
+        tm_browser::profile::site_profile_dir(profile.path(), "miles:smiles");
+    assert_eq!(smiles_profile, profile.path().join("miles-smiles"));
+    for (cookies, expected, named) in [
         // Only what any visit sets: Akamai and analytics.
         (
             &[(".smiles.com.br", "_abck"), (".smiles.com.br", "_ga")][..],
             LoginState::LoggedOut,
+            true,
         ),
         (
             &[(".smiles.com.br", "_abck"), ("www.smiles.com.br", "token")][..],
             LoginState::LoggedIn,
+            true,
         ),
         // Another program's session is not Smiles'.
         (
             &[(".latamairlines.com", "token")][..],
             LoginState::LoggedOut,
+            true,
+        ),
+        // An app before 0062 does not name the program.
+        (
+            &[("www.smiles.com.br", "token")][..],
+            LoginState::LoggedIn,
+            false,
         ),
     ] {
-        cookie_jar(profile.path(), cookies).await;
+        cookie_jar(&smiles_profile, cookies).await;
         store
             .enqueue(&RequestKind::OpenLogin {
                 program: "smiles".into(),
@@ -1105,12 +1246,229 @@ async fn closing_the_login_records_the_profiles_session() {
             .await
             .expect("enqueues");
         h.daemon.process_requests().await.expect("processes");
+        assert!(h.daemon.is_paused("miles:smiles"));
         store
-            .enqueue(&RequestKind::CloseLogin)
+            .enqueue(&RequestKind::CloseLogin {
+                program: named.then(|| "smiles".to_owned()),
+            })
             .await
             .expect("enqueues");
         h.daemon.process_requests().await.expect("processes");
-        assert!(!h.daemon.is_paused());
+        assert!(h.daemon.paused_sites().is_empty());
         assert_eq!(smiles_state(&store).await, expected, "{cookies:?}");
     }
+    // Google Flights never paused.
+    assert!(h.log().stops.is_empty());
+}
+
+/// Whether two spans overlap in time.
+fn overlap(a: &Span, b: &Span) -> bool {
+    a.start < b.end && b.start < a.end
+}
+
+/// Different sites check at the same time; each site one check at a
+/// time; and each counts its own loads (0060, 0062).
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn sites_check_in_parallel_one_check_each_at_a_time() {
+    let mut h = harness_with(
+        Config {
+            budget: Some(12),
+            max_budget: Some(12),
+            site_budgets: vec![(
+                "airline:TP".into(),
+                SiteLimits { start: 12, max: 12 },
+            )],
+            ..test_config(Only {
+                family: None,
+                destination: Some("LIS".into()),
+            })
+        },
+        |a| {
+            a.calendar = Box::new(|_| Fetch::ok(Vec::new(), 3));
+            a.tap = Box::new(|_| Fetch::ok(Vec::new(), 2));
+            a.delay = Duration::from_millis(150);
+        },
+    )
+    .await;
+    h.daemon.tick().await.expect("ticks");
+    let spans = h.log().spans.clone();
+    let google: Vec<&Span> = spans
+        .iter()
+        .filter(|s| s.site == "google_flights")
+        .collect();
+    let tap: Vec<&Span> =
+        spans.iter().filter(|s| s.site == "airline:TP").collect();
+    assert!(!google.is_empty() && !tap.is_empty(), "{spans:?}");
+    // The two sites' checks ran at the same time...
+    assert!(
+        google.iter().any(|g| tap.iter().any(|t| overlap(g, t))),
+        "no overlap: {spans:?}"
+    );
+    // ...but never two of the same site.
+    for site in [&google, &tap] {
+        for (i, a) in site.iter().enumerate() {
+            for b in &site[i + 1..] {
+                assert!(!overlap(a, b), "{a:?} and {b:?}");
+            }
+        }
+    }
+    // Each site counted its own loads, against its own budget.
+    let google_budget = h.site_budget("google_flights").await;
+    let tap_budget = h.site_budget("airline:TP").await;
+    assert_eq!(google_budget.loads_today, 3 * google.len() as u32);
+    assert_eq!(tap_budget.loads_today, 2 * tap.len() as u32);
+    assert_eq!(
+        (google_budget.daily_budget, tap_budget.daily_budget),
+        (12, 12)
+    );
+    let beat = h
+        .store()
+        .heartbeat()
+        .await
+        .expect("reads")
+        .expect("a heartbeat");
+    assert_eq!(
+        beat.loads_today,
+        google_budget.loads_today + tap_budget.loads_today
+    );
+    assert_eq!(beat.budget, 24);
+    // Each site's browser is its own.
+    let starts = h.log().starts.clone();
+    assert_eq!(starts.iter().filter(|s| *s == "google_flights").count(), 1);
+    assert_eq!(starts.iter().filter(|s| *s == "airline:TP").count(), 1);
+}
+
+/// A block on TAP halves and cools TAP alone; Google Flights keeps its
+/// budget and keeps checking (0060).
+#[tokio::test]
+async fn a_block_on_one_site_leaves_the_others_alone() {
+    let mut h = harness_with(
+        Config {
+            budget: Some(20),
+            max_budget: Some(20),
+            ..test_config(Only {
+                family: None,
+                destination: Some("LIS".into()),
+            })
+        },
+        |a| {
+            a.tap = Box::new(|_| {
+                Fetch::failed(
+                    QueryOutcome::Blocked {
+                        detail: "captcha".into(),
+                    },
+                    1,
+                )
+            });
+        },
+    )
+    .await;
+    h.daemon.tick().await.expect("ticks");
+    assert_eq!(h.log().tap.len(), 1, "TAP stops at its first block");
+    let calendars = h.log().calendar.len();
+    assert!(calendars > 1);
+    let blocks = h
+        .store()
+        .blocks_since(Utc::now() - TimeDelta::hours(1))
+        .await
+        .expect("reads");
+    assert_eq!(blocks.len(), 1);
+    assert_eq!(blocks[0].site, "airline:TP");
+    let tap = h.site_budget("airline:TP").await;
+    assert_eq!(tap.daily_budget, 150);
+    let google = h.site_budget("google_flights").await;
+    assert_eq!(google.daily_budget, 20);
+    assert_eq!(h.status("airline:TP").await.state, "cooling down");
+    assert_eq!(h.status("google_flights").await.state, "idle");
+    let world = h.daemon.world().await.expect("loads");
+    let cx = h.daemon.context(&world, Utc::now()).await.expect("builds");
+    assert!(cx.cooling.contains("airline:TP"));
+    assert!(!cx.cooling.contains("google_flights"));
+
+    // The next tick: TAP waits out its cooldown, Google Flights runs.
+    h.store()
+        .enqueue(&RequestKind::CheckRoute {
+            route: route(h.store(), "LIS").await,
+        })
+        .await
+        .expect("enqueues");
+    h.daemon.process_requests().await.expect("processes");
+    h.daemon.run_manual().await;
+    assert_eq!(h.log().tap.len(), 1);
+    assert!(h.log().calendar.len() > calendars);
+}
+
+/// The daemon's loop runs each site on its own timer; a shutdown stops
+/// every site's worker and closes every browser.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn a_shutdown_stops_every_site() {
+    let config = Config {
+        once: false,
+        tick: Duration::from_millis(200),
+        request_poll: Duration::from_millis(50),
+        budget: Some(100_000),
+        max_budget: Some(100_000),
+        site_budgets: vec![(
+            "airline:TP".into(),
+            SiteLimits {
+                start: 100_000,
+                max: 100_000,
+            },
+        )],
+        ..test_config(Only {
+            family: None,
+            destination: Some("LIS".into()),
+        })
+    };
+    let (mut daemon, log, stop, store) =
+        daemon(config, Answers::default()).await;
+    let running = tokio::spawn(async move {
+        let result = daemon.run().await;
+        (daemon, result)
+    });
+    let started = async {
+        loop {
+            {
+                let log = log.lock().expect("the log lock");
+                if log.starts.iter().any(|s| s == "google_flights")
+                    && log.starts.iter().any(|s| s == "airline:TP")
+                    && !log.tap.is_empty()
+                {
+                    break;
+                }
+            }
+            tokio::time::sleep(Duration::from_millis(20)).await;
+        }
+    };
+    tokio::time::timeout(Duration::from_secs(20), started)
+        .await
+        .expect("both sites start checking");
+    stop.send(true).expect("signals");
+    let (daemon, result) =
+        tokio::time::timeout(Duration::from_secs(20), running)
+            .await
+            .expect("stops in time")
+            .expect("joins");
+    result.expect("runs");
+    assert!(daemon.sites().is_empty());
+    {
+        let log = log.lock().expect("the log lock");
+        for site in ["google_flights", "airline:TP"] {
+            let starts = log.starts.iter().filter(|s| *s == site).count();
+            let stops = log.stops.iter().filter(|s| *s == site).count();
+            assert_eq!(starts, stops, "{site}: every browser closed");
+        }
+    }
+    let statuses = store.site_statuses().await.expect("reads");
+    assert!(statuses.len() >= 2);
+    for status in &statuses {
+        assert_eq!(status.state, "stopped", "{status:?}");
+        assert_eq!(status.check, None);
+    }
+    let beat = store
+        .heartbeat()
+        .await
+        .expect("reads")
+        .expect("a heartbeat");
+    assert_eq!(beat.state, "stopped");
 }

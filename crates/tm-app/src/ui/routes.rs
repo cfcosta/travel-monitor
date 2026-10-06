@@ -209,13 +209,27 @@ impl TravelMonitor {
                             "Page loads",
                             div()
                                 .flex()
-                                .child(d.loads_today.to_string())
+                                .child(format::thousands(d.loads_today))
                                 .child(
                                     div()
                                         .text_color(color(theme::TEXT_DIM))
-                                        .child(format!("/{}", d.budget)),
+                                        .child(format!(
+                                            "/{}",
+                                            format::thousands(d.budget)
+                                        )),
                                 ),
-                            format!("{} blocks today", d.blocks_today),
+                            {
+                                // Each site's own budget (0060).
+                                let mut sub: Vec<String> = d
+                                    .budgets()
+                                    .filter_map(crate::data::SiteRow::loads)
+                                    .collect();
+                                sub.push(format!(
+                                    "{} blocks today",
+                                    d.blocks_today
+                                ));
+                                sub.join(" · ")
+                            },
                             theme::TEXT,
                         )
                         .flex_1(),

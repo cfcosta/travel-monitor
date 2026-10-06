@@ -80,6 +80,7 @@ use super::{
     RowStatus,
     SellerRow,
     SharedBackend,
+    SiteRow,
     Snapshot,
     SnapshotQuery,
     Ticket,
@@ -752,39 +753,9 @@ async fn snapshot(
         .collect();
     let blocks_today =
         blocks.iter().filter(|b| b.at.date_naive() == today).count() as u32;
-    let budget = store.budget().await?;
-    let daemon = match store.heartbeat().await? {
-        Some(h) => {
-            let check = match &h.check {
-                Some(c) if h.state == "checking" => {
-                    current_check(store, c, &pos_names).await?
-                }
-                _ => None,
-            };
-            DaemonStatus {
-                heartbeat: Some(h.updated_at),
-                state: h.state,
-                next_check: h.next_check,
-                next_check_at: h.next_check_at,
-                check,
-                loads_today: h.loads_today,
-                budget: h.budget,
-                blocks_today,
-            }
-        }
-        None => DaemonStatus {
-            heartbeat: None,
-            state: String::new(),
-            next_check: None,
-            next_check_at: None,
-            check: None,
-            loads_today: budget
-                .filter(|b| b.day == today)
-                .map_or(0, |b| b.loads_today),
-            budget: budget.map_or(settings.daily_budget, |b| b.daily_budget),
-            blocks_today,
-        },
-    };
+    let daemon =
+        daemon_status(store, &settings, blocks_today, today, &pos_names)
+            .await?;
     let sweep = queries
         .iter()
         .find(|q| q.sweep && matches!(q.outcome, Some(QueryOutcome::Ok)));
@@ -890,6 +861,129 @@ async fn snapshot(
     })
 }
 
+/// The daemon's heartbeat, each site's budget and status, and the checks
+/// running now (0057, 0060, 0062).
+async fn daemon_status(
+    store: &Store,
+    settings: &Settings,
+    blocks_today: u32,
+    today: NaiveDate,
+    pos: &HashMap<PosId, CountryCode>,
+) -> anyhow::Result<DaemonStatus> {
+    let airlines: Vec<(String, String)> = store
+        .list_airline_sources()
+        .await?
+        .into_iter()
+        .map(|a| (a.code, a.name))
+        .collect();
+    let programs: Vec<(String, String)> = store
+        .list_miles_programs()
+        .await?
+        .into_iter()
+        .map(|m| (m.program, m.name))
+        .collect();
+    let label = |site: &str| site_label(site, &airlines, &programs);
+    let budgets = store.site_budgets().await?;
+    let statuses = store.site_statuses().await?;
+    let mut sites: Vec<SiteRow> = budgets
+        .iter()
+        .map(|b| SiteRow {
+            site: b.site.clone(),
+            label: label(&b.site),
+            state: String::new(),
+            loads_today: b.loads_on(today),
+            budget: Some(b.daily_budget),
+            max_budget: Some(b.max_daily_budget),
+        })
+        .collect();
+    let mut checks = Vec::new();
+    let mut next_check_at: Option<DateTime<Utc>> = None;
+    for status in &statuses {
+        match sites.iter_mut().find(|s| s.site == status.site) {
+            Some(row) => row.state.clone_from(&status.state),
+            None => sites.push(SiteRow {
+                site: status.site.clone(),
+                label: label(&status.site),
+                state: status.state.clone(),
+                ..SiteRow::default()
+            }),
+        }
+        match &status.check {
+            Some(c) if status.state == "checking" => {
+                if let Some(mut check) = current_check(store, c, pos).await? {
+                    if status.site != tm_domain::GOOGLE_FLIGHTS {
+                        check.site = Some(label(&status.site));
+                    }
+                    checks.push(check);
+                }
+            }
+            _ => {
+                if status.state == "idle"
+                    && let Some(at) = status.next_check_at
+                {
+                    next_check_at =
+                        Some(next_check_at.map_or(at, |n| n.min(at)));
+                }
+            }
+        }
+    }
+    // Google Flights first, then by site (the store's order).
+    sites
+        .sort_by_key(|s| (s.site != tm_domain::GOOGLE_FLIGHTS, s.site.clone()));
+    let total_loads = sites.iter().map(|s| s.loads_today).sum();
+    let total_budget = sites.iter().filter_map(|s| s.budget).sum();
+    Ok(match store.heartbeat().await? {
+        Some(h) => DaemonStatus {
+            heartbeat: Some(h.updated_at),
+            state: h.state,
+            next_check: h.next_check,
+            next_check_at: next_check_at.or(h.next_check_at),
+            checks,
+            sites,
+            loads_today: total_loads,
+            budget: total_budget,
+            blocks_today,
+        },
+        None => DaemonStatus {
+            heartbeat: None,
+            state: String::new(),
+            next_check: None,
+            next_check_at: None,
+            checks: Vec::new(),
+            loads_today: total_loads,
+            budget: if sites.is_empty() {
+                settings.daily_budget
+            } else {
+                total_budget
+            },
+            sites,
+            blocks_today,
+        },
+    })
+}
+
+/// A site's short name: `Google`, an airline's first word (`TAP`), a
+/// miles program's name (`Smiles`).
+pub(crate) fn site_label(
+    site: &str,
+    airlines: &[(String, String)],
+    programs: &[(String, String)],
+) -> String {
+    match Source::from_site(site) {
+        Some(Source::GoogleFlights) => "Google".to_owned(),
+        Some(Source::Airline { code }) => airlines
+            .iter()
+            .find(|(c, _)| *c == code)
+            .and_then(|(_, name)| name.split_whitespace().next())
+            .map_or(code, str::to_owned),
+        Some(Source::Miles { program }) => programs
+            .iter()
+            .find(|(p, _)| *p == program)
+            .map_or(program, |(_, name)| name.clone()),
+        None => site.to_owned(),
+    }
+}
+
 /// The check in progress with its route, cabin, kind and point of sale
 /// filled in from its family (0057).
 async fn current_check(
@@ -937,7 +1031,9 @@ fn request_kind(request: Request) -> RequestKind {
         Request::CheckRoute(route) => RequestKind::CheckRoute { route },
         Request::ConfirmDeal(deal) => RequestKind::ConfirmDeal { deal },
         Request::OpenLogin(program) => RequestKind::OpenLogin { program },
-        Request::CloseLogin => RequestKind::CloseLogin,
+        Request::CloseLogin(program) => RequestKind::CloseLogin {
+            program: Some(program),
+        },
         Request::ReloadConfig => RequestKind::ReloadConfig,
     }
 }
@@ -1386,7 +1482,7 @@ mod tests {
     }
 
     /// The daemon's writes reach the window as change notices, and its
-    /// heartbeat as the check in progress (0057).
+    /// sites' statuses as the checks in progress (0057, 0062).
     #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
     async fn notices_the_daemons_writes() {
         let dir = dir();
@@ -1427,46 +1523,121 @@ mod tests {
             .await
             .expect("family")
             .expect("the return leg");
+        let tap_family = daemon
+            .family_id(&tm_domain::FamilyKey {
+                route: lis,
+                cabin: Cabin::Economy,
+                source: Source::Airline { code: "TP".into() },
+                pos: home.id,
+                kind: FamilyKind::Leg { leg: Leg::Outbound },
+            })
+            .await
+            .expect("family")
+            .expect("TAP's outbound leg");
         let started = Utc::now();
         let query = daemon
             .start_query(family, &QueryReason::Bootstrap, started)
             .await
             .expect("starts");
+        let tap_query = daemon
+            .start_query(tap_family, &QueryReason::Manual, started)
+            .await
+            .expect("starts");
+        let today = chrono::Local::now().date_naive();
+        daemon
+            .add_site_loads("google_flights", 1234, today)
+            .await
+            .expect("counts");
+        daemon
+            .add_site_loads("airline:TP", 40, today)
+            .await
+            .expect("counts");
         daemon
             .write_heartbeat(&tm_store::Heartbeat {
                 pid: 1,
                 updated_at: started,
-                state: "checking".into(),
+                state: "running".into(),
                 next_check: None,
                 next_check_at: None,
-                check: Some(tm_store::CheckInProgress {
-                    family,
-                    query: Some(query),
-                    reason: QueryReason::Bootstrap,
-                    started_at: started,
-                }),
-                loads_today: 3,
-                budget: 300,
+                loads_today: 1274,
+                budget: 5100,
             })
             .await
             .expect("beats");
+        // Two sites check at once (0062); Smiles waits for a login.
+        for (site, family, query, reason) in [
+            ("google_flights", family, query, QueryReason::Bootstrap),
+            ("airline:TP", tap_family, tap_query, QueryReason::Manual),
+        ] {
+            daemon
+                .write_site_status(&tm_store::SiteStatus {
+                    site: site.into(),
+                    updated_at: started,
+                    state: "checking".into(),
+                    next_check_at: None,
+                    check: Some(tm_store::CheckInProgress {
+                        family,
+                        query: Some(query),
+                        reason,
+                        started_at: started,
+                    }),
+                })
+                .await
+                .expect("writes");
+        }
+        daemon
+            .write_site_status(&tm_store::SiteStatus {
+                site: "miles:smiles".into(),
+                updated_at: started,
+                state: "paused for login: smiles".into(),
+                next_check_at: None,
+                check: None,
+            })
+            .await
+            .expect("writes");
         assert!(wait(&mut changes).await, "the commits were noticed");
 
         let s = backend
             .snapshot(SnapshotQuery::default())
             .await
             .expect("reads");
-        let check = s.daemon.checking().expect("a check in progress");
+        let checks = s.daemon.checking();
+        assert_eq!(checks.len(), 2);
+        let check = &checks[0];
         assert_eq!(check.route, "SAO→LIS");
         assert_eq!(check.kind, "return");
         assert_eq!(check.cabin, Cabin::Economy);
         assert_eq!(check.pos, "BR");
+        assert_eq!(check.site, None);
         assert_eq!(check.reason, "First check");
         assert_eq!(check.query, Some(query.0));
+        assert_eq!(checks[1].site.as_deref(), Some("TAP"));
+        assert_eq!(checks[1].kind, "outbound");
+        assert_eq!(checks[1].query, Some(tap_query.0));
         assert!(s.activity.iter().any(|a| a.id == query.0 && a.running));
+        let loads: Vec<String> =
+            s.daemon.budgets().filter_map(SiteRow::loads).collect();
+        assert_eq!(loads, ["Google 1,234/4,800", "TAP 40/300"]);
+        assert_eq!((s.daemon.loads_today, s.daemon.budget), (1274, 5100));
+        let paused: Vec<&str> =
+            s.daemon.paused_sites().map(|r| r.label.as_str()).collect();
+        assert_eq!(paused, ["Smiles"]);
         daemon.close().await;
         drop(backend);
         let _ = std::fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn sites_have_short_labels() {
+        let airlines = [("TP".to_owned(), "TAP Air Portugal".to_owned())];
+        let programs = [("latam_pass".to_owned(), "LATAM Pass".to_owned())];
+        let label = |site| site_label(site, &airlines, &programs);
+        assert_eq!(label("google_flights"), "Google");
+        assert_eq!(label("airline:TP"), "TAP");
+        assert_eq!(label("airline:LA"), "LA");
+        assert_eq!(label("miles:latam_pass"), "LATAM Pass");
+        assert_eq!(label("miles:smiles"), "smiles");
+        assert_eq!(label("bing"), "bing");
     }
 
     #[test]

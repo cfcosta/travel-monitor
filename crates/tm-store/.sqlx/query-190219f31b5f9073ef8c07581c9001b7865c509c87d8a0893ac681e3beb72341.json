@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO site_budgets (site, start_budget, daily_budget,\n                 max_daily_budget, loads_today, day)\n             VALUES (?1, ?2, ?3, ?4, ?5, ?6)\n             ON CONFLICT (site) DO UPDATE SET\n                 loads_today = CASE WHEN site_budgets.day = excluded.day\n                     THEN site_budgets.loads_today + excluded.loads_today\n                     ELSE excluded.loads_today END,\n                 day = excluded.day",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 6
+    },
+    "nullable": []
+  },
+  "hash": "190219f31b5f9073ef8c07581c9001b7865c509c87d8a0893ac681e3beb72341"
+}

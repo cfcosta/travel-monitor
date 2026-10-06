@@ -16,33 +16,47 @@ use gpui::{
 
 use super::{Menu, Screen, TravelMonitor, widgets};
 use crate::{
-    data::{DaemonStatus, Live},
+    data::{DaemonStatus, Live, SiteRow},
     format,
     theme::{self, Fonts, color},
 };
 
 /// The status chip: its dot's colour, its text, and whether a check is
 /// running (the dot pulses). `checking SAO→LIS · economy · outbound ·
-/// BR · 12 s`, `idle · next in 3 min · 212/1200 loads`, `paused for
-/// login: smiles`, `stale · seen 5 min ago` (0057).
+/// BR · 12 s` for one check, `checking Google SAO→LIS 12 s, TAP SAO→MAD
+/// 3 s` when several sites check at once (0062), `idle · next in 3 min ·
+/// Google 212/4,800 · TAP 40/300` with each site's loads and budget
+/// today (0060), `Smiles paused for login`, `stale · seen 5 min ago`
+/// (0057).
 pub(crate) fn status_line(
     d: &DaemonStatus,
     now: DateTime<Utc>,
 ) -> (u32, String, bool) {
-    let loads = format!("{}/{} loads", d.loads_today, d.budget);
+    let mut loads: Vec<String> =
+        d.budgets().filter_map(SiteRow::loads).collect();
+    if loads.is_empty() {
+        loads.push(format!(
+            "{}/{} loads",
+            format::thousands(d.loads_today),
+            format::thousands(d.budget)
+        ));
+    }
     let (dot, mut parts, checking) = match d.live(now) {
         Live::Missing => {
             (theme::RED, vec!["daemon not seen".to_owned()], false)
         }
-        Live::Stale(at) => (
-            theme::YELLOW,
-            vec![format!("stale · seen {}", format::ago(now, at)), loads],
-            false,
-        ),
-        Live::Paused(state) => {
-            (theme::YELLOW, vec![state.to_owned(), loads], false)
+        Live::Stale(at) => {
+            let mut parts =
+                vec![format!("stale · seen {}", format::ago(now, at))];
+            parts.extend(loads);
+            (theme::YELLOW, parts, false)
         }
-        Live::Checking(c) => {
+        Live::Paused(state) => {
+            let mut parts = vec![state.to_owned()];
+            parts.extend(loads);
+            (theme::YELLOW, parts, false)
+        }
+        Live::Checking([c]) => {
             let mut parts = vec![
                 format!("checking {}", c.route),
                 c.cabin.label().to_lowercase(),
@@ -53,20 +67,41 @@ pub(crate) fn status_line(
             parts.push(format::elapsed(now, c.started_at));
             (theme::TEAL, parts, true)
         }
-        Live::Idle(next) => (
-            theme::TEAL,
-            vec![
-                match next {
-                    Some(at) => {
-                        format!("idle · next in {}", format::countdown(now, at))
-                    }
-                    None => "idle".to_owned(),
-                },
-                loads,
-            ],
-            false,
-        ),
+        Live::Checking(checks) => {
+            let each: Vec<String> = checks
+                .iter()
+                .map(|c| {
+                    format!(
+                        "{} {} {}",
+                        c.site.as_deref().unwrap_or("Google"),
+                        c.route,
+                        format::elapsed(now, c.started_at)
+                    )
+                })
+                .collect();
+            (
+                theme::TEAL,
+                vec![format!("checking {}", each.join(", "))],
+                true,
+            )
+        }
+        Live::Idle(next) => {
+            let mut parts = vec![match next {
+                Some(at) => {
+                    format!("idle · next in {}", format::countdown(now, at))
+                }
+                None => "idle".to_owned(),
+            }];
+            parts.extend(loads);
+            (theme::TEAL, parts, false)
+        }
     };
+    if matches!(d.live(now), Live::Checking(_) | Live::Idle(_)) {
+        parts.extend(
+            d.paused_sites()
+                .map(|s| format!("{} paused for login", s.label)),
+        );
+    }
     if d.blocks_today > 0 {
         parts.push(format!(
             "{} block{}",

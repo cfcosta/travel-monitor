@@ -11,6 +11,7 @@ How the crates fit together. Decisions are numbered in
                  │                                   │ drives
                  ▼                                   ▼
             tm-store  ◀──────── writes ──────── tm-browser ── CDP ──▶ headless Chromium
+                                                                     (one per site, 0062)
                  ▲
    tm-scheduler (pure) ◀── daemon asks ──
    tm-gflights  (pure) ◀── URLs + parsers ──
@@ -85,6 +86,12 @@ Chromium and CDP, async (tokio + tokio-tungstenite).
   responses through the Network domain (request post data, status,
   body). `Capture::wait_for(n, timeout)`, `drain()`. This is how
   `GetCalendarGraph` & co. are read (0032).
+- `profile`: a profile's cookie jar read while no Chromium runs on it
+  (`login_cookies`, 0064), and `site_profile_dir(base, site)`: each
+  site's profile is `<profile-dir>/<site slug>` (`google_flights`,
+  `airline-tp`, `miles-smiles`; `tm_domain::site_slug`). The daemon's
+  Chromium for a site and the app's login window for it both open that
+  directory (0062).
 
 ### tm-store
 
@@ -112,12 +119,24 @@ reads while the daemon writes (0020, 0040).
 - Observations (append-only), Explore hints, deals (candidate →
   confirmed/rejected/expired, `seen` for the app), seller quotes.
 - Requests (0046): the app enqueues (`CheckRoute`, `CheckFamily`,
-  `ConfirmDeal`, `OpenLogin`, `CloseLogin`, `ReloadConfig`); the daemon
-  claims and completes them.
-- Budget and blocks (0039): today's budget, loads used, block events
-  per site.
-- Exchange rates (0038), daemon heartbeat (state, next check, loads
-  today) for the app's status chip.
+  `ConfirmDeal`, `OpenLogin { program }`, `CloseLogin { program }`,
+  `ReloadConfig`); the daemon claims and completes them. A
+  `CloseLogin` without a program (an app before 0062) still reads.
+- Budgets and blocks (0039, 0060): `site_budgets` has one row per site
+  (`start_budget`, `daily_budget` in force, `max_daily_budget`,
+  `loads_today`, `day`, `last_ramp_at`). A site without a row starts
+  from its defaults: Google Flights from the settings' `daily_budget` and
+  `max_daily_budget`, any other site from `SiteLimits::OTHER` (300,
+  ramping to 1,000). `configure_site_budget` applies configured limits
+  (a changed start resets the budget in force; an unchanged one keeps
+  the ramp); `add_site_loads` counts one site's loads. Migration 0003
+  turned the old single `budget` row into Google Flights' row and
+  dropped the table. Block events are per site.
+- Exchange rates (0038). The heartbeat (process state, totals over the
+  sites) and `site_status` (per site: `idle`, `checking` with the check
+  in progress, `paused for login: …`, `cooling down`, `browser
+  unavailable`, `stopped`; 0057, 0062) for the app's status chip and
+  activity screen.
 
 ### tm-scheduler (pure)
 
@@ -139,18 +158,49 @@ reads while the daemon writes (0020, 0040).
 - `trips`: legs → trips in the 5–10 day range, with the learned
   round-trip discount; discount learning and the additive stop rule
   (0042, 0043).
-- `budget`: the conservative-then-ramp state machine of 0039.
+- `budget`: the conservative-then-ramp state machine of 0039. It knows
+  nothing of sites' limits: the daemon runs one per site, with that
+  site's start, maximum and floor in a copy of `Params` (0060).
 
 ### tm-daemon (`tmd`)
 
-The loop: reload configuration, sync families, read requests, ask the
-scheduler for this tick's picks, run each pick through its source, write
-observations, update scheduler state, evaluate trips and deals, confirm
-candidates, record blocks and adjust the budget, write the heartbeat.
-Sources: Google Flights (legs, round trips, Explore, booking pages) and
-TAP's booking site (0051). A check whose page does not produce what is
-expected ends as `Unexpected` and is retried later. Other airline sites
-and miles programs have no reader and are skipped (0052, 0059).
+A coordinator and one worker per site (0060, 0062).
+
+- **Coordinator** (`daemon`): start-up (seed, budget flags into the
+  sites' rows, requeue, sync), the global heartbeat every 30 s, the
+  configuration reload published to the workers, and the requests
+  table. Requests are routed by site: a route's manual check to every
+  site it has families on (the request completes when the last site's
+  check ends), a deal confirmation to Google Flights, `OpenLogin` and
+  `CloseLogin` to the program's `miles:<program>` site alone. It starts
+  a worker for every site with eligible families (and for a site a
+  login names) and stops them all on SIGINT/SIGTERM.
+- **Worker** (`worker`), a tokio task per site, owns the site's
+  `Sources` (its own Chromium on `<profile-dir>/<site slug>`, started
+  when the site has work, closed after 5 idle minutes), its `Budget`
+  (count, ramp, halving and cooldown of its own), its pacing, and its
+  own `plan_tick` over the site's candidates with the site's budget.
+  It runs one check at a time: reload, take requests, run manual checks
+  first, then the picks; write observations, update scheduler state,
+  evaluate trips and confirm deals (Google Flights only), record blocks
+  on its own budget, and write its `site_status` row as checks start and
+  end. A `Pause` closes its browser for a login window; `Resume` reads
+  the program's profile for a session (0064) and lets the site run.
+  Different sites run at the same time; a block, cooldown or login on
+  one never slows another.
+- Shared state is the store. Fan-out and Explore hints raise other
+  sites' families; a check re-reads its family's state just before
+  writing it, so a raise that lands while it runs is kept.
+
+Flags: `--budget`/`--max-budget` are Google Flights' start and maximum
+(the settings' `daily_budget`/`max_daily_budget`); `--site-budget
+airline:TP=300:1000` (repeatable) sets another site's; `--cdp-port` is
+Google Flights' Chromium (other sites pick free ports). Sources: Google
+Flights (legs, round trips, Explore, booking pages) and TAP's booking
+site (0051). A check whose page does not produce what is expected ends
+as `Unexpected` and is retried later. Other airline sites and miles
+programs have no reader and are skipped (0052, 0059); their workers only
+pause and resume for logins.
 
 ### tm-app (`tm`)
 
@@ -158,9 +208,15 @@ gpui-pre `=0.3.7`. The main screen is the map + list of 0044; also a
 routes overview, a route detail with the departure × length grid,
 activity, and settings that edit the configuration. Reads the database
 directly; writes only configuration and requests. Shows a desktop
-notification for each newly confirmed deal (0040). Opens the daemon's
-Chromium profile in a visible window for miles logins (0024), after a
-`OpenLogin` request has paused the daemon's browser.
+notification for each newly confirmed deal (0040). The status chip and
+the activity screen show every check running now (one "Now checking"
+row per busy site) and each site's loads and budget today (`Google
+1,234/4,800 · TAP 40/300`); settings list the site budgets read-only
+(Google Flights' stay editable as settings). For a miles login (0024)
+the app sends `OpenLogin`, waits until the daemon paused that program's
+site, and opens the program's own profile (`<profile-dir>/miles-<program>`)
+in a visible window; logins made in the shared profile before 0062 are
+not carried over.
 
 ### nix
 

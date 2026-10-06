@@ -73,7 +73,10 @@ pub struct Settings {
     pub iof: f64,
     /// The card's exchange spread (0038).
     pub card_spread: f64,
-    /// Page loads per day; starts at 4800 and ramps (0039, 0065).
+    /// Google Flights' page loads per day: where its budget starts, and
+    /// the most it ramps to (0039, 0060, 0065). Every other site has its
+    /// own budget in the store's `site_budgets` table, from
+    /// [`crate::SiteLimits::OTHER`] unless set otherwise.
     pub daily_budget: u32,
     pub max_daily_budget: u32,
     /// A family is checked at least this often (0029: one week).
@@ -102,7 +105,7 @@ impl Default for Settings {
             horizon_days: 180,
             iof: 0.035,
             card_spread: 0.01,
-            // 0065: double 0058's 2400/6000.
+            // 0065: double 0058's 2400/6000. Google Flights only (0060).
             daily_budget: 4800,
             max_daily_budget: 12000,
             max_interval_hours: 24 * 7,
@@ -131,6 +134,25 @@ pub enum SettingsError {
 }
 
 impl Settings {
+    /// Google Flights' budget limits (0060, 0065).
+    pub fn google_flights_limits(&self) -> crate::SiteLimits {
+        crate::SiteLimits {
+            start: self.daily_budget,
+            max: self.max_daily_budget,
+        }
+        .normalized()
+    }
+
+    /// The budget limits `site` starts from: Google Flights' from these
+    /// settings, every other site's [`crate::SiteLimits::OTHER`] (0060).
+    pub fn default_limits(&self, site: &str) -> crate::SiteLimits {
+        if site == crate::GOOGLE_FLIGHTS {
+            self.google_flights_limits()
+        } else {
+            crate::SiteLimits::OTHER
+        }
+    }
+
     pub fn validate(&self) -> Result<(), SettingsError> {
         if self.passengers.adults == 0 {
             return Err(SettingsError::NoAdults);

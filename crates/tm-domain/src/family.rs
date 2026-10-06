@@ -74,6 +74,75 @@ impl Source {
             Source::Miles { program } => format!("miles:{program}"),
         }
     }
+
+    /// The source a [`Source::site`] names, if it names one.
+    pub fn from_site(site: &str) -> Option<Self> {
+        if site == GOOGLE_FLIGHTS {
+            return Some(Source::GoogleFlights);
+        }
+        if let Some(code) = site.strip_prefix("airline:") {
+            return (!code.is_empty()).then(|| Source::Airline {
+                code: code.to_owned(),
+            });
+        }
+        let program = site.strip_prefix("miles:")?;
+        (!program.is_empty()).then(|| Source::Miles {
+            program: program.to_owned(),
+        })
+    }
+}
+
+/// Google Flights' [`Source::site`].
+pub const GOOGLE_FLIGHTS: &str = "google_flights";
+
+/// A site's daily page-load budget (DECISIONS.md 0060): where it starts
+/// and the most the ramp may raise it to.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SiteLimits {
+    pub start: u32,
+    pub max: u32,
+}
+
+impl SiteLimits {
+    /// Every site but Google Flights, until set otherwise (0060): 300
+    /// loads a day, ramping to 1,000. Google Flights' come from
+    /// [`crate::Settings`].
+    pub const OTHER: SiteLimits = SiteLimits {
+        start: 300,
+        max: 1000,
+    };
+
+    /// At least one load a day, and a maximum no lower than the start.
+    pub fn normalized(self) -> Self {
+        let start = self.start.max(1);
+        Self {
+            start,
+            max: self.max.max(start),
+        }
+    }
+}
+
+/// A site's directory name: its [`Source::site`] in lower case, with
+/// anything but letters, digits, `_` and `-` turned into `-`
+/// (`airline:TP` → `airline-tp`). Each site keeps its own Chromium
+/// profile under it (DECISIONS.md 0062).
+pub fn site_slug(site: &str) -> String {
+    let slug: String = site
+        .chars()
+        .map(|c| {
+            let c = c.to_ascii_lowercase();
+            if c.is_ascii_alphanumeric() || c == '_' || c == '-' {
+                c
+            } else {
+                '-'
+            }
+        })
+        .collect();
+    if slug.is_empty() || slug.chars().all(|c| c == '-') {
+        "site".to_owned()
+    } else {
+        slug
+    }
 }
 
 /// The sites whose cookies hold a miles program's login session (0024):
@@ -102,4 +171,57 @@ pub struct FamilyKey {
     pub source: Source,
     pub pos: PosId,
     pub kind: FamilyKind,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sites_round_trip_and_slug() {
+        for source in [
+            Source::GoogleFlights,
+            Source::Airline { code: "TP".into() },
+            Source::Miles {
+                program: "latam_pass".into(),
+            },
+        ] {
+            assert_eq!(Source::from_site(&source.site()), Some(source));
+        }
+        assert_eq!(Source::from_site("airline:"), None);
+        assert_eq!(Source::from_site("bing"), None);
+        assert_eq!(site_slug("google_flights"), "google_flights");
+        assert_eq!(site_slug("airline:TP"), "airline-tp");
+        assert_eq!(site_slug("miles:latam_pass"), "miles-latam_pass");
+        assert_eq!(site_slug("../x"), "---x");
+        assert_eq!(site_slug(""), "site");
+        assert_eq!(site_slug("::"), "site");
+    }
+
+    #[test]
+    fn limits_are_normalized() {
+        let l = SiteLimits { start: 0, max: 0 }.normalized();
+        assert_eq!(l, SiteLimits { start: 1, max: 1 });
+        let l = SiteLimits {
+            start: 500,
+            max: 10,
+        }
+        .normalized();
+        assert_eq!(
+            l,
+            SiteLimits {
+                start: 500,
+                max: 500
+            }
+        );
+        let s = crate::Settings::default();
+        assert_eq!(
+            s.default_limits(GOOGLE_FLIGHTS),
+            SiteLimits {
+                start: 4800,
+                max: 12000
+            }
+        );
+        assert_eq!(s.default_limits("airline:TP"), SiteLimits::OTHER);
+    }
 }

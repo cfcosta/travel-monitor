@@ -1,7 +1,7 @@
 //! What the daemon did: recent queries with why they ran and how they
-//! ended (0028), and the blocks it met (0039). While a check runs, a
-//! "Now checking" row heads the log, and queries that land are tinted
-//! for a moment (0057).
+//! ended (0028), each site's budget today (0060), and the blocks it met
+//! (0039). While checks run, a "Now checking" row per busy site heads
+//! the log (0062), and queries that land are tinted for a moment (0057).
 
 use chrono::{DateTime, Utc};
 use gpui::{AnyElement, Context, Div, FontWeight, div, prelude::*, px};
@@ -18,13 +18,14 @@ use crate::{
 };
 
 /// The query log as a table; `with_route` adds the route column.
-/// `checking` heads it with the check in progress (its own running row
-/// is left out), and `glow` tints rows that just landed.
+/// `checking` heads it with the checks in progress, one row per site
+/// (their own running rows are left out), and `glow` tints rows that
+/// just landed.
 pub(super) fn activity_table(
     fonts: &Fonts,
     rows: &[ActivityRow],
     with_route: bool,
-    checking: Option<(&CurrentCheck, DateTime<Utc>)>,
+    checking: Option<(&[CurrentCheck], DateTime<Utc>)>,
     glow: impl Fn(i64) -> f32,
 ) -> Div {
     let line = || div().relative().flex().gap(px(12.)).px(px(16.)).py(px(9.));
@@ -39,7 +40,13 @@ pub(super) fn activity_table(
         .child(div().flex_1().min_w_0().child("Why"))
         .child(div().flex_1().min_w_0().child("Result"))
         .child(div().w(px(60.)).flex_none().text_right().child("Loads"));
-    let now_row = checking.map(|(c, now)| {
+    let (checks, now) = checking.unwrap_or((&[], DateTime::<Utc>::MIN_UTC));
+    let now_rows = checks.iter().enumerate().map(|(i, c)| {
+        let selector = if i == 0 {
+            "now-checking".to_owned()
+        } else {
+            format!("now-checking-{i}")
+        };
         let what = [
             Some(capitalized(&c.kind)),
             Some(c.cabin.label().to_owned()),
@@ -55,7 +62,7 @@ pub(super) fn activity_table(
             .border_color(color(theme::ROW_RULE_FAINT))
             .bg(alpha(theme::TEAL, 0.06))
             .text_size(px(13.))
-            .debug_selector(|| "now-checking".into())
+            .debug_selector(|| selector)
             .child(
                 mono(fonts, format::elapsed(now, c.started_at))
                     .w(px(70.))
@@ -89,7 +96,9 @@ pub(super) fn activity_table(
                     .gap(px(8.))
                     .text_color(color(theme::TEAL))
                     .child(widgets::pulse(
-                        "now-checking-pulse",
+                        gpui::SharedString::from(format!(
+                            "now-checking-pulse-{i}"
+                        )),
                         widgets::dot(theme::TEAL, 6., true),
                     ))
                     .child("Now checking"),
@@ -102,8 +111,8 @@ pub(super) fn activity_table(
                     .text_color(color(theme::TEXT_FAINT)),
             )
     });
-    let hidden = checking.and_then(|(c, _)| c.query);
-    let body = rows.iter().filter(|r| Some(r.id) != hidden).map(|r| {
+    let hidden: Vec<i64> = checks.iter().filter_map(|c| c.query).collect();
+    let body = rows.iter().filter(|r| !hidden.contains(&r.id)).map(|r| {
         let result_color = match r.tone {
             Tone::Deal => theme::YELLOW,
             Tone::Bad => theme::RED,
@@ -158,7 +167,7 @@ pub(super) fn activity_table(
             )
             .children(widgets::fresh_tint(glow(r.id)))
     });
-    let empty = (rows.is_empty() && now_row.is_none()).then(|| {
+    let empty = (rows.is_empty() && checks.is_empty()).then(|| {
         line()
             .border_t_1()
             .border_color(color(theme::ROW_RULE_FAINT))
@@ -174,7 +183,7 @@ pub(super) fn activity_table(
         .overflow_hidden()
         .child(header)
         .children(empty)
-        .children(now_row)
+        .children(now_rows)
         .children(body)
 }
 
@@ -205,9 +214,31 @@ impl TravelMonitor {
             Live::Checking(_) | Live::Idle(_) => ("Running", theme::TEAL),
         };
         let (doing, doing_sub) = match live {
-            Live::Checking(c) => (
+            Live::Checking([c]) => (
                 "Checking".to_owned(),
-                format!("{} · {}", c.route, format::elapsed(now, c.started_at)),
+                format!(
+                    "{}{} · {}",
+                    c.site
+                        .as_ref()
+                        .map(|s| format!("{s} "))
+                        .unwrap_or_default(),
+                    c.route,
+                    format::elapsed(now, c.started_at)
+                ),
+            ),
+            Live::Checking(checks) => (
+                format!("Checking {} sites", checks.len()),
+                checks
+                    .iter()
+                    .map(|c| {
+                        format!(
+                            "{} {}",
+                            c.site.as_deref().unwrap_or("Google"),
+                            c.route
+                        )
+                    })
+                    .collect::<Vec<_>>()
+                    .join(" · "),
             ),
             Live::Idle(Some(at)) => (
                 "Idle".to_owned(),
@@ -219,15 +250,75 @@ impl TravelMonitor {
                 ("–".to_owned(), d.next_check.clone().unwrap_or_default())
             }
         };
-        let checking = d.checking().map(|c| (c, now));
+        let checks = d.checking();
+        let checking = (!checks.is_empty()).then_some((checks, now));
         let loads_hour: u32 = s
             .activity
             .iter()
             .filter(|a| (now - a.at).num_minutes() < 60)
             .filter_map(|a| a.loads)
             .sum();
+        let loads_tile =
+            |title: String, loads: u32, budget: u32, sub: String| {
+                widgets::stat_tile(
+                    fonts,
+                    title,
+                    div().flex().child(format::thousands(loads)).child(
+                        div()
+                            .text_color(color(theme::TEXT_DIM))
+                            .child(format!("/{}", format::thousands(budget))),
+                    ),
+                    sub,
+                    theme::TEXT,
+                )
+                .flex_1()
+            };
+        // One tile per site with a budget (0060), else the total.
+        let mut site_tiles: Vec<Div> = d
+            .budgets()
+            .map(|site| {
+                let mut sub = vec![if site.state.is_empty() {
+                    "no worker".to_owned()
+                } else {
+                    site.state.clone()
+                }];
+                if let Some(max) = site.max_budget {
+                    sub.push(format!("max {}", format::thousands(max)));
+                }
+                loads_tile(
+                    format!("{} loads today", site.label),
+                    site.loads_today,
+                    site.budget.unwrap_or_default(),
+                    sub.join(" · "),
+                )
+                .debug_selector({
+                    let site = site.site.clone();
+                    move || format!("site-budget-{site}")
+                })
+            })
+            .collect();
+        if site_tiles.is_empty() {
+            site_tiles.push(loads_tile(
+                "Page loads today".to_owned(),
+                d.loads_today,
+                d.budget,
+                format!("{loads_hour} in the last hour"),
+            ));
+        }
+        let paused: Vec<String> = d
+            .paused_sites()
+            .map(|s| format!("{} paused for login", s.label))
+            .collect();
+        let doing_sub = if paused.is_empty() {
+            doing_sub
+        } else if doing_sub.is_empty() {
+            paused.join(" · ")
+        } else {
+            format!("{doing_sub} · {}", paused.join(" · "))
+        };
         let tiles = div()
             .flex()
+            .flex_wrap()
             .gap(px(10.))
             .child(
                 widgets::stat_tile(
@@ -241,20 +332,7 @@ impl TravelMonitor {
                 )
                 .flex_1(),
             )
-            .child(
-                widgets::stat_tile(
-                    fonts,
-                    "Page loads today",
-                    div().flex().child(d.loads_today.to_string()).child(
-                        div()
-                            .text_color(color(theme::TEXT_DIM))
-                            .child(format!("/{}", d.budget)),
-                    ),
-                    format!("{loads_hour} in the last hour"),
-                    theme::TEXT,
-                )
-                .flex_1(),
-            )
+            .children(site_tiles)
             .child(
                 widgets::stat_tile(
                     fonts,

@@ -1,7 +1,8 @@
 # The home-manager module (DECISIONS.md 0037): installs the daemon `tmd`
 # and runs it as the systemd user service `travel-monitor`, with its own
-# headless Chromium (0021). It also installs the app `tm` (0040) and
-# points it at the same database and Chromium profile.
+# headless Chromium (0021), one profile and process per site under
+# profileDir (0062). It also installs the app `tm` (0040) and points it at
+# the same database and profiles.
 #
 # The daemon is started as:
 #
@@ -10,8 +11,9 @@
 #       --chromium <chromium.package>/bin/chromium
 #       [--headed]                      (when chromium.headless = false)
 #       --cdp-port <chromium.port>      (0: the daemon picks a free port)
-#       --budget <budget.daily>
+#       --budget <budget.daily>          (Google Flights, DECISIONS.md 0060)
 #       --max-budget <budget.max>
+#       [--site-budget <site>=<daily>:<max>]...   (budget.sites)
 #       <extraArgs...>
 #
 # These flags are the daemon's CLI contract; keep them in sync with
@@ -65,6 +67,12 @@ let
     "--max-budget"
     (toString cfg.budget.max)
   ]
+  ++ lib.concatLists (
+    lib.mapAttrsToList (site: b: [
+      "--site-budget"
+      "${site}=${toString b.daily}:${toString b.max}"
+    ]) cfg.budget.sites
+  )
   ++ cfg.extraArgs;
 
   # What both programs read: the app finds the daemon's database and
@@ -150,9 +158,11 @@ in
       default = "${config.xdg.dataHome}/travel-monitor/chromium";
       defaultText = literalExpression ''"''${config.xdg.dataHome}/travel-monitor/chromium"'';
       description = ''
-        The Chromium user data directory of the daemon's browser. Miles
-        program sessions are kept here after a manual login from the app
-        (DECISIONS.md 0024).
+        The directory of the daemon's Chromium profiles: each site has its
+        own under it (`google_flights`, `airline-tp`, `miles-smiles`, ...),
+        and its own browser process (DECISIONS.md 0062). Miles program
+        sessions are kept in the program's profile after a manual login
+        from the app (0024).
       '';
     };
 
@@ -173,24 +183,49 @@ in
       port = mkOption {
         type = types.port;
         default = 0;
-        description = "The CDP port of the daemon's Chromium. 0 lets the daemon pick a free port.";
+        description = "The CDP port of the daemon's Google Flights Chromium. 0 lets the daemon pick a free port; other sites always pick a free one.";
       };
     };
 
     budget = {
       daily = mkOption {
         type = types.ints.positive;
-        default = 300;
+        default = 4800;
         description = ''
-          The page-load budget the daemon starts with each day. It is raised
-          step by step while no block is seen (DECISIONS.md 0039).
+          Google Flights' daily page-load budget to start from. It is raised
+          step by step while no block is seen (DECISIONS.md 0039). Every
+          site has its own budget (0060); see `budget.sites`.
         '';
       };
 
       max = mkOption {
         type = types.ints.positive;
-        default = 2000;
-        description = "The highest daily page-load budget the daemon may ramp up to.";
+        default = 12000;
+        description = "The highest daily page-load budget Google Flights may ramp up to.";
+      };
+
+      sites = mkOption {
+        type = types.attrsOf (
+          types.submodule {
+            options = {
+              daily = mkOption {
+                type = types.ints.positive;
+                description = "The site's daily page-load budget to start from.";
+              };
+              max = mkOption {
+                type = types.ints.positive;
+                description = "The highest daily budget the site may ramp up to.";
+              };
+            };
+          }
+        );
+        default = { };
+        example = literalExpression ''{ "airline:TP" = { daily = 300; max = 1000; }; }'';
+        description = ''
+          Budgets of sites other than Google Flights, by site (`airline:TP`,
+          `miles:smiles`), passed as `--site-budget`. A site left out starts
+          at 300 page loads a day and ramps to 1,000 (DECISIONS.md 0060).
+        '';
       };
     };
 
@@ -220,7 +255,11 @@ in
         assertion = cfg.budget.daily <= cfg.budget.max;
         message = "services.travel-monitor.budget.daily (${toString cfg.budget.daily}) must not exceed budget.max (${toString cfg.budget.max}).";
       }
-    ];
+    ]
+    ++ lib.mapAttrsToList (site: b: {
+      assertion = b.daily <= b.max && site != "google_flights";
+      message = "services.travel-monitor.budget.sites.\"${site}\": daily must not exceed max, and Google Flights' budget is budget.daily and budget.max.";
+    }) cfg.budget.sites;
 
     warnings = optional (osConfig != null && !lingerEnabled) ''
       services.travel-monitor: the daemon must keep running without a login

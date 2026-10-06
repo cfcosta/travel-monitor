@@ -23,7 +23,7 @@ use tm_daemon::{
     sources::{
         CalendarJob,
         Sources,
-        browser::{BrowserSources, Timeouts},
+        browser::{BrowserSources, Timeouts, site_config},
     },
 };
 use tm_domain::{
@@ -305,7 +305,10 @@ async fn the_daemon_captures_parses_and_stores() {
         .await
         .expect("reads")
         .expect("the family");
-    let sources = BrowserSources::new(config).with_timeouts(fast());
+    // Each site's own profile under the test's (0062).
+    let sources = move |site: &str| {
+        BrowserSources::new(site_config(&config, site)).with_timeouts(fast())
+    };
     let daemon_config = Config {
         once: true,
         only: Only {
@@ -351,5 +354,15 @@ async fn the_daemon_captures_parses_and_stores() {
         .expect("a heartbeat");
     assert_eq!(beat.state, "stopped");
     assert_eq!(beat.loads_today, 1 + PAGES as u32);
-    assert!(!daemon.sources().is_running());
+    assert!(daemon.sites().is_empty(), "every worker stopped");
+    let google = store
+        .site_statuses()
+        .await
+        .expect("reads")
+        .into_iter()
+        .find(|s| s.site == "google_flights")
+        .expect("Google Flights' status");
+    assert_eq!(google.state, "stopped");
+    // Google Flights' Chromium ran on its own profile.
+    assert!(dir.path().join("profile").join("google_flights").is_dir());
 }

@@ -4,15 +4,20 @@
 //! ```text
 //! tmd --db <path> --profile-dir <path> --chromium <path> [--headed]
 //!     --cdp-port <n> --budget <n> --max-budget <n>
+//!     [--site-budget <site>=<start>:<max>]...
 //! ```
 //!
 //! `--db`, `--profile-dir` and `--chromium` fall back to `TM_DB`,
 //! `TM_PROFILE_DIR` and `TM_CHROMIUM`, then to the module's defaults.
-//! The hidden flags exist for debugging and tests.
+//! `--budget` and `--max-budget` are Google Flights' (0060);
+//! `--site-budget` sets another site's (`airline:TP=300:1000`).
+//! `--profile-dir` holds one Chromium profile per site (0062). The
+//! hidden flags exist for debugging and tests.
 
 use std::{path::PathBuf, time::Duration};
 
 use clap::Parser;
+use tm_domain::{GOOGLE_FLIGHTS, SiteLimits, Source};
 
 #[derive(Debug, Clone, PartialEq, Parser)]
 #[command(
@@ -25,8 +30,10 @@ pub struct Cli {
     #[arg(long, env = "TM_DB", value_name = "PATH")]
     pub db: Option<PathBuf>,
 
-    /// Chromium's user data directory (default:
-    /// $XDG_DATA_HOME/travel-monitor/chromium). Miles logins live here.
+    /// The directory of the sites' Chromium profiles (default:
+    /// $XDG_DATA_HOME/travel-monitor/chromium): each site has its own
+    /// under it (`google_flights`, `airline-tp`, `miles-smiles`), where
+    /// its miles login lives.
     #[arg(long, env = "TM_PROFILE_DIR", value_name = "PATH")]
     pub profile_dir: Option<PathBuf>,
 
@@ -38,17 +45,25 @@ pub struct Cli {
     #[arg(long)]
     pub headed: bool,
 
-    /// Chromium's DevTools port; 0 picks a free one.
+    /// Google Flights' Chromium DevTools port; 0 picks a free one. Other
+    /// sites always pick a free one.
     #[arg(long, default_value_t = 0, value_name = "N")]
     pub cdp_port: u16,
 
-    /// The daily page-load budget to start from (DECISIONS.md 0039).
+    /// Google Flights' daily page-load budget to start from
+    /// (DECISIONS.md 0039, 0060).
     #[arg(long, value_name = "N")]
     pub budget: Option<u32>,
 
-    /// The highest daily budget the ramp may reach.
+    /// The highest daily budget Google Flights' ramp may reach.
     #[arg(long, value_name = "N")]
     pub max_budget: Option<u32>,
+
+    /// Another site's daily budget and its maximum, as
+    /// `site=start:max` (`airline:TP=300:1000`). Repeatable. Sites left
+    /// out start at 300 and ramp to 1,000 (0060).
+    #[arg(long = "site-budget", value_name = "SITE=START:MAX", value_parser = parse_site_budget)]
+    pub site_budgets: Vec<(String, SiteLimits)>,
 
     /// Start up, run one tick, and exit.
     #[arg(long)]
@@ -78,6 +93,36 @@ pub struct Cli {
     /// Replace `https://www.google.com` in generated URLs (tests).
     #[arg(long, hide = true, value_name = "URL")]
     pub google_origin: Option<String>,
+
+    /// Seconds without work before a site's browser closes (0062).
+    #[arg(long, hide = true, default_value_t = 300, value_name = "N")]
+    pub idle_close_seconds: u64,
+}
+
+fn parse_site_budget(text: &str) -> Result<(String, SiteLimits), String> {
+    let (site, limits) = text
+        .rsplit_once('=')
+        .ok_or_else(|| "expected site=start:max".to_owned())?;
+    let site = site.trim();
+    if site == GOOGLE_FLIGHTS {
+        return Err(
+            "Google Flights' budget is --budget and --max-budget".to_owned()
+        );
+    }
+    if Source::from_site(site).is_none() {
+        return Err(format!(
+            "{site:?} is not a site (google_flights, airline:XX or miles:program)"
+        ));
+    }
+    let (start, max) = limits
+        .split_once(':')
+        .ok_or_else(|| "expected start:max".to_owned())?;
+    let start: u32 = start.trim().parse().map_err(|e| format!("{e}"))?;
+    let max: u32 = max.trim().parse().map_err(|e| format!("{e}"))?;
+    if start == 0 || max < start {
+        return Err("expected 0 < start <= max".to_owned());
+    }
+    Ok((site.to_owned(), SiteLimits { start, max }))
 }
 
 fn parse_pace(text: &str) -> Result<(u64, u64), String> {
@@ -118,6 +163,10 @@ impl Cli {
     pub fn tick(&self) -> Duration {
         Duration::from_secs(self.tick_seconds.max(1))
     }
+
+    pub fn idle_close(&self) -> Duration {
+        Duration::from_secs(self.idle_close_seconds)
+    }
 }
 
 #[cfg(test)]
@@ -142,8 +191,31 @@ mod tests {
             "300",
             "--max-budget",
             "2000",
+            "--site-budget",
+            "airline:TP=300:1000",
+            "--site-budget",
+            "miles:smiles=50:100",
         ])
         .expect("parses");
+        assert_eq!(
+            cli.site_budgets,
+            vec![
+                (
+                    "airline:TP".to_owned(),
+                    SiteLimits {
+                        start: 300,
+                        max: 1000
+                    }
+                ),
+                (
+                    "miles:smiles".to_owned(),
+                    SiteLimits {
+                        start: 50,
+                        max: 100
+                    }
+                ),
+            ]
+        );
         assert_eq!(
             cli.db_path(),
             PathBuf::from("/home/me/.local/share/travel-monitor/tm.db")
@@ -209,7 +281,22 @@ mod tests {
         assert_eq!(cli.budget, None);
         assert!(cli.db_path().ends_with("travel-monitor/tm.db"));
         assert!(cli.profile_path().ends_with("travel-monitor/chromium"));
+        assert!(cli.site_budgets.is_empty());
+        assert_eq!(cli.idle_close(), Duration::from_secs(300));
         assert!(Cli::try_parse_from(["tmd", "--pace", "5,1"]).is_err());
+        for bad in [
+            "google_flights=1:2",
+            "airline:TP",
+            "airline:TP=300",
+            "airline:TP=300:100",
+            "airline:TP=0:100",
+            "bing=1:2",
+        ] {
+            assert!(
+                Cli::try_parse_from(["tmd", "--site-budget", bad]).is_err(),
+                "{bad}"
+            );
+        }
         assert!(Cli::try_parse_from(["tmd", "--cdp-port", "x"]).is_err());
     }
 }

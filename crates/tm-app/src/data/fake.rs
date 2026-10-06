@@ -53,6 +53,7 @@ use super::{
     RouteRow,
     RowStatus,
     SellerRow,
+    SiteRow,
     Snapshot,
     SnapshotQuery,
     Ticket,
@@ -174,8 +175,8 @@ struct FakeState {
     requests: Vec<Request>,
     /// Queries that landed after the sample log, newest last.
     landed: Vec<ActivityRow>,
-    /// The check the daemon is running.
-    checking: Option<CurrentCheck>,
+    /// The checks the daemon is running, one per site (0062).
+    checking: Vec<CurrentCheck>,
     /// Minutes taken off a destination's last check (`check_route`).
     rechecked: HashMap<String, i64>,
     snapshots: u32,
@@ -287,7 +288,7 @@ impl FakeBackend {
                 next_place: 100,
                 requests: Vec::new(),
                 landed: Vec::new(),
-                checking: Some(sample_check()),
+                checking: vec![sample_check()],
                 rechecked: HashMap::new(),
                 snapshots: 0,
             }),
@@ -353,7 +354,13 @@ impl FakeBackend {
     /// The daemon started (or, with `None`, ended) a check.
     #[cfg(test)]
     pub fn set_checking(&self, check: Option<CurrentCheck>) {
-        self.lock().checking = check;
+        self.set_checks(check.into_iter().collect());
+    }
+
+    /// The checks the daemon's sites are running now (0062).
+    #[cfg(test)]
+    pub fn set_checks(&self, checks: Vec<CurrentCheck>) {
+        self.lock().checking = checks;
         self.changes.notify();
     }
 
@@ -989,24 +996,59 @@ impl Backend for FakeBackend {
             rows,
             daemon: DaemonStatus {
                 heartbeat: Some(now - Duration::seconds(4)),
-                state: if state.checking.is_some() {
-                    "checking".into()
-                } else {
-                    "running".into()
-                },
+                state: "running".into(),
                 next_check: Some("MIA · Business in 4 min".into()),
                 next_check_at: state
                     .checking
-                    .is_none()
+                    .is_empty()
                     .then(|| now + Duration::minutes(4)),
-                check: state.checking.clone().map(|mut c| {
-                    if c.started_at == DateTime::<Utc>::MIN_UTC {
-                        c.started_at = now - Duration::seconds(12);
-                    }
-                    c
-                }),
-                loads_today: 212,
-                budget: state.settings.daily_budget,
+                checks: state
+                    .checking
+                    .iter()
+                    .cloned()
+                    .map(|mut c| {
+                        if c.started_at == DateTime::<Utc>::MIN_UTC {
+                            c.started_at = now - Duration::seconds(12);
+                        }
+                        c
+                    })
+                    .collect(),
+                sites: vec![
+                    SiteRow {
+                        site: "google_flights".into(),
+                        label: "Google".into(),
+                        state: if state
+                            .checking
+                            .iter()
+                            .any(|c| c.site.is_none())
+                        {
+                            "checking".into()
+                        } else {
+                            "idle".into()
+                        },
+                        loads_today: 212,
+                        budget: Some(state.settings.daily_budget),
+                        max_budget: Some(state.settings.max_daily_budget),
+                    },
+                    SiteRow {
+                        site: "airline:TP".into(),
+                        label: "TAP".into(),
+                        state: if state
+                            .checking
+                            .iter()
+                            .any(|c| c.site.is_some())
+                        {
+                            "checking".into()
+                        } else {
+                            "idle".into()
+                        },
+                        loads_today: 40,
+                        budget: Some(300),
+                        max_budget: Some(1000),
+                    },
+                ],
+                loads_today: 252,
+                budget: state.settings.daily_budget + 300,
                 blocks_today: 0,
             },
             activity: {
@@ -1014,7 +1056,7 @@ impl Backend for FakeBackend {
                 // The sample's running query ends with its check.
                 if let Some(r) = rows.first_mut()
                     && r.running
-                    && state.checking.is_none()
+                    && state.checking.is_empty()
                 {
                     r.running = false;
                     r.loads = Some(2);

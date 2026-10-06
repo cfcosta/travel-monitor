@@ -1,0 +1,98 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT site AS \"site!: String\", start_budget, daily_budget,\n                      max_daily_budget, loads_today, day AS \"day: NaiveDate\",\n                      last_ramp_at AS \"last_ramp_at: DateTime<Utc>\"\n               FROM site_budgets\n               ORDER BY site <> 'google_flights', site",
+  "describe": {
+    "columns": [
+      {
+        "name": "site!: String",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "site_budgets",
+            "name": "site"
+          }
+        }
+      },
+      {
+        "name": "start_budget",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "site_budgets",
+            "name": "start_budget"
+          }
+        }
+      },
+      {
+        "name": "daily_budget",
+        "ordinal": 2,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "site_budgets",
+            "name": "daily_budget"
+          }
+        }
+      },
+      {
+        "name": "max_daily_budget",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "site_budgets",
+            "name": "max_daily_budget"
+          }
+        }
+      },
+      {
+        "name": "loads_today",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "site_budgets",
+            "name": "loads_today"
+          }
+        }
+      },
+      {
+        "name": "day: NaiveDate",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "site_budgets",
+            "name": "day"
+          }
+        }
+      },
+      {
+        "name": "last_ramp_at: DateTime<Utc>",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "site_budgets",
+            "name": "last_ramp_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "2bc074a837e1d937ffe1788e1aad259fdb72e8218d38592c7224171f42e2ede7"
+}

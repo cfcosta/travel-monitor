@@ -9,7 +9,7 @@ use tm_daemon::{
     candidates::Only,
     cli::Cli,
     jobs::JobOptions,
-    sources::browser::BrowserSources,
+    sources::browser::{BrowserSources, site_config},
 };
 use tm_domain::FamilyId;
 use tm_store::Store;
@@ -51,7 +51,10 @@ async fn run(cli: Cli) -> anyhow::Result<()> {
         ChromiumConfig::new(cli.chromium_path(), cli.profile_path());
     chromium.headless = !cli.headed;
     chromium.port = cli.cdp_port;
-    let sources = BrowserSources::new(chromium);
+    // Each site gets its own profile under --profile-dir and its own
+    // Chromium process (0062).
+    let sources =
+        move |site: &str| BrowserSources::new(site_config(&chromium, site));
 
     let config = Config {
         tick: cli.tick(),
@@ -68,14 +71,16 @@ async fn run(cli: Cli) -> anyhow::Result<()> {
         },
         budget: cli.budget,
         max_budget: cli.max_budget,
+        site_budgets: cli.site_budgets.clone(),
         profile_dir: Some(cli.profile_path()),
+        idle_close: cli.idle_close(),
         ..Config::default()
     };
 
     let (stop, shutdown) = watch::channel(false);
     tokio::spawn(async move {
         wait_for_signal().await;
-        info!("signal received: finishing the current page");
+        info!("signal received: finishing the current pages");
         let _ = stop.send(true);
     });
 

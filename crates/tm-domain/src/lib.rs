@@ -12,7 +12,16 @@ pub mod place;
 pub mod query;
 pub mod settings;
 
-pub use family::{FamilyKey, FamilyKind, Leg, Source, miles_session_domains};
+pub use family::{
+    FamilyKey,
+    FamilyKind,
+    GOOGLE_FLIGHTS,
+    Leg,
+    SiteLimits,
+    Source,
+    miles_session_domains,
+    site_slug,
+};
 pub use money::{Currency, Money, effective_brl};
 pub use observation::{
     Deal,

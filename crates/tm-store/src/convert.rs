@@ -932,11 +932,28 @@ mod tests {
             RequestKind::OpenLogin {
                 program: "smiles".into(),
             },
-            RequestKind::CloseLogin,
+            RequestKind::CloseLogin { program: None },
+            RequestKind::CloseLogin {
+                program: Some("smiles".into()),
+            },
             RequestKind::ReloadConfig,
         ] {
             assert_eq!(kind.name(), serde_tag(&kind, "kind"));
         }
+    }
+
+    /// An app before 0062 asks to close a login without naming the
+    /// program.
+    #[test]
+    fn an_old_close_login_still_reads() {
+        let old: RequestKind =
+            serde_json::from_str(r#"{"kind":"close_login"}"#).expect("parses");
+        assert_eq!(old, RequestKind::CloseLogin { program: None });
+        let new = RequestKind::CloseLogin {
+            program: Some("smiles".into()),
+        };
+        let json = serde_json::to_string(&new).expect("serializes");
+        assert_eq!(json, r#"{"kind":"close_login","program":"smiles"}"#);
     }
 
     #[test]

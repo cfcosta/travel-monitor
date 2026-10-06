@@ -1,85 +1,54 @@
-//! The loop (DECISIONS.md 0028, 0029, 0035, 0039, 0046): reload the
-//! configuration, take the app's requests, ask the scheduler for this
-//! tick's picks, run each through its source, record what it saw,
-//! update the scheduler's state, find and confirm deals, and keep the
-//! heartbeat.
+//! The coordinator (DECISIONS.md 0028, 0035, 0046, 0060, 0062): reload
+//! the configuration, take the app's requests, and keep one worker per
+//! site ([`crate::worker`]) running that site's checks.
 //!
-//! Everything runs on one task, one check at a time: the browser is
-//! shared, and Google sees one visitor reading at a human pace
-//! (random pauses between page loads, 0039).
+//! Each site (`Source::site()`: Google Flights, TAP, each miles program)
+//! has its own worker task with its own Chromium profile and process,
+//! its own budget, its own pacing and its own scheduler tick, so
+//! different sites check in parallel while each runs at most one check
+//! at a time. A worker starts when the site has eligible families (or a
+//! login request names it) and lives until the daemon stops; its browser
+//! starts when the site has work and closes when the site is idle.
+//!
+//! Requests are routed by site: a route's manual check goes to every
+//! site the route has families on, a deal confirmation to Google
+//! Flights, and a miles login (`OpenLogin`/`CloseLogin`) to that
+//! program's site alone, which pauses while every other site keeps
+//! running.
+//!
+//! The coordinator writes the global heartbeat (process alive, totals);
+//! each worker writes its own row of `site_status` (what it checks now)
+//! and of `site_budgets`.
 
 use std::{
-    collections::{BTreeMap, HashMap, HashSet, VecDeque},
+    collections::{BTreeMap, BTreeSet, HashSet},
     path::PathBuf,
+    sync::Arc,
     time::Duration,
 };
 
-use anyhow::Context as _;
-use chrono::{DateTime, Days, NaiveDate, Utc};
+use chrono::Utc;
 use rand::{Rng, SeedableRng, rngs::StdRng};
 use tm_domain::{
-    Cabin,
-    Deal,
-    DealId,
     DealStatus,
-    ExploreHint,
     FamilyId,
-    FamilyKey,
-    FamilyKind,
-    Leg,
-    Money,
-    Observation,
-    PlaceId,
-    PlaceKind,
-    PointOfSale,
-    PosId,
-    QueryId,
-    QueryOutcome,
+    GOOGLE_FLIGHTS,
     QueryReason,
     RequestId,
-    Route,
-    RouteId,
-    Settings,
+    SiteLimits,
     Source,
 };
-use tm_gflights::{PlaceRef, Search, rpc::ExploreDestination, url::search_url};
-use tm_scheduler::{
-    CheckSummary,
-    FxTable,
-    Params,
-    fanout,
-    hints::{HintTarget, add_hint, hinted_families},
-    plan_tick,
-    trips::{build_trips, compare_round_trips},
-    update::{min_moved, update_after_check_with},
-};
-use tm_store::{
-    CheckInProgress,
-    DealFilter,
-    FamilyRecord,
-    Heartbeat,
-    LoginState,
-    RequestKind,
-    RequestRecord,
-    Store,
-};
-use tokio::sync::watch;
-use tracing::{debug, error, info, warn};
+use tm_scheduler::Params;
+use tm_store::{Heartbeat, RequestKind, RequestRecord, SiteStatus, Store};
+use tokio::sync::{mpsc, oneshot, watch};
+use tracing::{error, info, warn};
 
 use crate::{
     budget::{self, Budget},
-    candidates::{
-        self,
-        Context,
-        Only,
-        from_discount,
-        to_discount,
-        to_record,
-        to_state,
-    },
-    deals::{self, Group},
-    jobs::{self, Job, JobError, JobOptions},
-    sources::{Cell, ConfirmJob, Fetch, Sources},
+    candidates::{self, Context, Only},
+    jobs::JobOptions,
+    sources::Sources,
+    worker::{self, Command, Loaded, Shared, Tracker, Worker, World},
 };
 
 /// How the daemon runs, from the command line.
@@ -89,19 +58,26 @@ pub struct Config {
     /// Start up, run one tick, stop.
     pub once: bool,
     pub only: Only,
-    /// Seconds of random pause between page loads.
+    /// Seconds of random pause between one site's page loads.
     pub pace: (u64, u64),
     pub jobs: JobOptions,
+    /// Google Flights' starting daily budget (`--budget`).
     pub budget: Option<u32>,
+    /// Google Flights' maximum (`--max-budget`).
     pub max_budget: Option<u32>,
+    /// Other sites' limits (`--site-budget airline:TP=300:1000`), 0060.
+    pub site_budgets: Vec<(String, SiteLimits)>,
     /// How often the requests table is polled between ticks.
     pub request_poll: Duration,
     /// Seed for the scheduler's randomness (tests); `None` seeds from
     /// the OS.
     pub seed: Option<u64>,
-    /// The Chromium profile, whose cookie jar says whether a miles login
-    /// took (0024). `None` records no login state.
+    /// The base of the sites' Chromium profiles: each site's is
+    /// `<profile_dir>/<site slug>` (0062), whose cookie jar says whether
+    /// a miles login took (0064). `None` records no login state.
     pub profile_dir: Option<PathBuf>,
+    /// A site's browser closes after this long without work (0062).
+    pub idle_close: Duration,
 }
 
 impl Default for Config {
@@ -114,71 +90,48 @@ impl Default for Config {
             jobs: JobOptions::default(),
             budget: None,
             max_budget: None,
+            site_budgets: Vec::new(),
             request_poll: Duration::from_secs(2),
             seed: None,
             profile_dir: None,
+            idle_close: Duration::from_secs(5 * 60),
         }
     }
 }
 
-/// Cells older than this are not paired into trips.
-const FRESH_HOURS: i64 = 48;
+/// Makes a site's [`Sources`]: the real daemon gives each site its own
+/// Chromium profile ([`crate::sources::browser::site_config`]).
+pub type SourceFactory<S> = Arc<dyn Fn(&str) -> S + Send + Sync>;
 
-/// The configuration a tick works from.
-#[derive(Debug, Clone, Default)]
-pub struct World {
-    pub families: Vec<FamilyRecord>,
-    pub routes: HashMap<RouteId, Route>,
-    pub sweeps: HashSet<RouteId>,
-    pub pos: HashMap<PosId, PointOfSale>,
-}
-
-impl World {
-    fn family_by_key(&self, key: &FamilyKey) -> Option<&FamilyRecord> {
-        self.families.iter().find(|f| &f.key == key)
-    }
-}
-
-/// What a check produced, for the bookkeeping after it.
-enum Found {
-    Cells(Vec<Cell>),
-    Explore(Vec<ExploreDestination>),
+/// A worker task and the way to talk to it.
+struct Handle {
+    tx: mpsc::UnboundedSender<Command>,
+    join: tokio::task::JoinHandle<()>,
 }
 
 pub struct Daemon<S: Sources> {
     store: Store,
-    sources: S,
     config: Config,
     shutdown: watch::Receiver<bool>,
-    settings: Settings,
-    params: Params,
-    config_version: i64,
-    budget: Option<Budget>,
+    factory: SourceFactory<S>,
+    loaded: Arc<Loaded>,
+    publish: watch::Sender<Arc<Loaded>>,
+    workers: BTreeMap<String, Handle>,
+    /// Sites paused for a login, and the program (0024, 0062).
+    paused: BTreeMap<String, String>,
+    tracker: Tracker,
+    /// Workers tick on their own timers (the daemon's loop); otherwise
+    /// they act only when told (tests and `--once`).
+    autonomous: bool,
     rng: StdRng,
-    /// The miles program being logged into while the browser is paused
-    /// (0024).
-    paused: Option<String>,
-    /// Requests that need the browser, held while it is paused.
-    deferred: VecDeque<RequestRecord>,
-    /// Manual checks (0046), run before the scheduler's picks.
-    manual: VecDeque<(FamilyId, Option<RequestId>)>,
-    /// Manual checks still to run per request.
-    manual_left: HashMap<RequestId, usize>,
-    /// Places whose Freebase ID could not be learned under this
-    /// configuration version.
-    resolve_tried: HashSet<PlaceId>,
     state: String,
-    next_check: Option<String>,
-    /// When the daemon looks for work again, for the app's countdown.
-    next_check_at: Option<DateTime<Utc>>,
-    /// The check running now, for the heartbeat (0057).
-    check: Option<CheckInProgress>,
 }
 
-impl<S: Sources> Daemon<S> {
+impl<S: Sources + 'static> Daemon<S> {
+    /// A daemon over `store`; `sources` makes each site's sources.
     pub fn new(
         store: Store,
-        sources: S,
+        sources: impl Fn(&str) -> S + Send + Sync + 'static,
         config: Config,
         shutdown: watch::Receiver<bool>,
     ) -> Self {
@@ -186,25 +139,21 @@ impl<S: Sources> Daemon<S> {
             Some(seed) => StdRng::seed_from_u64(seed),
             None => StdRng::from_os_rng(),
         };
+        let loaded = Arc::new(Loaded::default());
+        let (publish, _) = watch::channel(Arc::clone(&loaded));
         Self {
             store,
-            sources,
             config,
             shutdown,
-            settings: Settings::default(),
-            params: Params::default(),
-            config_version: -1,
-            budget: None,
+            factory: Arc::new(sources),
+            loaded,
+            publish,
+            workers: BTreeMap::new(),
+            paused: BTreeMap::new(),
+            tracker: Tracker::default(),
+            autonomous: false,
             rng,
-            paused: None,
-            deferred: VecDeque::new(),
-            manual: VecDeque::new(),
-            manual_left: HashMap::new(),
-            resolve_tried: HashSet::new(),
             state: "starting".into(),
-            next_check: None,
-            next_check_at: None,
-            check: None,
         }
     }
 
@@ -212,26 +161,23 @@ impl<S: Sources> Daemon<S> {
         &self.store
     }
 
-    pub fn sources(&self) -> &S {
-        &self.sources
+    /// The sites that have a worker.
+    pub fn sites(&self) -> Vec<String> {
+        self.workers.keys().cloned().collect()
     }
 
-    pub fn sources_mut(&mut self) -> &mut S {
-        &mut self.sources
+    /// Whether `site` is paused for a login.
+    pub fn is_paused(&self, site: &str) -> bool {
+        self.paused.contains_key(site)
     }
 
-    pub fn is_paused(&self) -> bool {
-        self.paused.is_some()
+    /// The sites paused for a login.
+    pub fn paused_sites(&self) -> Vec<String> {
+        self.paused.keys().cloned().collect()
     }
 
     fn stopping(&self) -> bool {
         *self.shutdown.borrow()
-    }
-
-    fn budget(&mut self) -> anyhow::Result<&mut Budget> {
-        self.budget
-            .as_mut()
-            .context("the budget is not loaded (startup did not run)")
     }
 
     // -----------------------------------------------------------------
@@ -239,94 +185,84 @@ impl<S: Sources> Daemon<S> {
     // -----------------------------------------------------------------
 
     /// Opens for business: seeds an empty database, applies the budget
-    /// flags, requeues requests a previous run left claimed, syncs
-    /// routes and families, starts the browser and learns missing
-    /// Freebase IDs.
+    /// flags to the sites' rows, requeues requests a previous run left
+    /// claimed, syncs routes and families, starts a worker per site with
+    /// work, and has Google Flights learn missing Freebase IDs.
     pub async fn startup(&mut self) -> anyhow::Result<()> {
         if self.store.seed_defaults().await? {
             info!("seeded the first-run configuration");
         }
-        self.settings = budget::apply_flags(
+        let settings = budget::apply_flags(
             &self.store,
             self.config.budget,
             self.config.max_budget,
         )
         .await?;
+        budget::configure_sites(
+            &self.store,
+            &settings,
+            &self.config.site_budgets,
+            Utc::now(),
+            budget::today(),
+        )
+        .await?;
+        for b in self.store.site_budgets().await? {
+            info!(
+                site = %b.site,
+                daily = b.daily_budget,
+                max = b.max_daily_budget,
+                used = b.loads_on(budget::today()),
+                "budget"
+            );
+        }
         let requeued = self.store.requeue_claimed().await?;
         if requeued > 0 {
             info!(requeued, "requeued requests a previous run left claimed");
         }
+        self.store.clear_site_statuses().await?;
         self.reload(true).await?;
-        let now = Utc::now();
-        let budget =
-            Budget::restore(&self.store, &self.params, now, budget::today())
-                .await?;
-        budget.save(&self.store).await?;
-        info!(
-            daily = budget.state.daily_budget,
-            used = budget.loads_today,
-            cooling = ?budget.cooling(now),
-            "budget restored"
-        );
-        self.budget = Some(budget);
-        self.ensure_browser().await;
-        if let Err(e) = self.resolve_places().await {
-            warn!("resolving Freebase IDs failed: {e:#}");
+        self.ensure_workers().await?;
+        if !self.autonomous && self.workers.contains_key(GOOGLE_FLIGHTS) {
+            self.ask(GOOGLE_FLIGHTS, Command::Resolve).await;
         }
         self.state = "running".into();
         self.heartbeat().await;
         Ok(())
     }
 
-    /// Runs until SIGINT/SIGTERM (or one tick with `once`), then closes
-    /// the browser and writes a last heartbeat.
+    /// Runs until SIGINT/SIGTERM (or one tick with `once`), then stops
+    /// every worker and writes a last heartbeat.
     pub async fn run(&mut self) -> anyhow::Result<()> {
+        self.autonomous = !self.config.once;
         self.startup().await?;
         if self.config.once {
             if let Err(e) = self.process_requests().await {
                 warn!("requests: {e:#}");
             }
-            if let Err(e) = self.run_manual().await {
-                warn!("manual checks: {e:#}");
-            }
+            self.run_manual().await;
             if let Err(e) = self.tick().await {
                 error!("tick failed: {e:#}");
             }
             self.stop().await;
             return Ok(());
         }
-        let mut next_tick = tokio::time::Instant::now();
+        let mut next_tick = tokio::time::Instant::now() + self.config.tick;
         let mut last_beat = tokio::time::Instant::now();
         while !self.stopping() {
             if let Err(e) = self.process_requests().await {
                 warn!("requests: {e:#}");
             }
-            if let Err(e) = self.run_manual().await {
-                warn!("manual checks: {e:#}");
-            }
-            if self.stopping() {
-                break;
-            }
+            self.reap().await;
             if tokio::time::Instant::now() >= next_tick {
-                if let Err(e) = self.tick().await {
-                    error!("tick failed: {e:#}");
+                if let Err(e) = self.reload(false).await {
+                    warn!("reloading the configuration failed: {e:#}");
+                }
+                if let Err(e) = self.ensure_workers().await {
+                    warn!("starting site workers failed: {e:#}");
                 }
                 next_tick = tokio::time::Instant::now() + self.config.tick;
-                self.next_check_at = Some(
-                    Utc::now()
-                        + chrono::TimeDelta::from_std(self.config.tick)
-                            .unwrap_or_default(),
-                );
-                self.next_check = Some(format!(
-                    "next tick at {}",
-                    (chrono::Local::now()
-                        + chrono::TimeDelta::from_std(self.config.tick)
-                            .unwrap_or_default())
-                    .format("%H:%M:%S")
-                ));
-                self.heartbeat().await;
-                last_beat = tokio::time::Instant::now();
-            } else if last_beat.elapsed() >= Duration::from_secs(30) {
+            }
+            if last_beat.elapsed() >= Duration::from_secs(30) {
                 self.heartbeat().await;
                 last_beat = tokio::time::Instant::now();
             }
@@ -340,42 +276,82 @@ impl<S: Sources> Daemon<S> {
         Ok(())
     }
 
-    /// Closes the browser and records the daemon as stopped.
+    /// Stops every worker (each closes its browser and saves its budget)
+    /// and records the daemon as stopped.
     pub async fn stop(&mut self) {
-        info!("stopping");
-        self.sources.stop().await;
-        self.state = "stopped".into();
-        self.next_check = None;
-        self.next_check_at = None;
-        self.check = None;
-        if let Some(budget) = &self.budget
-            && let Err(e) = budget.save(&self.store).await
-        {
-            warn!("saving the budget failed: {e:#}");
+        info!(sites = self.workers.len(), "stopping");
+        let workers = std::mem::take(&mut self.workers);
+        let mut joins = Vec::new();
+        for (site, handle) in workers {
+            // Dropping the sender ends the worker's command loop.
+            drop(handle.tx);
+            joins.push((site, handle.join));
         }
+        for (site, join) in joins {
+            if let Err(e) = join.await {
+                error!(%site, "the site worker failed: {e}");
+                self.write_stopped(&site).await;
+            }
+        }
+        self.state = "stopped".into();
         self.heartbeat().await;
     }
 
-    async fn heartbeat(&mut self) {
-        let now = Utc::now();
-        let (loads_today, budget) = match &self.budget {
-            Some(b) => (b.loads_today, b.daily(now, &self.params)),
-            None => (0, self.settings.daily_budget),
-        };
-        let state = match &self.paused {
-            Some(program) if self.state != "stopped" => {
-                format!("paused for login: {program}")
+    /// Notices workers that ended on their own (a panic): their site is
+    /// marked stopped and gets a new worker on the next tick.
+    async fn reap(&mut self) {
+        let done: Vec<String> = self
+            .workers
+            .iter()
+            .filter(|(_, h)| h.join.is_finished())
+            .map(|(site, _)| site.clone())
+            .collect();
+        for site in done {
+            if let Some(handle) = self.workers.remove(&site) {
+                if let Err(e) = handle.join.await {
+                    error!(%site, "the site worker failed: {e}");
+                }
+                self.write_stopped(&site).await;
             }
-            _ if self.check.is_some() => "checking".to_owned(),
-            _ => self.state.clone(),
+        }
+    }
+
+    async fn write_stopped(&self, site: &str) {
+        let status = SiteStatus {
+            site: site.to_owned(),
+            updated_at: Utc::now(),
+            state: "stopped".into(),
+            next_check_at: None,
+            check: None,
+        };
+        if let Err(e) = self.store.write_site_status(&status).await {
+            warn!(%site, "status failed: {e}");
+        }
+    }
+
+    /// The global heartbeat: the process is alive, with today's loads and
+    /// budgets summed over the sites (each site's own are in
+    /// `site_budgets`).
+    async fn heartbeat(&self) {
+        let today = budget::today();
+        let (loads_today, budget) = match self.store.site_budgets().await {
+            Ok(rows) => rows.iter().fold((0u32, 0u32), |(l, b), r| {
+                (
+                    l.saturating_add(r.loads_on(today)),
+                    b.saturating_add(r.daily_budget),
+                )
+            }),
+            Err(e) => {
+                warn!("reading the budgets failed: {e}");
+                (0, 0)
+            }
         };
         let beat = Heartbeat {
             pid: std::process::id(),
-            updated_at: now,
-            state,
-            next_check: self.next_check.clone(),
-            next_check_at: self.next_check_at,
-            check: self.check.clone(),
+            updated_at: Utc::now(),
+            state: self.state.clone(),
+            next_check: None,
+            next_check_at: None,
             loads_today,
             budget,
         };
@@ -384,257 +360,221 @@ impl<S: Sources> Daemon<S> {
         }
     }
 
-    /// Says on the heartbeat that a check started (0057).
-    async fn begin_check(
-        &mut self,
-        family: FamilyId,
-        query: QueryId,
-        reason: &QueryReason,
-        started_at: DateTime<Utc>,
-    ) {
-        self.check = Some(CheckInProgress {
-            family,
-            query: Some(query),
-            reason: reason.clone(),
-            started_at,
-        });
-        self.next_check_at = None;
-        self.heartbeat().await;
-    }
-
-    /// Says on the heartbeat that the check ended, if one was running.
-    async fn end_check(&mut self) {
-        if self.check.take().is_some() {
-            self.heartbeat().await;
-        }
-    }
-
     /// Re-reads the settings and re-syncs routes and families when the
-    /// configuration changed (0035), or when `force`d.
+    /// configuration changed (0035), or when `force`d, and hands the new
+    /// configuration to the workers.
     pub async fn reload(&mut self, force: bool) -> anyhow::Result<bool> {
         let version = self.store.config_version().await?;
-        if !force && version == self.config_version {
+        if !force && version == self.loaded.version {
             return Ok(false);
         }
-        self.settings = self.store.settings().await?;
-        self.params = Params::from_settings(&self.settings);
+        let settings = self.store.settings().await?;
+        let params = Params::from_settings(&settings);
         let routes = self.store.sync_routes().await?;
-        let sync = self.store.sync_families(&self.settings).await?;
-        self.config_version = self.store.config_version().await?;
-        self.resolve_tried.clear();
+        let sync = self.store.sync_families(&settings).await?;
+        let version = self.store.config_version().await?;
+        self.loaded = Arc::new(Loaded {
+            settings,
+            params,
+            version,
+        });
+        self.publish.send_replace(Arc::clone(&self.loaded));
         info!(
             routes,
             families = sync.active,
             created = sync.created,
-            version = self.config_version,
+            version,
             "configuration loaded"
         );
         Ok(true)
     }
 
-    /// Starts the browser unless it runs or is paused for a login.
-    async fn ensure_browser(&mut self) {
-        if self.paused.is_some() || self.sources.is_running() {
-            return;
-        }
-        let pos = match self.store.list_points_of_sale(true).await {
-            Ok(pos) => pos,
-            Err(e) => {
-                warn!("cannot list points of sale: {e}");
-                return;
-            }
-        };
-        match self.sources.start(&pos).await {
-            Ok(()) => {
-                if self.state == "browser unavailable" {
-                    self.state = "running".into();
-                }
-            }
-            Err(e) => {
-                error!("the browser did not start: {e:#}");
-                self.state = "browser unavailable".into();
-            }
-        }
-    }
+    // -----------------------------------------------------------------
+    // Workers
+    // -----------------------------------------------------------------
 
-    /// Everything a tick needs from the configuration.
-    pub async fn world(&self) -> anyhow::Result<World> {
-        let families = self.store.list_families(true).await?;
-        let mut routes: HashMap<RouteId, Route> = self
-            .store
-            .list_routes(false)
-            .await?
-            .into_iter()
-            .map(|r| (r.id, r))
-            .collect();
-        let mut sweeps = HashSet::new();
-        for r in self.store.sweep_routes(false).await? {
-            sweeps.insert(r.id);
-            routes.insert(r.id, r);
-        }
-        let pos = self
-            .store
-            .list_points_of_sale(false)
-            .await?
-            .into_iter()
-            .map(|p| (p.id, p))
-            .collect();
-        Ok(World {
-            families,
-            routes,
-            sweeps,
-            pos,
-        })
-    }
-
-    /// The candidate filters for `world` at `now`.
-    pub fn context(&self, world: &World, now: DateTime<Utc>) -> Context {
-        let unresolved = world
-            .routes
-            .values()
-            .filter(|r| {
-                r.origin.google_id().is_none()
-                    || r.destination.google_id().is_none()
-            })
-            .map(|r| r.id)
-            .collect();
-        let destinations = world
-            .routes
-            .values()
-            .map(|r| {
-                let code = (!world.sweeps.contains(&r.id))
-                    .then(|| r.destination.code.clone());
-                (r.id, code)
-            })
-            .collect();
-        Context {
-            unresolved,
-            cooling: self
-                .budget
-                .as_ref()
-                .map(|b| b.cooling(now))
-                .unwrap_or_default(),
-            destinations,
-            paused: self.paused.is_some(),
-            only: self.config.only.clone(),
-            home_pos: world.pos.values().find(|p| p.is_home).map(|p| p.id),
-            passengers: self.settings.passengers,
-        }
-    }
-
-    /// One scheduler tick (0028).
-    pub async fn tick(&mut self) -> anyhow::Result<()> {
-        let now = Utc::now();
-        let today = budget::today();
-        self.reload(false).await?;
-        let params = self.params.clone();
-        if self.budget()?.advance(now, today, &params) {
-            let budget = self.budget()?.clone();
-            budget.save(&self.store).await?;
-        }
-        if self.paused.is_some() {
-            debug!("paused for a login: no checks");
-            return Ok(());
-        }
-        self.ensure_browser().await;
-        if !self.sources.is_running() {
-            return Ok(());
-        }
-        self.state = "running".into();
-        if let Err(e) = self.resolve_places().await {
-            warn!("resolving Freebase IDs failed: {e:#}");
-        }
+    /// Starts a worker for every site with eligible families.
+    async fn ensure_workers(&mut self) -> anyhow::Result<()> {
         let world = self.world().await?;
-        let cx = self.context(&world, now);
-        let (candidates, skipped) = candidates::build(&world.families, &cx);
-        let ticks_left = if self.config.once {
-            1
-        } else {
-            budget::ticks_left_today(self.config.tick)
-        };
-        let mut rng = StdRng::from_rng(&mut self.rng);
-        let tick_budget =
-            self.budget()?.tick(now, ticks_left, &params, &mut rng);
-        let picks =
-            plan_tick(&candidates, now, &tick_budget, &params, &mut rng);
-        info!(
-            candidates = candidates.len(),
-            ?skipped,
-            loads_available = tick_budget.loads_available,
-            picks = picks.len(),
-            "tick planned"
+        let cx = worker::context(
+            &world,
+            &self.loaded.settings,
+            &self.config.only,
+            HashSet::new(),
+            HashSet::new(),
         );
-        for (i, pick) in picks.iter().enumerate() {
-            if self.stopping() {
-                break;
-            }
-            if self.login_requested().await {
-                info!("a login is waiting: ending the tick early");
-                break;
-            }
-            if self
-                .budget
-                .as_ref()
-                .is_some_and(|b| b.cooling(Utc::now()).contains(&pick.site))
-            {
-                continue;
-            }
-            if i > 0 {
-                self.pace().await;
-            }
-            if let Err(e) = self
-                .run_check(pick.family, pick.reason.clone(), &world)
-                .await
-            {
-                warn!(family = %pick.family, "check failed: {e:#}");
-            }
+        let sites: BTreeSet<String> = world
+            .families
+            .iter()
+            .filter(|f| candidates::eligibility(f, &cx).is_ok())
+            .map(|f| f.site.clone())
+            .collect();
+        for site in sites {
+            self.worker(&site).await?;
         }
         Ok(())
     }
 
-    /// A random pause between page loads, cut short by a shutdown.
-    async fn pace(&mut self) {
-        let (min, max) = self.config.pace;
-        if max == 0 {
-            return;
+    /// `site`'s worker, started if it has none.
+    async fn worker(
+        &mut self,
+        site: &str,
+    ) -> anyhow::Result<&mpsc::UnboundedSender<Command>> {
+        if !self.workers.contains_key(site) {
+            let budget = Budget::restore(
+                &self.store,
+                site,
+                &self.loaded.params,
+                Utc::now(),
+                budget::today(),
+            )
+            .await?;
+            let shared = Shared {
+                store: self.store.clone(),
+                config: self.config.clone(),
+                loaded: self.publish.subscribe(),
+                shutdown: self.shutdown.clone(),
+                tracker: self.tracker.clone(),
+            };
+            let seed = self.rng.random();
+            let (tx, join) = Worker::spawn(
+                site.to_owned(),
+                shared,
+                (self.factory)(site),
+                budget,
+                seed,
+                self.autonomous,
+            );
+            if let Some(program) = self.paused.get(site) {
+                let _ = tx.send(Command::Pause {
+                    program: program.clone(),
+                    request: None,
+                });
+            }
+            self.workers.insert(site.to_owned(), Handle { tx, join });
         }
-        let secs = self.rng.random_range(min..=max);
-        self.next_check_at = Some(
-            Utc::now()
-                + chrono::TimeDelta::from_std(Duration::from_secs(secs))
-                    .unwrap_or_default(),
-        );
-        self.heartbeat().await;
-        let mut shutdown = self.shutdown.clone();
-        tokio::select! {
-            () = tokio::time::sleep(Duration::from_secs(secs)) => {}
-            _ = shutdown.changed() => {}
+        self.workers
+            .get(site)
+            .map(|h| &h.tx)
+            .ok_or_else(|| anyhow::anyhow!("no worker for {site}"))
+    }
+
+    /// Sends `command` to `site`'s worker, starting it if needed.
+    async fn send(
+        &mut self,
+        site: &str,
+        command: Command,
+    ) -> anyhow::Result<()> {
+        let tx = self.worker(site).await?;
+        tx.send(command)
+            .map_err(|_| anyhow::anyhow!("the {site} worker has stopped"))
+    }
+
+    /// Sends a command with a reply to an existing worker and waits.
+    async fn ask<T>(
+        &self,
+        site: &str,
+        make: impl FnOnce(oneshot::Sender<T>) -> Command,
+    ) -> Option<T> {
+        let handle = self.workers.get(site)?;
+        let (tx, rx) = oneshot::channel();
+        handle.tx.send(make(tx)).ok()?;
+        rx.await.ok()
+    }
+
+    /// Sends a command with a reply to every worker, then waits for all:
+    /// the workers run it at the same time.
+    async fn ask_all(&self, make: impl Fn(oneshot::Sender<()>) -> Command) {
+        let mut replies = Vec::new();
+        for handle in self.workers.values() {
+            let (tx, rx) = oneshot::channel();
+            if handle.tx.send(make(tx)).is_ok() {
+                replies.push(rx);
+            }
+        }
+        for rx in replies {
+            let _ = rx.await;
         }
     }
 
-    async fn login_requested(&self) -> bool {
-        self.store.pending_requests().await.is_ok_and(|rs| {
-            rs.iter()
-                .any(|r| matches!(r.kind, RequestKind::OpenLogin { .. }))
+    /// One scheduler tick on every site at once (0028, 0062); the daemon's
+    /// loop leaves ticks to the workers' own timers.
+    pub async fn tick(&mut self) -> anyhow::Result<()> {
+        self.reload(false).await?;
+        self.ensure_workers().await?;
+        self.ask_all(Command::Tick).await;
+        self.heartbeat().await;
+        Ok(())
+    }
+
+    /// Runs every site's queued manual checks, the sites in parallel.
+    pub async fn run_manual(&mut self) {
+        self.ask_all(Command::RunManual).await;
+    }
+
+    /// Runs one check of `family` now on its site's worker, and records
+    /// everything it saw.
+    pub async fn run_check(
+        &mut self,
+        family: FamilyId,
+        reason: QueryReason,
+    ) -> anyhow::Result<()> {
+        let record = self
+            .store
+            .family(family)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("no family {family}"))?;
+        self.worker(&record.site).await?;
+        self.ask(&record.site, |reply| Command::Check {
+            family,
+            reason,
+            reply,
         })
+        .await
+        .unwrap_or_else(|| {
+            Err(anyhow::anyhow!("the {} worker stopped", record.site))
+        })
+    }
+
+    /// Everything a tick needs from the configuration.
+    pub async fn world(&self) -> anyhow::Result<World> {
+        worker::world(&self.store).await
+    }
+
+    /// The candidate filters for `world` at `now`: the sites in a block
+    /// cooldown (from the block log) and those paused for a login.
+    pub async fn context(
+        &self,
+        world: &World,
+        now: chrono::DateTime<Utc>,
+    ) -> anyhow::Result<Context> {
+        let cooling =
+            budget::cooling_sites(&self.store, &self.loaded.params, now)
+                .await?;
+        Ok(worker::context(
+            world,
+            &self.loaded.settings,
+            &self.config.only,
+            cooling,
+            self.paused.keys().cloned().collect(),
+        ))
     }
 
     // -----------------------------------------------------------------
     // Requests (0046)
     // -----------------------------------------------------------------
 
-    /// Takes every pending request.
+    /// Takes every pending request and hands it to its site's worker.
+    /// Outside the daemon's loop, waits until the workers took them.
     pub async fn process_requests(&mut self) -> anyhow::Result<()> {
+        let mut any = false;
         while let Some(request) = self.store.claim_next().await? {
             info!(id = %request.id, kind = request.kind.name(), "request");
             self.handle_request(request).await?;
+            any = true;
         }
-        if self.paused.is_none() && !self.deferred.is_empty() {
-            let deferred: Vec<RequestRecord> =
-                self.deferred.drain(..).collect();
-            for request in deferred {
-                self.handle_request(request).await?;
-            }
+        if any && !self.autonomous {
+            self.ask_all(Command::Sync).await;
         }
         Ok(())
     }
@@ -644,106 +584,88 @@ impl<S: Sources> Daemon<S> {
         request: RequestRecord,
     ) -> anyhow::Result<()> {
         let id = request.id;
-        match &request.kind {
+        match request.kind {
             RequestKind::OpenLogin { program } => {
-                info!(%program, "pausing the browser for a login");
-                self.sources.stop().await;
-                self.paused = Some(program.clone());
-                self.heartbeat().await;
-                self.store
-                    .complete(id, true, Some("the daemon's browser is closed"))
-                    .await?;
+                let site = miles_site(&program);
+                info!(%site, "pausing the site for a login");
+                self.paused.insert(site.clone(), program.clone());
+                self.send(
+                    &site,
+                    Command::Pause {
+                        program,
+                        request: Some(id),
+                    },
+                )
+                .await?;
             }
-            RequestKind::CloseLogin => {
-                if let Some(program) = self.paused.take()
-                    && let Some(dir) = &self.config.profile_dir
-                {
-                    // The window has closed and our Chromium is not up
-                    // yet, so the cookie jar is free to read.
-                    let domains = tm_domain::miles_session_domains(&program);
-                    let now = Utc::now();
-                    match tm_browser::profile::login_cookies(dir, domains, now)
-                        .await
-                    {
-                        Ok(cookies) => {
-                            let state = if cookies.is_empty() {
-                                LoginState::LoggedOut
-                            } else {
-                                LoginState::LoggedIn
-                            };
-                            info!(%program, ?state, "login window closed");
-                            self.store
-                                .set_miles_login(&program, state, now)
-                                .await?;
-                        }
-                        Err(e) => {
-                            warn!(%program, "login not checked: {e}");
-                        }
-                    }
-                }
-                self.ensure_browser().await;
-                let ok = self.sources.is_running();
-                self.store
-                    .complete(
-                        id,
-                        ok,
-                        Some(if ok {
-                            "resumed"
-                        } else {
-                            "the browser did not start"
-                        }),
+            RequestKind::CloseLogin {
+                program: Some(program),
+            } => {
+                let site = miles_site(&program);
+                self.paused.remove(&site);
+                self.send(
+                    &site,
+                    Command::Resume {
+                        program: Some(program),
+                        request: Some(id),
+                    },
+                )
+                .await?;
+            }
+            RequestKind::CloseLogin { program: None } => {
+                // An app before 0062: resume every paused site.
+                let paused = std::mem::take(&mut self.paused);
+                let mut request = Some(id);
+                for (site, program) in paused {
+                    self.send(
+                        &site,
+                        Command::Resume {
+                            program: Some(program),
+                            request: request.take(),
+                        },
                     )
                     .await?;
-                self.heartbeat().await;
+                }
+                if let Some(id) = request {
+                    self.store.complete(id, true, Some("resumed")).await?;
+                }
             }
             RequestKind::ReloadConfig => {
                 self.reload(true).await?;
+                self.ensure_workers().await?;
                 self.store.complete(id, true, None).await?;
-            }
-            RequestKind::CheckRoute { .. }
-            | RequestKind::CheckFamily { .. }
-                if self.paused.is_some() =>
-            {
-                self.deferred.push_back(request);
-            }
-            RequestKind::ConfirmDeal { .. } if self.paused.is_some() => {
-                self.deferred.push_back(request);
             }
             RequestKind::CheckRoute { route } => {
                 let world = self.world().await?;
-                let cx = self.context(&world, Utc::now());
-                let ids = candidates::of_route(&world.families, *route, &cx);
-                self.queue_manual(id, ids).await?;
+                let cx = self.manual_context(&world).await?;
+                let ids = candidates::of_route(&world.families, route, &cx);
+                self.queue_manual(id, &world, ids).await?;
             }
             RequestKind::CheckFamily { family } => {
                 let world = self.world().await?;
-                let cx = self.context(&world, Utc::now());
+                let mut cx = self.manual_context(&world).await?;
+                // Manual checks ignore the debugging restriction.
+                cx.only = Only::default();
                 let ids: Vec<FamilyId> = world
                     .families
                     .iter()
-                    .filter(|f| f.id == *family)
-                    .filter(|f| {
-                        // Manual checks ignore the debugging restriction.
-                        let mut cx = cx.clone();
-                        cx.only = Only::default();
-                        candidates::eligibility(f, &cx).is_ok()
-                    })
+                    .filter(|f| f.id == family)
+                    .filter(|f| candidates::eligibility(f, &cx).is_ok())
                     .map(|f| f.id)
                     .collect();
-                self.queue_manual(id, ids).await?;
+                self.queue_manual(id, &world, ids).await?;
             }
             RequestKind::ConfirmDeal { deal } => match self
                 .store
-                .deal(*deal)
+                .deal(deal)
                 .await?
             {
                 Some(d)
                     if d.status == DealStatus::Candidate
                         || d.status == DealStatus::Confirmed =>
                 {
-                    self.ensure_browser().await;
-                    let ok = self.confirm(*deal, &d, None).await.is_ok();
-                    self.store.complete(id, ok, None).await?;
+                    self.send(GOOGLE_FLIGHTS, Command::Confirm(deal, id))
+                        .await?;
                 }
                 Some(_) => {
                     self.store
@@ -760,9 +682,19 @@ impl<S: Sources> Daemon<S> {
         Ok(())
     }
 
+    /// The filters of a manual check: as a tick's, except that a paused
+    /// site's checks wait for it to resume instead of being dropped.
+    async fn manual_context(&self, world: &World) -> anyhow::Result<Context> {
+        let mut cx = self.context(world, Utc::now()).await?;
+        cx.paused.clear();
+        Ok(cx)
+    }
+
+    /// Hands a request's checks to their sites' workers.
     async fn queue_manual(
         &mut self,
         request: RequestId,
+        world: &World,
         ids: Vec<FamilyId>,
     ) -> anyhow::Result<()> {
         if ids.is_empty() {
@@ -771,1010 +703,25 @@ impl<S: Sources> Daemon<S> {
                 .await?;
             return Ok(());
         }
-        self.manual_left.insert(request, ids.len());
-        self.manual
-            .extend(ids.into_iter().map(|f| (f, Some(request))));
-        Ok(())
-    }
-
-    /// Runs the queued manual checks, first in line (0046).
-    pub async fn run_manual(&mut self) -> anyhow::Result<()> {
-        if self.manual.is_empty() || self.paused.is_some() {
-            return Ok(());
-        }
-        self.ensure_browser().await;
-        if !self.sources.is_running() {
-            return Ok(());
-        }
-        let world = self.world().await?;
-        let mut first = true;
-        while let Some((family, request)) = self.manual.pop_front() {
-            if self.stopping() || self.paused.is_some() {
-                self.manual.push_front((family, request));
-                break;
-            }
-            if !first {
-                self.pace().await;
-            }
-            first = false;
-            let result =
-                self.run_check(family, QueryReason::Manual, &world).await;
-            if let Err(e) = &result {
-                warn!(%family, "manual check failed: {e:#}");
-            }
-            if let Some(request) = request
-                && let Some(left) = self.manual_left.get_mut(&request)
-            {
-                *left -= 1;
-                if *left == 0 {
-                    self.manual_left.remove(&request);
-                    self.store.complete(request, true, None).await?;
-                }
-            }
-            if self.login_requested().await {
-                break;
+        let mut by_site: BTreeMap<String, Vec<FamilyId>> = BTreeMap::new();
+        for id in ids {
+            if let Some(f) = world.families.iter().find(|f| f.id == id) {
+                by_site.entry(f.site.clone()).or_default().push(id);
             }
         }
-        Ok(())
-    }
-
-    // -----------------------------------------------------------------
-    // Freebase IDs (0041)
-    // -----------------------------------------------------------------
-
-    /// Learns the Freebase ID of every city on a selected route that
-    /// lacks one, once per configuration version.
-    async fn resolve_places(&mut self) -> anyhow::Result<()> {
-        if !self.sources.is_running() || self.paused.is_some() {
-            return Ok(());
-        }
-        let routes = self.store.list_routes(true).await?;
-        let only = &self.config.only;
-        let mut places = Vec::new();
-        for route in &routes {
-            if let Some(code) = &only.destination
-                && !route.destination.code.eq_ignore_ascii_case(code)
-            {
-                continue;
-            }
-            if only.family.is_some() {
-                let Some(id) = only.family else { continue };
-                match self.store.family(id).await? {
-                    Some(f) if f.key.route == route.id => {}
-                    _ => continue,
-                }
-            }
-            for place in [&route.origin, &route.destination] {
-                if matches!(place.kind, PlaceKind::City { freebase_id: None })
-                    && !self.resolve_tried.contains(&place.id)
-                    && !places
-                        .iter()
-                        .any(|p: &tm_domain::Place| p.id == place.id)
-                {
-                    places.push(place.clone());
-                }
-            }
-        }
-        if places.is_empty() {
-            return Ok(());
-        }
-        let Some(home) = self.store.home_point_of_sale().await? else {
-            return Ok(());
-        };
-        for place in places {
-            let now = Utc::now();
-            let params = self.params.clone();
-            let budget = self.budget()?;
-            if budget.cooling(now).contains("google_flights")
-                || budget.loads_today >= budget.daily(now, &params)
-            {
-                break;
-            }
-            self.resolve_tried.insert(place.id);
-            let job = jobs::resolve_job(
-                &place,
-                &self.settings,
-                &home,
-                &self.config.jobs,
-            );
-            info!(code = %place.code, url = %job.url, "learning a Freebase ID");
-            let fetch = self.sources.resolve(&job).await;
-            self.spend(fetch.page_loads).await?;
-            match (&fetch.outcome, &fetch.value) {
-                (QueryOutcome::Ok, Some(id)) => {
-                    info!(code = %place.code, %id, "Freebase ID learned");
-                    self.store.set_freebase_id(place.id, id).await?;
-                }
-                (QueryOutcome::Blocked { detail }, _) => {
-                    self.block("google_flights", detail).await?;
-                    break;
-                }
-                (outcome, _) => {
-                    warn!(code = %place.code, ?outcome, "no Freebase ID");
-                }
-            }
-            self.pace().await;
-        }
-        Ok(())
-    }
-
-    // -----------------------------------------------------------------
-    // Checks
-    // -----------------------------------------------------------------
-
-    async fn spend(&mut self, loads: u32) -> anyhow::Result<()> {
-        let store = self.store.clone();
-        let today = budget::today();
-        self.budget()?.spend(&store, loads, Utc::now(), today).await
-    }
-
-    async fn block(&mut self, site: &str, detail: &str) -> anyhow::Result<()> {
-        warn!(%site, %detail, "blocked: backing off");
-        let store = self.store.clone();
-        let params = self.params.clone();
-        self.budget()?
-            .on_block(&store, site, detail, Utc::now(), &params)
-            .await
-    }
-
-    /// The departure a TAP search without a calendar prices (0053): the
-    /// cheapest one Google Flights showed lately for the same route,
-    /// cabin and leg under the home point of sale.
-    async fn cheapest_departure(
-        &self,
-        family: &FamilyRecord,
-        world: &World,
-    ) -> Option<NaiveDate> {
-        let home = world.pos.values().find(|p| p.is_home)?;
-        let leg = match family.key.kind {
-            FamilyKind::Leg { leg } => leg,
-            _ => Leg::Outbound,
-        };
-        let key = FamilyKey {
-            route: family.key.route,
-            cabin: family.key.cabin,
-            source: Source::GoogleFlights,
-            pos: home.id,
-            kind: FamilyKind::Leg { leg },
-        };
-        let id = world.family_by_key(&key)?.id;
-        let tomorrow = budget::today() + Days::new(1);
-        self.store
-            .latest_cells(id)
-            .await
-            .ok()?
-            .into_iter()
-            .filter(|c| c.departure >= tomorrow)
-            .filter_map(|c| c.price.map(|p| (p.minor, c.departure)))
-            .min()
-            .map(|(_, d)| d)
-    }
-
-    /// Runs one check of `family` and records everything it saw. The
-    /// heartbeat says so while it runs (0057).
-    pub async fn run_check(
-        &mut self,
-        family_id: FamilyId,
-        reason: QueryReason,
-        world: &World,
-    ) -> anyhow::Result<()> {
-        let result = self.check_family(family_id, reason, world).await;
-        self.end_check().await;
-        result
-    }
-
-    async fn check_family(
-        &mut self,
-        family_id: FamilyId,
-        reason: QueryReason,
-        world: &World,
-    ) -> anyhow::Result<()> {
-        let Some(family) = self.store.family(family_id).await? else {
-            anyhow::bail!("no family {family_id}");
-        };
-        let route = world
-            .routes
-            .get(&family.key.route)
-            .cloned()
-            .context("the family's route is not configured")?;
-        let pos = world
-            .pos
-            .get(&family.key.pos)
-            .cloned()
-            .context("the family's point of sale is not configured")?;
-        let today = budget::today();
-        let options = JobOptions {
-            cheapest_departure: match family.key.source {
-                Source::GoogleFlights => None,
-                _ => self.cheapest_departure(&family, world).await,
-            },
-            now: Some(Utc::now()),
-            ..self.config.jobs.clone()
-        };
-        let job = match jobs::build(
-            &family.key,
-            &route,
-            &pos,
-            &self.settings,
-            today,
-            &options,
-        ) {
-            Ok(job) => job,
-            Err(e @ JobError::Unresolved(_)) => {
-                debug!(family = %family.id, "{e}");
-                return Ok(());
-            }
-            Err(e) => {
-                warn!(family = %family.id, "cannot check: {e}");
-                self.mark_checked(&family, Utc::now()).await?;
-                return Ok(());
-            }
-        };
-        let started = Utc::now();
-        let query = self.store.start_query(family.id, &reason, started).await?;
-        self.begin_check(family.id, query, &reason, started).await;
-        info!(
-            family = %family.id,
-            route = %format!("{}-{}", route.origin.code, route.destination.code),
-            cabin = ?family.key.cabin,
-            site = %family.site,
-            pos = %pos.country,
-            kind = ?family.key.kind,
-            reason = reason.label(),
-            "checking"
-        );
-        let (fetch, found) = match &job {
-            Job::Calendar(j) => {
-                split(self.sources.calendar(j).await, Found::Cells)
-            }
-            Job::Tap(j) => split(self.sources.tap(j).await, Found::Cells),
-            Job::Explore(j) => {
-                split(self.sources.explore(j).await, Found::Explore)
-            }
-        };
-        let finished = Utc::now();
-        self.store
-            .finish_query(query, &fetch.outcome, fetch.page_loads, finished)
-            .await?;
-        self.spend(fetch.page_loads).await?;
-        self.end_check().await;
-        info!(
-            family = %family.id,
-            outcome = ?fetch.outcome,
-            loads = fetch.page_loads,
-            "checked"
-        );
-        match &fetch.outcome {
-            QueryOutcome::Ok => {}
-            QueryOutcome::Blocked { detail } => {
-                self.block(&family.site, detail).await?;
-                self.mark_checked(&family, finished).await?;
-                return Ok(());
-            }
-            QueryOutcome::LoggedOut => {
-                if let Source::Miles { program } = &family.key.source {
-                    warn!(%program, "logged out: the app will ask for a login");
-                    self.store
-                        .set_miles_login(program, LoginState::Expired, finished)
-                        .await?;
-                }
-                self.mark_checked(&family, finished).await?;
-                return Ok(());
-            }
-            QueryOutcome::Unexpected { .. } | QueryOutcome::Error { .. } => {
-                self.mark_checked(&family, finished).await?;
-                return Ok(());
-            }
-        }
-        match found {
-            Found::Explore(destinations) => {
-                self.after_explore(
-                    &family,
-                    &route,
-                    &pos,
-                    query,
-                    destinations,
-                    world,
-                    finished,
-                    fetch.page_loads,
-                    reason,
-                )
-                .await
-            }
-            Found::Cells(cells) => {
-                self.after_cells(
-                    &family,
-                    &route,
-                    &pos,
-                    query,
-                    cells,
-                    world,
-                    finished,
-                    fetch.page_loads,
-                    reason,
-                )
-                .await
-            }
-        }
-    }
-
-    /// A check that taught nothing about prices still counts as a visit,
-    /// so a broken family is not retried every tick.
-    async fn mark_checked(
-        &self,
-        family: &FamilyRecord,
-        at: DateTime<Utc>,
-    ) -> anyhow::Result<()> {
-        let mut state = family.state.clone();
-        state.last_check = Some(at);
-        self.store.save_family_state(family.id, &state).await?;
-        Ok(())
-    }
-
-    /// Folds a successful check into the family's state; returns whether
-    /// its window minimum dropped materially.
-    async fn learn(
-        &self,
-        family: &FamilyRecord,
-        min_price_minor: Option<i64>,
-        page_loads: u32,
-        reason: QueryReason,
-        at: DateTime<Utc>,
-    ) -> anyhow::Result<bool> {
-        let mut state = to_state(&family.state);
-        let moved = min_moved(
-            state.last_min_price_minor,
-            min_price_minor,
-            self.params.material_change,
-        );
-        let summary = CheckSummary {
-            min_price_minor,
-            any_material_change: false,
-            drop: false,
-            page_loads,
-            reason,
-        };
-        update_after_check_with(&mut state, &summary, at, &self.params);
-        self.store
-            .save_family_state(family.id, &to_record(&state, &family.state))
-            .await?;
-        Ok(moved.dropped)
-    }
-
-    /// Adds one pending hint to the families related to one that
-    /// dropped (0028: probe, then fan out).
-    async fn fan_out(
-        &self,
-        dropped: &FamilyRecord,
-        world: &World,
-    ) -> anyhow::Result<()> {
-        let related = fanout::related(
-            &dropped.key,
-            world.families.iter().map(|f| &f.key),
-        );
-        for (key, relation) in related {
-            let Some(id) = world.family_by_key(&key).map(|f| f.id) else {
-                continue;
-            };
-            if let Some(f) = self.store.family(id).await? {
-                let mut state = to_state(&f.state);
-                fanout::boost(&mut state);
-                self.store
-                    .save_family_state(id, &to_record(&state, &f.state))
-                    .await?;
-                debug!(family = %id, ?relation, "fan-out boost");
-            }
-        }
-        Ok(())
-    }
-
-    #[allow(clippy::too_many_arguments)]
-    async fn after_cells(
-        &mut self,
-        family: &FamilyRecord,
-        route: &Route,
-        pos: &PointOfSale,
-        query: QueryId,
-        cells: Vec<Cell>,
-        world: &World,
-        at: DateTime<Utc>,
-        page_loads: u32,
-        reason: QueryReason,
-    ) -> anyhow::Result<()> {
-        let observations: Vec<Observation> = cells
-            .into_iter()
-            .map(|c| Observation {
-                id: None,
-                query,
-                family: family.id,
-                observed_at: at,
-                departure: c.departure,
-                return_date: c.return_date,
-                price: c.price,
-                miles: c.miles,
-                carrier: c.carrier,
-                stops: c.stops,
-                duration_minutes: c.duration_minutes,
-                seller: c.seller,
-            })
-            .collect();
-        if !observations.is_empty() {
-            self.store.insert_observations(&observations).await?;
-        }
-        let miles = matches!(family.key.source, Source::Miles { .. });
-        let min = observations
-            .iter()
-            .filter_map(|o| {
-                if miles {
-                    o.miles.or(o.price.as_ref().map(|p| p.minor))
-                } else {
-                    o.price.as_ref().map(|p| p.minor)
-                }
-            })
-            .min();
-        let dropped = self.learn(family, min, page_loads, reason, at).await?;
-        if dropped {
-            info!(family = %family.id, "material drop: fanning out");
-            self.fan_out(family, world).await?;
-        }
-        if family.key.source == Source::GoogleFlights
-            && family.key.kind != FamilyKind::Explore
-        {
-            self.evaluate_deals(route, family.key.cabin, pos, family.key.kind)
-                .await?;
-        }
-        Ok(())
-    }
-
-    /// The minimum a hint is compared with for a route and cabin: the
-    /// round trip's last minimum, else the sum of the legs' (0041).
-    fn reference_min(
-        world: &World,
-        route: RouteId,
-        cabin: Cabin,
-    ) -> Option<i64> {
-        let of = |pred: &dyn Fn(&FamilyKind) -> bool| {
-            world
-                .families
-                .iter()
-                .filter(|f| {
-                    f.key.route == route
-                        && f.key.cabin == cabin
-                        && f.key.source == Source::GoogleFlights
-                        && pred(&f.key.kind)
-                })
-                .filter_map(|f| f.state.last_min_price_minor)
-                .min()
-        };
-        of(&|k| matches!(k, FamilyKind::RoundTrip { .. })).or_else(|| {
-            Some(
-                of(&|k| *k == FamilyKind::Leg { leg: Leg::Outbound })?
-                    + of(&|k| *k == FamilyKind::Leg { leg: Leg::Return })?,
-            )
-        })
-    }
-
-    #[allow(clippy::too_many_arguments)]
-    async fn after_explore(
-        &mut self,
-        family: &FamilyRecord,
-        sweep: &Route,
-        pos: &PointOfSale,
-        query: QueryId,
-        destinations: Vec<ExploreDestination>,
-        world: &World,
-        at: DateTime<Utc>,
-        page_loads: u32,
-        reason: QueryReason,
-    ) -> anyhow::Result<()> {
-        let hints: Vec<ExploreHint> = destinations
-            .iter()
-            .filter_map(|d| {
-                Some(ExploreHint {
-                    query,
-                    origin: sweep.origin.id,
-                    cabin: family.key.cabin,
-                    pos: pos.id,
-                    observed_at: at,
-                    destination_freebase_id: d.freebase_id.clone(),
-                    destination_airport: d.airport.clone().unwrap_or_default(),
-                    price: d.money(&pos.currency)?,
-                    departure: d.departure,
-                    return_date: d.return_date,
-                    stops: d.stops,
-                    duration_minutes: d.duration_minutes,
-                    carrier: d
-                        .carrier
-                        .clone()
-                        .or_else(|| d.carrier_code.clone()),
-                })
-            })
-            .collect();
-        if !hints.is_empty() {
-            self.store.insert_explore_hints(&hints).await?;
-        }
-        let targets: Vec<HintTarget> = world
-            .families
-            .iter()
-            .filter(|f| {
-                f.key.kind != FamilyKind::Explore
-                    && f.key.cabin == family.key.cabin
-            })
-            .filter_map(|f| {
-                let route = world.routes.get(&f.key.route)?;
-                (route.origin.id == sweep.origin.id
-                    && !world.sweeps.contains(&route.id))
-                .then(|| HintTarget {
-                    family: f.id,
-                    origin: route.origin.id,
-                    cabin: f.key.cabin,
-                    destination_code: route.destination.code.clone(),
-                    destination_airports: Vec::new(),
-                    destination_freebase_id: match &route.destination.kind {
-                        PlaceKind::City { freebase_id } => freebase_id.clone(),
-                        PlaceKind::Airport => None,
-                    },
-                    reference_min_minor: Self::reference_min(
-                        world,
-                        route.id,
-                        f.key.cabin,
-                    ),
-                })
-            })
-            .collect();
-        let hinted = hinted_families(&hints, &targets, &self.params);
-        info!(
-            destinations = destinations.len(),
-            hints = hints.len(),
-            hinted = hinted.len(),
-            "Explore recorded"
-        );
-        for id in hinted {
-            if let Some(f) = self.store.family(id).await? {
-                let mut state = to_state(&f.state);
-                add_hint(&mut state);
-                self.store
-                    .save_family_state(id, &to_record(&state, &f.state))
-                    .await?;
-            }
-        }
-        let min = hints.iter().map(|h| h.price.minor).min();
-        self.learn(family, min, page_loads, reason, at).await?;
-        Ok(())
-    }
-
-    // -----------------------------------------------------------------
-    // Deals (0030, 0031, 0042, 0043)
-    // -----------------------------------------------------------------
-
-    /// Re-prices the trips of one route × cabin × point of sale after a
-    /// check of one of its Google Flights families, learns the
-    /// round-trip discount, expires confirmed deals that are gone, and
-    /// confirms new candidates.
-    pub async fn evaluate_deals(
-        &mut self,
-        route: &Route,
-        cabin: Cabin,
-        pos: &PointOfSale,
-        touched: FamilyKind,
-    ) -> anyhow::Result<()> {
-        let now = Utc::now();
-        let today = budget::today();
-        let key = |kind| FamilyKey {
-            route: route.id,
-            cabin,
-            source: Source::GoogleFlights,
-            pos: pos.id,
-            kind,
-        };
-        let days = self.settings.trips.round_trip_days;
-        let (Some(outbound), Some(ret)) = (
-            self.store
-                .family_id(&key(FamilyKind::Leg { leg: Leg::Outbound }))
-                .await?,
-            self.store
-                .family_id(&key(FamilyKind::Leg { leg: Leg::Return }))
-                .await?,
-        ) else {
-            return Ok(());
-        };
-        let round_trip = self
-            .store
-            .family_id(&key(FamilyKind::RoundTrip { days }))
-            .await?;
-        let fresh = |cells: Vec<Observation>| -> Vec<Observation> {
-            cells
-                .into_iter()
-                .filter(|c| {
-                    now - c.observed_at <= chrono::TimeDelta::hours(FRESH_HOURS)
-                })
-                .collect()
-        };
-        let out_cells = fresh(self.store.latest_cells(outbound).await?);
-        let ret_cells = fresh(self.store.latest_cells(ret).await?);
-        let rt_cells = match round_trip {
-            Some(id) => fresh(self.store.latest_cells(id).await?),
-            None => Vec::new(),
-        };
-        let out = deals::leg_prices(&out_cells);
-        let back = deals::leg_prices(&ret_cells);
-        let rt = deals::round_trip_prices(&rt_cells);
-        let mut discount = to_discount(
-            &self
-                .store
-                .route_trip_state(route.id)
-                .await?
-                .unwrap_or_default(),
-        );
-        if matches!(touched, FamilyKind::RoundTrip { .. }) && !rt.is_empty() {
-            let pairs = compare_round_trips(&rt, &out, &back);
-            if !pairs.is_empty() {
-                let was = discount.additive;
-                discount.observe_pairs(&pairs, &self.params);
-                self.store
-                    .save_route_trip_state(route.id, &from_discount(&discount))
-                    .await?;
-                info!(
-                    route = %route.destination.code,
-                    pairs = pairs.len(),
-                    discount = discount.ewma,
-                    additive = discount.additive,
-                    "round-trip discount learned"
-                );
-                if discount.additive && !was {
-                    info!(route = %route.destination.code, "round trips match their legs: tracking stops");
-                }
-            }
-        }
-        let range = self.settings.trips;
-        let estimated = build_trips(&out, &back, range, discount.discount());
-        let real = deals::real_trips(&rt);
-        let trips: Vec<(tm_scheduler::Trip, bool)> = estimated
-            .iter()
-            .map(|t| (*t, true))
-            .chain(real.iter().map(|t| (*t, false)))
-            .collect();
-        if trips.is_empty() {
-            return Ok(());
-        }
-        let history = self
-            .store
-            .history_for_route(
-                route.id,
-                cabin,
-                now - self.params.baseline_window,
-            )
-            .await?;
-        let group = Group {
-            outbound,
-            ret,
-            round_trip: round_trip.map(|id| (id, days)),
-        };
-        let exclude: HashSet<QueryId> = out_cells
-            .iter()
-            .chain(&ret_cells)
-            .chain(&rt_cells)
-            .map(|c| c.query)
-            .collect();
-        let points = deals::history_points(
-            &history,
-            &group,
-            range,
-            discount.discount(),
-            &exclude,
-        );
-        let first = today + Days::new(1);
-        let last = jobs::horizon_end(today, &self.settings);
-        let found =
-            deals::find(&trips, &points, now, &self.params, first, last);
-        let known = self
-            .store
-            .list_deals(&DealFilter {
-                limit: Some(1000),
-                ..DealFilter::default()
-            })
-            .await?;
-        let mut current: BTreeMap<(NaiveDate, NaiveDate), i64> =
-            BTreeMap::new();
-        for (t, _) in &trips {
-            current
-                .entry((t.departure, t.return_date))
-                .and_modify(|p| *p = (*p).min(t.price_minor))
-                .or_insert(t.price_minor);
-        }
-        for d in known.iter().filter(|d| {
-            d.status == DealStatus::Confirmed
-                && d.route == route.id
-                && d.cabin == cabin
-                && d.pos == pos.id
-        }) {
-            if deals::expired(d, &current, today)
-                && let Some(id) = d.id
-            {
-                info!(deal = %id, "deal expired");
-                self.store
-                    .set_deal_status(id, DealStatus::Expired, now)
-                    .await?;
-            }
-        }
-        let picked = deals::select(
-            found,
-            &known,
-            (route.id, cabin, pos.id),
-            now,
-            deals::CONFIRMS_PER_GROUP,
-        );
-        for f in picked {
-            let url = route_search(
-                route,
-                cabin,
-                f.trip.departure,
-                f.trip.return_date,
-                &self.settings,
-            )
-            .map(|s| {
-                jobs::rebase(
-                    &search_url(&s, &jobs::locale(&self.settings, pos)),
-                    None,
-                )
-            });
-            let deal = deals::candidate(
-                &f,
-                route.id,
-                cabin,
-                pos,
-                now,
-                &self.params,
-                url,
-            );
-            let id = self.store.insert_deal(&deal).await?;
-            info!(
-                deal = %id,
-                route = %route.destination.code,
-                departure = %f.trip.departure,
-                return_date = %f.trip.return_date,
-                price = %deal.price,
-                change = f.change,
-                reason = ?f.reason,
-                estimated = f.estimated,
-                "deal candidate: confirming"
-            );
-            let legs = f.estimated.then_some(f.trip.legs_sum_minor);
-            if let Err(e) = self.confirm(id, &deal, legs).await {
-                warn!(deal = %id, "confirmation failed: {e:#}");
-            }
-        }
-        Ok(())
-    }
-
-    /// The second query of a candidate (0031): the round trip for its
-    /// exact dates under its point of sale, then that point of sale's
-    /// booking page (0034). Logged as a `Confirmation` query of the
-    /// route's round-trip family (or its outbound leg).
-    pub async fn confirm(
-        &mut self,
-        id: DealId,
-        deal: &Deal,
-        legs_sum: Option<i64>,
-    ) -> anyhow::Result<()> {
-        let result = self.confirm_deal(id, deal, legs_sum).await;
-        self.end_check().await;
-        result
-    }
-
-    async fn confirm_deal(
-        &mut self,
-        id: DealId,
-        deal: &Deal,
-        legs_sum: Option<i64>,
-    ) -> anyhow::Result<()> {
-        if self
-            .budget
-            .as_ref()
-            .is_some_and(|b| b.cooling(Utc::now()).contains("google_flights"))
-            || !self.sources.is_running()
-        {
-            info!(deal = %id, "cannot confirm now: left as a candidate");
-            return Ok(());
-        }
-        let route = self.store.route(deal.route).await?.context("no route")?;
-        let pos = self
-            .store
-            .point_of_sale(deal.pos)
-            .await?
-            .context("no point of sale")?;
-        let Some(search) = route_search(
-            &route,
-            deal.cabin,
-            deal.departure,
-            deal.return_date,
-            &self.settings,
-        ) else {
-            return Ok(());
-        };
-        let days = self.settings.trips.round_trip_days;
-        let key = |kind| FamilyKey {
-            route: route.id,
-            cabin: deal.cabin,
-            source: Source::GoogleFlights,
-            pos: pos.id,
-            kind,
-        };
-        let rt_family = self
-            .store
-            .family_id(&key(FamilyKind::RoundTrip { days }))
-            .await?;
-        let log_family = match rt_family {
-            Some(id) => id,
-            None => self
-                .store
-                .family_id(&key(FamilyKind::Leg { leg: Leg::Outbound }))
-                .await?
-                .context("no family to log the confirmation on")?,
-        };
-        let now = Utc::now();
-        let query = self
-            .store
-            .start_query(log_family, &QueryReason::Confirmation, now)
-            .await?;
-        self.begin_check(log_family, query, &QueryReason::Confirmation, now)
-            .await;
-        let job = ConfirmJob {
-            pos: pos.id,
-            search,
-            locale: jobs::locale(&self.settings, &pos),
-            origin_override: self.config.jobs.origin_override.clone(),
-        };
-        let fetch = self.sources.confirm(&job).await;
-        let finished = Utc::now();
-        self.store
-            .finish_query(query, &fetch.outcome, fetch.page_loads, finished)
-            .await?;
-        self.spend(fetch.page_loads).await?;
-        self.end_check().await;
-        match &fetch.outcome {
-            QueryOutcome::Ok => {}
-            QueryOutcome::Blocked { detail } => {
-                self.block("google_flights", detail).await?;
-                return Ok(());
-            }
-            other => {
-                warn!(deal = %id, outcome = ?other, "confirmation did not load: left as a candidate");
-                return Ok(());
-            }
-        }
-        let Some(confirmation) = fetch.value else {
-            return Ok(());
-        };
-        let fx = FxTable::new(
-            self.store
-                .latest_exchange_rates()
-                .await?
-                .into_iter()
-                .map(|r| (r.currency.0, r.brl_per_unit)),
-        );
-        let Some(verdict) = deals::judge(
-            deal.price.minor,
-            &confirmation,
-            &pos,
-            &fx,
-            &self.params,
-        ) else {
-            info!(deal = %id, "no price on the results page: rejected");
-            self.store
-                .set_deal_status(id, DealStatus::Rejected, finished)
-                .await?;
-            return Ok(());
-        };
-        for (currency, rate) in &verdict.rates {
-            self.store
-                .set_exchange_rate(currency, *rate, finished)
-                .await?;
-        }
-        self.store
-            .update_deal_quote(
-                id,
-                &verdict.price,
-                &verdict.effective,
-                confirmation.carrier.as_deref(),
-                verdict.seller.as_deref(),
-                Some(
-                    confirmation
-                        .booking_url
-                        .as_deref()
-                        .unwrap_or(&confirmation.search_url),
-                ),
-            )
-            .await?;
-        if !verdict.quotes.is_empty() {
-            self.store.attach_seller_quotes(id, &verdict.quotes).await?;
-        }
-        let status = if verdict.held {
-            DealStatus::Confirmed
-        } else {
-            DealStatus::Rejected
-        };
-        self.store.set_deal_status(id, status, finished).await?;
-        info!(
-            deal = %id,
-            ?status,
-            candidate = %deal.price,
-            confirmed = %verdict.price,
-            effective = %verdict.effective,
-            seller = ?verdict.seller,
-            sellers = verdict.quotes.len(),
-            "deal confirmation"
-        );
-        // A confirmation is a real round trip next to its legs: it
-        // teaches the discount, and resumes round-trip tracking when it
-        // shows a gap (0042).
-        if let Some(legs) = legs_sum {
-            let mut discount = to_discount(
-                &self
-                    .store
-                    .route_trip_state(route.id)
-                    .await?
-                    .unwrap_or_default(),
-            );
-            discount.observe(verdict.price.minor, legs, &self.params);
-            self.store
-                .save_route_trip_state(route.id, &from_discount(&discount))
-                .await?;
-        }
-        let length = (deal.return_date - deal.departure).num_days();
-        if rt_family == Some(log_family) && length == i64::from(days) {
-            self.store
-                .insert_observations(&[Observation {
-                    id: None,
-                    query,
-                    family: log_family,
-                    observed_at: finished,
-                    departure: deal.departure,
-                    return_date: Some(deal.return_date),
-                    price: Some(Money::brl_whole(verdict.price.whole())),
-                    miles: None,
-                    carrier: confirmation.carrier.clone(),
-                    stops: None,
-                    duration_minutes: None,
-                    seller: verdict.seller.clone(),
-                }])
-                .await?;
+        self.tracker
+            .expect(request, by_site.values().map(Vec::len).sum());
+        for (site, ids) in by_site {
+            self.send(&site, Command::Queue(ids, Some(request))).await?;
         }
         Ok(())
     }
 }
 
-/// The round-trip search for a route's exact dates.
-fn route_search(
-    route: &Route,
-    cabin: Cabin,
-    departure: NaiveDate,
-    return_date: NaiveDate,
-    settings: &Settings,
-) -> Option<Search> {
-    Some(Search::round_trip(
-        PlaceRef::from_place(&route.origin)?,
-        PlaceRef::from_place(&route.destination)?,
-        departure,
-        return_date,
-        cabin,
-        settings.passengers,
-    ))
-}
-
-/// A fetch's bookkeeping, and its value as a [`Found`].
-fn split<T>(f: Fetch<T>, found: impl FnOnce(T) -> Found) -> (Fetch<()>, Found) {
-    let Fetch {
-        outcome,
-        value,
-        page_loads,
-    } = f;
-    (
-        Fetch {
-            outcome,
-            value: (),
-            page_loads,
-        },
-        found(value),
-    )
+/// The site of a miles program (`miles:smiles`).
+fn miles_site(program: &str) -> String {
+    Source::Miles {
+        program: program.to_owned(),
+    }
+    .site()
 }

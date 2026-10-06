@@ -29,8 +29,6 @@ use tm_domain::{
     Settings,
 };
 use tm_store::{
-    BudgetState,
-    CheckInProgress,
     DealFilter,
     Heartbeat,
     RequestKind,
@@ -507,7 +505,9 @@ async fn requests_are_claimed_in_order() {
         RequestKind::OpenLogin {
             program: "smiles".into(),
         },
-        RequestKind::CloseLogin,
+        RequestKind::CloseLogin {
+            program: Some("smiles".into()),
+        },
         RequestKind::ReloadConfig,
     ];
     let mut ids = Vec::new();
@@ -637,26 +637,8 @@ async fn a_reader_reads_while_a_writer_writes() {
 }
 
 #[tokio::test]
-async fn budget_blocks_rates_and_heartbeat() {
+async fn blocks_rates_and_heartbeat() {
     let store = seeded().await;
-    assert_eq!(store.budget().await.expect("reads"), None);
-    let b = store.add_loads(5, date(10, 6)).await.expect("adds");
-    assert_eq!(b.daily_budget, 4800); // Settings default (0065)
-    assert_eq!(b.loads_today, 5);
-    let b = store.add_loads(7, date(10, 6)).await.expect("adds");
-    assert_eq!(b.loads_today, 12);
-    let b = store.add_loads(2, date(10, 7)).await.expect("adds");
-    assert_eq!((b.loads_today, b.day), (2, date(10, 7)));
-
-    let ramped = BudgetState {
-        daily_budget: 360,
-        loads_today: 2,
-        day: date(10, 7),
-        last_ramp_at: Some(at(7, 1)),
-    };
-    store.save_budget(&ramped).await.expect("saves");
-    assert_eq!(store.budget().await.expect("reads"), Some(ramped));
-
     store
         .record_block("google_flights", at(6, 3), "unusual traffic", 41)
         .await
@@ -707,7 +689,6 @@ async fn budget_blocks_rates_and_heartbeat() {
         state: "running".into(),
         next_check: Some("SAO→LIS economy in 4 min".into()),
         next_check_at: Some(at(6, 13)),
-        check: None,
         loads_today: 12,
         budget: 300,
     };
@@ -718,51 +699,4 @@ async fn budget_blocks_rates_and_heartbeat() {
     later.next_check_at = None;
     store.write_heartbeat(&later).await.expect("writes");
     assert_eq!(store.heartbeat().await.expect("reads"), Some(later));
-}
-
-/// A check in progress is written with the heartbeat and cleared by the
-/// next one (0057).
-#[tokio::test]
-async fn heartbeat_carries_the_check_in_progress() {
-    let store = seeded().await;
-    let lis = outbound(&store, route(&store, "SAO", "LIS").await).await;
-    let query = store
-        .start_query(lis.id, &QueryReason::Manual, at(6, 12))
-        .await
-        .expect("starts");
-    let checking = Heartbeat {
-        pid: 7,
-        updated_at: at(6, 12),
-        state: "checking".into(),
-        next_check: None,
-        next_check_at: None,
-        check: Some(CheckInProgress {
-            family: lis.id,
-            query: Some(query),
-            reason: QueryReason::Scheduled {
-                score: 0.41,
-                runner_up: Some(0.2),
-            },
-            started_at: at(6, 12),
-        }),
-        loads_today: 3,
-        budget: 300,
-    };
-    store.write_heartbeat(&checking).await.expect("writes");
-    assert_eq!(
-        store.heartbeat().await.expect("reads"),
-        Some(checking.clone())
-    );
-
-    let idle = Heartbeat {
-        updated_at: at(6, 13),
-        state: "running".into(),
-        next_check_at: Some(at(6, 14)),
-        check: None,
-        ..checking
-    };
-    store.write_heartbeat(&idle).await.expect("writes");
-    let read = store.heartbeat().await.expect("reads").expect("a beat");
-    assert_eq!(read, idle);
-    assert_eq!(read.check, None);
 }

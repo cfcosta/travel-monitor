@@ -225,6 +225,17 @@ pub async fn login_cookies(
         .collect())
 }
 
+/// The Chromium profile directory of `site` (a [`tm_domain::Source::site`])
+/// under the daemon's profile directory `base`: `base/<site slug>`
+/// (`chromium/google_flights`, `chromium/airline-tp`,
+/// `chromium/miles-smiles`). Each site has its own profile and browser
+/// process, so a login window on one site's profile pauses only that
+/// site (DECISIONS.md 0062). The daemon and the app's login window both
+/// use this path.
+pub fn site_profile_dir(base: &Path, site: &str) -> PathBuf {
+    base.join(tm_domain::site_slug(site))
+}
+
 #[cfg(test)]
 #[allow(
     clippy::disallowed_methods,
@@ -241,6 +252,23 @@ mod tests {
             name: name.into(),
             expires: expires.and_then(DateTime::from_timestamp_micros),
         }
+    }
+
+    #[test]
+    fn each_site_has_its_own_directory() {
+        let base = Path::new("/data/chromium");
+        assert_eq!(
+            site_profile_dir(base, "google_flights"),
+            PathBuf::from("/data/chromium/google_flights")
+        );
+        assert_eq!(
+            site_profile_dir(base, "miles:smiles"),
+            PathBuf::from("/data/chromium/miles-smiles")
+        );
+        assert_eq!(
+            site_profile_dir(base, "airline:TP"),
+            PathBuf::from("/data/chromium/airline-tp")
+        );
     }
 
     #[test]
