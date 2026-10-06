@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE deals SET price_minor = ?2, currency = ?3,\n                 effective_minor = ?4, effective_currency = ?5,\n                 carrier = COALESCE(?6, carrier),\n                 seller = COALESCE(?7, seller),\n                 url = COALESCE(?8, url)\n             WHERE id = ?1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 8
+    },
+    "nullable": []
+  },
+  "hash": "e8c72709c866b9662606a3e45c83e9e6bb12076dba6f4d48ad021b5a0f90e027"
+}

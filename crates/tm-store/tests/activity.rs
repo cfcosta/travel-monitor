@@ -451,6 +451,37 @@ async fn deals_go_through_their_lifecycle() {
     );
 
     store
+        .update_deal_quote(
+            id,
+            &Money::brl_whole(9_100),
+            &Money::brl_whole(9_100),
+            Some("TP"),
+            None,
+            Some("https://example.test/booking"),
+        )
+        .await
+        .expect("updates");
+    let updated = store.deal(id).await.expect("reads").expect("exists");
+    assert_eq!(updated.price, Money::brl_whole(9_100));
+    assert_eq!(updated.effective_brl, Money::brl_whole(9_100));
+    assert_eq!(updated.carrier.as_deref(), Some("TP"));
+    assert_eq!(updated.seller, candidate.seller);
+    assert_eq!(updated.url.as_deref(), Some("https://example.test/booking"));
+    assert!(matches!(
+        store
+            .update_deal_quote(
+                tm_domain::DealId(999),
+                &Money::brl_whole(1),
+                &Money::brl_whole(1),
+                None,
+                None,
+                None,
+            )
+            .await,
+        Err(StoreError::NotFound { .. })
+    ));
+
+    store
         .set_deal_status(id, DealStatus::Expired, at(7, 0))
         .await
         .expect("expires");

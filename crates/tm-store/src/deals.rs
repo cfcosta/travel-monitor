@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 use chrono::{DateTime, NaiveDate, Utc};
 use sqlx::SqliteConnection;
-use tm_domain::{Deal, DealId, DealStatus, SellerQuote};
+use tm_domain::{Deal, DealId, DealStatus, Money, SellerQuote};
 
 use crate::{
     Store,
@@ -117,6 +117,45 @@ impl Store {
             id.0,
             name,
             at
+        )
+        .execute(&self.pool)
+        .await?;
+        if done.rows_affected() == 0 {
+            return Err(StoreError::not_found("deal", id));
+        }
+        Ok(())
+    }
+
+    /// Records what a confirmation found (0031, 0034): the price the
+    /// second query saw, its effective BRL cost, the carrier, the
+    /// cheapest seller and the URL that shows it. `None` keeps the
+    /// stored carrier, seller or URL.
+    pub async fn update_deal_quote(
+        &self,
+        id: DealId,
+        price: &Money,
+        effective_brl: &Money,
+        carrier: Option<&str>,
+        seller: Option<&str>,
+        url: Option<&str>,
+    ) -> Result<()> {
+        let currency = price.currency.as_str();
+        let effective_currency = effective_brl.currency.as_str();
+        let done = sqlx::query!(
+            "UPDATE deals SET price_minor = ?2, currency = ?3,
+                 effective_minor = ?4, effective_currency = ?5,
+                 carrier = COALESCE(?6, carrier),
+                 seller = COALESCE(?7, seller),
+                 url = COALESCE(?8, url)
+             WHERE id = ?1",
+            id.0,
+            price.minor,
+            currency,
+            effective_brl.minor,
+            effective_currency,
+            carrier,
+            seller,
+            url
         )
         .execute(&self.pool)
         .await?;
