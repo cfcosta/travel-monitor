@@ -2580,6 +2580,7 @@ dependencies = [
  "gpui-pre-linux",
  "gpui-pre-macos",
  "gpui-pre-web",
+ "gpui-pre-wgpu",
  "gpui-pre-windows",
 ]
 
@@ -2697,6 +2698,7 @@ dependencies = [
  "gpui-pre",
  "gpui-pre-collections",
  "gpui-pre-util",
+ "image",
  "itertools 0.14.0",
  "log",
  "parking_lot",
@@ -6549,8 +6551,12 @@ dependencies = [
  "dirs 6.0.0",
  "gpui-pre",
  "gpui-pre-platform",
+ "gpui-pre-wgpu",
  "notify-rust",
  "tm-domain",
+ "tm-gflights",
+ "tm-scheduler",
+ "tm-store",
  "tokio",
  "tracing",
  "tracing-subscriber",
@@ -6577,7 +6583,24 @@ dependencies = [
 name = "tm-daemon"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
+ "async-trait",
+ "chrono",
+ "clap",
+ "dirs 6.0.0",
+ "rand 0.9.5",
+ "serde_json",
+ "tempfile",
+ "thiserror 2.0.21",
+ "tm-browser",
  "tm-domain",
+ "tm-gflights",
+ "tm-jev",
+ "tm-scheduler",
+ "tm-store",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]

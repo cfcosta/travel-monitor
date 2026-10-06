@@ -1,0 +1,52 @@
+[package]
+name = "tm-daemon"
+description = "The travel monitor daemon: schedules checks, drives the browser and records prices."
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "tmd"
+path = "src/main.rs"
+
+[lib]
+name = "tm_daemon"
+path = "src/lib.rs"
+
+[dependencies]
+anyhow.workspace = true
+async-trait.workspace = true
+chrono.workspace = true
+clap.workspace = true
+dirs.workspace = true
+rand.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tm-browser.workspace = true
+tm-domain.workspace = true
+tm-gflights.workspace = true
+tm-jev.workspace = true
+tm-scheduler.workspace = true
+tm-store.workspace = true
+tokio = { workspace = true, features = [
+  "macros",
+  "rt-multi-thread",
+  "signal",
+  "sync",
+  "time",
+] }
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+tokio = { workspace = true, features = [
+  "io-util",
+  "macros",
+  "net",
+  "rt-multi-thread",
+  "time",
+] }
+
+[lints]
+workspace = true
