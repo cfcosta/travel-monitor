@@ -1,7 +1,8 @@
 //! The night map (DECISIONS.md 0044, 0074): a globe of land dots, an
 //! arc along the great circle from the origin to every watched
-//! destination, lifted off the surface, deals in yellow, the selected
-//! route brightest. The globe faces the routes, or the selected one;
+//! destination, lifted off the surface and coloured by its region
+//! (0075, with a legend), deals brighter with a yellow dot, the
+//! selected route in yellow. The globe faces the routes, or the selected one;
 //! given a [`MapState`] it turns when dragged, zooms with the wheel or a
 //! pinch, and faces the routes again on a double click.
 
@@ -34,7 +35,7 @@ use gpui::{
 };
 
 use crate::{
-    geo::{self, Globe, GlobeView, LabelSide, Pt, Rect, Vec3},
+    geo::{self, Globe, GlobeView, LabelSide, Pt, Rect, Region, Vec3},
     land_dots::LAND_DOTS,
     theme::{self, Fonts, alpha, color},
 };
@@ -49,6 +50,8 @@ pub struct MapPlace {
 #[derive(Debug, Clone, PartialEq)]
 pub struct MapDest {
     pub place: MapPlace,
+    /// Which colour its arc takes (0075).
+    pub region: Region,
     pub deal: bool,
     pub selected: bool,
 }
@@ -474,17 +477,21 @@ fn paint_map(
         .map(|d| (globe.project(d.place.lon, d.place.lat), d))
         .collect();
 
-    // Quiet arcs first, deals over them, the selected one on top.
+    // Quiet arcs first, deals over them, the selected one on top. Each
+    // takes its region's colour (0075); a deal is brighter and thicker,
+    // with a yellow dot.
     for (p, d) in dests.iter().filter(|(_, d)| !d.deal && !d.selected) {
+        let hue = theme::region(d.region);
         let runs = arc_runs(&globe, origin, &d.place);
-        stroke(window, &runs, 0.9 * z, alpha(theme::ARC, 0.85));
+        stroke(window, &runs, 0.9 * z, alpha(hue, 0.55));
         if let Some(p) = p {
-            circle(window, *p, 2.4 * z, color(theme::DOT));
+            circle(window, *p, 2.4 * z, alpha(hue, 0.95));
         }
     }
     for (p, d) in dests.iter().filter(|(_, d)| d.deal && !d.selected) {
+        let hue = theme::region(d.region);
         let runs = arc_runs(&globe, origin, &d.place);
-        stroke(window, &runs, 1.2 * z, alpha(theme::ARC_DEAL, 0.9));
+        stroke(window, &runs, 1.5 * z, alpha(hue, 0.95));
         if let Some(p) = p {
             circle(window, *p, 3.2 * z, color(theme::YELLOW));
         }
@@ -581,5 +588,58 @@ fn paint_map(
         let line = px(l.size * 1.3);
         let _ = s.paint(pt(l.at), line, TextAlign::Left, None, window, cx);
     }
+    paint_legend(model, fonts, (x, y, h), z, window, cx);
     globe
+}
+
+/// The regions on the map and their colours, in the bottom-left corner
+/// of the box at `(x, y)` of height `h` (0075).
+fn paint_legend(
+    model: &MapModel,
+    fonts: &Fonts,
+    (x, y, h): (f32, f32, f32),
+    z: f32,
+    window: &mut Window,
+    cx: &mut App,
+) {
+    let mut regions: Vec<Region> =
+        model.destinations.iter().map(|d| d.region).collect();
+    regions.sort();
+    regions.dedup();
+    if regions.len() < 2 {
+        return;
+    }
+    let size = (11.0 * z).clamp(10.0, 13.0);
+    let line = size * 1.6;
+    let left = x + 18.0;
+    let mut row = y + h - 18.0 - line * regions.len() as f32;
+    for region in regions {
+        let hue = theme::region(region);
+        let mid = row + line / 2.0;
+        let mut path = PathBuilder::stroke(px(2.0));
+        path.move_to(point(px(left), px(mid)));
+        path.line_to(point(px(left + 16.0), px(mid)));
+        if let Ok(path) = path.build() {
+            window.paint_path(path, alpha(hue, 0.95));
+        }
+        let label = Label {
+            text: region.label().into(),
+            at: Pt::new(left + 24.0, mid - size * 0.65),
+            side: LabelSide::Right,
+            color: color(theme::TEXT_LABEL).into(),
+            size,
+            bold: false,
+            family: fonts.sans.clone(),
+        };
+        let shaped = shape(&label, window);
+        let _ = shaped.paint(
+            pt(label.at),
+            px(size * 1.3),
+            TextAlign::Left,
+            None,
+            window,
+            cx,
+        );
+        row += line;
+    }
 }

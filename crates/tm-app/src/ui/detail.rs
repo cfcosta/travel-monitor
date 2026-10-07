@@ -25,6 +25,7 @@ use super::{
 use crate::{
     data::{ActivityRow, RouteDetail, RouteRow, Snapshot},
     format,
+    geo::Region,
     grid::{CalendarDay, Tone},
     live::Fresh,
     theme::{self, Fonts, color},
@@ -412,6 +413,10 @@ impl TravelMonitor {
                                 lon: d.lon as f32,
                                 lat: d.lat as f32,
                             },
+                            region: Region::of(
+                                &d.country.0,
+                                Some(o.country.0.as_str()),
+                            ),
                             deal: row.status.is_deal(),
                             selected: true,
                         }],

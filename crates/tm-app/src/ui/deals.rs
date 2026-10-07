@@ -29,6 +29,7 @@ use super::{
 use crate::{
     data::{RouteDetail, RouteRow},
     format,
+    geo::Region,
     grid::{GridCell, TripGrid},
     live::Fresh,
     theme::{self, Fonts, color},
@@ -307,6 +308,7 @@ impl TravelMonitor {
         let Some(s) = &self.snapshot else {
             return div().id("deals-map-pane");
         };
+        let home = s.origin_place().map(|p| p.country.0.as_str());
         let origin = s.origin_place().map(|p| MapPlace {
             code: p.code.clone().into(),
             lon: p.lon as f32,
@@ -334,6 +336,7 @@ impl TravelMonitor {
                     lon: d.lon as f32,
                     lat: d.lat as f32,
                 },
+                region: Region::of(&d.country.0, home),
                 deal: row.status.is_deal(),
                 selected,
             });

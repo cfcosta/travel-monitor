@@ -1128,3 +1128,17 @@ edge.
   size. Arcs, labels and dots keep their sizes while zoomed.
 - The Routes header and the route card show fixed globes facing their
   routes.
+
+## 0075: Arcs are coloured by region
+
+- Date: 2026-10-07
+- Refines [0074](#0074-the-map-is-a-globe).
+
+Each arc takes the colour of its destination's region, from the
+destination's country: domestic (the origin's own country), South
+America, Central America & Caribbean (with Mexico), North America,
+Europe, Africa & Middle East, Asia and Oceania, with a grey for any
+country not listed. A legend in the map's bottom-left corner names the
+regions on screen. Yellow is kept out of the palette: a deal's arc is
+its region's colour, brighter and thicker, ending in a yellow dot, and
+the selected route stays yellow.

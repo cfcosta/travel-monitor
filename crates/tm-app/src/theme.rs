@@ -56,10 +56,24 @@ pub const OCEAN: u32 = 0x0A1428;
 /// The glow around the globe's rim.
 pub const ATMOSPHERE: u32 = 0x4F8FC0;
 pub const ARC_DEAL: u32 = 0x8A6F2E;
-pub const ARC: u32 = 0x2F5C7A;
-pub const DOT: u32 = 0x6FA3C4;
 pub const LABEL_DEAL: u32 = 0xE9D9A8;
 pub const LABEL: u32 = 0x7F9FB8;
+
+/// Arc colours by region (0075); yellow stays for deals.
+pub fn region(region: crate::geo::Region) -> u32 {
+    use crate::geo::Region;
+    match region {
+        Region::Domestic => 0x4FD1C5,
+        Region::SouthAmerica => 0x86D46B,
+        Region::CentralAmerica => 0xE58FD8,
+        Region::NorthAmerica => 0x5B9DF5,
+        Region::Europe => 0xA78BFA,
+        Region::AfricaMiddleEast => 0xF28C5B,
+        Region::Asia => 0xF0607A,
+        Region::Oceania => 0xC9A27E,
+        Region::Other => 0x6B7A90,
+    }
+}
 
 // Sparklines and bars.
 pub const SPARK: u32 = 0x4F7EA0;

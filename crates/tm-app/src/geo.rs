@@ -252,6 +252,95 @@ pub fn great_arc(
         .collect()
 }
 
+/// The groups the map colours its arcs by (0075): the origin's own
+/// country, then the world's regions.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub enum Region {
+    Domestic,
+    SouthAmerica,
+    CentralAmerica,
+    NorthAmerica,
+    Europe,
+    AfricaMiddleEast,
+    Asia,
+    Oceania,
+    Other,
+}
+
+impl Region {
+    /// The region of `country` (ISO 3166 alpha-2) seen from `home`, the
+    /// origin's country: home is domestic.
+    pub fn of(country: &str, home: Option<&str>) -> Self {
+        const SOUTH: &[&str] = &[
+            "AR", "BO", "BR", "CL", "CO", "EC", "FK", "GF", "GY", "PE", "PY",
+            "SR", "UY", "VE",
+        ];
+        const CENTRAL: &[&str] = &[
+            "AG", "AI", "AW", "BB", "BL", "BM", "BQ", "BS", "BZ", "CR", "CU",
+            "CW", "DM", "DO", "GD", "GP", "GT", "HN", "HT", "JM", "KN", "KY",
+            "LC", "MF", "MQ", "MS", "MX", "NI", "PA", "PR", "SV", "SX", "TC",
+            "TT", "VC", "VG", "VI",
+        ];
+        const NORTH: &[&str] = &["CA", "GL", "PM", "US"];
+        const EUROPE: &[&str] = &[
+            "AD", "AL", "AM", "AT", "AZ", "BA", "BE", "BG", "BY", "CH", "CY",
+            "CZ", "DE", "DK", "EE", "ES", "FI", "FO", "FR", "GB", "GE", "GI",
+            "GR", "HR", "HU", "IE", "IS", "IT", "LI", "LT", "LU", "LV", "MC",
+            "MD", "ME", "MK", "MT", "NL", "NO", "PL", "PT", "RO", "RS", "RU",
+            "SE", "SI", "SK", "SM", "TR", "UA", "VA", "XK",
+        ];
+        const AFRICA_MIDDLE_EAST: &[&str] = &[
+            "AE", "AO", "BF", "BH", "BI", "BJ", "BW", "CD", "CF", "CG", "CI",
+            "CM", "CV", "DJ", "DZ", "EG", "EH", "ER", "ET", "GA", "GH", "GM",
+            "GN", "GQ", "GW", "IL", "IQ", "IR", "JO", "KE", "KM", "KW", "LB",
+            "LR", "LS", "LY", "MA", "MG", "ML", "MR", "MU", "MW", "MZ", "NA",
+            "NE", "NG", "OM", "PS", "QA", "RE", "RW", "SA", "SC", "SD", "SL",
+            "SN", "SO", "SS", "ST", "SY", "SZ", "TD", "TG", "TN", "TZ", "UG",
+            "YE", "YT", "ZA", "ZM", "ZW",
+        ];
+        const ASIA: &[&str] = &[
+            "AF", "BD", "BN", "BT", "CN", "HK", "ID", "IN", "JP", "KG", "KH",
+            "KP", "KR", "KZ", "LA", "LK", "MM", "MN", "MO", "MV", "MY", "NP",
+            "PH", "PK", "SG", "TH", "TJ", "TL", "TM", "TW", "UZ", "VN",
+        ];
+        const OCEANIA: &[&str] = &[
+            "AS", "AU", "CK", "FJ", "FM", "GU", "KI", "MH", "MP", "NC", "NR",
+            "NZ", "PF", "PG", "PW", "SB", "TO", "TV", "VU", "WS",
+        ];
+        let country = country.trim().to_ascii_uppercase();
+        if home.is_some_and(|h| h.eq_ignore_ascii_case(&country)) {
+            return Self::Domestic;
+        }
+        let groups: [(&[&str], Self); 7] = [
+            (SOUTH, Self::SouthAmerica),
+            (CENTRAL, Self::CentralAmerica),
+            (NORTH, Self::NorthAmerica),
+            (EUROPE, Self::Europe),
+            (AFRICA_MIDDLE_EAST, Self::AfricaMiddleEast),
+            (ASIA, Self::Asia),
+            (OCEANIA, Self::Oceania),
+        ];
+        groups
+            .iter()
+            .find(|(codes, _)| codes.contains(&country.as_str()))
+            .map_or(Self::Other, |(_, region)| *region)
+    }
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Domestic => "Domestic",
+            Self::SouthAmerica => "South America",
+            Self::CentralAmerica => "Central America & Caribbean",
+            Self::NorthAmerica => "North America",
+            Self::Europe => "Europe",
+            Self::AfricaMiddleEast => "Africa & Middle East",
+            Self::Asia => "Asia",
+            Self::Oceania => "Oceania",
+            Self::Other => "Elsewhere",
+        }
+    }
+}
+
 /// The great-circle distance between two points, in kilometres
 /// (haversine on a sphere of the Earth's mean radius). Used to rank
 /// trips by price per kilometre flown.
@@ -455,6 +544,65 @@ mod tests {
                 .all(|(v, _)| (v.length() - 1.0).abs() < 1e-4)
         );
         assert!(opposite[8].0.dot(Vec3::from_lon_lat(180.0, 0.0)) > 0.9999);
+    }
+
+    /// Every country on the watchlist has a region; home is domestic.
+    #[test]
+    fn countries_fall_in_regions() {
+        let watched = [
+            ("AE", Region::AfricaMiddleEast),
+            ("AR", Region::SouthAmerica),
+            ("AT", Region::Europe),
+            ("AU", Region::Oceania),
+            ("AW", Region::CentralAmerica),
+            ("BO", Region::SouthAmerica),
+            ("CA", Region::NorthAmerica),
+            ("CH", Region::Europe),
+            ("CL", Region::SouthAmerica),
+            ("CO", Region::SouthAmerica),
+            ("CR", Region::CentralAmerica),
+            ("CU", Region::CentralAmerica),
+            ("CW", Region::CentralAmerica),
+            ("CZ", Region::Europe),
+            ("DE", Region::Europe),
+            ("DO", Region::CentralAmerica),
+            ("EC", Region::SouthAmerica),
+            ("ES", Region::Europe),
+            ("FR", Region::Europe),
+            ("GB", Region::Europe),
+            ("GR", Region::Europe),
+            ("HK", Region::Asia),
+            ("ID", Region::Asia),
+            ("IE", Region::Europe),
+            ("IS", Region::Europe),
+            ("IT", Region::Europe),
+            ("JP", Region::Asia),
+            ("KR", Region::Asia),
+            ("MA", Region::AfricaMiddleEast),
+            ("MX", Region::CentralAmerica),
+            ("NL", Region::Europe),
+            ("NZ", Region::Oceania),
+            ("PA", Region::CentralAmerica),
+            ("PE", Region::SouthAmerica),
+            ("PT", Region::Europe),
+            ("PY", Region::SouthAmerica),
+            ("QA", Region::AfricaMiddleEast),
+            ("SG", Region::Asia),
+            ("TH", Region::Asia),
+            ("TR", Region::Europe),
+            ("US", Region::NorthAmerica),
+            ("UY", Region::SouthAmerica),
+            ("VE", Region::SouthAmerica),
+            ("ZA", Region::AfricaMiddleEast),
+        ];
+        for (country, region) in watched {
+            assert_eq!(Region::of(country, Some("BR")), region, "{country}");
+        }
+        assert_eq!(Region::of("BR", Some("BR")), Region::Domestic);
+        assert_eq!(Region::of("br", Some("BR")), Region::Domestic);
+        assert_eq!(Region::of("BR", None), Region::SouthAmerica);
+        assert_eq!(Region::of("AR", Some("AR")), Region::Domestic);
+        assert_eq!(Region::of("ZZ", Some("BR")), Region::Other);
     }
 
     #[test]

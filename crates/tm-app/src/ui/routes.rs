@@ -24,6 +24,7 @@ use super::{
 use crate::{
     data::{RouteRow, RowStatus, Snapshot, Tone},
     format,
+    geo::Region,
     theme::{self, Fonts, color},
 };
 
@@ -105,6 +106,7 @@ pub(super) fn small_map(
     fonts: &Fonts,
     labels: bool,
 ) -> impl IntoElement {
+    let home = s.origin_place().map(|p| p.country.0.as_str());
     let origin = s.origin_place().map(|p| MapPlace {
         code: p.code.clone().into(),
         lon: p.lon as f32,
@@ -127,6 +129,7 @@ pub(super) fn small_map(
                 lon: d.lon as f32,
                 lat: d.lat as f32,
             },
+            region: Region::of(&d.country.0, home),
             deal: row.status.is_deal(),
             selected: sel,
         });
