@@ -16,7 +16,14 @@
 //!   bot-manager cookie ([`is_tracker`]), which any visit sets, logged
 //!   in or not.
 //!
-//! This is a heuristic, with these limits:
+//! Sites whose session cookie a probe has named ([`KNOWN_SESSIONS`])
+//! are held to that cookie instead: LATAM's own cookies, set to any
+//! visitor, are persistent and not trackers, so the general rule would
+//! read every LATAM visit as a login (docs/research/sites/latam-pass.md,
+//! "Measuring cash against miles", §6). For those sites only the named
+//! cookie on its named host counts, still persistent and unexpired.
+//!
+//! The general rule is a heuristic, with these limits:
 //!
 //! - Any other persistent cookie counts: a site that keeps a
 //!   preference, or a tracker missing from the list, for a visitor who
@@ -64,10 +71,84 @@ impl StoredCookie {
         host == domain || host.ends_with(&format!(".{domain}"))
     }
 
-    /// Whether it counts toward a login at `now` (see the module docs).
+    /// Whether it counts toward a login at `now` under the general rule
+    /// (see the module docs).
     pub fn counts_as_login(&self, now: DateTime<Utc>) -> bool {
-        self.expires.is_some_and(|e| e > now) && !is_tracker(&self.name)
+        self.is_live(now) && !is_tracker(&self.name)
     }
+
+    /// Persistent and not expired at `now`.
+    fn is_live(&self, now: DateTime<Utc>) -> bool {
+        self.expires.is_some_and(|e| e > now)
+    }
+
+    /// Whether it is `session`'s cookie: the same name, on exactly the
+    /// session's host (a host-only cookie or a domain cookie of that
+    /// host).
+    pub fn is_session(&self, session: &SessionCookie) -> bool {
+        self.name == session.name
+            && self
+                .host
+                .trim_start_matches('.')
+                .eq_ignore_ascii_case(session.host)
+    }
+}
+
+/// The cookie that holds a site's login, found by a probe of the site.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SessionCookie {
+    /// The registrable domain the rule applies to, one of a program's
+    /// session domains (`tm_domain::miles_session_domains`).
+    pub domain: &'static str,
+    /// The host that sets it, without a leading dot.
+    pub host: &'static str,
+    pub name: &'static str,
+}
+
+/// Sites whose login cookie is known. For a site listed here, only that
+/// cookie means logged in (see the module docs).
+///
+/// - LATAM Pass: `_xp_session` on `www.latamairlines.com`, httpOnly,
+///   five days from the last page load. Auth0's own `auth0` cookie on
+///   `auth.latamairlines.com` lasts three days from the login and is
+///   not renewed by the site's pages, so it is not required; the
+///   site's pages read the login from `_xp_session`.
+pub const KNOWN_SESSIONS: &[SessionCookie] = &[SessionCookie {
+    domain: "latamairlines.com",
+    host: "www.latamairlines.com",
+    name: "_xp_session",
+}];
+
+/// The known session cookies of `domains` ([`KNOWN_SESSIONS`]); empty
+/// when none of them has one, and the general rule applies.
+pub fn known_sessions(domains: &[&str]) -> Vec<SessionCookie> {
+    KNOWN_SESSIONS
+        .iter()
+        .filter(|s| domains.iter().any(|d| d.eq_ignore_ascii_case(s.domain)))
+        .copied()
+        .collect()
+}
+
+/// The cookies among `cookies` that make a profile count as logged in to
+/// `domains` at `now`: the live known session cookies when the domains
+/// have one ([`known_sessions`]), else every cookie that passes the
+/// general rule ([`StoredCookie::counts_as_login`]).
+pub fn session_cookies(
+    cookies: Vec<StoredCookie>,
+    domains: &[&str],
+    now: DateTime<Utc>,
+) -> Vec<StoredCookie> {
+    let known = known_sessions(domains);
+    cookies
+        .into_iter()
+        .filter(|c| {
+            if known.is_empty() {
+                c.counts_as_login(now)
+            } else {
+                c.is_live(now) && known.iter().any(|s| c.is_session(s))
+            }
+        })
+        .collect()
 }
 
 /// Cookie names (or name prefixes) that any visit sets, logged in or
@@ -134,6 +215,18 @@ const TRACKERS: &[&str] = &[
     "_dd_s",
     "rdtrk",
     "__trf",
+    // Google Ads, FullStory, Medallia (Kampyle), Bloomreach (Exponea),
+    // ThreatMetrix: all set on LATAM's pages before any login.
+    "__gads",
+    "__gpi",
+    "__eoi",
+    "fs_uid",
+    "fs_lua",
+    "fs_cid",
+    "kampyle",
+    "__exponea",
+    "thx_guid",
+    "tmx_guid",
     // Consent banners (OneTrust, IAB TCF).
     "OptanonConsent",
     "OptanonAlertBoxClosed",
@@ -156,8 +249,9 @@ fn chromium_time(micros: i64) -> Option<DateTime<Utc>> {
     DateTime::from_timestamp_micros(micros - WINDOWS_TO_UNIX_MICROS)
 }
 
-/// The default profile's cookie files: `Network/Cookies` since Chromium
-/// 96, `Cookies` before.
+/// The default profile's cookie files: `Network/Cookies` where Chromium
+/// moved it (96 on, on most platforms), `Cookies` otherwise (the Linux
+/// Chromium 151 the daemon runs still writes `Default/Cookies`).
 fn cookie_files(user_data_dir: &Path) -> Vec<PathBuf> {
     let default = user_data_dir.join("Default");
     [
@@ -212,17 +306,18 @@ async fn read_cookies(file: &Path) -> sqlx::Result<Vec<StoredCookie>> {
 }
 
 /// The cookies that make the profile count as logged in to `domains`
-/// at `now` (see the module docs). Empty when it does not.
+/// at `now` (see the module docs and [`session_cookies`]). Empty when
+/// it does not.
 pub async fn login_cookies(
     user_data_dir: &Path,
     domains: &[&str],
     now: DateTime<Utc>,
 ) -> Result<Vec<StoredCookie>> {
-    Ok(stored_cookies(user_data_dir, domains)
-        .await?
-        .into_iter()
-        .filter(|c| c.counts_as_login(now))
-        .collect())
+    Ok(session_cookies(
+        stored_cookies(user_data_dir, domains).await?,
+        domains,
+        now,
+    ))
 }
 
 /// The Chromium profile directory of `site` (a [`tm_domain::Source::site`])
@@ -296,6 +391,135 @@ mod tests {
         }
     }
 
+    /// The LATAM cookies a visit leaves before any login, as the
+    /// `miles-latam_pass` profile held them on 2026-10-07
+    /// (docs/research/sites/fixtures/latam-pass/session-cookies.json):
+    /// host, name, days to expiry (`None`: a session cookie).
+    const LATAM_VISIT: &[(&str, &str, Option<i64>)] = &[
+        (".latamairlines.com", "_abck", Some(365)),
+        (".latamairlines.com", "bm_sz", Some(1)),
+        (".latamairlines.com", "bm_s", Some(31)),
+        (".latamairlines.com", "ak_bmsc", Some(1)),
+        (".latamairlines.com", "AKA_A2", Some(1)),
+        (".latamairlines.com", "_ga", Some(400)),
+        (".latamairlines.com", "_ga_0FQ5F9TMWN", Some(400)),
+        (".latamairlines.com", "_gcl_au", Some(90)),
+        (".latamairlines.com", "__gads", Some(390)),
+        (".latamairlines.com", "__gpi", Some(390)),
+        (".latamairlines.com", "__eoi", Some(180)),
+        (".latamairlines.com", "__exponea_etc__", Some(400)),
+        (".latamairlines.com", "fs_uid", Some(365)),
+        (".latamairlines.com", "_xp_exp_id", Some(400)),
+        (".latamairlines.com", "_xp_application_country", None),
+        (".latamairlines.com", "PIM-SESSION-ID", None),
+        (".www.latamairlines.com", "RT", Some(7)),
+        (".www.latamairlines.com", "bm_lso", Some(30)),
+        ("www.latamairlines.com", "_xp_show_login_incentive", Some(1)),
+        ("www.latamairlines.com", "_xp_metadata_br_pt", Some(7)),
+        ("www.latamairlines.com", "kampyle_userid", Some(365)),
+        ("www.latamairlines.com", "akavpau_CyberLatam", None),
+        ("auth.latamairlines.com", "did", Some(365)),
+        ("auth.latamairlines.com", "did_compat", Some(365)),
+        ("auth.latamairlines.com", "fpid-af", None),
+        ("loyaltyprogram.latam.com", "thx_guid", Some(400)),
+        ("loyaltyprogram.latam.com", "tmx_guid", Some(400)),
+    ];
+
+    /// A LATAM jar: [`LATAM_VISIT`] plus `extra`, at `now`.
+    fn latam_jar(
+        now: DateTime<Utc>,
+        extra: &[(&str, &str, Option<i64>)],
+    ) -> Vec<StoredCookie> {
+        LATAM_VISIT
+            .iter()
+            .chain(extra)
+            .map(|&(host, name, days)| {
+                cookie(
+                    host,
+                    name,
+                    days.map(|d| (now + TimeDelta::days(d)).timestamp_micros()),
+                )
+            })
+            .collect()
+    }
+
+    const LATAM: [&str; 2] = ["latamairlines.com", "latam.com"];
+
+    #[test]
+    fn the_general_rule_reads_a_latam_visit_as_a_login() {
+        // Why LATAM needs its named cookie: these pass the general rule.
+        let now = Utc::now();
+        let general: Vec<_> = latam_jar(now, &[])
+            .into_iter()
+            .filter(|c| c.counts_as_login(now))
+            .map(|c| c.name)
+            .collect();
+        assert!(general.contains(&"_xp_show_login_incentive".to_owned()));
+        assert!(general.contains(&"did".to_owned()));
+        // The trackers among them are not.
+        for tracker in ["__gads", "fs_uid", "kampyle_userid", "thx_guid"] {
+            assert!(!general.contains(&tracker.to_owned()), "{tracker}");
+        }
+    }
+
+    #[test]
+    fn latam_counts_only_its_session_cookie() {
+        let now = Utc::now();
+        assert_eq!(
+            known_sessions(&LATAM),
+            vec![SessionCookie {
+                domain: "latamairlines.com",
+                host: "www.latamairlines.com",
+                name: "_xp_session",
+            }]
+        );
+        assert!(known_sessions(&["smiles.com.br"]).is_empty());
+
+        // A visit, logged out.
+        assert!(session_cookies(latam_jar(now, &[]), &LATAM, now).is_empty());
+        // Auth0's login-domain session alone: the site's pages do not
+        // read it.
+        let auth0 = [("auth.latamairlines.com", "auth0", Some(3))];
+        assert!(
+            session_cookies(latam_jar(now, &auth0), &LATAM, now).is_empty()
+        );
+        // Logged in: `_xp_session` on www, five days.
+        let logged_in = [
+            ("auth.latamairlines.com", "auth0", Some(3)),
+            ("www.latamairlines.com", "_xp_session", Some(5)),
+        ];
+        let found = session_cookies(latam_jar(now, &logged_in), &LATAM, now);
+        assert_eq!(found.len(), 1, "{found:?}");
+        assert_eq!(found[0].name, "_xp_session");
+        assert_eq!(found[0].host, "www.latamairlines.com");
+        // Expired, or ending with the browser: logged out.
+        for days in [Some(-1), None] {
+            let jar = latam_jar(
+                now,
+                &[("www.latamairlines.com", "_xp_session", days)],
+            );
+            assert!(session_cookies(jar, &LATAM, now).is_empty(), "{days:?}");
+        }
+        // The same name on another host is not the session.
+        for host in [".latamairlines.com", "auth.latamairlines.com"] {
+            let jar = latam_jar(now, &[(host, "_xp_session", Some(5))]);
+            assert!(session_cookies(jar, &LATAM, now).is_empty(), "{host}");
+        }
+    }
+
+    #[test]
+    fn other_sites_keep_the_general_rule() {
+        let now = Utc::now();
+        let later = Some((now + TimeDelta::days(30)).timestamp_micros());
+        let jar = vec![
+            cookie(".smiles.com.br", "_abck", later),
+            cookie("www.smiles.com.br", "token", later),
+        ];
+        let found = session_cookies(jar, &["smiles.com.br"], now);
+        assert_eq!(found.len(), 1);
+        assert_eq!(found[0].name, "token");
+    }
+
     #[test]
     fn chromium_times_start_in_1601() {
         assert_eq!(chromium_time(0), None);
@@ -317,7 +541,7 @@ mod tests {
             .await
             .expect("create");
         sqlx::query(
-            "CREATE TABLE cookies (creation_utc INTEGER NOT NULL, \
+            "CREATE TABLE IF NOT EXISTS cookies (creation_utc INTEGER NOT NULL, \
              host_key TEXT NOT NULL, name TEXT NOT NULL, \
              value TEXT NOT NULL, encrypted_value BLOB NOT NULL, \
              path TEXT NOT NULL, expires_utc INTEGER NOT NULL, \
@@ -383,5 +607,29 @@ mod tests {
             .expect("read");
         assert_eq!(smiles.len(), 1);
         assert_eq!(smiles[0].name, "token");
+
+        // A persistent LATAM cookie that is not a tracker is still not a
+        // login; `_xp_session` is.
+        jar(
+            dir.path(),
+            &[("www.latamairlines.com", "_xp_show_login_incentive", later)],
+        )
+        .await;
+        assert!(
+            login_cookies(dir.path(), &domains, now)
+                .await
+                .expect("read")
+                .is_empty()
+        );
+        jar(
+            dir.path(),
+            &[("www.latamairlines.com", "_xp_session", later)],
+        )
+        .await;
+        let latam = login_cookies(dir.path(), &domains, now)
+            .await
+            .expect("read");
+        assert_eq!(latam.len(), 1);
+        assert_eq!(latam[0].name, "_xp_session");
     }
 }

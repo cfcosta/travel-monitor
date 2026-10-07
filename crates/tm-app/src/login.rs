@@ -13,8 +13,14 @@
 //! ([`tm_browser::profile_args`]), so the cookies it writes are the ones
 //! the daemon's Chromium can read. Once it closes, the profile's cookie
 //! jar says whether the login took ([`tm_browser::profile`] has the
-//! heuristic and its limits); the daemon checks the same jar when it
-//! resumes and records what it finds.
+//! rule and its limits: LATAM Pass counts only its `_xp_session` cookie,
+//! 0082); the daemon checks the same jar when it resumes and records
+//! what it finds.
+//!
+//! The window is a normal headed Chromium on the person's desktop, the
+//! kind LATAM's bot protection lets through. Browsing a little in it
+//! (accepting cookies, a search) warms the profile the daemon's
+//! offscreen Chromium then uses (0081).
 
 use std::{
     path::{Path, PathBuf},
@@ -22,7 +28,7 @@ use std::{
 };
 
 use anyhow::{Context as _, bail};
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use gpui::Context;
 
 use crate::{
@@ -106,8 +112,10 @@ pub fn login_url(program: &str) -> &'static str {
 /// What the profile holds for a program once the login window closed.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Session {
-    /// A cookie that counts as a login is there.
-    Found,
+    /// A cookie that counts as a login is there, lasting until `until`
+    /// (the latest of them). LATAM renews its cookie on every page load,
+    /// so its date moves on while the daemon checks.
+    Found { until: Option<DateTime<Utc>> },
     /// None is: the login did not take, or its cookies end with the
     /// browser.
     Missing,
@@ -119,7 +127,11 @@ impl Session {
     /// The toast after a login attempt for `name` (`"LATAM Pass"`).
     pub fn message(&self, name: &str) -> String {
         match self {
-            Session::Found => format!("{name}: logged in"),
+            Session::Found { until: None } => format!("{name}: logged in"),
+            Session::Found { until: Some(until) } => format!(
+                "{name}: logged in (session until {})",
+                until.format("%-d %b %H:%M UTC")
+            ),
             Session::Missing => {
                 format!("{name}: no session found \u{2014} try again")
             }
@@ -144,7 +156,9 @@ pub async fn check_session(profile_dir: &Path, program: &str) -> Session {
                 .map(|c| format!("{}:{}", c.host, c.name))
                 .collect();
             tracing::info!(%program, ?names, "login cookies found");
-            Session::Found
+            Session::Found {
+                until: cookies.iter().filter_map(|c| c.expires).max(),
+            }
         }
         Err(error) => Session::Unknown(error.to_string()),
     }
@@ -329,6 +343,44 @@ mod tests {
         assert_eq!(
             Session::Missing.message("LATAM Pass"),
             "LATAM Pass: no session found \u{2014} try again"
+        );
+        let until = DateTime::parse_from_rfc3339("2026-10-12T18:48:36Z")
+            .expect("date")
+            .with_timezone(&Utc);
+        assert_eq!(
+            Session::Found { until: Some(until) }.message("LATAM Pass"),
+            "LATAM Pass: logged in (session until 12 Oct 18:48 UTC)"
+        );
+        assert_eq!(
+            Session::Found { until: None }.message("Smiles"),
+            "Smiles: logged in"
+        );
+    }
+
+    /// LATAM Pass logs in in its own profile, the one the daemon's
+    /// offscreen Chromium for `miles:latam_pass` opens (0062, 0081),
+    /// with the daemon's profile flags, in a visible window.
+    #[test]
+    fn latam_pass_opens_its_sites_profile() {
+        let c = LoginConfig::resolve(Some("/p".into()), Some("c".into()));
+        let args = c.args("latam_pass", login_url("latam_pass"));
+        assert_eq!(args[0], "--user-data-dir=/p/miles-latam_pass");
+        for flag in tm_browser::profile_args() {
+            assert!(args.iter().any(|a| a == flag), "{flag} missing");
+        }
+        assert!(!args.iter().any(|a| a.starts_with("--headless")));
+        assert!(
+            login_url("latam_pass")
+                .starts_with("https://www.latamairlines.com/")
+        );
+        // Only `_xp_session` on www counts for its domains (0082).
+        let domains = tm_domain::miles_session_domains("latam_pass");
+        assert_eq!(
+            tm_browser::profile::known_sessions(domains)
+                .iter()
+                .map(|s| (s.host, s.name))
+                .collect::<Vec<_>>(),
+            vec![("www.latamairlines.com", "_xp_session")]
         );
     }
 
