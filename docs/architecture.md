@@ -84,13 +84,39 @@ Everything about Google Flights that is not driving a browser.
 - `plan`: how many price-graph pages cover a horizon (first page ~60
   days, then 21 per scroll).
 
+### tm-compositor
+
+A minimal offscreen Wayland compositor on the GPU render node (smithay,
+modelled on moonshine's), so a headed Chromium runs with no visible
+window (0081). One compositor per Chromium, on its own calloop thread.
+
+- `Compositor::start(CompositorConfig { size, refresh_hz, render_node })`
+  opens a render node (no DRM master or logind), offers a socket in
+  `$XDG_RUNTIME_DIR` (`wayland_display()`) and draws every window into a
+  GBM buffer nobody reads; `shutdown()` or drop stops it. Toplevels are
+  maximized at the output's size at the origin and get keyboard focus.
+- `Compositor::pointer() -> PointerHandle` (Clone + Send): the seat's
+  pointer, driven from any thread over a calloop channel (0091).
+  `move_to(x, y)` in output pixels (clamped), `press`/`release(Button)`
+  (left/right/middle), `scroll(dx, dy)` in wheel notches (15 px and 120
+  `value120` units each, wheel source), `position()`,
+  `is_over_window()`. Events are stamped with the monotonic clock when
+  sent. The loop gives pointer focus to the surface under the cursor
+  (the window's popups, subsurfaces or the window), so the client gets
+  enter, leave, motion, button, axis and frame as from a mouse; a
+  window that draws under a still cursor gets an enter at once. Popup
+  grabs are honoured (a click outside a menu closes it). The cursor
+  rests at the output's centre until moved. The keyboard gets no input.
+
 ### tm-browser
 
 Chromium and CDP, async (tokio + tokio-tungstenite).
 
-- `Chromium::launch(ChromiumConfig { binary, user_data_dir, headless,
+- `Chromium::launch(ChromiumConfig { binary, user_data_dir, display,
   port, window, extra_args })` → a process whose browser endpoint is
-  connected; `shutdown()`.
+  connected; `shutdown()`. `Display::Offscreen` starts a `tm-compositor`
+  first and runs Chromium headed on it (0081); `pointer()` is its
+  `PointerHandle`.
 - `Browser::connect(ws_url)`, `Browser::new_context(ContextOptions {
   proxy, locale, timezone })` (`Target.createBrowserContext`, so each
   point of sale or proxy gets isolated cookies, 0033).
@@ -101,6 +127,20 @@ Chromium and CDP, async (tokio + tokio-tungstenite).
   responses through the Network domain (request post data, status,
   body). `Capture::wait_for(n, timeout)`, `drain()`. This is how
   `GetCalendarGraph` & co. are read (0032).
+- `Mouse` (`Chromium::mouse()`, or `Mouse::new(pointer, seed)` for a
+  replayable one): `move_to(page, x, y)`, `hover(page, target)`,
+  `click(page, target)`, `scroll(page, notches)`, `wander_for(page,
+  duration)`, `wander_while(page, future)`; a target is a selector
+  (scrolled into view with the wheel, never `scrollIntoView`) or a
+  viewport `Rect`. On the offscreen display it moves the compositor's
+  pointer; viewport CSS pixels map to output pixels from `outerWidth`
+  over the output width (the scale factor), `devicePixelRatio` (CSS to
+  output) and `outerHeight − innerHeight` (the tab strip and toolbar
+  above the viewport). Elsewhere it sends the same paths as CDP
+  `Input.dispatchMouseEvent`. The movement model is `motion`: pure,
+  seeded functions for paths (cubic Bézier, overshoot and correction,
+  minimum-jerk easing, Fitts's-law durations, 60–125 Hz with tremor),
+  click points, holds, wheel bursts and idle drifts (0091).
 - `profile`: a profile's cookie jar read while no Chromium runs on it
   (`login_cookies`, 0064), and `site_profile_dir(base, site)`: each
   site's profile is `<profile-dir>/<site slug>` (`google_flights`,
