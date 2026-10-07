@@ -137,11 +137,16 @@ reads while the daemon writes (0020, 0040).
 - Budgets and blocks (0039, 0060): `site_budgets` has one row per site
   (`start_budget`, `daily_budget` in force, `max_daily_budget`,
   `loads_today`, `day`, `last_ramp_at`). A site without a row starts
-  from its defaults: Google Flights from the settings' `daily_budget` and
-  `max_daily_budget`, any other site from `SiteLimits::OTHER` (300,
-  ramping to 1,000). `configure_site_budget` applies configured limits
-  (a changed start resets the budget in force; an unchanged one keeps
-  the ramp); `add_site_loads` counts one site's loads. Migration 0003
+  from its defaults (`Settings::default_limits`): Google Flights from
+  the settings' `daily_budget` and `max_daily_budget`, a miles program
+  from `SiteLimits::MILES` (40, ramping to 80; the app edits it, 0083),
+  LATAM's cash site from `SiteLimits::LATAM` (300, ramping to 1,000) and
+  any other site from `SiteLimits::OTHER` (1,200, ramping to 4,000;
+  0088). `configure_site_budget` applies configured limits (a changed
+  start resets the budget in force; an unchanged one keeps the ramp;
+  today's count is kept); at each start the daemon applies Google
+  Flights', each `--site-budget` and every other stored non-miles
+  site's defaults, so a new default reaches existing rows; `add_site_loads` counts one site's loads. Migration 0003
   turned the old single `budget` row into Google Flights' row and
   dropped the table. Block events are per site.
 - Exchange rates (0038). The heartbeat (process state, totals over the
@@ -230,7 +235,7 @@ A coordinator and one worker per site (0060, 0062).
 Flags: `--parallel` (default 3) is how many checks each site runs at
 once; `--budget`/`--max-budget` are Google Flights' start and maximum
 (the settings' `daily_budget`/`max_daily_budget`); `--site-budget
-airline:TP=300:1000` (repeatable) sets another site's; `--cdp-port` is
+airline:TP=1200:4000` (repeatable) sets another site's; `--cdp-port` is
 Google Flights' Chromium (other sites pick free ports). Sources: Google
 Flights (legs, round trips, Explore, booking pages) and TAP's booking
 site (0051). A check whose page does not produce what is expected ends

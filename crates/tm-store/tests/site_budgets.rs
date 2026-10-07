@@ -87,7 +87,7 @@ async fn the_old_budget_row_becomes_google_flights() {
         .expect("reads");
     assert_eq!(
         (tap.daily_budget, tap.max_daily_budget, tap.loads_today),
-        (300, 1000, 0)
+        (1200, 4000, 0)
     );
     store.close().await;
 
@@ -160,7 +160,7 @@ async fn each_site_counts_its_own_loads() {
         .expect("adds");
     assert_eq!(
         (tap.start_budget, tap.daily_budget, tap.max_daily_budget),
-        (300, 300, 1000)
+        (1200, 1200, 4000)
     );
     assert_eq!(tap.loads_today, 8);
     // A new day starts a new count, per site.
@@ -189,7 +189,7 @@ async fn each_site_counts_its_own_loads() {
     assert_eq!(sites, ["google_flights", "airline:TP"]);
 
     let ramped = SiteBudget {
-        daily_budget: 330,
+        daily_budget: 1320,
         last_ramp_at: Some(at(7, 1)),
         ..tap
     };

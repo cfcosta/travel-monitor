@@ -958,7 +958,7 @@ impl TravelMonitor {
                 div()
                     .text_size(px(12.))
                     .text_color(color(theme::TEXT_FAINT))
-                    .child("Each site has its own daily budget, ramp and backoff, and its own browser (0060, 0062). Google Flights' is set above (or by the daemon's --budget); a miles program's award loads are set in its block below (40 a day, at most 80, to start); other sites start at 300 loads a day and ramp to 1,000, or follow the daemon's --site-budget."),
+                    .child("Each site has its own daily budget, ramp and backoff, and its own browser (0060, 0062). Google Flights' is set above (or by the daemon's --budget); a miles program's award loads are set in its block below (40 a day, at most 80, to start); other sites start at 1,200 loads a day and ramp to 4,000 (LATAM's cash site at 300, ramping to 1,000), or follow the daemon's --site-budget."),
             );
 
         div()

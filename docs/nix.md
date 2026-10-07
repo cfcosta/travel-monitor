@@ -50,7 +50,7 @@ The options are documented in `nix/hm-module.nix`. The main ones:
 | `profileDir` | `$XDG_DATA_HOME/travel-monitor/chromium` |
 | `chromium.package` / `.headless` / `.port` | `pkgs.chromium` / `true` / `0` (free port) |
 | `budget.daily` / `budget.max` (Google Flights, 0060) | `30000` / `30000` (0077) |
-| `budget.sites` (other sites, `--site-budget`) | `{ }` (300, ramping to 1,000) |
+| `budget.sites` (other sites, `--site-budget`) | `{ }` (airlines 1,200, ramping to 4,000; LATAM 300 to 1,000; miles from the app; 0088) |
 | `logLevel` | `"info"` (`RUST_LOG`) |
 | `extraArgs`, `environment` | `[ ]`, `{ }` |
 

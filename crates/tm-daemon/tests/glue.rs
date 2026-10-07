@@ -717,7 +717,7 @@ async fn a_block_backs_off() {
     // The block is per site: TAP's legs on the route still run after it,
     // on TAP's own budget (0060).
     let tap = h.site_budget("airline:TP").await;
-    assert_eq!(tap.daily_budget, 300);
+    assert_eq!(tap.daily_budget, 1200);
     assert!(tap.loads_today > 0);
     assert_eq!(h.status("google_flights").await.state, "cooling down");
     assert_eq!(h.status("airline:TP").await.state, "idle");
@@ -1572,7 +1572,7 @@ async fn a_block_on_one_site_leaves_the_others_alone() {
     assert_eq!(blocks.len(), 1);
     assert_eq!(blocks[0].site, "airline:TP");
     let tap = h.site_budget("airline:TP").await;
-    assert_eq!(tap.daily_budget, 150);
+    assert_eq!(tap.daily_budget, 600, "halved from 1,200 (0088)");
     let google = h.site_budget("google_flights").await;
     assert_eq!(google.daily_budget, 20);
     assert_eq!(h.status("airline:TP").await.state, "cooling down");

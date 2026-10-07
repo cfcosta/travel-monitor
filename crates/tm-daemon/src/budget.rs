@@ -6,9 +6,10 @@
 //! loads today, its own +10%-a-day ramp and its own halving and cooldown
 //! on a block; spending or a block on one site never touches another.
 //! Google Flights starts from the settings' `daily_budget` and
-//! `max_daily_budget` (the `--budget` and `--max-budget` flags), every
-//! other site from [`SiteLimits::OTHER`] or `--site-budget`. The
-//! scheduler is unchanged: a site's limits become the `daily_budget`,
+//! `max_daily_budget` (the `--budget` and `--max-budget` flags), a
+//! miles program from [`SiteLimits::MILES`] or the app (0083), every
+//! other site from [`Settings::default_limits`] or `--site-budget`,
+//! applied again at each start (0088). The scheduler is unchanged: a site's limits become the `daily_budget`,
 //! `max_daily_budget` and `min_daily_budget` of a copy of the
 //! [`Params`] ([`site_params`]).
 //!
@@ -22,7 +23,7 @@ use std::collections::{BTreeMap, HashSet, VecDeque};
 
 use chrono::{DateTime, Local, NaiveDate, TimeDelta, Timelike, Utc};
 use rand::Rng;
-use tm_domain::{GOOGLE_FLIGHTS, Settings, SiteLimits};
+use tm_domain::{GOOGLE_FLIGHTS, Settings, SiteLimits, Source};
 use tm_scheduler::{BudgetState, Params, TickBudget};
 use tm_store::{SiteBudget, Store};
 
@@ -105,8 +106,13 @@ pub async fn apply_flags(
 
 /// Writes the configured limits into the sites' rows before their
 /// workers start: Google Flights' from the settings, then each
-/// `--site-budget`. A changed start resets that site's budget in force;
-/// an unchanged one keeps its ramp ([`Store::configure_site_budget`]).
+/// `--site-budget`, then every other stored site's defaults
+/// ([`Settings::default_limits`], 0088), so a new default reaches a
+/// site that already has a row. A miles program without a
+/// `--site-budget` is left alone: its limits are the user's, set in the
+/// app (0083). A changed start resets that site's budget in force; an
+/// unchanged one keeps its ramp; today's count is kept either way
+/// ([`Store::configure_site_budget`]).
 pub async fn configure_sites(
     store: &Store,
     settings: &Settings,
@@ -129,6 +135,22 @@ pub async fn configure_sites(
         store
             .configure_site_budget(site, *limits, today, now)
             .await?;
+    }
+    for row in store.site_budgets().await? {
+        let site = row.site.as_str();
+        let set_elsewhere = site == GOOGLE_FLIGHTS
+            || overrides.iter().any(|(s, _)| s == site)
+            || matches!(Source::from_site(site), Some(Source::Miles { .. }));
+        if !set_elsewhere {
+            store
+                .configure_site_budget(
+                    site,
+                    settings.default_limits(site),
+                    today,
+                    now,
+                )
+                .await?;
+        }
     }
     Ok(())
 }
@@ -505,7 +527,7 @@ mod tests {
                 .await
                 .expect("restores");
         assert_eq!(google.daily(at(6, 0), &params), 4800);
-        assert_eq!(tap.daily(at(6, 0), &params), 300);
+        assert_eq!(tap.daily(at(6, 0), &params), 1200);
         assert_eq!(tap.limits, SiteLimits::OTHER);
         assert_eq!(smiles.daily(at(6, 0), &params), 40);
 
@@ -522,7 +544,7 @@ mod tests {
         assert_eq!(google.daily(at(6, 2), &params), 2400);
         assert!(google.is_cooling(at(6, 3)));
         assert!(!tap.is_cooling(at(6, 3)));
-        assert_eq!(tap.daily(at(6, 3), &params), 300);
+        assert_eq!(tap.daily(at(6, 3), &params), 1200);
         let mut rng = StdRng::seed_from_u64(3);
         assert!(
             tap.tick(at(6, 3), 1, &params, &mut rng)
@@ -539,9 +561,9 @@ mod tests {
         assert_eq!(tap_again.loads_today, 3);
         let mut later = tap_again.clone();
         later.advance(at(9, 0), at(9, 0).date_naive(), &params);
-        assert!(later.daily(at(9, 0), &params) > 300);
+        assert!(later.daily(at(9, 0), &params) > 1200);
         later.advance(at(30, 0), at(30, 0).date_naive(), &params);
-        assert_eq!(later.daily(at(30, 0), &params), 1000);
+        assert_eq!(later.daily(at(30, 0), &params), 4000);
 
         // New limits from the settings reset a changed start only.
         assert!(!google.configure(settings.google_flights_limits(), at(6, 4)));
@@ -567,6 +589,73 @@ mod tests {
                 max: 6000
             }
         );
+    }
+
+    /// New defaults reach a site that already has a row, keeping
+    /// today's count (0088); a `--site-budget` still wins, and a miles
+    /// program keeps the limits the app set (0083).
+    #[tokio::test]
+    async fn a_start_brings_stored_sites_to_their_defaults() {
+        let store = Store::open_in_memory().await.expect("opens");
+        store.seed_defaults().await.expect("seeds");
+        let settings = store.settings().await.expect("reads");
+        let day = at(7, 0).date_naive();
+        let old = |site: &str, start, daily, max| SiteBudget {
+            site: site.into(),
+            start_budget: start,
+            daily_budget: daily,
+            max_daily_budget: max,
+            loads_today: 241,
+            day,
+            last_ramp_at: Some(at(6, 0)),
+        };
+        for row in [
+            old("airline:TP", 300, 330, 1000),
+            old("airline:AD", 300, 300, 1000),
+            old("airline:LA", 300, 330, 1000),
+            old("miles:latam_pass", 60, 60, 120),
+        ] {
+            store.save_site_budget(&row).await.expect("saves");
+        }
+        let overrides = [(
+            "airline:AD".to_owned(),
+            SiteLimits {
+                start: 300,
+                max: 1000,
+            },
+        )];
+        configure_sites(&store, &settings, &overrides, at(7, 19), day)
+            .await
+            .expect("configures");
+        let row = |site: &'static str| {
+            let store = store.clone();
+            async move {
+                store
+                    .site_budget(site)
+                    .await
+                    .expect("reads")
+                    .expect("a row")
+            }
+        };
+        let tap = row("airline:TP").await;
+        assert_eq!(
+            (tap.start_budget, tap.daily_budget, tap.max_daily_budget),
+            (1200, 1200, 4000)
+        );
+        assert_eq!((tap.loads_today, tap.day), (241, day));
+        assert_eq!(tap.last_ramp_at, Some(at(7, 19)), "the ramp restarts");
+        assert_eq!(row("airline:AD").await, old("airline:AD", 300, 300, 1000));
+        assert_eq!(row("airline:LA").await, old("airline:LA", 300, 330, 1000));
+        assert_eq!(
+            row("miles:latam_pass").await,
+            old("miles:latam_pass", 60, 60, 120)
+        );
+
+        // A second start with the same limits keeps TAP's ramp.
+        configure_sites(&store, &settings, &overrides, at(9, 0), day)
+            .await
+            .expect("configures");
+        assert_eq!(row("airline:TP").await, tap);
     }
 
     #[tokio::test]

@@ -104,10 +104,18 @@ pub struct SiteLimits {
 }
 
 impl SiteLimits {
-    /// Every site but Google Flights, until set otherwise (0060): 300
-    /// loads a day, ramping to 1,000. Google Flights' come from
-    /// [`crate::Settings`].
+    /// Every airline site but LATAM's, until set otherwise: 1,200 loads
+    /// a day, ramping to 4,000 (0088; 0060 had 300 and 1,000). Google
+    /// Flights' come from [`crate::Settings`].
     pub const OTHER: SiteLimits = SiteLimits {
+        start: 1200,
+        max: 4000,
+    };
+
+    /// LATAM's cash site, `airline:LA`: it runs on the user's own LATAM
+    /// Pass profile (0084), so it keeps 0060's 300 a day, ramping to
+    /// 1,000, until a live run shows more is safe (0088).
+    pub const LATAM: SiteLimits = SiteLimits {
         start: 300,
         max: 1000,
     };
@@ -226,7 +234,14 @@ mod tests {
                 max: 30_000
             }
         );
-        assert_eq!(s.default_limits("airline:TP"), SiteLimits::OTHER);
+        assert_eq!(
+            s.default_limits("airline:TP"),
+            SiteLimits {
+                start: 1200,
+                max: 4000
+            }
+        );
+        assert_eq!(s.default_limits("airline:LA"), SiteLimits::LATAM);
         assert_eq!(s.default_limits("miles:latam_pass"), SiteLimits::MILES);
     }
 }

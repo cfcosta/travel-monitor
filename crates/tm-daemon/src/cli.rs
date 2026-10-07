@@ -60,8 +60,10 @@ pub struct Cli {
     pub max_budget: Option<u32>,
 
     /// Another site's daily budget and its maximum, as
-    /// `site=start:max` (`airline:TP=300:1000`). Repeatable. Sites left
-    /// out start at 300 and ramp to 1,000 (0060).
+    /// `site=start:max` (`airline:TP=1200:4000`). Repeatable. Sites left
+    /// out start from their defaults (airlines 1,200 ramping to 4,000,
+    /// LATAM's 300 to 1,000, 0088); a miles program's are set in the app
+    /// (0083). Applied at each start, today's count kept.
     #[arg(long = "site-budget", value_name = "SITE=START:MAX", value_parser = parse_site_budget)]
     pub site_budgets: Vec<(String, SiteLimits)>,
 

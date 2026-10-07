@@ -1892,8 +1892,8 @@ mod tests {
         assert!(s.activity.iter().any(|a| a.id == query.0 && a.running));
         let loads: Vec<String> =
             s.daemon.budgets().filter_map(SiteRow::loads).collect();
-        assert_eq!(loads, ["Google 1,234/30,000", "TAP 40/300"]);
-        assert_eq!((s.daemon.loads_today, s.daemon.budget), (1274, 30_300));
+        assert_eq!(loads, ["Google 1,234/30,000", "TAP 40/1,200"]);
+        assert_eq!((s.daemon.loads_today, s.daemon.budget), (1274, 31_200));
         let paused: Vec<&str> =
             s.daemon.paused_sites().map(|r| r.label.as_str()).collect();
         assert_eq!(paused, ["Smiles"]);

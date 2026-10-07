@@ -220,11 +220,15 @@ in
           }
         );
         default = { };
-        example = literalExpression ''{ "airline:TP" = { daily = 300; max = 1000; }; }'';
+        example = literalExpression ''{ "airline:TP" = { daily = 1200; max = 4000; }; }'';
         description = ''
           Budgets of sites other than Google Flights, by site (`airline:TP`,
-          `miles:smiles`), passed as `--site-budget`. A site left out starts
-          at 300 page loads a day and ramps to 1,000 (DECISIONS.md 0060).
+          `miles:smiles`), passed as `--site-budget`. A site left out uses
+          its defaults: an airline starts at 1,200 page loads a day and
+          ramps to 4,000, LATAM (`airline:LA`) at 300 ramping to 1,000, and a
+          miles program follows the app's settings (40, at most 80, to
+          start). The daemon applies these at each start, keeping today's
+          count (DECISIONS.md 0060, 0083, 0088).
         '';
       };
     };
