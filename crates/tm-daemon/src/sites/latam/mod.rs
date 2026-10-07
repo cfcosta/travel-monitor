@@ -1,9 +1,10 @@
 //! LATAM Airlines (`airline:LA`) and LATAM Pass (`miles:latam_pass`) on
-//! `www.latamairlines.com` (DECISIONS.md 0081, 0082; research:
-//! `docs/research/sites/latam.md` and `latam-pass.md`). Pure: the
-//! results URL and the parser for the offers responses the results page
-//! makes. No reader runs yet; both sites need the offscreen display
-//! (0081), and LATAM Pass a login.
+//! `www.latamairlines.com` (DECISIONS.md 0081, 0082, 0084, 0085;
+//! research: `docs/research/sites/latam.md` and `latam-pass.md`). Pure:
+//! the results URL, the parsers for the responses the results page
+//! makes, and how a blocked or logged-out page looks.
+//! [`crate::sources::latam`] drives the page; [`dates`] chooses which
+//! departures a check reads and [`page`] holds the page scripts.
 //!
 //! - **Results URL** (`/br/pt/oferta-voos`): one search, cash or award
 //!   (`redemption=true`), one way or round trip. The page then calls
@@ -15,6 +16,9 @@
 //!   with the fare before taxes (`priceWithOutTax`) and the taxes in
 //!   BRL. A round trip is two calls: the outbound, then (after a brand
 //!   is chosen) the return with `outOfferId=<offer>`.
+//! - **Calendar** (`/bff/air-offers/v2/calendar…&extended=true`): two
+//!   months of the cheapest economy cash fare per day, cached and a few
+//!   percent high. It ranks dates and is never recorded (0053, 0085).
 //!
 //! Miles are the award fare before taxes × [`MILES_PER_BRL`], rounded,
 //! except for silent route discounts (× 0.95, × 0.92 seen); the award
@@ -22,11 +26,14 @@
 //! offers that bucket ([`pair_fares`], latam-pass.md "Measuring cash
 //! against miles").
 
+pub mod dates;
+pub mod page;
+
 use std::fmt::Write as _;
 
 use chrono::{NaiveDate, NaiveDateTime};
 use serde_json::Value;
-use tm_domain::{Cabin, Currency, Money, Passengers};
+use tm_domain::{Cabin, Currency, FamilyKind, Money, Passengers};
 
 /// LATAM's IATA code, as in `Source::Airline { code }`.
 pub const CODE: &str = "LA";
@@ -42,6 +49,15 @@ pub const BASE: &str = "https://www.latamairlines.com";
 pub const SEARCH_PATH: &str = "/bff/air-offers/v2/offers/search";
 /// The award offers call.
 pub const REDEMPTION_PATH: &str = "/bff/air-offers/v2/offers/search/redemption";
+/// The calendar call (the date strip's prices).
+pub const CALENDAR_PATH: &str = "/bff/air-offers/v2/calendar";
+/// What a check captures: every BFF call of the results page, offers
+/// and calendar alike.
+pub const CAPTURE: &str = "/bff/air-offers/v2/";
+/// The cookie that holds a LATAM Pass login on the site's own host,
+/// renewed by every page load (0082;
+/// `tm_browser::profile::KNOWN_SESSIONS`).
+pub const SESSION_COOKIE: &str = "_xp_session";
 
 /// Miles per BRL of award fare before taxes: R$ 0,0288 a mile, R$ 28,80
 /// per 1,000. 1,042 of 1,120 award brands probed on 2026-10-07 had
@@ -54,6 +70,50 @@ pub enum LatamError {
     Json(String),
     #[error("unexpected shape: {0}")]
     Shape(&'static str),
+}
+
+// ---------------------------------------------------------------------
+// What runs
+// ---------------------------------------------------------------------
+
+/// Why a LATAM family cannot be checked, if it cannot.
+///
+/// - Explore: LATAM has none.
+/// - Parties other than one adult: the page prices each passenger
+///   (latam.md §4), and storing per-person prices for a party would
+///   break 0036; multiplying them would be a guess, as for TAP (0053).
+pub fn unsupported(
+    kind: FamilyKind,
+    passengers: &Passengers,
+) -> Option<&'static str> {
+    match kind {
+        FamilyKind::Explore => Some("LATAM has no Explore"),
+        _ if *passengers != Passengers::default() => {
+            Some("LATAM's results price one passenger")
+        }
+        _ => None,
+    }
+}
+
+/// The airport LATAM is searched at for a place code. The results URL
+/// was only tested with airports (latam.md, open question 5), so a city
+/// is searched at its main airport for LATAM and its partners; other
+/// codes are passed as they are.
+pub fn airport(code: &str) -> &str {
+    match code {
+        "SAO" => "GRU",
+        "RIO" => "GIG",
+        "BUE" => "EZE",
+        "NYC" => "JFK",
+        "LON" => "LHR",
+        "PAR" => "CDG",
+        "ROM" => "FCO",
+        "MIL" => "MXP",
+        "WAS" => "IAD",
+        "TYO" => "NRT",
+        "SEL" => "ICN",
+        other => other,
+    }
 }
 
 // ---------------------------------------------------------------------
@@ -175,9 +235,27 @@ fn query_value<'a>(url: &'a str, key: &str) -> Option<&'a str> {
     })
 }
 
-/// Whether the page ended on LATAM's login (an award URL while logged
-/// out redirects to `auth.latamairlines.com/u/login/…`, latam-pass.md
-/// §1).
+/// The searched outbound date of an offers call (`outFrom`).
+pub fn out_from(url: &str) -> Option<NaiveDate> {
+    date_param(url, "outFrom")
+}
+
+/// The searched return date of an offers call (`inFrom`), for a round
+/// trip.
+pub fn in_from(url: &str) -> Option<NaiveDate> {
+    date_param(url, "inFrom")
+}
+
+fn date_param(url: &str, key: &str) -> Option<NaiveDate> {
+    let v = query_value(url, key)?;
+    NaiveDate::parse_from_str(v.get(..10)?, "%Y-%m-%d").ok()
+}
+
+/// Whether the page ended on LATAM's login: an award URL while logged
+/// out redirects to `auth.latamairlines.com/u/login/…` (latam-pass.md
+/// §1), and any page on the login host means the session is gone.
+/// Auth0's path (`/u/login`) on another host counts too, for a test
+/// server standing in for both.
 pub fn is_login_wall(url: &str) -> bool {
     let rest = url
         .strip_prefix("https://")
@@ -185,7 +263,49 @@ pub fn is_login_wall(url: &str) -> bool {
         .unwrap_or(url);
     let (host, path) = rest.split_once('/').unwrap_or((rest, ""));
     host.eq_ignore_ascii_case("auth.latamairlines.com")
-        && path.starts_with("u/login")
+        || path.starts_with("u/login")
+}
+
+// ---------------------------------------------------------------------
+// Blocks
+// ---------------------------------------------------------------------
+
+/// Akamai's "Access Denied" page in place of LATAM's, from the
+/// document's title and visible text (latam.md §5; the same page in
+/// Spanish, English and Portuguese).
+pub fn detect_block(title: &str, text: &str) -> Option<String> {
+    let title_l = title.trim().to_lowercase();
+    let text_l = text.to_lowercase();
+    if title_l.starts_with("access denied") {
+        return Some("Akamai Access Denied page".to_owned());
+    }
+    let denials = [
+        "for security reasons, we cannot grant you access",
+        "por razões de segurança, nâo é possível permitir seu acesso",
+        "por razões de segurança, não é possível permitir seu acesso",
+        "por motivos de seguridad, no pudimos permitir tu acceso",
+        "you don't have permission to access",
+    ];
+    denials
+        .iter()
+        .find(|d| text_l.contains(*d))
+        .map(|d| format!("Akamai denied the page (\"{d}\")"))
+}
+
+/// A captured BFF call that Akamai answered instead of LATAM: the
+/// headed Xvfb probe got 403 with the "Access Denied" page on
+/// `offers/search` (latam.md, "Headed Chromium in a virtual display").
+pub fn blocked_response(url: &str, status: Option<u16>) -> Option<String> {
+    let call = if OffersCall::of(url).is_some() {
+        "the offers search"
+    } else {
+        "a LATAM API call"
+    };
+    match status {
+        Some(403) => Some(format!("Akamai denied {call} (403)")),
+        Some(429) => Some(format!("LATAM rate-limited {call} (429)")),
+        _ => None,
+    }
 }
 
 // ---------------------------------------------------------------------
@@ -218,6 +338,16 @@ pub enum Price {
     Miles(i64),
 }
 
+impl Price {
+    /// Minor units of cash, or miles: what "cheapest" orders by.
+    pub fn amount(&self) -> i64 {
+        match self {
+            Price::Cash(m) => m.minor,
+            Price::Miles(m) => *m,
+        }
+    }
+}
+
 /// One itinerary × fare brand (`summary.brands[]`).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Fare {
@@ -240,6 +370,8 @@ pub struct Fare {
     /// The taxes, BRL.
     pub taxes: Option<Money>,
     pub seats: Option<u32>,
+    /// The site's own "few seats left" flag (`lowAvailability`).
+    pub low_seats: bool,
 }
 
 impl Fare {
@@ -302,6 +434,25 @@ impl Itinerary {
     pub fn departs(&self) -> Option<NaiveDateTime> {
         self.segments.first()?.departs
     }
+
+    /// The single carrier marketing every segment, or `"multi"`.
+    pub fn carrier(&self) -> Option<String> {
+        let first = &self.segments.first()?.carrier;
+        if self.segments.iter().all(|s| &s.carrier == first) {
+            Some(first.clone())
+        } else {
+            Some("multi".to_owned())
+        }
+    }
+
+    /// The cheapest fare of `cabin` on this itinerary, by miles or cash
+    /// price.
+    pub fn cheapest(&self, cabin: Cabin) -> Option<&Fare> {
+        self.fares
+            .iter()
+            .filter(|f| f.cabin == Some(cabin))
+            .min_by_key(|f| f.price.amount())
+    }
 }
 
 /// An offers response.
@@ -320,10 +471,7 @@ impl Offers {
             .iter()
             .flat_map(|i| i.fares.iter().map(move |f| (i, f)))
             .filter(|(_, f)| f.cabin == Some(cabin))
-            .min_by_key(|(_, f)| match &f.price {
-                Price::Cash(m) => m.minor,
-                Price::Miles(m) => *m,
-            })
+            .min_by_key(|(_, f)| f.price.amount())
     }
 }
 
@@ -427,6 +575,11 @@ fn parse_fare(b: &Value, split: Option<&Value>) -> Option<Fare> {
             .and_then(|s| s.get("count"))
             .and_then(Value::as_u64)
             .and_then(|n| u32::try_from(n).ok()),
+        low_seats: b
+            .get("seatsRemaining")
+            .and_then(|s| s.get("lowAvailability"))
+            .and_then(Value::as_bool)
+            .unwrap_or(false),
     })
 }
 
@@ -485,6 +638,81 @@ pub fn parse_offers(body: &str) -> Result<Offers, LatamError> {
         .and_then(|n| u32::try_from(n).ok())
         .unwrap_or(u32::try_from(itineraries.len()).unwrap_or(u32::MAX));
     Ok(Offers { total, itineraries })
+}
+
+// ---------------------------------------------------------------------
+// The calendar
+// ---------------------------------------------------------------------
+
+/// One day of the cash calendar: the cheapest economy fare LATAM cached
+/// for it, 2–5% above the live price (latam.md §3).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CalendarDay {
+    pub date: NaiveDate,
+    pub origin: String,
+    pub destination: String,
+    /// `travelType: ONEWAY`; a round trip's days are each leg's share.
+    pub one_way: bool,
+    /// `direction: OUTBOUND`.
+    pub outbound: bool,
+    /// `None` for a disabled day or one without a fare.
+    pub price: Option<Money>,
+}
+
+/// Whether a captured URL is the calendar with prices (`extended=true`;
+/// the call without it is the date picker's, always empty).
+pub fn is_calendar_url(url: &str) -> bool {
+    let path = url.split(['?', '#']).next().unwrap_or(url);
+    path.trim_end_matches('/').ends_with(CALENDAR_PATH)
+        && query_value(url, "extended") == Some("true")
+}
+
+/// Parses a calendar response: `days[].calendar[]` (the date picker's
+/// call without `extended` answers the bare list), each a month of one
+/// direction with its `detailsCalendar[]`.
+pub fn parse_calendar(body: &str) -> Result<Vec<CalendarDay>, LatamError> {
+    let root = json(body)?;
+    let days = root
+        .get("days")
+        .and_then(Value::as_array)
+        .or_else(|| root.as_array())
+        .ok_or(LatamError::Shape("no days"))?;
+    let mut out = Vec::new();
+    for month in days
+        .iter()
+        .filter_map(|d| d.get("calendar").and_then(Value::as_array))
+        .flatten()
+    {
+        let origin = text(month, "origin").unwrap_or_default();
+        let destination = text(month, "destination").unwrap_or_default();
+        let one_way = text(month, "travelType").as_deref() == Some("ONEWAY");
+        let outbound = text(month, "direction").as_deref() != Some("INBOUND");
+        for d in month
+            .get("detailsCalendar")
+            .and_then(Value::as_array)
+            .map(Vec::as_slice)
+            .unwrap_or_default()
+        {
+            let Some(date) = d
+                .get("date")
+                .and_then(Value::as_str)
+                .and_then(|s| NaiveDate::parse_from_str(s, "%Y-%m-%d").ok())
+            else {
+                continue;
+            };
+            let enabled =
+                d.get("enabled").and_then(Value::as_bool) != Some(false);
+            out.push(CalendarDay {
+                date,
+                origin: origin.clone(),
+                destination: destination.clone(),
+                one_way,
+                outbound,
+                price: d.get("fare").and_then(money).filter(|_| enabled),
+            });
+        }
+    }
+    Ok(out)
 }
 
 // ---------------------------------------------------------------------
@@ -565,6 +793,8 @@ pub fn pair_fares(award: &Offers, cash: &Offers) -> Vec<FarePair> {
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
+
+    use chrono::Datelike as _;
 
     use super::*;
 
@@ -882,6 +1112,126 @@ mod tests {
         let one_ways = miles(&ow_out, "LA8198") + miles(&ow_back, "LA8199");
         assert_eq!(round, 144_134);
         assert_eq!(one_ways, 224_676);
+    }
+
+    fn raw(name: &str) -> String {
+        let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../docs/research/sites/fixtures")
+            .join(name);
+        std::fs::read_to_string(&path)
+            .unwrap_or_else(|e| panic!("{}: {e}", path.display()))
+    }
+
+    #[test]
+    fn the_calendar_is_two_months_of_cached_days() {
+        let days = parse_calendar(&raw(
+            "latam/calendar-ow-gru-lis-2026-11-extended.json",
+        ))
+        .expect("parses");
+        assert!(days.iter().all(|d| d.one_way && d.outbound));
+        assert!(
+            days.iter()
+                .all(|d| d.origin == "GRU" && d.destination == "LIS")
+        );
+        let nov10 = days
+            .iter()
+            .find(|d| d.date == day(2026, 11, 10))
+            .expect("Nov 10");
+        // The cached figure, 4.6% above the live R$1,913.39.
+        assert_eq!(nov10.price, Some(brl_minor(200_141)));
+        assert!(days.iter().any(|d| d.date.month() == 12));
+        let rt = parse_calendar(&raw(
+            "latam/calendar-rt-gru-mia-2027-03-extended.json",
+        ))
+        .expect("parses");
+        assert!(rt.iter().all(|d| !d.one_way));
+        assert!(rt.iter().any(|d| !d.outbound));
+        assert!(
+            parse_calendar(&raw(
+                "latam/calendar-ow-gru-lis-2026-11-plain.json"
+            ))
+            .is_ok_and(|d| d.iter().all(|d| d.price.is_none()))
+        );
+        let base = "https://www.latamairlines.com/bff/air-offers/v2/calendar";
+        assert!(is_calendar_url(&format!(
+            "{base}?origin=GRU&month=11&isRoundTrip=false&extended=true"
+        )));
+        assert!(!is_calendar_url(&format!("{base}?origin=GRU&month=11")));
+    }
+
+    #[test]
+    fn offers_calls_name_their_dates() {
+        let url = "https://www.latamairlines.com/bff/air-offers/v2/offers/search/redemption\
+                   ?sort=RECOMMENDED&outOfferId=null&inFrom=null&origin=GRU\
+                   &destination=LIS&outFrom=2027-06-16&redemption=true";
+        assert_eq!(out_from(url), Some(day(2027, 6, 16)));
+        assert_eq!(in_from(url), None);
+        assert_eq!(
+            in_from("x/offers/search?outFrom=2027-03-04&inFrom=2027-03-11"),
+            Some(day(2027, 3, 11))
+        );
+    }
+
+    #[test]
+    fn akamai_denials_and_logins_are_told_apart() {
+        let html = raw("latam/headless-access-denied.html");
+        assert!(detect_block("Access Denied", "").is_some());
+        assert!(detect_block("", &html).is_some());
+        assert_eq!(
+            detect_block(
+                "Seleção de voos | LATAM Airlines",
+                "GRU LIS R$ 1.913"
+            ),
+            None
+        );
+        let search =
+            "https://www.latamairlines.com/bff/air-offers/v2/offers/search?x=1";
+        assert!(blocked_response(search, Some(403)).is_some());
+        assert!(blocked_response(search, Some(429)).is_some());
+        assert_eq!(blocked_response(search, Some(200)), None);
+        assert!(is_login_wall(
+            "https://auth.latamairlines.com/authorize/resume"
+        ));
+        assert!(is_login_wall(
+            "http://127.0.0.1:9/u/login/identifier?state=x"
+        ));
+    }
+
+    #[test]
+    fn one_adult_legs_and_round_trips_run() {
+        let one = Passengers::default();
+        let leg = FamilyKind::Leg {
+            leg: tm_domain::Leg::Return,
+        };
+        assert_eq!(unsupported(leg, &one), None);
+        assert_eq!(unsupported(FamilyKind::RoundTrip { days: 7 }, &one), None);
+        assert!(unsupported(FamilyKind::Explore, &one).is_some());
+        let two = Passengers { adults: 2, ..one };
+        assert!(unsupported(leg, &two).is_some());
+        assert_eq!(airport("SAO"), "GRU");
+        assert_eq!(airport("LIS"), "LIS");
+    }
+
+    #[test]
+    fn itineraries_name_their_carrier_and_seats() {
+        let award = fixture(
+            "latam-pass/offers-search-redemption-ow-gru-lis-2026-11-10-br.json",
+        );
+        let nonstop = award
+            .itineraries
+            .iter()
+            .find(|i| i.flights() == "LA8146")
+            .expect("LA8146");
+        assert_eq!(nonstop.carrier().as_deref(), Some("LA"));
+        let iberia = award
+            .itineraries
+            .iter()
+            .find(|i| i.flights() == "LA8066/IB533")
+            .expect("LA8066/IB533");
+        assert_eq!(iberia.carrier().as_deref(), Some("multi"));
+        let light = nonstop.cheapest(Cabin::Economy).expect("economy");
+        assert_eq!(light.brand_id, "SL");
+        assert_eq!((light.seats, light.low_seats), (Some(9), false));
     }
 
     #[test]
