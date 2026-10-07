@@ -73,7 +73,9 @@ pub struct ChromiumConfig {
     /// The profile directory. Only one Chromium can use it at a time.
     pub user_data_dir: PathBuf,
     pub display: Display,
-    /// The DevTools port. 0 lets the system pick a free one.
+    /// The DevTools port. 0 picks a free one at launch
+    /// ([`ChromiumConfig::with_free_port`]); Chromium itself is never
+    /// given 0.
     pub port: u16,
     /// Window size in pixels, width then height. Google's Explore page
     /// returns more destinations for a larger viewport.
@@ -106,6 +108,21 @@ impl ChromiumConfig {
                 Error::Launch(format!("{CHROMIUM_VAR} is not set"))
             })?;
         Ok(Self::new(binary, user_data_dir))
+    }
+
+    /// This configuration with port 0 replaced by a port that is free
+    /// now. Chromium treats `--remote-debugging-port=0` as a launch by an
+    /// automation tool and sets `navigator.webdriver` on every page;
+    /// with a fixed port, as a person debugging would pass, it does not
+    /// (Chromium 151, DECISIONS.md 0081). The port could be
+    /// taken before Chromium binds it; the launch then times out and the
+    /// next one picks another.
+    pub fn with_free_port(mut self) -> Result<Self> {
+        if self.port == 0 {
+            let listener = std::net::TcpListener::bind(("127.0.0.1", 0))?;
+            self.port = listener.local_addr()?.port();
+        }
+        Ok(self)
     }
 
     /// The command line, without the binary.
@@ -147,6 +164,7 @@ impl Chromium {
     /// Starts Chromium, waits for its DevTools endpoint and connects.
     /// For [`Display::Offscreen`], starts its compositor first.
     pub async fn launch(config: ChromiumConfig) -> Result<Self> {
+        let config = config.with_free_port()?;
         std::fs::create_dir_all(&config.user_data_dir)?;
         let compositor = match config.display {
             Display::Offscreen => Some(start_compositor(config.window).await?),
@@ -370,6 +388,42 @@ mod tests {
         assert!(!args.iter().any(|a| a.starts_with("--headless")));
         assert!(args.contains(&"--ozone-platform=wayland".to_owned()));
         assert_eq!(args[args.len() - 2], "--lang=pt-BR");
+    }
+
+    /// Port 0 makes Chromium set `navigator.webdriver`; a launch always
+    /// passes a real port, and a chosen one is kept.
+    #[test]
+    fn a_launch_never_passes_port_zero() {
+        let config = ChromiumConfig::new("/bin/chromium", "/tmp/profile")
+            .with_free_port()
+            .expect("a free port");
+        assert_ne!(config.port, 0);
+        let args = config.args();
+        assert!(
+            args.contains(&format!("--remote-debugging-port={}", config.port))
+        );
+        assert!(!args.iter().any(|a| a == "--remote-debugging-port=0"));
+        let mut fixed = ChromiumConfig::new("/bin/chromium", "/tmp/profile");
+        fixed.port = 9341;
+        assert_eq!(fixed.with_free_port().expect("kept").port, 9341);
+    }
+
+    /// Nothing on the command line marks the browser as automated.
+    #[test]
+    fn no_automation_flag_is_passed() {
+        for display in [Display::Headless, Display::Window, Display::Offscreen]
+        {
+            let mut config =
+                ChromiumConfig::new("/bin/chromium", "/tmp/profile");
+            config.display = display;
+            for arg in config.args() {
+                assert!(
+                    !arg.contains("automation")
+                        && !arg.starts_with("--remote-debugging-pipe"),
+                    "{arg}"
+                );
+            }
+        }
     }
 
     #[test]

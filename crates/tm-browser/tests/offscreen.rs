@@ -115,6 +115,9 @@ async fn a_headed_chromium_renders_offscreen_on_the_gpu() {
     assert_eq!(probe.visibility, "visible");
     assert_eq!(probe.screen, (1440, 1000));
     assert!(probe.fine_pointer && probe.hover, "{probe:?}");
+    // The launch picks a real DevTools port: with port 0 Chromium sets
+    // navigator.webdriver (ChromiumConfig::with_free_port).
+    assert!(!probe.webdriver, "navigator.webdriver is set");
 
     let shot = page.screenshot().await.expect("screenshot");
     assert!(shot.starts_with(b"\x89PNG"), "a PNG");
