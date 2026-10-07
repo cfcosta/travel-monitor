@@ -105,9 +105,10 @@ impl Default for Settings {
             horizon_days: 180,
             iof: 0.035,
             card_spread: 0.01,
-            // 0065: double 0058's 2400/6000. Google Flights only (0060).
-            daily_budget: 4800,
-            max_daily_budget: 12000,
+            // 0077: enough for a check every ~25 s all day (0065 had
+            // 4800/12000). Google Flights only (0060).
+            daily_budget: 30_000,
+            max_daily_budget: 30_000,
             max_interval_hours: 24 * 7,
             min_interval_hours: 6,
             random_share: 0.10,

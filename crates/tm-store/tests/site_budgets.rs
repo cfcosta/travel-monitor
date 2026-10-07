@@ -141,14 +141,14 @@ async fn each_site_counts_its_own_loads() {
         .site_budget_or_default(GOOGLE_FLIGHTS, date(10, 6))
         .await
         .expect("reads");
-    assert_eq!((gf.daily_budget, gf.max_daily_budget), (4800, 12000));
+    assert_eq!((gf.daily_budget, gf.max_daily_budget), (30_000, 30_000));
     assert!(store.site_budgets().await.expect("reads").is_empty());
 
     let b = store
         .add_site_loads(GOOGLE_FLIGHTS, 5, date(10, 6))
         .await
         .expect("adds");
-    assert_eq!((b.daily_budget, b.loads_today), (4800, 5));
+    assert_eq!((b.daily_budget, b.loads_today), (30_000, 5));
     let b = store
         .add_site_loads(GOOGLE_FLIGHTS, 7, date(10, 6))
         .await

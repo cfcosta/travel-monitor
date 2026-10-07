@@ -1170,3 +1170,28 @@ confirmed. It was option B of three drawn for the card:
   confirmed deals the cheapest seller; then Open in Google Flights,
   Check now and History. The full sellers table stays on the detail
   screen.
+
+## 0077: Google Flights checks every half minute, all day
+
+- Date: 2026-10-07
+- Refines [0065](#0065-fill-in-and-refresh-the-oldest-data-first-google-flights-doubles-again)
+  and [0039](#0039-the-page-load-budget-starts-conservative-and-ramps-up).
+
+Google Flights sat idle for minutes at a time. The daemon spends each
+site's daily budget evenly over the day, and 4,800 loads came to one
+8-load check every two to three minutes. The aim now is never to wait
+more than about 10 seconds between checks.
+
+- **Budget.** Google Flights starts at 30,000 page loads a day, which is
+  also its cap (it was 4,800 ramping to 12,000). That pays for a check
+  about every 25 seconds around the clock. A block still halves the
+  budget and cools the site down, and the ramp brings it back to 30,000.
+  The live database's settings were raised to match.
+- **Ticks every 10 seconds** instead of 60. Each tick releases its share
+  of the day's budget; at one tick a minute the checks ran in a burst
+  and the rest of the minute was idle.
+- **Pauses of 4–10 seconds** between one lane's checks instead of 4–15.
+
+With checks of about 15 seconds every ~25, the gaps stay under 10
+seconds while the budget lasts. Three lanes (0072) only matter when a
+tick has saved up enough for several checks.

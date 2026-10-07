@@ -1,6 +1,6 @@
 //! The daily page-load budget (DECISIONS.md 0039).
 //!
-//! - Start at `daily_budget` (4800 by default, DECISIONS.md 0065).
+//! - Start at `daily_budget` (30,000 by default, DECISIONS.md 0077).
 //! - Every full 24 hours without a block anywhere raises it by
 //!   `budget_ramp` (10%, at least one load), up to `max_daily_budget`.
 //! - A block (CAPTCHA, "unusual traffic", a block page) halves it, never
@@ -195,7 +195,7 @@ mod tests {
     use super::*;
 
     /// These tests were written around a 300-load start (0039); the
-    /// default is now 4800, capped at 12000 (0065).
+    /// default is now 30,000, capped there (0077).
     fn params_300() -> Params {
         Params {
             daily_budget: 300,

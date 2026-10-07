@@ -49,7 +49,7 @@ The options are documented in `nix/hm-module.nix`. The main ones:
 | `databasePath` | `$XDG_DATA_HOME/travel-monitor/tm.db` |
 | `profileDir` | `$XDG_DATA_HOME/travel-monitor/chromium` |
 | `chromium.package` / `.headless` / `.port` | `pkgs.chromium` / `true` / `0` (free port) |
-| `budget.daily` / `budget.max` (Google Flights, 0060) | `4800` / `12000` (0065) |
+| `budget.daily` / `budget.max` (Google Flights, 0060) | `30000` / `30000` (0077) |
 | `budget.sites` (other sites, `--site-budget`) | `{ }` (300, ramping to 1,000) |
 | `logLevel` | `"info"` (`RUST_LOG`) |
 | `extraArgs`, `environment` | `[ ]`, `{ }` |

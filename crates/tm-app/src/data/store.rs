@@ -1562,7 +1562,7 @@ mod tests {
                 next_check: None,
                 next_check_at: None,
                 loads_today: 1274,
-                budget: 5100,
+                budget: 30_300,
             })
             .await
             .expect("beats");
@@ -1619,8 +1619,8 @@ mod tests {
         assert!(s.activity.iter().any(|a| a.id == query.0 && a.running));
         let loads: Vec<String> =
             s.daemon.budgets().filter_map(SiteRow::loads).collect();
-        assert_eq!(loads, ["Google 1,234/4,800", "TAP 40/300"]);
-        assert_eq!((s.daemon.loads_today, s.daemon.budget), (1274, 5100));
+        assert_eq!(loads, ["Google 1,234/30,000", "TAP 40/300"]);
+        assert_eq!((s.daemon.loads_today, s.daemon.budget), (1274, 30_300));
         let paused: Vec<&str> =
             s.daemon.paused_sites().map(|r| r.label.as_str()).collect();
         assert_eq!(paused, ["Smiles"]);

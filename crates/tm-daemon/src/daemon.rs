@@ -85,10 +85,10 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            tick: Duration::from_secs(60),
+            tick: Duration::from_secs(10),
             once: false,
             only: Only::default(),
-            pace: (4, 15),
+            pace: (4, 10),
             parallel: 3,
             jobs: JobOptions::default(),
             budget: None,

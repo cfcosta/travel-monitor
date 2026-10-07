@@ -69,8 +69,9 @@ pub struct Cli {
     #[arg(long)]
     pub once: bool,
 
-    /// Seconds between scheduler ticks.
-    #[arg(long, default_value_t = 60, value_name = "N")]
+    /// Seconds between scheduler ticks: each releases its share of the
+    /// day's budget, so short ticks keep checks evenly spaced (0077).
+    #[arg(long, default_value_t = 10, value_name = "N")]
     pub tick_seconds: u64,
 
     /// Only check this family (debugging).
@@ -92,7 +93,7 @@ pub struct Cli {
     pub parallel: u16,
 
     /// Seconds of random pause between page loads, as `min,max`.
-    #[arg(long, hide = true, default_value = "4,15", value_parser = parse_pace)]
+    #[arg(long, hide = true, default_value = "4,10", value_parser = parse_pace)]
     pub pace: (u64, u64),
 
     /// Replace `https://www.google.com` in generated URLs (tests).
@@ -238,8 +239,8 @@ mod tests {
         assert_eq!(cli.budget, Some(300));
         assert_eq!(cli.max_budget, Some(2000));
         assert!(!cli.once);
-        assert_eq!(cli.tick(), Duration::from_secs(60));
-        assert_eq!(cli.pace, (4, 15));
+        assert_eq!(cli.tick(), Duration::from_secs(10));
+        assert_eq!(cli.pace, (4, 10));
         assert_eq!(cli.parallel, 3);
     }
 

@@ -134,11 +134,11 @@ runCommand "travel-monitor-hm-module-check"
     has "$start" "--chromium /nix/store/"
     has "$start" "--headed"
     # Nothing else between the port, the budgets and the extra arguments.
-    has "$start" "--cdp-port 9333 --budget 120 --max-budget 12000 --site-budget 'airline:TP=300:1000' --extra"
+    has "$start" "--cdp-port 9333 --budget 120 --max-budget 30000 --site-budget 'airline:TP=300:1000' --extra"
 
     lacks "$defaultStart" "--headed"
     lacks "$defaultStart" "--site-budget"
-    has "$defaultStart" "--cdp-port 0 --budget 4800 --max-budget 12000"
+    has "$defaultStart" "--cdp-port 0 --budget 30000 --max-budget 30000"
 
     test -x "$activation/home-path/bin/tm" || fail "tm is not installed"
     test -x "$activation/home-path/bin/tmd" || fail "tmd is not installed"

@@ -190,7 +190,7 @@ in
     budget = {
       daily = mkOption {
         type = types.ints.positive;
-        default = 4800;
+        default = 30000;
         description = ''
           Google Flights' daily page-load budget to start from. It is raised
           step by step while no block is seen (DECISIONS.md 0039). Every
@@ -200,7 +200,7 @@ in
 
       max = mkOption {
         type = types.ints.positive;
-        default = 12000;
+        default = 30000;
         description = "The highest daily page-load budget Google Flights may ramp up to.";
       };
 

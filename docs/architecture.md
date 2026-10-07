@@ -182,7 +182,7 @@ A coordinator and one worker per site (0060, 0062).
   own `plan_tick` over the site's candidates with the site's budget.
   It runs up to three checks at once (`--parallel`, 0072), each on its
   own tab: it reloads, takes requests, and starts manual checks and
-  picks in turn (0071) on free lanes, each lane resting 4–15 s after
+  picks in turn (0071) on free lanes, each lane resting 4–10 s after
   its check. A check's fetch runs on a task of its own; when it lands,
   the worker writes observations, updates scheduler state, evaluates
   trips and confirms deals (Google Flights only), records blocks on its

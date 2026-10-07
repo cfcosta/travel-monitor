@@ -218,8 +218,8 @@ mod tests {
         assert_eq!(
             s.default_limits(GOOGLE_FLIGHTS),
             SiteLimits {
-                start: 4800,
-                max: 12000
+                start: 30_000,
+                max: 30_000
             }
         );
         assert_eq!(s.default_limits("airline:TP"), SiteLimits::OTHER);
