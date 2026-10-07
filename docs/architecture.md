@@ -228,23 +228,49 @@ A coordinator and one worker per site (0060, 0062).
   the program's profile for a session (0064) and lets the site run.
   Different sites run at the same time; a block, cooldown or login on
   one never slows another.
+- **LATAM** (0084, 0085): `airline:LA` and `miles:latam_pass` share
+  one worker, named for LATAM Pass (`sites::worker_site`), so one
+  headed offscreen Chromium on `miles-latam_pass` (the profile the user
+  logged in to and warmed), one budget (LATAM Pass's row, 40 a day to
+  80), one check at a time and 20–45 s between searches. A check loads
+  the results page in the profile's own context (not a point of sale's
+  isolated one) and reads the offers call the page makes
+  (`sources::latam`): cash, the cabin's cheapest brand for the date;
+  awards, every itinerary × brand of the cabin with miles, taxes, fare,
+  fare basis and seats. Award legs may click up to six days of the
+  page's date strip, each one more search, counted and spaced like a
+  load; a round trip chooses the cheapest outbound brand to make the
+  page price the return. Dates come from `sites::latam::dates`: the
+  cheapest cash day (Google Flights' legs, LATAM's own cash, the cached
+  calendar a page fetched, which is never recorded) not read in three
+  days, a weekly spot check, or every day, per the program's setting.
+  After each check the worker records the session cookie's end
+  (`_xp_session`); a login wall or a missing cookie expires LATAM Pass,
+  its award families wait (`Skip::LoggedOut`) and one "log in again"
+  notice is sent. Akamai's denial is a block. Award deals are judged
+  against their own series, recorded as candidates, confirmed by reading
+  the date again, and announced by this worker (Google Flights'
+  announces cash deals). "Check award" queues the trip's legs on it.
 - Shared state is the store. Fan-out and Explore hints raise other
   sites' families; a check re-reads its family's state just before
-  writing it, so a raise that lands while it runs is kept.
+  writing it, so a raise that lands while it runs is kept. A worker
+  re-reads its budget row's limits each tick, so the app's changes to a
+  program's daily loads are kept.
 
 Flags: `--parallel` (default 3) is how many checks each site runs at
 once; `--budget`/`--max-budget` are Google Flights' start and maximum
 (the settings' `daily_budget`/`max_daily_budget`); `--site-budget
 airline:TP=1200:4000` (repeatable) sets another site's; `--cdp-port` is
-Google Flights' Chromium (other sites pick free ports). Sources: Google
-Flights (legs, round trips, Explore, booking pages) and TAP's booking
-site (0051). A check whose page does not produce what is expected ends
+Google Flights' Chromium (other sites pick free ports);
+`--latam-origin` (hidden) points LATAM's URLs at a test server.
+Sources: Google Flights (legs, round trips, Explore, booking pages),
+TAP's booking site (0051) and LATAM's results page, cash and LATAM Pass
+awards (0085). A check whose page does not produce what is expected ends
 as `Unexpected` and is retried later. Other airline sites and miles
 programs have no reader and are skipped (0052, 0059); their workers only
-pause and resume for logins. `deals` has the award half ready for the
-LATAM Pass reader (`find_awards`, `select_awards`, `award_candidate`,
-`award_expired`), and `notify` words miles deals and "log in again"
-(0083); `CheckAward` requests are answered "no award reader yet".
+pause and resume for logins. `deals` judges award series
+(`find_awards`, `select_awards`, `award_candidate`, `award_expired`),
+and `notify` words miles deals and "log in again" (0083).
 
 ### tm-app (`tm`)
 
