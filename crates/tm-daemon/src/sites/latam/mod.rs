@@ -112,6 +112,13 @@ pub fn airport(code: &str) -> &str {
         "WAS" => "IAD",
         "TYO" => "NRT",
         "SEL" => "ICN",
+        // Metro codes whose letters are also a smaller airport's (0086).
+        "ORL" => "MCO",
+        "HOU" => "IAH",
+        "CHI" => "ORD",
+        "YTO" => "YYZ",
+        "YMQ" => "YUL",
+        "OSA" => "KIX",
         other => other,
     }
 }
@@ -1209,6 +1216,8 @@ mod tests {
         let two = Passengers { adults: 2, ..one };
         assert!(unsupported(leg, &two).is_some());
         assert_eq!(airport("SAO"), "GRU");
+        assert_eq!(airport("ORL"), "MCO");
+        assert_eq!(airport("HOU"), "IAH");
         assert_eq!(airport("LIS"), "LIS");
     }
 

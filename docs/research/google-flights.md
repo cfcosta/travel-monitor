@@ -253,3 +253,42 @@ origin taken from the user's location. No RPC is involved.
 
 **Explore streams too.** The business-class Explore response had 68
 destinations in its first payload and four more in four later payloads.
+
+## Which airports a city covers
+
+- Date: 2026-10-07
+- Method: the live database's Explore hints (no page load), and one
+  Explore page from each of nine cities (`q=Flights from Chicago`, …,
+  gl=BR, 15 s apart, a temporary profile). Used for DECISIONS.md 0086.
+
+A city in `tfs` and Explore is a Freebase ID, and Google decides which
+airports it groups. Explore shows it twice: a destination's entry names
+the airport it priced, so a city seen with two airports over several
+sweeps covers both; and Explore *from* a city prices each destination
+from whichever of the city's airports is cheapest, so the token labels
+(`MDW-LAS:…`) list the origin city's airports.
+
+| City (Freebase)              | Airports seen priced                | Seen in                    |
+| ---------------------------- | ----------------------------------- | -------------------------- |
+| Orlando `/m/0ply0`           | MCO, SFB                            | SAO sweeps (GRU→SFB, Arajet) |
+| Chicago `/m/01_d4`           | ORD (47), MDW (9)                   | Explore from Chicago       |
+| Houston `/m/03l2n`           | IAH (44), HOU (10)                  | Explore from Houston       |
+| Toronto `/m/0h7h6`           | YYZ (53), YTZ (3)                   | Explore from Toronto       |
+| Dallas `/m/0f2rq`            | DFW (48), DAL (7)                   | Explore from Dallas        |
+| Bangkok `/m/0fn2g`           | BKK (58), DMK (11)                  | Explore from Bangkok       |
+| Mexico City `/m/04sqj`       | MEX (52), NLU (6)                   | Explore from Mexico City   |
+| Taipei `/m/0ftkx`            | TPE (64), TSA (2)                   | Explore from Taipei        |
+| Osaka `/m/0dqyw`             | KIX, ITM                            | SAO sweeps                 |
+| Istanbul `/m/09949m`         | IST, SAW                            | SAO sweeps                 |
+| Montreal `/m/052p7`          | YUL, YHU                            | as a destination           |
+| Dubai `/m/01f08r`            | DXB, SHJ (Sharjah)                  | as a destination           |
+| Miami `/m/0f2v0`             | MIA, FLL                            | as a destination           |
+| Washington `/m/0rh6k`        | IAD, DCA, BWI                       | as a destination           |
+| San Francisco `/m/0d6lp`     | SFO only (55 of 55)                 | Explore from San Francisco |
+| Los Angeles `/m/030qb3t`     | LAX only (55 of 55)                 | Explore from Los Angeles   |
+
+Single airports seen for Venice (VCE), Melbourne (MEL), Seattle (SEA),
+Milan (MXP, already a city), Seoul (ICN) and others say nothing about
+their smaller airports: Explore shows one airport per destination per
+sweep. The origin's Freebase ID is in the request (`[[["/m/01_d4",4]]]`),
+which is how the IDs above were read.

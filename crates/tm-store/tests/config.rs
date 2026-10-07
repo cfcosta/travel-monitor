@@ -40,7 +40,7 @@ async fn seeds_once() {
     assert_eq!(sao.country.as_str(), "BR");
 
     let destinations = store.list_destinations(true).await.expect("lists");
-    assert_eq!(destinations.len(), 116);
+    assert_eq!(destinations.len(), 163);
     let lis = store
         .place_by_code("lis")
         .await
@@ -54,6 +54,29 @@ async fn seeds_once() {
         .expect("reads")
         .expect("TYO");
     assert_eq!(tyo.kind, PlaceKind::City { freebase_id: None });
+    // Metro areas whose airports Google groups are cities, seeded with
+    // the Freebase ID their searches use (0086).
+    for (code, id) in [
+        ("ORL", "/m/0ply0"),
+        ("CHI", "/m/01_d4"),
+        ("HOU", "/m/03l2n"),
+        ("YTO", "/m/0h7h6"),
+        ("OSA", "/m/0dqyw"),
+        ("TPE", "/m/0ftkx"),
+    ] {
+        let place = store
+            .place_by_code(code)
+            .await
+            .expect("reads")
+            .unwrap_or_else(|| panic!("{code} is seeded"));
+        assert_eq!(place.google_id(), Some(id), "{code}");
+    }
+    for gone in ["MCO", "ORD", "IAH", "YYZ", "YUL"] {
+        assert!(
+            store.place_by_code(gone).await.expect("reads").is_none(),
+            "{gone} is now part of a city"
+        );
+    }
 
     let poses = store.list_points_of_sale(true).await.expect("lists");
     let countries: Vec<_> = poses.iter().map(|p| p.country.as_str()).collect();
@@ -73,7 +96,7 @@ async fn seeds_once() {
     assert_eq!(programs, ["azul_fidelidade", "latam_pass", "smiles"]);
     assert!(miles.iter().all(|m| m.login_state == LoginState::LoggedOut));
 
-    assert_eq!(store.list_routes(true).await.expect("lists").len(), 116);
+    assert_eq!(store.list_routes(true).await.expect("lists").len(), 163);
     assert_eq!(store.sweep_routes(true).await.expect("lists").len(), 1);
 }
 
@@ -209,10 +232,10 @@ async fn routes_deactivate_and_come_back() {
 
     store.remove_destination(lis.id).await.expect("removes");
     assert!(store.config_version().await.expect("reads") > before);
-    assert_eq!(store.sync_routes().await.expect("syncs"), 115);
+    assert_eq!(store.sync_routes().await.expect("syncs"), 162);
     let r = store.route(lis_route).await.expect("reads").expect("kept");
     assert!(!r.active);
-    assert_eq!(store.list_routes(false).await.expect("lists").len(), 116);
+    assert_eq!(store.list_routes(false).await.expect("lists").len(), 163);
 
     store
         .add_destination(
@@ -221,7 +244,7 @@ async fn routes_deactivate_and_come_back() {
         )
         .await
         .expect("re-adds");
-    assert_eq!(store.sync_routes().await.expect("syncs"), 116);
+    assert_eq!(store.sync_routes().await.expect("syncs"), 163);
     assert_eq!(route(&store, "SAO", "LIS").await, lis_route);
     assert!(
         store
@@ -237,7 +260,7 @@ async fn routes_deactivate_and_come_back() {
         .add_origin(&NewPlace::airport("VCP", "Campinas", "BR", -23.0, -47.1))
         .await
         .expect("adds");
-    assert_eq!(store.sync_routes().await.expect("syncs"), 232);
+    assert_eq!(store.sync_routes().await.expect("syncs"), 326);
     let sweep = store
         .sweep_route(vcp.id)
         .await
@@ -248,7 +271,7 @@ async fn routes_deactivate_and_come_back() {
     assert_eq!(store.sweep_routes(true).await.expect("lists").len(), 2);
 
     store.remove_origin(vcp.id).await.expect("removes");
-    assert_eq!(store.sync_routes().await.expect("syncs"), 116);
+    assert_eq!(store.sync_routes().await.expect("syncs"), 163);
     assert_eq!(store.sweep_routes(true).await.expect("lists").len(), 1);
     assert_eq!(store.sweep_routes(false).await.expect("lists").len(), 2);
 }
@@ -547,6 +570,6 @@ async fn file_database_persists() {
     assert!(!store.seed_defaults().await.expect("already seeded"));
     assert_eq!(
         store.list_destinations(true).await.expect("lists").len(),
-        116
+        163
     );
 }

@@ -28,12 +28,21 @@ fn origin() -> NewPlace {
     NewPlace::city("SAO", "São Paulo", "BR", Some("/m/022pfm"), -23.55, -46.63)
 }
 
-/// The watchlist of 0006. Cities are IATA metropolitan codes; their
-/// Freebase IDs are learned when first needed (0041).
+/// The watchlist of 0006 and its additions. Cities are IATA
+/// metropolitan codes; their Freebase IDs are learned when first needed
+/// (0041) unless already known. A city covers every airport Google
+/// groups under it (Orlando: MCO and SFB), so a metro area with several
+/// airports is a city (0086).
 fn watchlist() -> Vec<NewPlace> {
     let a = NewPlace::airport;
     let c = |code, name, country, lat, lon| {
         NewPlace::city(code, name, country, None, lat, lon)
+    };
+    // A city whose Freebase ID is already known (0086): read from the
+    // live Explore sweeps or a `q=` page, so no load is spent learning
+    // it, and the airports Google groups under it were seen priced.
+    let k = |code, name, country, id, lat, lon| {
+        NewPlace::city(code, name, country, Some(id), lat, lon)
     };
     vec![
         // Brazil
@@ -81,7 +90,7 @@ fn watchlist() -> Vec<NewPlace> {
         a("MDZ", "Mendoza", "AR", -32.89, -68.83),
         // North America and Caribbean
         a("MIA", "Miami", "US", 25.76, -80.19),
-        a("MCO", "Orlando", "US", 28.54, -81.38),
+        k("ORL", "Orlando", "US", "/m/0ply0", 28.54, -81.38),
         c("NYC", "New York", "US", 40.71, -74.01),
         a("CUN", "Cancún", "MX", 21.16, -86.85),
         a("PUJ", "Punta Cana", "DO", 18.58, -68.40),
@@ -122,13 +131,13 @@ fn watchlist() -> Vec<NewPlace> {
         a("AUA", "Aruba", "AW", 12.50, -70.02),
         a("CUR", "Curaçao", "CW", 12.19, -68.96),
         a("HAV", "Havana", "CU", 23.11, -82.37),
-        a("MEX", "Mexico City", "MX", 19.43, -99.13),
+        k("MEX", "Mexico City", "MX", "/m/04sqj", 19.43, -99.13),
         // North America (0063)
         a("LAX", "Los Angeles", "US", 34.05, -118.24),
         a("SFO", "San Francisco", "US", 37.77, -122.42),
         a("LAS", "Las Vegas", "US", 36.17, -115.14),
         a("BOS", "Boston", "US", 42.36, -71.06),
-        a("ORD", "Chicago", "US", 41.88, -87.63),
+        k("CHI", "Chicago", "US", "/m/01_d4", 41.88, -87.63),
         // "Washington" alone resolves to the state; DC's ID is known.
         NewPlace::city(
             "WAS",
@@ -139,11 +148,11 @@ fn watchlist() -> Vec<NewPlace> {
             -77.04,
         ),
         a("ATL", "Atlanta", "US", 33.75, -84.39),
-        a("DFW", "Dallas", "US", 32.78, -96.80),
-        a("IAH", "Houston", "US", 29.76, -95.37),
+        k("DFW", "Dallas", "US", "/m/0f2rq", 32.78, -96.80),
+        k("HOU", "Houston", "US", "/m/03l2n", 29.76, -95.37),
         a("FLL", "Fort Lauderdale", "US", 26.12, -80.14),
-        a("YYZ", "Toronto", "CA", 43.65, -79.38),
-        a("YUL", "Montréal", "CA", 45.50, -73.57),
+        k("YTO", "Toronto", "CA", "/m/0h7h6", 43.65, -79.38),
+        k("YMQ", "Montréal", "CA", "/m/052p7", 45.50, -73.57),
         // Europe, Africa, Asia and Oceania (0063)
         c("MIL", "Milan", "IT", 45.46, 9.19),
         a("FRA", "Frankfurt", "DE", 50.11, 8.68),
@@ -153,7 +162,7 @@ fn watchlist() -> Vec<NewPlace> {
         a("VIE", "Vienna", "AT", 48.21, 16.37),
         a("PRG", "Prague", "CZ", 50.08, 14.44),
         a("ATH", "Athens", "GR", 37.98, 23.73),
-        a("IST", "Istanbul", "TR", 41.01, 28.98),
+        k("IST", "Istanbul", "TR", "/m/09949m", 41.01, 28.98),
         a("DUB", "Dublin", "IE", 53.35, -6.26),
         a("BER", "Berlin", "DE", 52.52, 13.40),
         a("CPT", "Cape Town", "ZA", -33.92, 18.42),
@@ -161,7 +170,7 @@ fn watchlist() -> Vec<NewPlace> {
         a("RAK", "Marrakech", "MA", 31.63, -8.01),
         a("DOH", "Doha", "QA", 25.29, 51.53),
         c("SEL", "Seoul", "KR", 37.57, 126.98),
-        a("BKK", "Bangkok", "TH", 13.76, 100.50),
+        k("BKK", "Bangkok", "TH", "/m/0fn2g", 13.76, 100.50),
         a("SIN", "Singapore", "SG", 1.35, 103.82),
         a("DPS", "Bali", "ID", -8.65, 115.22),
         a("HKG", "Hong Kong", "HK", 22.32, 114.17),
@@ -171,8 +180,59 @@ fn watchlist() -> Vec<NewPlace> {
         a("KEF", "Reykjavík", "IS", 64.15, -21.94),
         a("ANC", "Anchorage", "US", 61.22, -149.90),
         // Long-haul
-        a("DXB", "Dubai", "AE", 25.20, 55.27),
+        k("DXB", "Dubai", "AE", "/m/01f08r", 25.20, 55.27),
         c("TYO", "Tokyo", "JP", 35.68, 139.69),
+        // Europe (0086)
+        a("VCE", "Venice", "IT", 45.44, 12.32),
+        a("FLR", "Florence", "IT", 43.77, 11.26),
+        a("NCE", "Nice", "FR", 43.70, 7.27),
+        a("EDI", "Edinburgh", "GB", 55.95, -3.19),
+        a("BUD", "Budapest", "HU", 47.50, 19.04),
+        a("CPH", "Copenhagen", "DK", 55.68, 12.57),
+        a("MLA", "Malta", "MT", 35.90, 14.51),
+        a("JTR", "Santorini", "GR", 36.39, 25.46),
+        a("FNC", "Madeira", "PT", 32.65, -16.91),
+        a("PDL", "Azores", "PT", 37.74, -25.67),
+        a("SVQ", "Seville", "ES", 37.39, -5.98),
+        a("DBV", "Dubrovnik", "HR", 42.65, 18.09),
+        // Asia and the Indian Ocean (0086)
+        k("OSA", "Osaka", "JP", "/m/0dqyw", 34.69, 135.50),
+        k("TPE", "Taipei", "TW", "/m/0ftkx", 25.03, 121.57),
+        a("SGN", "Ho Chi Minh City", "VN", 10.82, 106.63),
+        a("HAN", "Hanoi", "VN", 21.03, 105.85),
+        a("HKT", "Phuket", "TH", 7.88, 98.39),
+        a("KUL", "Kuala Lumpur", "MY", 3.15, 101.69),
+        a("DEL", "Delhi", "IN", 28.61, 77.21),
+        a("BOM", "Mumbai", "IN", 19.08, 72.88),
+        a("MLE", "Maldives", "MV", 4.18, 73.51),
+        a("MRU", "Mauritius", "MU", -20.16, 57.50),
+        a("SEZ", "Seychelles", "SC", -4.62, 55.45),
+        // The Americas (0086)
+        a("HNL", "Honolulu", "US", 21.31, -157.86),
+        a("YVR", "Vancouver", "CA", 49.28, -123.12),
+        a("SEA", "Seattle", "US", 47.61, -122.33),
+        a("SAN", "San Diego", "US", 32.72, -117.16),
+        a("DEN", "Denver", "US", 39.74, -104.99),
+        a("MSY", "New Orleans", "US", 29.95, -90.07),
+        a("YYC", "Calgary", "CA", 51.05, -114.07),
+        a("TQO", "Tulum", "MX", 20.21, -87.47),
+        a("SJD", "Los Cabos", "MX", 23.06, -109.70),
+        a("SJU", "San Juan", "PR", 18.47, -66.11),
+        a("NAS", "Nassau", "BS", 25.05, -77.36),
+        a("MBJ", "Montego Bay", "JM", 18.47, -77.92),
+        a("PNT", "Puerto Natales", "CL", -51.73, -72.51),
+        a("LEC", "Lençóis", "BR", -12.56, -41.39),
+        // Africa, the Middle East and Oceania (0086)
+        a("TLV", "Tel Aviv", "IL", 32.09, 34.78),
+        a("AMM", "Amman", "JO", 31.95, 35.93),
+        a("CAI", "Cairo", "EG", 30.04, 31.24),
+        a("NBO", "Nairobi", "KE", -1.29, 36.82),
+        a("ZNZ", "Zanzibar", "TZ", -6.17, 39.20),
+        a("VFA", "Victoria Falls", "ZW", -17.93, 25.84),
+        a("MEL", "Melbourne", "AU", -37.81, 144.96),
+        a("ZQN", "Queenstown", "NZ", -45.03, 168.66),
+        a("PPT", "Tahiti", "PF", -17.54, -149.57),
+        a("NAN", "Fiji", "FJ", -17.80, 177.42),
     ]
 }
 
@@ -197,7 +257,7 @@ fn airlines() -> Vec<(&'static str, &'static str, Vec<&'static str>)> {
                 BRAZIL,
                 &[
                     "BUE", "SCL", "MVD", "LIM", "BOG", "BRC", "USH", "PUQ",
-                    "MIA", "MCO", "NYC", "CUN", "PUJ", "LIS", "MAD", "BCN",
+                    "MIA", "ORL", "NYC", "CUN", "PUJ", "LIS", "MAD", "BCN",
                     "LON", "ROM",
                 ],
             ),
@@ -205,7 +265,7 @@ fn airlines() -> Vec<(&'static str, &'static str, Vec<&'static str>)> {
         (
             "AD",
             "Azul",
-            with(BRAZIL, &["BUE", "MVD", "MCO", "LIS", "PAR"]),
+            with(BRAZIL, &["BUE", "MVD", "ORL", "LIS", "PAR"]),
         ),
         (
             "G3",
@@ -213,7 +273,7 @@ fn airlines() -> Vec<(&'static str, &'static str, Vec<&'static str>)> {
             with(
                 BRAZIL,
                 &[
-                    "BUE", "SCL", "MVD", "LIM", "BRC", "MIA", "MCO", "CUN",
+                    "BUE", "SCL", "MVD", "LIM", "BRC", "MIA", "ORL", "CUN",
                     "PUJ",
                 ],
             ),
@@ -224,9 +284,9 @@ fn airlines() -> Vec<(&'static str, &'static str, Vec<&'static str>)> {
         (
             "AA",
             "American Airlines",
-            vec!["MIA", "MCO", "NYC", "CUN", "PUJ"],
+            vec!["MIA", "ORL", "NYC", "CUN", "PUJ"],
         ),
-        ("UA", "United Airlines", vec!["NYC", "MIA", "MCO", "CUN"]),
+        ("UA", "United Airlines", vec!["NYC", "MIA", "ORL", "CUN"]),
         ("EK", "Emirates", vec!["DXB", "TYO"]),
         ("QR", "Qatar Airways", vec!["DXB", "TYO"]),
         ("TK", "Turkish Airlines", vec!["DXB", "TYO", "ROM"]),
@@ -296,6 +356,17 @@ impl Store {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn watchlist_codes_are_unique() {
+        let list = watchlist();
+        let mut codes: Vec<&str> =
+            list.iter().map(|p| p.code.as_str()).collect();
+        codes.sort_unstable();
+        codes.dedup();
+        assert_eq!(codes.len(), list.len());
+        assert_eq!(list.len(), 163);
+    }
 
     #[test]
     fn airline_destinations_are_on_the_watchlist() {
