@@ -1,6 +1,6 @@
-//! The night map's geometry (DECISIONS.md 0044, 0073): the Robinson
-//! projection fitted to a box, the user's zoom and pan over it, and the
-//! curved arcs from the origin.
+//! The night map's geometry (DECISIONS.md 0044, 0074): an orthographic
+//! globe that turns and zooms, arcs along great circles lifted off its
+//! surface, and the label and sparkline helpers of the screens.
 //!
 //! Pure functions on plain `f32` points, so they are tested without a
 //! window. The map view turns them into gpui paths.
@@ -22,382 +22,234 @@ impl Pt {
     }
 }
 
-/// A geographic window: west/east longitudes, north/south latitudes.
+/// A direction from the Earth's centre: x towards (0°E, 0°N), y
+/// towards (90°E, 0°N), z towards the north pole.
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct GeoWindow {
-    pub west: f32,
-    pub east: f32,
-    pub north: f32,
-    pub south: f32,
+pub struct Vec3 {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
 }
 
-impl GeoWindow {
-    /// The designs' crop: the Americas to Japan, the Arctic circle to
-    /// Patagonia (1000 × 434 in the mockups).
-    pub const DEFAULT: GeoWindow = GeoWindow {
-        west: -128.0,
-        east: 158.0,
-        north: 66.0,
-        south: -58.0,
-    };
-
-    #[cfg(test)]
-    pub fn width(&self) -> f32 {
-        self.east - self.west
-    }
-
-    #[cfg(test)]
-    pub fn height(&self) -> f32 {
-        self.north - self.south
-    }
-
-    /// This window grown to hold every `(lon, lat)` with `margin`
-    /// degrees around it, clamped to the globe.
-    pub fn including(
-        mut self,
-        points: impl IntoIterator<Item = (f32, f32)>,
-        margin: f32,
-    ) -> Self {
-        for (lon, lat) in points {
-            self.west = self.west.min(lon - margin);
-            self.east = self.east.max(lon + margin);
-            self.north = self.north.max(lat + margin);
-            self.south = self.south.min(lat - margin);
-        }
-        self.west = self.west.max(-180.0);
-        self.east = self.east.min(180.0);
-        self.north = self.north.min(85.0);
-        self.south = self.south.max(-85.0);
-        self
-    }
-}
-
-impl GeoWindow {
-    /// The smallest window holding every `(lon, lat)`, padded by
-    /// `margin` degrees and grown around its centre to at least
-    /// `min_width` × `min_height` degrees, clamped to the globe. `None`
-    /// when there are no points.
-    ///
-    /// The map fits this box rather than a fixed crop, so the routes
-    /// fill the panel at any window size and aspect ratio.
-    pub fn around(
-        points: impl IntoIterator<Item = (f32, f32)>,
-        margin: f32,
-        min_width: f32,
-        min_height: f32,
-    ) -> Option<Self> {
-        let mut it = points.into_iter();
-        let (lon, lat) = it.next()?;
-        let mut w = GeoWindow {
-            west: lon,
-            east: lon,
-            north: lat,
-            south: lat,
-        };
-        for (lon, lat) in it {
-            w.west = w.west.min(lon);
-            w.east = w.east.max(lon);
-            w.north = w.north.max(lat);
-            w.south = w.south.min(lat);
-        }
-        w.west -= margin;
-        w.east += margin;
-        w.north += margin;
-        w.south -= margin;
-        let grow = |lo: &mut f32, hi: &mut f32, min: f32| {
-            let extra = (min - (*hi - *lo)).max(0.0) / 2.0;
-            *lo -= extra;
-            *hi += extra;
-        };
-        grow(&mut w.west, &mut w.east, min_width);
-        grow(&mut w.south, &mut w.north, min_height);
-        w.west = w.west.max(-180.0);
-        w.east = w.east.min(180.0);
-        w.north = w.north.min(85.0);
-        w.south = w.south.max(-85.0);
-        Some(w)
-    }
-}
-
-/// Robinson's table (1974), every 5° of latitude from the equator to
-/// the pole: the parallel's length relative to the equator's, and its
-/// distance from the equator relative to the pole's.
-const ROBINSON_X: [f32; 19] = [
-    1.0000, 0.9986, 0.9954, 0.9900, 0.9822, 0.9730, 0.9600, 0.9427, 0.9216,
-    0.8962, 0.8679, 0.8350, 0.7986, 0.7597, 0.7186, 0.6732, 0.6213, 0.5722,
-    0.5322,
-];
-const ROBINSON_Y: [f32; 19] = [
-    0.0000, 0.0620, 0.1240, 0.1860, 0.2480, 0.3100, 0.3720, 0.4340, 0.4958,
-    0.5571, 0.6176, 0.6769, 0.7346, 0.7903, 0.8435, 0.8936, 0.9394, 0.9761,
-    1.0000,
-];
-
-/// The Robinson projection of `(lon, lat)` in degrees onto a plane, x
-/// east and y north, in units where a degree of longitude on the
-/// equator is 0.8487 (the equator is about 305.5 long, pole to pole
-/// about 155). Linear between the table's rows, which is closer than a
-/// 2° dot grid can show.
-pub fn robinson(lon: f32, lat: f32) -> Pt {
-    let a = lat.abs().min(90.0) / 5.0;
-    let i = (a.floor() as usize).min(17);
-    let t = a - i as f32;
-    let x = ROBINSON_X[i] + (ROBINSON_X[i + 1] - ROBINSON_X[i]) * t;
-    let y = ROBINSON_Y[i] + (ROBINSON_Y[i + 1] - ROBINSON_Y[i]) * t;
-    Pt::new(
-        0.8487 * x * lon,
-        1.3523 * y * 180.0 / std::f32::consts::PI * lat.signum(),
-    )
-}
-
-/// A box on the projected plane: west/east x, north/south y.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Plane {
-    pub west: f32,
-    pub east: f32,
-    pub north: f32,
-    pub south: f32,
-}
-
-impl Plane {
-    /// The smallest box holding every point of `window`: its meridians
-    /// are widest at the latitude nearest the equator.
-    pub fn of(window: &GeoWindow) -> Self {
-        let widest = 0.0_f32.clamp(window.south, window.north);
+impl Vec3 {
+    pub fn from_lon_lat(lon: f32, lat: f32) -> Self {
+        let (lon, lat) = (lon.to_radians(), lat.to_radians());
         Self {
-            west: robinson(window.west, widest).x,
-            east: robinson(window.east, widest).x,
-            north: robinson(0.0, window.north).y,
-            south: robinson(0.0, window.south).y,
+            x: lat.cos() * lon.cos(),
+            y: lat.cos() * lon.sin(),
+            z: lat.sin(),
         }
     }
 
-    /// The land data's extent: the map never shows sky past it.
-    pub fn globe() -> Self {
-        Self::of(&GeoWindow {
-            west: -180.0,
-            east: 180.0,
-            north: 84.0,
-            south: -88.0,
-        })
+    pub fn dot(self, o: Self) -> f32 {
+        self.x * o.x + self.y * o.y + self.z * o.z
     }
 
-    pub fn width(&self) -> f32 {
-        self.east - self.west
-    }
-
-    pub fn height(&self) -> f32 {
-        self.north - self.south
-    }
-}
-
-/// The Robinson projection of a [`GeoWindow`] into a box, keeping the
-/// plane's units square and centring the slack ("meet").
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Projection {
-    pub window: GeoWindow,
-    /// The window on the plane.
-    pub plane: Plane,
-    /// Pixels per plane unit.
-    pub scale: f32,
-    /// Where the plane's (west, north) lands.
-    pub origin: Pt,
-}
-
-impl Projection {
-    /// Fits `window` into the box at `(x, y)` of `width × height`.
-    pub fn fit(
-        window: GeoWindow,
-        x: f32,
-        y: f32,
-        width: f32,
-        height: f32,
-    ) -> Self {
-        let plane = Plane::of(&window);
-        let scale = (width / plane.width())
-            .min(height / plane.height())
-            .max(0.0);
-        let used_w = plane.width() * scale;
-        let used_h = plane.height() * scale;
+    fn scaled(self, k: f32) -> Self {
         Self {
-            window,
-            plane,
-            scale,
-            origin: Pt::new(
-                x + (width - used_w) / 2.0,
-                y + (height - used_h) / 2.0,
-            ),
+            x: self.x * k,
+            y: self.y * k,
+            z: self.z * k,
         }
     }
 
-    /// Slides the map inside the box `(x, y, width, height)` so its
-    /// slack never shows beyond the globe: when the box shows more than
-    /// the whole globe along an axis, the globe is centred on that axis;
-    /// otherwise an edge past a pole (or the date line) is pulled back to
-    /// it. The scale is kept, so the fitted window stays fully visible
-    /// whenever it can.
-    pub fn clamped_to_globe(
-        mut self,
-        x: f32,
-        y: f32,
-        width: f32,
-        height: f32,
-    ) -> Self {
-        if self.scale <= 0.0 {
+    fn plus(self, o: Self) -> Self {
+        Self {
+            x: self.x + o.x,
+            y: self.y + o.y,
+            z: self.z + o.z,
+        }
+    }
+
+    fn length(self) -> f32 {
+        self.dot(self).sqrt()
+    }
+
+    /// This direction at unit length; `None` for (nearly) zero.
+    fn normalized(self) -> Option<Self> {
+        let l = self.length();
+        (l > 1e-6).then(|| self.scaled(1.0 / l))
+    }
+
+    /// Longitude and latitude in degrees.
+    pub fn lon_lat(self) -> (f32, f32) {
+        (
+            self.y.atan2(self.x).to_degrees(),
+            self.z.clamp(-1.0, 1.0).asin().to_degrees(),
+        )
+    }
+}
+
+/// The least and most zoom over the fitted globe.
+pub const MIN_ZOOM: f32 = 0.6;
+pub const MAX_ZOOM: f32 = 12.0;
+
+/// Where the globe faces and how large it is drawn (0074).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct GlobeView {
+    /// The point at the centre of the disc.
+    pub lon: f32,
+    pub lat: f32,
+    /// Times the fitted size.
+    pub zoom: f32,
+}
+
+impl GlobeView {
+    /// Facing the middle of `points` (their mean direction), at the
+    /// fitted size. The latitude stays within ±60° so the globe never
+    /// opens on a pole.
+    pub fn facing(points: impl IntoIterator<Item = (f32, f32)>) -> Self {
+        let sum = points
+            .into_iter()
+            .map(|(lon, lat)| Vec3::from_lon_lat(lon, lat))
+            .fold(
+                Vec3 {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0,
+                },
+                Vec3::plus,
+            );
+        let (lon, lat) = sum.normalized().map_or((0.0, 0.0), Vec3::lon_lat);
+        Self {
+            lon,
+            lat: lat.clamp(-60.0, 60.0),
+            zoom: 1.0,
+        }
+    }
+
+    /// Turned by a drag of `dx, dy` pixels on a globe of `radius`
+    /// pixels: the surface follows the pointer.
+    pub fn rotated(self, dx: f32, dy: f32, radius: f32) -> Self {
+        if radius <= 0.0 {
             return self;
         }
-        let s = self.scale;
-        let globe = Plane::globe();
-        // Vertically: the top of the box shows `north + (origin.y − y)/s`.
-        let span = height / s;
-        let top = self.plane.north + (self.origin.y - y) / s;
-        let top = if span >= globe.height() {
-            globe.north + (span - globe.height()) / 2.0
-        } else {
-            top.min(globe.north).max(globe.south + span)
-        };
-        self.origin.y = y + (top - self.plane.north) * s;
-        // Horizontally: the left of the box shows `west − (origin.x − x)/s`.
-        let span = width / s;
-        let left = self.plane.west - (self.origin.x - x) / s;
-        let left = if span >= globe.width() {
-            globe.west - (span - globe.width()) / 2.0
-        } else {
-            left.max(globe.west).min(globe.east - span)
-        };
-        self.origin.x = x + (self.plane.west - left) * s;
-        self
-    }
-
-    /// `view` applied to this fitted map in the box `(x, y, width,
-    /// height)`, kept on the globe, with the view as it ends up once
-    /// kept there (a pan past the globe's edge is taken back).
-    pub fn viewed(
-        self,
-        view: View,
-        x: f32,
-        y: f32,
-        width: f32,
-        height: f32,
-    ) -> (Self, View) {
-        let c = Pt::new(x + width / 2.0, y + height / 2.0);
-        let mut p = self;
-        p.scale *= view.zoom;
-        p.origin = Pt::new(
-            c.x + (self.origin.x - c.x) * view.zoom + view.pan.x,
-            c.y + (self.origin.y - c.y) * view.zoom + view.pan.y,
-        );
-        let kept = p.clamped_to_globe(x, y, width, height);
-        let pan = Pt::new(
-            view.pan.x + kept.origin.x - p.origin.x,
-            view.pan.y + kept.origin.y - p.origin.y,
-        );
-        (
-            kept,
-            View {
-                zoom: view.zoom,
-                pan,
-            },
-        )
-    }
-
-    /// The least zoom that still fills the box `width × height` with
-    /// globe along one axis: zooming out further only adds empty sky.
-    pub fn min_zoom(&self, width: f32, height: f32) -> f32 {
-        let globe = Plane::globe();
-        if self.scale <= 0.0 {
-            return 1.0;
-        }
-        (width / (globe.width() * self.scale))
-            .max(height / (globe.height() * self.scale))
-            .min(1.0)
-    }
-
-    pub fn project(&self, lon: f32, lat: f32) -> Pt {
-        let p = robinson(lon, lat);
-        Pt::new(
-            self.origin.x + (p.x - self.plane.west) * self.scale,
-            self.origin.y + (self.plane.north - p.y) * self.scale,
-        )
-    }
-
-    /// Whether `(lon, lat)` lands inside the screen box
-    /// `(x, y, width, height)`: the window is only what must fit; the
-    /// slack around it shows more of the globe.
-    pub fn lands_in(
-        &self,
-        lon: f32,
-        lat: f32,
-        x: f32,
-        y: f32,
-        width: f32,
-        height: f32,
-    ) -> bool {
-        let p = self.project(lon, lat);
-        p.x >= x && p.x <= x + width && p.y >= y && p.y <= y + height
-    }
-
-    /// Whether `(lon, lat)` falls inside the window.
-    #[cfg(test)]
-    pub fn contains(&self, lon: f32, lat: f32) -> bool {
-        lon >= self.window.west
-            && lon <= self.window.east
-            && lat <= self.window.north
-            && lat >= self.window.south
-    }
-
-    /// How large the map is drawn relative to the designs' 1000-unit
-    /// width, for stroke widths and dot sizes.
-    pub fn zoom(&self) -> f32 {
-        self.plane.width() * self.scale / 1000.0
-    }
-}
-
-/// The deepest zoom over the fitted map.
-pub const MAX_ZOOM: f32 = 16.0;
-
-/// The user's zoom and pan over the fitted map (0073): `zoom` around
-/// the box's centre, then `pan` in pixels.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct View {
-    pub zoom: f32,
-    pub pan: Pt,
-}
-
-impl Default for View {
-    fn default() -> Self {
+        let lon = self.lon - (dx / radius).to_degrees();
         Self {
-            zoom: 1.0,
-            pan: Pt::new(0.0, 0.0),
-        }
-    }
-}
-
-impl View {
-    /// Zoomed by `factor` (within `min..=MAX_ZOOM`) keeping the point
-    /// under the screen point `at` where it is; `centre` is the centre
-    /// of the box the view applies in.
-    pub fn zoomed_at(self, factor: f32, at: Pt, centre: Pt, min: f32) -> Self {
-        let zoom = (self.zoom * factor).clamp(min.min(1.0), MAX_ZOOM);
-        // The fitted map's point under `at`, before and after.
-        let bx = centre.x + (at.x - self.pan.x - centre.x) / self.zoom;
-        let by = centre.y + (at.y - self.pan.y - centre.y) / self.zoom;
-        Self {
-            zoom,
-            pan: Pt::new(
-                at.x - centre.x - (bx - centre.x) * zoom,
-                at.y - centre.y - (by - centre.y) * zoom,
-            ),
-        }
-    }
-
-    /// Moved by `dx, dy` pixels.
-    pub fn dragged(self, dx: f32, dy: f32) -> Self {
-        Self {
+            lon: (lon + 540.0).rem_euclid(360.0) - 180.0,
+            lat: (self.lat + (dy / radius).to_degrees()).clamp(-85.0, 85.0),
             zoom: self.zoom,
-            pan: Pt::new(self.pan.x + dx, self.pan.y + dy),
         }
     }
+
+    /// Zoomed by `factor`, within [`MIN_ZOOM`]..=[`MAX_ZOOM`].
+    pub fn zoomed(self, factor: f32) -> Self {
+        Self {
+            zoom: (self.zoom * factor).clamp(MIN_ZOOM, MAX_ZOOM),
+            ..self
+        }
+    }
+}
+
+/// An orthographic globe in a box.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Globe {
+    pub view: GlobeView,
+    pub centre: Pt,
+    /// The disc's radius in pixels.
+    pub radius: f32,
+}
+
+impl Globe {
+    /// The fitted globe fills 90% of the box's shorter side; the view's
+    /// zoom scales that.
+    pub fn fit(
+        view: GlobeView,
+        x: f32,
+        y: f32,
+        width: f32,
+        height: f32,
+    ) -> Self {
+        Self {
+            view,
+            centre: Pt::new(x + width / 2.0, y + height / 2.0),
+            radius: (0.45 * width.min(height) * view.zoom).max(0.0),
+        }
+    }
+
+    /// Where the direction `v`, raised `altitude` radii above the
+    /// surface, lands on screen, and its depth: the cosine of its angle
+    /// from the facing point, positive on the near side.
+    pub fn place(&self, v: Vec3, altitude: f32) -> (Pt, f32) {
+        let (l0, p0) = (self.view.lon.to_radians(), self.view.lat.to_radians());
+        let facing = Vec3::from_lon_lat(self.view.lon, self.view.lat);
+        let east = Vec3 {
+            x: -l0.sin(),
+            y: l0.cos(),
+            z: 0.0,
+        };
+        let north = Vec3 {
+            x: -p0.sin() * l0.cos(),
+            y: -p0.sin() * l0.sin(),
+            z: p0.cos(),
+        };
+        let k = self.radius * (1.0 + altitude);
+        (
+            Pt::new(
+                self.centre.x + k * v.dot(east),
+                self.centre.y - k * v.dot(north),
+            ),
+            v.dot(facing),
+        )
+    }
+
+    /// Where `(lon, lat)` on the surface lands, or `None` on the far
+    /// side.
+    pub fn project(&self, lon: f32, lat: f32) -> Option<Pt> {
+        let (p, depth) = self.place(Vec3::from_lon_lat(lon, lat), 0.0);
+        (depth >= 0.0).then_some(p)
+    }
+
+    /// Whether a point placed at `p` with `depth` is in sight: on the
+    /// near side, or raised beyond the disc's rim.
+    pub fn in_sight(&self, p: Pt, depth: f32) -> bool {
+        depth >= 0.0 || p.distance(self.centre) > self.radius
+    }
+}
+
+/// `n + 1` points along the great circle from `a` to `b` (each
+/// `(lon, lat)`), each with its altitude: lifted in the middle by
+/// `lift` radii times the share of a half-turn the arc spans, so long
+/// flights rise higher. Opposite points take any of their circles.
+pub fn great_arc(
+    a: (f32, f32),
+    b: (f32, f32),
+    n: usize,
+    lift: f32,
+) -> Vec<(Vec3, f32)> {
+    let n = n.max(1);
+    let va = Vec3::from_lon_lat(a.0, a.1);
+    let vb = Vec3::from_lon_lat(b.0, b.1);
+    let cos = va.dot(vb).clamp(-1.0, 1.0);
+    let angle = cos.acos();
+    // The unit direction from `a` towards `b` along the circle.
+    let towards = vb
+        .plus(va.scaled(-cos))
+        .normalized()
+        .or_else(|| {
+            Vec3 {
+                x: -va.y,
+                y: va.x,
+                z: 0.0,
+            }
+            .normalized()
+            .or(Some(Vec3 {
+                x: 1.0,
+                y: 0.0,
+                z: 0.0,
+            }))
+        })
+        .unwrap_or(va);
+    let height = lift * angle / std::f32::consts::PI;
+    (0..=n)
+        .map(|i| {
+            let t = i as f32 / n as f32;
+            let v = va
+                .scaled((t * angle).cos())
+                .plus(towards.scaled((t * angle).sin()));
+            (v, height * (std::f32::consts::PI * t).sin())
+        })
+        .collect()
 }
 
 /// The great-circle distance between two points, in kilometres
@@ -411,36 +263,6 @@ pub fn great_circle_km(lat1: f64, lon1: f64, lat2: f64, lon2: f64) -> f64 {
     let h = (dp / 2.0).sin().powi(2)
         + p1.cos() * p2.cos() * (dl / 2.0).sin().powi(2);
     2.0 * EARTH_RADIUS_KM * h.sqrt().asin()
-}
-
-/// How far an arc bows out, as a share of its chord (the designs use
-/// 0.22).
-pub const BOW: f32 = 0.22;
-
-/// The control point of the quadratic arc from `from` to `to`: the
-/// chord's midpoint pushed `BOW × chord` along its normal, towards the
-/// top of the screen (north), so every arc bows the same way.
-pub fn arc_control(from: Pt, to: Pt) -> Pt {
-    let mid = Pt::new((from.x + to.x) / 2.0, (from.y + to.y) / 2.0);
-    let (dx, dy) = (to.x - from.x, to.y - from.y);
-    // (dy, −dx) is the chord's normal with the chord's own length, so
-    // BOW × normal is BOW × chord.
-    let (mut nx, mut ny) = (dy * BOW, -dx * BOW);
-    if ny > 0.0 || (ny == 0.0 && nx > 0.0) {
-        nx = -nx;
-        ny = -ny;
-    }
-    Pt::new(mid.x + nx, mid.y + ny)
-}
-
-/// A point of the quadratic Bézier `from → control → to` at `t`.
-#[cfg(test)]
-pub fn quad_point(from: Pt, control: Pt, to: Pt, t: f32) -> Pt {
-    let u = 1.0 - t;
-    Pt::new(
-        u * u * from.x + 2.0 * u * t * control.x + t * t * to.x,
-        u * u * from.y + 2.0 * u * t * control.y + t * t * to.y,
-    )
 }
 
 /// Where a destination's label goes: to the right of the dot when the
@@ -529,218 +351,110 @@ mod tests {
     }
 
     #[test]
-    fn robinson_follows_its_table() {
-        assert_eq!(robinson(0.0, 0.0), Pt::new(0.0, 0.0));
-        // The equator 0.8487 × 360 long, the pole 1.3523 radians up.
-        assert!((robinson(180.0, 0.0).x - 152.766).abs() < 1e-2);
-        assert!((robinson(0.0, 90.0).y - 77.481).abs() < 1e-2);
-        assert!((robinson(0.0, -90.0).y + 77.481).abs() < 1e-2);
-        // Row 45°: X 0.8962, Y 0.5571.
-        let p = robinson(100.0, 45.0);
-        assert!((p.x - 0.8487 * 0.8962 * 100.0).abs() < 1e-3, "{p:?}");
-        assert!((p.y - 1.3523 * 0.5571 * 57.29578).abs() < 1e-2, "{p:?}");
-        // Halfway between rows is halfway between their values.
-        let mid = robinson(10.0, 47.5).x;
-        let want = 0.8487 * (0.8962 + 0.8679) / 2.0 * 10.0;
-        assert!((mid - want).abs() < 1e-3);
-        // Parallels shorten towards the poles; the map is about twice as
-        // wide as it is tall.
-        assert!(robinson(180.0, 60.0).x < robinson(180.0, 30.0).x);
-        let globe = Plane::globe();
-        let whole =
-            robinson(180.0, 0.0).x * 2.0 / (robinson(0.0, 90.0).y * 2.0);
-        assert!((whole - 1.97).abs() < 0.01, "{whole}");
-        assert!(globe.width() > 0.0 && globe.height() > 0.0);
-    }
-
-    #[test]
-    fn fitting_keeps_units_square_and_centres() {
-        let w = GeoWindow::DEFAULT;
-        let plane = Plane::of(&w);
-        let p = Projection::fit(w, 10.0, 20.0, 2000.0, 434.0);
-        // Height-bound.
-        assert!((p.scale - 434.0 / plane.height()).abs() < 1e-3);
-        let used = plane.width() * p.scale;
-        assert!((p.origin.x - (10.0 + (2000.0 - used) / 2.0)).abs() < 1e-3);
-        assert!((p.origin.y - 20.0).abs() < 1e-3);
-        // The window's corners and places inside it land in the box.
+    fn directions_round_trip() {
         for (lon, lat) in [
-            (w.west, w.north),
-            (w.east, w.south),
+            (0.0, 0.0),
             (-46.63, -23.55),
             (139.69, 35.68),
+            (-150.0, 61.2),
         ] {
-            assert!(p.lands_in(lon, lat, 10.0, 20.0, 2000.0, 434.0));
+            let v = Vec3::from_lon_lat(lon, lat);
+            assert!((v.length() - 1.0).abs() < 1e-5);
+            let (lo, la) = v.lon_lat();
+            assert!(
+                (lo - lon).abs() < 1e-3 && (la - lat).abs() < 1e-3,
+                "{lon} {lat}"
+            );
         }
-        // North is up and east is right.
-        let sao = p.project(-46.63, -23.55);
-        let lis = p.project(-9.14, 38.72);
-        assert!(lis.x > sao.x && lis.y < sao.y);
     }
 
-    /// Zooming keeps the point under the cursor in place, and a view
-    /// pans no further than the globe's edge.
+    /// The facing point lands at the centre, north is up, east is
+    /// right, and the far side is hidden.
     #[test]
-    fn views_zoom_at_the_cursor_and_stay_on_the_globe() {
-        let w = GeoWindow {
-            west: -90.0,
-            east: 30.0,
-            north: 50.0,
-            south: -60.0,
+    fn the_globe_faces_its_view() {
+        let view = GlobeView {
+            lon: -46.63,
+            lat: -23.55,
+            zoom: 1.0,
         };
-        let (x, y, bw, bh) = (0.0, 0.0, 1200.0, 800.0);
-        let base =
-            Projection::fit(w, x, y, bw, bh).clamped_to_globe(x, y, bw, bh);
-        let centre = Pt::new(600.0, 400.0);
-        let lis = base.project(-9.14, 38.72);
-        let view = View::default().zoomed_at(3.0, lis, centre, 1.0);
-        assert!((view.zoom - 3.0).abs() < 1e-6);
-        let (zoomed, kept) = base.viewed(view, x, y, bw, bh);
-        assert!(close(zoomed.project(-9.14, 38.72), lis, 1e-2));
-        assert_eq!(kept, view, "inside the globe: nothing taken back");
-        assert!((zoomed.scale - base.scale * 3.0).abs() < 1e-3);
-        // Zoom is bounded both ways.
-        let deep = View::default().zoomed_at(1000.0, lis, centre, 1.0);
-        assert_eq!(deep.zoom, MAX_ZOOM);
-        let out = View::default().zoomed_at(0.01, lis, centre, 0.5);
-        assert_eq!(out.zoom, 0.5);
-        // Dragged far east, the date line stops at the box's right edge.
-        let (far, kept) = base.viewed(view.dragged(-1.0e6, 0.0), x, y, bw, bh);
-        assert!((far.project(180.0, 0.0).x - bw).abs() < 1e-1);
-        assert!(kept.pan.x > -1.0e6);
-        // And the fitted view is the plain projection.
-        let (same, _) = base.viewed(View::default(), x, y, bw, bh);
-        assert_eq!(same, base);
+        let g = Globe::fit(view, 0.0, 0.0, 1000.0, 600.0);
+        assert!((g.radius - 270.0).abs() < 1e-3);
+        let sao = g.project(-46.63, -23.55).expect("in front");
+        assert!(close(sao, Pt::new(500.0, 300.0), 1e-2), "{sao:?}");
+        let north = g.project(-46.63, 0.0).expect("in front");
+        assert!(north.y < sao.y && (north.x - sao.x).abs() < 1e-2);
+        let east = g.project(-30.0, -23.55).expect("in front");
+        assert!(east.x > sao.x);
+        // São Paulo's antipode, near Taiwan, is behind; Tokyo too.
+        assert_eq!(g.project(133.37, 23.55), None);
+        assert_eq!(g.project(139.69, 35.68), None);
+        // Every point in front lands inside the disc.
+        for (lon, lat) in [(-9.14, 38.72), (-80.0, 25.8), (18.4, -33.9)] {
+            let p = g.project(lon, lat).expect("in front");
+            assert!(p.distance(g.centre) <= g.radius + 1e-3);
+        }
+        // Raised past the rim, a point behind is still in sight.
+        let (p, depth) = g.place(Vec3::from_lon_lat(133.37 - 95.0, 23.55), 0.3);
+        assert!(depth < 0.0);
+        assert!(g.in_sight(p, depth));
+        // Zoom scales the disc.
+        let near = Globe::fit(view.zoomed(2.0), 0.0, 0.0, 1000.0, 600.0);
+        assert!((near.radius - 540.0).abs() < 1e-3);
     }
 
     #[test]
-    fn around_fits_the_points_with_a_minimum_size() {
-        assert_eq!(GeoWindow::around(std::iter::empty(), 5.0, 1.0, 1.0), None);
-        // SAO to Lisbon and Tokyo.
-        let w = GeoWindow::around(
-            [(-46.6, -23.5), (-9.1, 38.7), (139.7, 35.7)],
-            8.0,
-            60.0,
-            40.0,
-        )
-        .expect("points");
-        assert!((w.west - -54.6).abs() < 1e-3 && (w.east - 147.7).abs() < 1e-3);
+    fn views_face_the_middle_and_turn_with_a_drag() {
+        let v = GlobeView::facing([(-10.0, 0.0), (10.0, 0.0)]);
+        assert!(v.lon.abs() < 1e-3 && v.lat.abs() < 1e-3);
+        assert_eq!(v.zoom, 1.0);
+        // Never a pole, and something sensible with nothing to face.
+        assert_eq!(GlobeView::facing([(0.0, 89.0)]).lat, 60.0);
+        let none = GlobeView::facing(std::iter::empty());
+        assert_eq!((none.lon, none.lat), (0.0, 0.0));
+        // A drag right brings the west into view; down, the north.
+        let r = 300.0;
+        let turned = v.rotated(r * std::f32::consts::FRAC_PI_2, 0.0, r);
+        assert!((turned.lon - -90.0).abs() < 1e-3, "{turned:?}");
+        let up = v.rotated(0.0, 1000.0 * r, r);
+        assert_eq!(up.lat, 85.0);
+        // Longitude wraps.
+        let wrapped = GlobeView { lon: 170.0, ..v }.rotated(-r * 0.5, 0.0, r);
+        assert!(wrapped.lon < -150.0, "{wrapped:?}");
+        // Zoom is bounded.
+        assert_eq!(v.zoomed(1000.0).zoom, MAX_ZOOM);
+        assert_eq!(v.zoomed(0.0).zoom, MIN_ZOOM);
+    }
+
+    #[test]
+    fn arcs_follow_great_circles_and_rise_in_the_middle() {
+        let sao = (-46.63, -23.55);
+        let lis = (-9.14, 38.72);
+        let arc = great_arc(sao, lis, 32, 0.4);
+        assert_eq!(arc.len(), 33);
+        let (first, h0) = arc[0];
+        let (last, h1) = arc[32];
+        assert!(first.dot(Vec3::from_lon_lat(sao.0, sao.1)) > 0.99999);
+        assert!(last.dot(Vec3::from_lon_lat(lis.0, lis.1)) > 0.99999);
+        assert!(h0.abs() < 1e-6 && h1.abs() < 1e-6);
+        // On the sphere, evenly spaced, highest in the middle.
+        let step = arc[0].0.dot(arc[1].0);
+        for w in arc.windows(2) {
+            assert!((w[0].0.length() - 1.0).abs() < 1e-4);
+            assert!((w[0].0.dot(w[1].0) - step).abs() < 1e-4);
+        }
+        let top = arc.iter().map(|(_, h)| *h).fold(0.0, f32::max);
+        assert!((arc[16].1 - top).abs() < 1e-6);
+        // A longer flight rises higher.
+        let tyo = great_arc(sao, (139.69, 35.68), 32, 0.4);
+        assert!(tyo[16].1 > top);
+        // Opposite points still make an arc of unit points.
+        let opposite = great_arc((0.0, 0.0), (180.0, 0.0), 8, 0.4);
         assert!(
-            (w.north - 46.7).abs() < 1e-3 && (w.south - -31.5).abs() < 1e-3
+            opposite
+                .iter()
+                .all(|(v, _)| (v.length() - 1.0).abs() < 1e-4)
         );
-        // A single domestic route still gets a sensible box.
-        let w = GeoWindow::around(
-            [(-46.6, -23.5), (-37.1, -11.0)],
-            4.0,
-            60.0,
-            40.0,
-        )
-        .expect("points");
-        assert!((w.width() - 60.0).abs() < 1e-3);
-        assert!((w.height() - 40.0).abs() < 1e-3);
-    }
-
-    #[test]
-    fn a_tall_box_centres_the_globe_and_a_short_one_stops_at_the_poles() {
-        let w = GeoWindow {
-            west: -60.0,
-            east: 20.0,
-            north: 40.0,
-            south: -30.0,
-        };
-        // Width-bound in a box 2000 px tall: more than the whole globe
-        // shows vertically, so it is centred, with as much sky above as
-        // below.
-        let p = Projection::fit(w, 0.0, 0.0, 800.0, 2000.0)
-            .clamped_to_globe(0.0, 0.0, 800.0, 2000.0);
-        let top = p.project(0.0, 84.0).y;
-        let bottom = p.project(0.0, -88.0).y;
-        assert!(top > 0.0, "{top}");
-        assert!((top - (2000.0 - bottom)).abs() < 1e-2, "{top} {bottom}");
-        // A window near the pole in a box taller than it: the top edge
-        // is pulled back to the data's north.
-        let arctic = GeoWindow {
-            west: -60.0,
-            east: 20.0,
-            north: 80.0,
-            south: 40.0,
-        };
-        let p = Projection::fit(arctic, 0.0, 0.0, 800.0, 900.0)
-            .clamped_to_globe(0.0, 0.0, 800.0, 900.0);
-        assert!(p.project(0.0, 84.0).y.abs() < 1e-2);
-        // And the window itself is still on screen.
-        assert!(p.lands_in(-20.0, 60.0, 0.0, 0.0, 800.0, 900.0));
-    }
-
-    #[test]
-    fn slack_shows_more_globe() {
-        // A tall box: the window fits the width, and land above and
-        // below it still lands on screen.
-        let w = GeoWindow {
-            west: -60.0,
-            east: 20.0,
-            north: 40.0,
-            south: -30.0,
-        };
-        let p = Projection::fit(w, 0.0, 0.0, 800.0, 2000.0);
-        assert!(!p.contains(-40.0, 60.0));
-        assert!(p.lands_in(-40.0, 60.0, 0.0, 0.0, 800.0, 2000.0));
-        assert!(!p.lands_in(-100.0, 0.0, 0.0, 0.0, 800.0, 2000.0));
-    }
-
-    #[test]
-    fn including_grows_the_window() {
-        let w = GeoWindow::DEFAULT.including([(-157.9, 21.3)], 4.0);
-        assert!(w.west <= -161.9 && w.west >= -180.0);
-        assert_eq!(w.east, GeoWindow::DEFAULT.east);
-        let clamped = GeoWindow::DEFAULT.including([(179.0, 89.0)], 10.0);
-        assert_eq!(clamped.east, 180.0);
-        assert_eq!(clamped.north, 85.0);
-    }
-
-    /// Control points from the mockup: SAO → LIS bows to
-    /// (302.3, 175.6), SAO → MIA to (263.8, 201.1), SAO → BUE to
-    /// (255.4, 323.6).
-    #[test]
-    fn arcs_bow_north_like_the_mockup() {
-        let sao = Pt::new(284.6, 313.2);
-        let cases = [
-            (Pt::new(415.7, 95.5), Pt::new(302.3, 175.6)),
-            (Pt::new(167.1, 140.7), Pt::new(263.8, 201.1)),
-            (Pt::new(243.4, 352.1), Pt::new(255.4, 323.6)),
-            (Pt::new(936.0, 106.0), Pt::new(564.7, 66.3)),
-        ];
-        for (to, want) in cases {
-            let got = arc_control(sao, to);
-            assert!(close(got, want, 0.6), "{to:?}: {got:?} vs {want:?}");
-        }
-    }
-
-    #[test]
-    fn arc_control_is_above_the_chord_midpoint() {
-        let from = Pt::new(100.0, 100.0);
-        for to in [
-            Pt::new(200.0, 100.0),
-            Pt::new(0.0, 100.0),
-            Pt::new(100.0, 300.0),
-            Pt::new(250.0, -40.0),
-        ] {
-            let c = arc_control(from, to);
-            let mid_y = (from.y + to.y) / 2.0;
-            assert!(c.y <= mid_y, "{to:?} → {c:?}");
-            let chord = from.distance(to);
-            let mid = Pt::new((from.x + to.x) / 2.0, mid_y);
-            assert!((mid.distance(c) - BOW * chord).abs() < 1e-3);
-        }
-    }
-
-    #[test]
-    fn bezier_ends_at_its_points() {
-        let (a, c, b) =
-            (Pt::new(0.0, 0.0), Pt::new(5.0, -5.0), Pt::new(10.0, 0.0));
-        assert_eq!(quad_point(a, c, b, 0.0), a);
-        assert_eq!(quad_point(a, c, b, 1.0), b);
-        assert!(close(quad_point(a, c, b, 0.5), Pt::new(5.0, -2.5), 1e-4));
+        assert!(opposite[8].0.dot(Vec3::from_lon_lat(180.0, 0.0)) > 0.9999);
     }
 
     #[test]

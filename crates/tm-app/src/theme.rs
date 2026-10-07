@@ -49,7 +49,12 @@ pub const FLAT_BG: u32 = 0x1A2232;
 pub const RED: u32 = 0xFF7A6B;
 
 // Map.
-pub const LAND: u32 = 0x1B2A40;
+/// Land dots, faded towards the globe's rim (0074).
+pub const LAND: u32 = 0x3A5677;
+/// The globe's sea, a little lighter than the ground.
+pub const OCEAN: u32 = 0x0A1428;
+/// The glow around the globe's rim.
+pub const ATMOSPHERE: u32 = 0x4F8FC0;
 pub const ARC_DEAL: u32 = 0x8A6F2E;
 pub const ARC: u32 = 0x2F5C7A;
 pub const DOT: u32 = 0x6FA3C4;

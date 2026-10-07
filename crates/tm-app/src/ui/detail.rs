@@ -25,7 +25,6 @@ use super::{
 use crate::{
     data::{ActivityRow, RouteDetail, RouteRow, Snapshot},
     format,
-    geo::GeoWindow,
     grid::{CalendarDay, Tone},
     live::Fresh,
     theme::{self, Fonts, color},
@@ -391,16 +390,6 @@ impl TravelMonitor {
         let route_map = {
             let o = &row.route.origin;
             let d = &row.route.destination;
-            let window = GeoWindow {
-                west: f32::INFINITY,
-                east: f32::NEG_INFINITY,
-                north: f32::NEG_INFINITY,
-                south: f32::INFINITY,
-            }
-            .including(
-                [(o.lon as f32, o.lat as f32), (d.lon as f32, d.lat as f32)],
-                12.0,
-            );
             div()
                 .w(px(240.))
                 .h(px(190.))
@@ -426,8 +415,6 @@ impl TravelMonitor {
                             deal: row.status.is_deal(),
                             selected: true,
                         }],
-                        window,
-                        bottom_inset: 0.,
                         labels: false,
                     },
                     fonts.clone(),

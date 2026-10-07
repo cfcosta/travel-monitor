@@ -339,13 +339,9 @@ impl TravelMonitor {
             });
             keys.push(row.key());
         }
-        let window = MapModel::fit_window(origin.as_ref(), &dests);
         let model = MapModel {
             origin,
             destinations: dests,
-            window,
-            // The card sits below the map, not over it.
-            bottom_inset: 0.,
             labels: true,
         };
         let entity = cx.entity().downgrade();

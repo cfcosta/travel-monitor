@@ -93,12 +93,14 @@ fn screenshots() -> anyhow::Result<()> {
             eprintln!("wrote {}", path.display());
         }
         if (w, h) == (1440., 900.) {
-            // Zoomed in on the Deals map (0073): it stays inside its pane.
+            // The Deals globe turned to Europe and zoomed in (0074): it stays
+            // inside its pane.
             cx.update_window(window.into(), |_, window, cx| {
                 view.update(cx, |tm, cx| {
-                    tm.deals_map.set_view(crate::geo::View {
-                        zoom: 3.0,
-                        pan: crate::geo::Pt::new(-120.0, 160.0),
+                    tm.deals_map.set_view(crate::geo::GlobeView {
+                        lon: 10.0,
+                        lat: 30.0,
+                        zoom: 2.5,
                     });
                     tm.navigate(Screen::Deals, window, cx);
                 });

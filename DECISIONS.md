@@ -1098,3 +1098,32 @@ and dots keep their fitted sizes while zoomed (the dots grow a little,
 up to a cap). The Routes screen's header map and the detail card's
 small map stay fixed: one sits in a scrolling page, the other is too
 small to explore.
+
+## 0074: The map is a globe
+
+- Date: 2026-10-07
+- Replaces [0073](#0073-the-map-uses-the-robinson-projection-and-zooms-and-pans)
+  (its zooming and panning carry over to the globe); refines
+  [0044](#0044-the-apps-main-screen-is-a-map-with-a-list).
+
+The Robinson map did not fix how the whole-globe view looked, so the
+map is now an orthographic globe, as Mapbox shows the world zoomed
+out. The land is the same 2° dots, dimmer towards the rim, with fewer
+dots per row near the poles so they do not bunch into rings. The sea is
+a disc a little lighter than the ground, with a soft glow around its
+edge.
+
+- **Arcs follow great circles**, lifted off the surface by up to 0.22
+  radii (higher for longer flights). Where an arc passes behind the
+  globe it is hidden, and a raised arc can show beyond the rim.
+- **What it faces.** The globe faces the middle of the origin and the
+  selected route (or of every route when none is selected), seen 18°
+  from the south so the raised arcs bow north instead of pointing at
+  the viewer. Selecting another route turns the globe to it, keeping
+  the zoom.
+- **Moving it (Deals map).** Dragging turns the globe, the wheel or a
+  pinch zooms (0.6× to 12×), a click that does not move picks a
+  destination, and a double click faces the routes again at the fitted
+  size. Arcs, labels and dots keep their sizes while zoomed.
+- The Routes header and the route card show fixed globes facing their
+  routes.

@@ -131,13 +131,10 @@ pub(super) fn small_map(
             selected: sel,
         });
     }
-    let window = MapModel::fit_window(origin.as_ref(), &dests);
     map(
         MapModel {
             origin,
             destinations: dests,
-            window,
-            bottom_inset: 0.,
             labels,
         },
         fonts.clone(),
