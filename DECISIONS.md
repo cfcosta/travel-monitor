@@ -1121,8 +1121,8 @@ edge.
   from the south so the raised arcs bow north instead of pointing at
   the viewer. Selecting another route turns the globe to it, keeping
   the zoom.
-- **Moving it (Deals map).** Dragging turns the globe (at twice the
-  pointer's speed over the surface), the wheel or a
+- **Moving it (Deals map).** Dragging turns the globe (at four times
+  the pointer's speed over the surface), the wheel or a
   pinch zooms (0.6× to 12×), a click that does not move picks a
   destination, and a double click faces the routes again at the fitted
   size. Arcs, labels and dots keep their sizes while zoomed.

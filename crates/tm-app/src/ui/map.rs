@@ -127,8 +127,8 @@ impl MapState {
 const DRAG_SLOP: f32 = 4.0;
 
 /// How fast a drag turns the globe: at 1 the surface under the pointer
-/// follows it; twice that crosses the world in fewer strokes.
-const DRAG_SPEED: f32 = 2.0;
+/// follows it; four times that crosses the world in a stroke or two.
+const DRAG_SPEED: f32 = 4.0;
 
 /// Points per arc.
 const ARC_STEPS: usize = 48;
