@@ -1397,3 +1397,29 @@ Livelo and Esfera rely on the blog. The user's clubs, cards and tiers
 pick the price that applies. A purchase is judged against the program's
 last 365 days, the measured value of a mile (0083) and the cash prices
 of watched trips; only a watched-trip saving or a record low notifies.
+
+## 0085: LATAM's reader shares LATAM Pass's worker; award dates follow cash
+
+- Date: 2026-10-07
+- Refines [0053](#0053-how-tap-is-read),
+  [0080](#0080-the-daemon-raises-the-deal-notifications),
+  [0082](#0082-latam-pass-miles-are-measured-against-cash-and-its-login-is-_xp_session),
+  [0083](#0083-awards-are-their-own-series-the-value-of-a-mile-is-measured) and
+  [0084](#0084-latam-shares-one-warm-profile-and-award-dates-come-from-the-date-strip).
+
+`airline:LA` runs on `miles:latam_pass`'s worker, profile, budget (40 a
+day, to 80) and pace: one check at a time, 20–45 s apart. Pages open in
+the profile's own context, so the login and warm-up apply. A cash check
+reads one date, the cabin's cheapest brand. An award check reads one
+date and may click up to six strip days (two for the weekly spot
+check), each a load, never past the day's budget, each recorded only
+for the date it asked. The anchor is the cheapest cash day (Google
+Flights' legs, LATAM's own cash, the cached calendar, which is never
+recorded) not read in three days; strip days are clicked when their
+cash is within 15% of the leg's cheapest. A round trip chooses the
+cheapest outbound brand to price the return: two loads. A login wall or
+a missing `_xp_session` expires LATAM Pass, pauses its awards and sends
+one notice; Akamai's denial is a block. An award deal is confirmed by
+reading its date again (one load) and holds within 3% of its miles. A
+worker re-reads its budget row's limits each tick, so the app's changes
+are kept.
