@@ -85,7 +85,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            tick: Duration::from_secs(10),
+            tick: Duration::from_secs(5),
             once: false,
             only: Only::default(),
             pace: (4, 10),

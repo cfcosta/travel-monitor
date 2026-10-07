@@ -189,7 +189,7 @@ impl Default for FamilyStateRecord {
             last_check: None,
             last_min_price_minor: None,
             checks: 0,
-            cost_loads: 3.0,
+            cost_loads: 8.0,
             rt_discount_ewma: 0.0,
             rt_discount_n: 0,
             additive_streak: 0,
@@ -457,7 +457,7 @@ mod tests {
         assert_eq!(s.last_check, None);
         assert_eq!(s.last_min_price_minor, None);
         assert_eq!(s.checks, 0);
-        assert_eq!(s.cost_loads, 3.0);
+        assert_eq!(s.cost_loads, 8.0);
         assert_eq!(s.route_trip(), RouteTripState::default());
     }
 }

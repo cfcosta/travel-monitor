@@ -223,9 +223,9 @@ mod tests {
     fn never_checked_scores_the_saturated_value() {
         let s = FamilyState::default();
         let p = mean_params();
-        // q = 1 × ½, c = 3, w = 2 → 2 / (0.5 · 3).
+        // q = 1 × ½, c = 8, w = 2 → 2 / (0.5 · 8).
         let got = score_with_rate(&s, 2.0, now(), &p, 1.0);
-        assert!((got - 2.0 / 1.5).abs() < 1e-12);
+        assert!((got - 2.0 / 4.0).abs() < 1e-12);
     }
 
     #[test]

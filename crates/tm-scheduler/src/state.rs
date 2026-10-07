@@ -22,9 +22,11 @@ pub const PRIOR_DEAL_B: f64 = 1.0;
 /// assumed more often wrong than right until shown otherwise.
 pub const PRIOR_PREC_A: f64 = 1.0;
 pub const PRIOR_PREC_B: f64 = 2.0;
-/// Prior page loads per check: a leg's price graph is a few loads
-/// (research: "about 67 families × about 3 grid loads").
-pub const PRIOR_COST_LOADS: f64 = 3.0;
+/// Prior page loads per check: what a price graph costs in practice
+/// (the page and seven graph pages, DECISIONS.md 0078). The research's
+/// "about 3 grid loads" undercharged new families, so a tick planned
+/// more checks than it could pay for and the site then sat idle.
+pub const PRIOR_COST_LOADS: f64 = 8.0;
 
 /// Learned state of one query family.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -136,7 +138,7 @@ mod tests {
         assert_eq!(s.change_rate(), 1.0);
         assert_eq!(s.drop_probability(), 0.5);
         assert!((s.hint_precision() - 1.0 / 3.0).abs() < 1e-12);
-        assert_eq!(s.expected_loads(), 3);
+        assert_eq!(s.expected_loads(), 8);
         assert_eq!(s.elapsed_days(Utc::now()), None);
     }
 
@@ -152,7 +154,7 @@ mod tests {
         };
         assert_eq!(s.change_rate(), 1.0);
         assert_eq!(s.drop_probability(), 0.5);
-        assert_eq!(s.expected_loads(), 3);
+        assert_eq!(s.expected_loads(), 8);
     }
 
     #[test]

@@ -1195,3 +1195,27 @@ more than about 10 seconds between checks.
 With checks of about 15 seconds every ~25, the gaps stay under 10
 seconds while the budget lasts. Three lanes (0072) only matter when a
 tick has saved up enough for several checks.
+
+## 0078: New families are charged a full check; ticks every 5 seconds
+
+- Date: 2026-10-07
+- Refines [0077](#0077-google-flights-checks-every-half-minute-all-day).
+
+After 0077, Google Flights still went quiet for close to a minute
+after bursts of three checks. Each tick banks its share of the day's
+budget and plans picks against the bank, charging each family its
+learned cost per check. A family never checked was charged the prior,
+3 loads, while a price graph costs about 8, and 2,910 of the 3,464
+families had never been checked. A tick with 9 loads banked started
+three checks that spent 24, and the bank stayed empty for the next five
+ticks.
+
+- The prior cost of a check is now 8 loads (the page and seven graph
+  pages); a family's first check still replaces it with what it really
+  cost. Never-checked families in the live database were moved from 3
+  to 8. This also feeds the scheduler's score, value per load: new
+  families no longer look 2.7 times cheaper than checked ones. The
+  bootstrap rank that fills in new routes first (0065, 0070) is
+  separate and unchanged.
+- Ticks come every 5 seconds instead of 10. With checks due every 23
+  seconds or so, a 10-second tick rounded some gaps up to 15 seconds.

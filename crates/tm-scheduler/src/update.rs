@@ -276,8 +276,8 @@ mod tests {
         assert_eq!(s.prec_a, 2.0);
         assert_eq!(s.n_hints, 0);
         assert_eq!(s.last_min_price_minor, Some(800));
-        // cost: alpha = max(0.3, 1/4) = 0.3 → 0.7·3 + 0.3·4
-        assert!((s.cost_loads - 3.3).abs() < 1e-12);
+        // cost: alpha = max(0.3, 1/4) = 0.3 → 0.7·8 + 0.3·4
+        assert!((s.cost_loads - 6.8).abs() < 1e-12);
     }
 
     #[test]

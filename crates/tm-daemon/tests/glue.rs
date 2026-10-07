@@ -1469,11 +1469,12 @@ async fn each_site_runs_up_to_three_checks_at_once() {
     let mut h = harness_with(
         Config {
             parallel: 3,
-            budget: Some(30),
-            max_budget: Some(30),
+            // New families are charged a full check (8 loads, 0078).
+            budget: Some(80),
+            max_budget: Some(80),
             site_budgets: vec![(
                 "airline:TP".into(),
-                SiteLimits { start: 12, max: 12 },
+                SiteLimits { start: 40, max: 40 },
             )],
             ..test_config(Only {
                 family: None,

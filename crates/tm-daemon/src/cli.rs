@@ -71,7 +71,7 @@ pub struct Cli {
 
     /// Seconds between scheduler ticks: each releases its share of the
     /// day's budget, so short ticks keep checks evenly spaced (0077).
-    #[arg(long, default_value_t = 10, value_name = "N")]
+    #[arg(long, default_value_t = 5, value_name = "N")]
     pub tick_seconds: u64,
 
     /// Only check this family (debugging).
@@ -239,7 +239,7 @@ mod tests {
         assert_eq!(cli.budget, Some(300));
         assert_eq!(cli.max_budget, Some(2000));
         assert!(!cli.once);
-        assert_eq!(cli.tick(), Duration::from_secs(10));
+        assert_eq!(cli.tick(), Duration::from_secs(5));
         assert_eq!(cli.pace, (4, 10));
         assert_eq!(cli.parallel, 3);
     }
