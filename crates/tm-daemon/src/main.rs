@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use anyhow::Context as _;
 use clap::Parser;
-use tm_browser::ChromiumConfig;
+use tm_browser::{ChromiumConfig, Display};
 use tm_daemon::{
     Config,
     Daemon,
@@ -52,10 +52,14 @@ async fn run(cli: Cli) -> anyhow::Result<()> {
 
     let mut chromium =
         ChromiumConfig::new(cli.chromium_path(), cli.profile_path());
-    chromium.headless = !cli.headed;
+    chromium.display = if cli.headed {
+        Display::Window
+    } else {
+        Display::Headless
+    };
     chromium.port = cli.cdp_port;
     // Each site gets its own profile under --profile-dir and its own
-    // Chromium process (0062).
+    // Chromium process (0062); LATAM's runs headed offscreen (0081).
     let sources =
         move |site: &str| BrowserSources::new(site_config(&chromium, site));
 

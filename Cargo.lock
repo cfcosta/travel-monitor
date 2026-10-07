@@ -6441,6 +6441,7 @@ dependencies = [
  "sqlx",
  "tempfile",
  "thiserror 2.0.21",
+ "tm-compositor",
  "tm-domain",
  "tokio",
  "tokio-tungstenite",

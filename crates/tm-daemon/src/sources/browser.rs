@@ -19,7 +19,9 @@
 //! Each site has its own Chromium profile and process ([`site_config`],
 //! 0062); inside it, each point of sale has its own browser context
 //! (isolated cookies, 0033). A site's checks run side by side, each on
-//! its own page (0072).
+//! its own page (0072). LATAM's sites run a headed Chromium on an
+//! offscreen compositor, since its bot protection refuses headless
+//! (DECISIONS.md 0081).
 
 use std::{
     collections::{HashMap, hash_map::Entry},
@@ -30,7 +32,14 @@ use std::{
 use async_trait::async_trait;
 use rand::Rng;
 use serde_json::Value;
-use tm_browser::{Chromium, ChromiumConfig, Context, ContextOptions, Page};
+use tm_browser::{
+    Chromium,
+    ChromiumConfig,
+    Context,
+    ContextOptions,
+    Display,
+    Page,
+};
 use tm_domain::{Cabin, Currency, PointOfSale, PosId, QueryOutcome};
 use tm_gflights::{
     Method,
@@ -115,7 +124,8 @@ const CONSENT_JS: &str = r#"(() => {
 /// ([`tm_browser::profile::site_profile_dir`]), the directory the app's
 /// login window opens for that site. A fixed `--cdp-port` goes to Google
 /// Flights; every other site picks a free port, so the processes never
-/// collide.
+/// collide. LATAM's sites draw offscreen instead of headless
+/// ([`OFFSCREEN_SITES`]); a visible window (`--headed`) stays visible.
 pub fn site_config(base: &ChromiumConfig, site: &str) -> ChromiumConfig {
     ChromiumConfig {
         user_data_dir: tm_browser::profile::site_profile_dir(
@@ -127,9 +137,21 @@ pub fn site_config(base: &ChromiumConfig, site: &str) -> ChromiumConfig {
         } else {
             0
         },
+        display: match base.display {
+            Display::Headless if OFFSCREEN_SITES.contains(&site) => {
+                Display::Offscreen
+            }
+            display => display,
+        },
         ..base.clone()
     }
 }
+
+/// The sites whose bot protection denies a headless Chromium but lets a
+/// headed one through, with a warmed profile, on a GPU display
+/// (docs/research/sites/latam-pass.md, 0081): LATAM's airline site and
+/// LATAM Pass.
+pub const OFFSCREEN_SITES: &[&str] = &["airline:LA", "miles:latam_pass"];
 
 struct Running {
     chromium: Chromium,
@@ -918,7 +940,7 @@ impl Sources for BrowserSources {
         info!(
             binary = %self.config.binary.display(),
             profile = %self.config.user_data_dir.display(),
-            headless = self.config.headless,
+            display = ?self.config.display,
             "starting Chromium"
         );
         let chromium = Chromium::launch(self.config.clone()).await?;
@@ -1010,14 +1032,14 @@ mod tests {
     fn each_site_has_its_own_profile_and_port() {
         let mut base = ChromiumConfig::new("/bin/chromium", "/data/chromium");
         base.port = 9333;
-        base.headless = false;
+        base.display = Display::Window;
         let google = site_config(&base, "google_flights");
         assert_eq!(
             google.user_data_dir,
             PathBuf::from("/data/chromium/google_flights")
         );
         assert_eq!(google.port, 9333);
-        assert!(!google.headless);
+        assert_eq!(google.display, Display::Window);
         let tap = site_config(&base, "airline:TP");
         assert_eq!(
             tap.user_data_dir,
@@ -1025,5 +1047,26 @@ mod tests {
         );
         assert_eq!(tap.port, 0);
         assert_eq!(tap.binary, base.binary);
+    }
+
+    /// LATAM's sites run headed on an offscreen display; the others stay
+    /// headless, and `--headed` keeps every window visible (0081).
+    #[test]
+    fn latam_sites_draw_offscreen() {
+        let base = ChromiumConfig::new("/bin/chromium", "/data/chromium");
+        for site in ["airline:LA", "miles:latam_pass"] {
+            assert_eq!(site_config(&base, site).display, Display::Offscreen);
+        }
+        for site in ["google_flights", "airline:TP", "miles:smiles"] {
+            assert_eq!(site_config(&base, site).display, Display::Headless);
+        }
+        let headed = ChromiumConfig {
+            display: Display::Window,
+            ..base
+        };
+        assert_eq!(
+            site_config(&headed, "miles:latam_pass").display,
+            Display::Window
+        );
     }
 }

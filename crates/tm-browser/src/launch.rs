@@ -1,4 +1,5 @@
-//! Starting and stopping our own Chromium (0021).
+//! Starting and stopping our own Chromium (0021), headless, in a window
+//! or headed on its own offscreen compositor (DECISIONS.md 0081).
 
 use std::{
     collections::VecDeque,
@@ -7,6 +8,7 @@ use std::{
     time::Duration,
 };
 
+use tm_compositor::{Compositor, CompositorConfig};
 use tokio::{
     io::{AsyncBufReadExt, BufReader},
     process::{Child, Command},
@@ -47,15 +49,30 @@ pub fn profile_args() -> &'static [&'static str] {
     ]
 }
 
+/// Where Chromium draws.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Display {
+    /// `--headless=new`: no display at all (0021).
+    Headless,
+    /// A visible window on the user's own desktop (`tmd --headed`).
+    Window,
+    /// A normal, headed Chromium on a Wayland compositor of its own,
+    /// on the GPU, that nobody sees (`tm-compositor`, 0081). For sites
+    /// whose bot protection refuses headless Chromium. The compositor
+    /// starts with the browser and stops with it.
+    Offscreen,
+}
+
+/// The refresh rate of an offscreen display, a common monitor's.
+const OFFSCREEN_REFRESH_HZ: u32 = 60;
+
 /// How to start Chromium.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChromiumConfig {
     pub binary: PathBuf,
     /// The profile directory. Only one Chromium can use it at a time.
     pub user_data_dir: PathBuf,
-    /// `--headless=new` when true; a visible window when false (the
-    /// miles-program logins of 0024).
-    pub headless: bool,
+    pub display: Display,
     /// The DevTools port. 0 lets the system pick a free one.
     pub port: u16,
     /// Window size in pixels, width then height. Google's Explore page
@@ -74,7 +91,7 @@ impl ChromiumConfig {
         Self {
             binary: binary.into(),
             user_data_dir: user_data_dir.into(),
-            headless: true,
+            display: Display::Headless,
             port: 0,
             window: (1440, 1000),
             extra_args: Vec::new(),
@@ -102,8 +119,11 @@ impl ChromiumConfig {
             "--disable-features=Translate,MediaRouter".into(),
         ];
         args.extend(profile_args().iter().map(|&a| a.to_owned()));
-        if self.headless {
-            args.push("--headless=new".into());
+        match self.display {
+            Display::Headless => args.push("--headless=new".into()),
+            // The desktop's own session picks the platform.
+            Display::Window => {}
+            Display::Offscreen => args.push("--ozone-platform=wayland".into()),
         }
         args.extend(self.extra_args.iter().cloned());
         args.push("about:blank".into());
@@ -111,19 +131,28 @@ impl ChromiumConfig {
     }
 }
 
-/// A running Chromium, connected. Dropping it kills the process; prefer
-/// [`Chromium::shutdown`], which lets it close its profile cleanly.
+/// A running Chromium, connected. Dropping it kills the process (and
+/// stops its offscreen compositor); prefer [`Chromium::shutdown`], which
+/// lets it close its profile cleanly.
 pub struct Chromium {
     child: Child,
     browser: Browser,
     ws_url: String,
+    /// The display of [`Display::Offscreen`]. Declared last so it is
+    /// dropped after the process was told to stop.
+    compositor: Option<Compositor>,
 }
 
 impl Chromium {
     /// Starts Chromium, waits for its DevTools endpoint and connects.
+    /// For [`Display::Offscreen`], starts its compositor first.
     pub async fn launch(config: ChromiumConfig) -> Result<Self> {
         std::fs::create_dir_all(&config.user_data_dir)?;
-        Self::launch_with(&config.binary, config.args()).await
+        let compositor = match config.display {
+            Display::Offscreen => Some(start_compositor(config.window).await?),
+            Display::Headless | Display::Window => None,
+        };
+        Self::spawn(&config.binary, config.args(), compositor).await
     }
 
     /// Starts `binary` with exactly `args`, which must ask for a
@@ -131,7 +160,24 @@ impl Chromium {
     /// command lines that [`ChromiumConfig`] does not build, such as the
     /// login window's in tests.
     pub async fn launch_with(binary: &Path, args: Vec<String>) -> Result<Self> {
-        let mut child = Command::new(binary)
+        Self::spawn(binary, args, None).await
+    }
+
+    /// Starts `binary`, on `compositor`'s display if given, and
+    /// connects.
+    async fn spawn(
+        binary: &Path,
+        args: Vec<String>,
+        compositor: Option<Compositor>,
+    ) -> Result<Self> {
+        let mut command = Command::new(binary);
+        if let Some(compositor) = &compositor {
+            // Only our display: never the desktop's Wayland or X11.
+            command
+                .env("WAYLAND_DISPLAY", compositor.wayland_display())
+                .env_remove("DISPLAY");
+        }
+        let mut child = command
             .args(args)
             .stdin(Stdio::null())
             .stdout(Stdio::null())
@@ -179,6 +225,7 @@ impl Chromium {
             child,
             browser,
             ws_url,
+            compositor,
         })
     }
 
@@ -193,6 +240,12 @@ impl Chromium {
 
     pub fn pid(&self) -> Option<u32> {
         self.child.id()
+    }
+
+    /// The offscreen compositor's `WAYLAND_DISPLAY`, for
+    /// [`Display::Offscreen`].
+    pub fn wayland_display(&self) -> Option<&str> {
+        self.compositor.as_ref().map(Compositor::wayland_display)
     }
 
     /// Closes the browser and waits for the process to exit, killing it
@@ -214,6 +267,29 @@ impl Drop for Chromium {
     fn drop(&mut self) {
         let _ = self.child.start_kill();
     }
+}
+
+/// Starts an offscreen compositor the size of the browser's window. Its
+/// GPU setup blocks for a moment, so it runs off the async runtime.
+async fn start_compositor(window: (u32, u32)) -> Result<Compositor> {
+    let config = CompositorConfig {
+        size: window,
+        refresh_hz: OFFSCREEN_REFRESH_HZ,
+        render_node: None,
+    };
+    let compositor =
+        tokio::task::spawn_blocking(move || Compositor::start(config))
+            .await
+            .map_err(|e| {
+                Error::Launch(format!("the compositor did not start: {e}"))
+            })?
+            .map_err(|e| Error::Launch(format!("no offscreen display: {e}")))?;
+    tracing::info!(
+        wayland_display = compositor.wayland_display(),
+        render_node = %compositor.render_node().display(),
+        "offscreen display up"
+    );
+    Ok(compositor)
 }
 
 /// Reads stderr until the DevTools line, then keeps draining it so the
@@ -278,8 +354,22 @@ mod tests {
         assert!(args.contains(&"--remote-debugging-port=0".to_owned()));
         assert!(args.contains(&"--user-data-dir=/tmp/profile".to_owned()));
         assert_eq!(args[args.len() - 2], "--lang=pt-BR");
-        config.headless = false;
-        assert!(!config.args().iter().any(|a| a.starts_with("--headless")));
+        config.display = Display::Window;
+        let args = config.args();
+        assert!(!args.iter().any(|a| a.starts_with("--headless")));
+        assert!(!args.iter().any(|a| a.starts_with("--ozone-platform")));
+    }
+
+    /// Offscreen is a headed Chromium on Wayland (0081).
+    #[test]
+    fn offscreen_is_headed_on_wayland() {
+        let mut config = ChromiumConfig::new("/bin/chromium", "/tmp/profile");
+        config.display = Display::Offscreen;
+        config.extra_args.push("--lang=pt-BR".into());
+        let args = config.args();
+        assert!(!args.iter().any(|a| a.starts_with("--headless")));
+        assert!(args.contains(&"--ozone-platform=wayland".to_owned()));
+        assert_eq!(args[args.len() - 2], "--lang=pt-BR");
     }
 
     #[test]

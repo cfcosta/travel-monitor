@@ -6,6 +6,8 @@
 //!
 //! - [`Chromium::launch`] starts Chromium with its own profile and
 //!   connects; [`Chromium::shutdown`] stops it, and dropping it kills it.
+//!   [`Display`] says where it draws: headless, in a window, or headed
+//!   on its own offscreen Wayland compositor on the GPU (0081).
 //! - [`Browser`] is one WebSocket shared by every page: a single task
 //!   matches responses to commands by id and routes events by session.
 //!   [`Browser::new_context`] gives isolated cookies and an optional
@@ -31,5 +33,11 @@ pub use browser::{Browser, Context, ContextOptions, Version};
 pub use capture::{Capture, Captured};
 pub use cdp::Event;
 pub use error::{Error, Result};
-pub use launch::{CHROMIUM_VAR, Chromium, ChromiumConfig, profile_args};
+pub use launch::{
+    CHROMIUM_VAR,
+    Chromium,
+    ChromiumConfig,
+    Display,
+    profile_args,
+};
 pub use page::Page;
