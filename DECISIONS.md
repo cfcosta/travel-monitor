@@ -1142,3 +1142,31 @@ country not listed. A legend in the map's bottom-left corner names the
 regions on screen. Yellow is kept out of the palette: a deal's arc is
 its region's colour, brighter and thicker, ending in a yellow dot, and
 the selected route stays yellow.
+
+## 0076: The route card shows prices by departure date
+
+- Date: 2026-10-07
+- Refines [0044](#0044-the-apps-main-screen-is-a-map-with-a-list).
+
+The card under the map showed a 5 × 6 grid of departure × trip length.
+Its cells were nearly identical abbreviated prices, mostly estimated
+from the legs, and didn't answer whether a better date exists. A third
+of the card was a sellers table that stays empty until a deal is
+confirmed. It was option B of three drawn for the card:
+
+- **Header:** the route, its status, the city, cabin and airline (or
+  "round trip" when the price graph gave none), the trip's dates with
+  "cheapest of N dates" when it is, and on the right the price with how
+  far it is from the usual price, in reais.
+- **Price strip:** every future departure's price for the chosen trip
+  length (the detail screen's six-month calendar), one bar each. Taller
+  is dearer. Bars are coloured below, near or above the usual price for
+  that far out, the card's trip is yellow, the usual price is a dashed
+  line, and each month's cheapest departure is written under it. The
+  5–10 day buttons switch the length, the same setting as the detail
+  screen; a bar picks its departure.
+- **Footer:** the legend, when the price was seen, how many days of
+  prices the usual price rests on ("still rough" under a week), and on
+  confirmed deals the cheapest seller; then Open in Google Flights,
+  Check now and History. The full sellers table stays on the detail
+  screen.

@@ -55,7 +55,6 @@ pub const LAND: u32 = 0x3A5677;
 pub const OCEAN: u32 = 0x0A1428;
 /// The glow around the globe's rim.
 pub const ATMOSPHERE: u32 = 0x4F8FC0;
-pub const ARC_DEAL: u32 = 0x8A6F2E;
 pub const LABEL_DEAL: u32 = 0xE9D9A8;
 pub const LABEL: u32 = 0x7F9FB8;
 
@@ -84,8 +83,6 @@ pub const BAR_RISE: u32 = 0x5E6B80;
 pub const TONE_BELOW: u32 = 0x3B87A8;
 pub const TONE_TYPICAL: u32 = 0x1C2A44;
 pub const TONE_ABOVE: u32 = 0x4A2F2A;
-/// Grid cells that are not deals.
-pub const CELL: u32 = 0x142038;
 
 pub fn color(hex: u32) -> Rgba {
     rgb(hex)

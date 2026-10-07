@@ -128,18 +128,6 @@ pub fn clock(at: DateTime<Utc>) -> String {
     at.with_timezone(&Local).format("%H:%M").to_string()
 }
 
-/// A compact price for grid cells: `3.93k`, `14.9k`, `916`.
-pub fn kilo(price: &Money) -> String {
-    let whole = price.whole();
-    if whole.abs() >= 10_000 {
-        format!("{:.1}k", whole as f64 / 1000.0)
-    } else if whole.abs() >= 1000 {
-        format!("{:.2}k", whole as f64 / 1000.0)
-    } else {
-        whole.to_string()
-    }
-}
-
 /// `9 h 55 min`, `55 min`.
 pub fn duration(minutes: u32) -> String {
     let (h, m) = (minutes / 60, minutes % 60);
@@ -264,13 +252,6 @@ mod tests {
         assert_eq!(thousands(4800), "4,800");
         assert_eq!(thousands(12_000), "12,000");
         assert_eq!(thousands(1_234_567), "1,234,567");
-    }
-
-    #[test]
-    fn compact_prices() {
-        assert_eq!(kilo(&Money::brl_whole(3932)), "3.93k");
-        assert_eq!(kilo(&Money::brl_whole(14870)), "14.9k");
-        assert_eq!(kilo(&Money::brl_whole(916)), "916");
     }
 
     #[test]

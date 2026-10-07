@@ -90,8 +90,7 @@ fn opens_on_the_biggest_deal(cx: &mut TestAppContext) {
     cx.update(|window, _| window.refresh());
     cx.run_until_parked();
     assert!(cx.debug_bounds("detail-card").is_some());
-    assert!(cx.debug_bounds("trip-grid").is_some());
-    assert!(cx.debug_bounds("sellers").is_some());
+    assert!(cx.debug_bounds("price-strip").is_some());
 }
 
 #[gpui::test]

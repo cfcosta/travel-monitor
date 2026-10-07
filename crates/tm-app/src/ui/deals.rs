@@ -2,6 +2,7 @@
 //! routes on the left, the night map on the right, and a card for the
 //! selected row over the map.
 
+use chrono::{Datelike, NaiveDate};
 use gpui::{
     AnyElement,
     Context,
@@ -13,9 +14,10 @@ use gpui::{
     div,
     prelude::*,
     px,
+    relative,
     rgba,
 };
-use tm_domain::Cabin;
+use tm_domain::{Cabin, Currency, Money};
 
 use super::{
     ListTab,
@@ -30,7 +32,7 @@ use crate::{
     data::{RouteDetail, RouteRow},
     format,
     geo::Region,
-    grid::{GridCell, TripGrid},
+    grid::{CalendarDay, Tone as CalendarTone},
     live::Fresh,
     theme::{self, Fonts, color},
 };
@@ -377,6 +379,9 @@ impl TravelMonitor {
             .children(self.render_card(fonts, cx))
     }
 
+    /// The selected route's card (0076): the trip and its price on one
+    /// line, then every departure's price for the chosen trip length,
+    /// against the usual price, with the cheapest of each month.
     fn render_card(
         &self,
         fonts: &Fonts,
@@ -389,24 +394,31 @@ impl TravelMonitor {
         let deal = row.status.is_deal();
         let trip = detail.and_then(|d| d.trip.as_ref()).or(row.best.as_ref());
         let origin = &row.route.origin.code;
-        let summary = [
-            Some(row.city().to_owned()),
-            Some(row.cabin.label().to_owned()),
-            trip.map(|t| format::date_range(t.departure, t.return_date)),
-        ]
-        .into_iter()
-        .flatten()
-        .collect::<Vec<_>>()
-        .join(" · ");
-        let vs = row.change.map(|c| {
-            format!("{} vs usual for this far out", format::change(c))
-        });
-        let first = div()
+        let usual = detail
+            .and_then(|d| d.usual.as_ref().map(|(m, _)| m.clone()))
+            .or_else(|| row.baseline.clone());
+        let days = self
+            .calendar_days
+            .unwrap_or(s.settings.trips.round_trip_days);
+        let priced: Vec<&CalendarDay> = detail
+            .map(|d| {
+                d.calendar
+                    .weeks
+                    .iter()
+                    .flat_map(|w| &w.days)
+                    .filter(|d| d.tone != CalendarTone::Past)
+                    .collect()
+            })
+            .unwrap_or_default();
+        let cheapest =
+            priced.iter().filter_map(|d| d.price.map(|p| p.minor)).min();
+        let dated = priced.iter().filter(|d| d.price.is_some()).count();
+
+        let route = div()
             .flex()
             .flex_col()
-            .gap(px(8.))
-            .flex_1()
-            .min_w(px(220.))
+            .gap(px(4.))
+            .min_w_0()
             .child(
                 div()
                     .flex()
@@ -414,128 +426,228 @@ impl TravelMonitor {
                     .gap(px(10.))
                     .child(
                         div()
-                            .text_size(px(26.))
+                            .text_size(px(24.))
                             .font_weight(FontWeight::BOLD)
                             .child(format!("{origin} → {}", row.code())),
                     )
                     .child(widgets::status_chip(row.status)),
             )
-            .child(div().text_color(color(theme::TEXT_MUTED)).child(summary))
-            .children(
-                trip.and_then(|t| t.carrier_label()).map(|c| {
-                    div().text_color(color(theme::TEXT_MUTED)).child(c)
-                }),
-            )
             .child(
+                div().text_color(color(theme::TEXT_MUTED)).child(
+                    [
+                        Some(row.city().to_owned()),
+                        Some(row.cabin.label().to_owned()),
+                        Some(match trip.and_then(|t| t.carrier_label()) {
+                            Some(c) => c,
+                            None => "round trip".to_owned(),
+                        }),
+                    ]
+                    .into_iter()
+                    .flatten()
+                    .collect::<Vec<_>>()
+                    .join(" · "),
+                ),
+            );
+        let vs = match (row.change, &usual) {
+            (Some(c), Some(u)) => Some(format!(
+                "{} vs usual {}",
+                format::change(c),
+                format::money(u)
+            )),
+            (Some(c), None) => Some(format!("{} vs usual", format::change(c))),
+            _ => None,
+        };
+        let when = trip.map(|t| {
+            let range = format::date_range(t.departure, t.return_date);
+            match cheapest {
+                Some(min) if t.price.minor <= min && dated > 1 => {
+                    format!("{range} · cheapest of {dated} dates")
+                }
+                _ => range,
+            }
+        });
+        let route = route.children(
+            when.map(|w| div().text_color(color(theme::TEXT_SOFT)).child(w)),
+        );
+        let price = div()
+            .flex()
+            .flex_col()
+            .items_end()
+            .gap(px(4.))
+            .ml_auto()
+            .flex_none()
+            .child(
+                mono(
+                    fonts,
+                    trip.map_or_else(
+                        || "–".to_owned(),
+                        |t| format::money(&t.price),
+                    ),
+                )
+                .text_size(px(30.))
+                .font_weight(FontWeight::BOLD)
+                .text_color(color(if deal {
+                    theme::PRICE_DEAL
+                } else {
+                    theme::TEXT
+                })),
+            )
+            .children(vs.map(|v| {
                 div()
-                    .flex()
-                    .flex_wrap()
-                    .items_baseline()
-                    .gap(px(10.))
-                    .mt(px(4.))
-                    .child(
-                        mono(
-                            fonts,
-                            trip.map_or_else(
-                                || "–".to_owned(),
-                                |t| format::money(&t.price),
-                            ),
-                        )
-                        .text_size(px(30.))
-                        .font_weight(FontWeight::BOLD)
-                        .text_color(color(if deal {
-                            theme::PRICE_DEAL
-                        } else {
-                            theme::TEXT
-                        })),
-                    )
-                    .children(vs.map(|v| {
-                        div()
-                            .font_weight(FontWeight::MEDIUM)
-                            .text_color(color(if deal {
-                                theme::YELLOW
-                            } else {
-                                theme::TEXT_MUTED
-                            }))
-                            .child(v)
+                    .font_weight(FontWeight::MEDIUM)
+                    .text_color(color(if deal {
+                        theme::YELLOW
+                    } else {
+                        theme::DROP
+                    }))
+                    .child(v)
+            }));
+        let actions = div()
+            .flex()
+            .flex_wrap()
+            .gap(px(8.))
+            .ml_auto()
+            .flex_none()
+            .child(
+                widgets::primary_button("open-gf", "Open in Google Flights")
+                    .on_click(cx.listener(|this, _, _, cx| {
+                        this.open_in_google_flights(cx)
                     })),
             )
             .child(
-                div()
-                    .flex()
-                    .flex_wrap()
-                    .gap(px(8.))
-                    .mt(px(6.))
-                    .child(
-                        widgets::primary_button(
-                            "open-gf",
-                            "Open in Google Flights",
-                        )
-                        .on_click(cx.listener(
-                            |this, _, _, cx| this.open_in_google_flights(cx),
-                        )),
-                    )
-                    .child(
-                        widgets::ghost_button("check-now", "Check now")
-                            .on_click(
-                                cx.listener(|this, _, _, cx| {
-                                    this.check_now(cx)
-                                }),
-                            ),
-                    )
-                    .child(
-                        widgets::ghost_button("price-history", "Price history")
-                            .on_click(cx.listener(|this, _, window, cx| {
-                                this.navigate(Screen::Detail, window, cx)
-                            })),
-                    ),
-            );
-        let grid = div()
+                widgets::ghost_button("check-now", "Check now")
+                    .on_click(cx.listener(|this, _, _, cx| this.check_now(cx))),
+            )
+            .child(widgets::ghost_button("price-history", "History").on_click(
+                cx.listener(|this, _, window, cx| {
+                    this.navigate(Screen::Detail, window, cx)
+                }),
+            ));
+        let header = div()
             .flex()
-            .flex_col()
-            .gap(px(6.))
-            .flex_1()
-            .min_w(px(300.))
-            .child(widgets::label("Departure × trip length"))
-            .child(match detail {
-                Some(d) if !d.grid.rows.is_empty() => trip_grid(fonts, &d.grid).into_any_element(),
-                Some(_) => div()
-                    .text_size(px(12.))
-                    .text_color(color(theme::TEXT_FAINT))
-                    .child("No leg prices yet.")
-                    .into_any_element(),
-                None => div()
-                    .text_size(px(12.))
-                    .text_color(color(theme::TEXT_FAINT))
-                    .child("Loading…")
-                    .into_any_element(),
-            })
+            .items_start()
+            .gap(px(24.))
+            .child(route)
+            .child(price);
+
+        let t = &s.settings.trips;
+        let lengths =
+            widgets::segments().children((t.min_days..=t.max_days).map(|n| {
+                widgets::segment(
+                    SharedString::from(format!("card-len-{n}")),
+                    format!("{n}d"),
+                    n == days,
+                )
+                .px(px(8.))
+                .on_click(cx.listener(
+                    move |this, _, _, cx| {
+                        this.calendar_days = Some(n);
+                        this.departure = None;
+                        this.refresh(cx);
+                        cx.notify();
+                    },
+                ))
+            }));
+        let strip_head = div()
+            .flex()
+            .items_center()
+            .gap(px(12.))
+            .child(widgets::label(format!(
+                "Price by departure date · {days}-day trips"
+            )))
+            .child(div().ml_auto().child(lengths));
+        let strip: AnyElement = match detail {
+            None => div()
+                .h(px(STRIP_H))
+                .text_color(color(theme::TEXT_FAINT))
+                .child("Loading…")
+                .into_any_element(),
+            Some(_) if dated == 0 => div()
+                .h(px(STRIP_H))
+                .text_color(color(theme::TEXT_FAINT))
+                .child(format!("No {days}-day trips priced yet."))
+                .into_any_element(),
+            Some(_) => price_strip(
+                fonts,
+                &priced,
+                trip.map(|t| t.departure),
+                usual.as_ref().map(|u| u.minor),
+                cx,
+            )
+            .into_any_element(),
+        };
+
+        let legend_item = |hex: u32, text: &'static str| {
+            div()
+                .flex()
+                .items_center()
+                .gap(px(6.))
+                .child(div().size(px(10.)).rounded(px(2.)).bg(color(hex)))
+                .child(text)
+        };
+        let history_days = row.history.len();
+        let mut notes: Vec<String> = Vec::new();
+        if let Some(at) = row.last_checked {
+            notes.push(format!("Seen {}", format::clock(at)));
+        }
+        notes.push(match history_days {
+            0 => "no price history yet".to_owned(),
+            1 => "1 day of prices, so “usual” is still rough".to_owned(),
+            n if n < 7 => {
+                format!("{n} days of prices, so “usual” is still rough")
+            }
+            n => format!("{n} days of prices"),
+        });
+        match detail
+            .and_then(|d| d.sellers.iter().min_by_key(|s| s.effective.minor))
+        {
+            Some(best) => notes.push(format!(
+                "cheapest seller {} ({}) {}",
+                best.seller,
+                best.pos.as_str(),
+                format::money(&best.effective)
+            )),
+            None if trip.is_some_and(|t| t.carrier.is_none()) => {
+                notes.push("airline shown once confirmed".to_owned())
+            }
+            None => {}
+        }
+        let footer = div()
+            .flex()
+            .items_center()
+            .gap(px(20.))
             .child(
                 div()
-                    .text_size(px(11.))
-                    .text_color(color(theme::TEXT_FAINT))
-                    .child("Solid: round trip confirmed by a search. Dashed: estimated from the two legs."),
-            );
-        let sellers = div()
-            .flex()
-            .flex_col()
-            .gap(px(6.))
-            .flex_1()
-            .min_w(px(260.))
-            .child(widgets::label(
-                "Cheapest seller by point of sale, effective BRL",
-            ))
-            .children(detail.map(|d| sellers_table(fonts, d, false)));
+                    .flex()
+                    .flex_col()
+                    .gap(px(6.))
+                    .min_w_0()
+                    .text_size(px(12.))
+                    .text_color(color(theme::TEXT_LABEL))
+                    .child(
+                        div()
+                            .flex()
+                            .flex_wrap()
+                            .gap(px(16.))
+                            .child(legend_item(theme::YELLOW, "this trip"))
+                            .child(legend_item(STRIP_BELOW, "below usual"))
+                            .child(legend_item(STRIP_TYPICAL, "near usual"))
+                            .child(legend_item(STRIP_ABOVE, "above usual")),
+                    )
+                    .child(notes.join(" · ")),
+            )
+            .child(actions);
+
         Some(
             div()
                 .flex_none()
                 .mx(px(24.))
                 .mb(px(24.))
                 .flex()
-                .flex_wrap()
-                .gap(px(20.))
-                .px(px(20.))
-                .py(px(18.))
+                .flex_col()
+                .gap(px(16.))
+                .px(px(24.))
+                .py(px(20.))
                 .rounded(px(16.))
                 .bg(rgba(0x0C1222EB))
                 .border_1()
@@ -543,9 +655,16 @@ impl TravelMonitor {
                 .shadow_lg()
                 .debug_selector(|| "detail-card".into())
                 .relative()
-                .child(first)
-                .child(grid)
-                .child(sellers)
+                .child(header)
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(8.))
+                        .child(strip_head)
+                        .child(strip),
+                )
+                .child(footer)
                 // New observations for this route just arrived (0057).
                 .children(
                     widgets::fresh_tint(self.glow(Fresh::Route(key)))
@@ -555,80 +674,178 @@ impl TravelMonitor {
     }
 }
 
-/// The departure × length grid of the detail card.
-pub(super) fn trip_grid(fonts: &Fonts, grid: &TripGrid) -> Div {
-    let header = div()
-        .flex()
-        .gap(px(3.))
-        .text_color(color(theme::TEXT_FAINT))
-        .child(div().w(px(54.)).flex_none())
-        .children(
-            grid.lengths
-                .iter()
-                .map(|n| div().flex_1().text_center().child(format!("{n}d"))),
-        );
-    let rows = grid.rows.iter().map(|row| {
-        div()
+/// The price strip's bar area, in pixels.
+const STRIP_H: f32 = 116.0;
+/// Bar colours: under, near and over the usual price for that far out.
+const STRIP_BELOW: u32 = 0x3B8FA0;
+const STRIP_TYPICAL: u32 = 0x36506F;
+const STRIP_ABOVE: u32 = 0x263247;
+
+/// Every departure's price as a bar (taller is dearer), coloured
+/// against the usual price for that far out, the selected trip in
+/// yellow, the usual price as a dashed line, and each month's cheapest
+/// under it (0076). A bar picks its departure.
+fn price_strip(
+    fonts: &Fonts,
+    days: &[&CalendarDay],
+    selected: Option<NaiveDate>,
+    usual: Option<i64>,
+    cx: &mut Context<TravelMonitor>,
+) -> Div {
+    let prices: Vec<i64> = days
+        .iter()
+        .filter_map(|d| d.price.map(|p| p.minor))
+        .collect();
+    let lo = prices.iter().copied().min().unwrap_or(0) as f32;
+    let hi = prices.iter().copied().max().unwrap_or(1) as f32;
+    let span = (hi - lo).max(1.0);
+    // The cheapest bar stays visible; the dearest fills the strip.
+    let height =
+        |minor: i64| 12.0 + (minor as f32 - lo) / span * (STRIP_H - 12.0);
+    let bars = days.iter().enumerate().map(|(i, day)| {
+        let slot = div()
+            .id(SharedString::from(format!("strip-{i}")))
+            .flex_1()
+            .min_w_0()
+            .h_full()
+            .px(px(1.))
             .flex()
-            .gap(px(3.))
-            .items_center()
+            .items_end();
+        let Some(price) = day.price else {
+            return slot
+                .child(div().w_full().h(px(3.)).bg(color(theme::BORDER)));
+        };
+        let fill = if selected == Some(day.date) {
+            theme::YELLOW
+        } else {
+            match day.tone {
+                CalendarTone::Deal | CalendarTone::Below => STRIP_BELOW,
+                CalendarTone::Typical => STRIP_TYPICAL,
+                _ => STRIP_ABOVE,
+            }
+        };
+        let date = day.date;
+        slot.cursor_pointer()
+            .hover(|s| s.opacity(0.75))
+            .on_click(cx.listener(move |this, _, _, cx| {
+                this.departure = Some(date);
+                this.refresh(cx);
+                cx.notify();
+            }))
             .child(
                 div()
-                    .w(px(54.))
-                    .flex_none()
-                    .text_color(color(theme::TEXT_MUTED))
-                    .child(format::short_date(row.departure)),
+                    .w_full()
+                    .h(px(height(price.minor)))
+                    .rounded_t(px(2.))
+                    .bg(color(fill)),
             )
-            .children(row.cells.iter().map(|cell| grid_cell(fonts, cell)))
     });
+    let usual_line = usual
+        .filter(|u| (*u as f32) >= lo && (*u as f32) <= hi)
+        .map(|u| {
+            let bottom = height(u);
+            div()
+                .absolute()
+                .left_0()
+                .right_0()
+                .bottom(px(bottom))
+                .border_t_1()
+                .border_dashed()
+                .border_color(color(theme::TEXT_DIM))
+                .child(
+                    mono(
+                        fonts,
+                        format!(
+                            "usual {}",
+                            format::money(&Money::new(u, Currency::brl()))
+                        ),
+                    )
+                    .absolute()
+                    .right_0()
+                    .bottom(px(3.))
+                    .pl(px(6.))
+                    .bg(rgba(0x0C1222EB))
+                    .text_size(px(11.))
+                    .text_color(color(theme::TEXT_MUTED)),
+                )
+        });
+    // Each month's share of the strip, and its cheapest departure.
+    let mut months: Vec<(NaiveDate, usize, Option<i64>)> = Vec::new();
+    for day in days {
+        let price = day.price.map(|p| p.minor);
+        match months.last_mut() {
+            Some((first, n, min)) if first.month() == day.date.month() => {
+                *n += 1;
+                *min = match (*min, price) {
+                    (Some(a), Some(b)) => Some(a.min(b)),
+                    (a, b) => a.or(b),
+                };
+            }
+            _ => months.push((day.date, 1, price)),
+        }
+    }
+    let total = days.len().max(1) as f32;
+    let best_month = months.iter().filter_map(|m| m.2).min();
+    let month_row = div()
+        .flex()
+        .border_t_1()
+        .border_color(color(theme::BORDER))
+        .pt(px(6.))
+        .children(months.iter().map(|(first, n, min)| {
+            let best = min.is_some() && *min == best_month;
+            // A sliver of a month (the strip's last days) keeps its
+            // divider but not its label.
+            let labelled = *n >= 12;
+            div()
+                .w(relative(*n as f32 / total))
+                .flex_none()
+                .min_w_0()
+                .overflow_hidden()
+                .pl(px(4.))
+                .border_l_1()
+                .border_color(color(theme::BORDER))
+                .flex()
+                .flex_col()
+                .gap(px(1.))
+                .when(labelled, |m| {
+                    m.child(
+                        div()
+                            .text_size(px(12.))
+                            .whitespace_nowrap()
+                            .text_color(color(theme::TEXT_MUTED))
+                            .child(format::month(*first)),
+                    )
+                })
+                .children(min.filter(|_| labelled).map(|m| {
+                    mono(fonts, format::money(&Money::new(m, Currency::brl())))
+                        .text_size(px(12.))
+                        .whitespace_nowrap()
+                        .text_color(color(if best {
+                            theme::YELLOW
+                        } else {
+                            theme::TEXT_SOFT
+                        }))
+                }))
+        }));
     div()
         .flex()
         .flex_col()
-        .gap(px(3.))
-        .text_size(px(11.))
-        .debug_selector(|| "trip-grid".into())
-        .child(header)
-        .children(rows)
-}
-
-fn grid_cell(fonts: &Fonts, cell: &GridCell) -> Div {
-    let base = div()
-        .flex_1()
-        .py(px(4.))
-        .rounded(px(4.))
-        .text_center()
-        .font_family(fonts.mono.clone())
-        .text_size(px(11.));
-    let Some(price) = cell.price else {
-        return base.text_color(color(theme::TEXT_DIM)).child("–");
-    };
-    let text = format::kilo(&tm_domain::Money::new(
-        price.minor,
-        tm_domain::Currency::brl(),
-    ));
-    let mut c = if cell.best {
-        base.bg(color(theme::YELLOW))
-            .text_color(color(theme::ON_YELLOW))
-            .font_weight(FontWeight::BOLD)
-    } else {
-        base.bg(color(theme::CELL))
-            .text_color(color(theme::TEXT_SOFT))
-    };
-    if cell.selected {
-        c = c.border_2().border_color(color(0xFFFFFF)).py(px(2.));
-    } else if !price.confirmed {
-        c = c
-            .border_1()
-            .border_dashed()
-            .border_color(color(if cell.best {
-                theme::ARC_DEAL
-            } else {
-                theme::BORDER_BUTTON
-            }))
-            .opacity(0.85)
-            .py(px(3.));
-    }
-    c.child(text)
+        .debug_selector(|| "price-strip".into())
+        .child(
+            div()
+                .relative()
+                .h(px(STRIP_H))
+                .child(
+                    div()
+                        .absolute()
+                        .inset_0()
+                        .flex()
+                        .items_end()
+                        .children(bars),
+                )
+                .children(usual_line),
+        )
+        .child(month_row)
 }
 
 /// Sellers per point of sale, the cheapest in yellow, then the
