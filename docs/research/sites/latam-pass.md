@@ -212,3 +212,103 @@ first.
 | `headless-logged-in-access-denied.png` | Screenshot of that page, 1440×1000 |
 
 No award fixture: no award search ran.
+
+## Headed Chromium with a warmed, logged-in profile (2026-10-07)
+
+Question: does a headed Chromium get `offers/search` where the Xvfb
+probe (latam.md, "Headed Chromium in a virtual display") got 403, if
+its profile is a real, lasting one that the user warmed up by hand?
+
+Setup:
+
+- Chromium 151.0.7922.71, the binary the daemon runs, with the
+  daemon's flags (`--remote-debugging-port=9341`, `--window-size=1440,1000`,
+  `--no-first-run`, `--no-default-browser-check`,
+  `--disable-features=Translate,MediaRouter`, `--password-store=basic`,
+  `--use-mock-keychain`, `--disable-sync`), no `--headless`, plus
+  `--ozone-platform=wayland`. The window was on the user's own
+  Wayland desktop, with the GPU. The CDP port was open the whole time.
+- Profile: `~/.local/share/travel-monitor/chromium/miles-latam_pass`,
+  the daemon's per-site profile for `miles:latam_pass` (0062). It was
+  new. The user logged in to LATAM Pass in it (with the SMS code),
+  accepted cookies, and ran a few searches by hand.
+- No user-agent override, no stealth flags, no extensions, no
+  synthetic input. The stock user agent (`X11; Linux x86_64 …
+  Chrome/151.0.0.0`).
+- `chrome-cdp` opened a new tab, installed an XHR/fetch hook with
+  `Page.addScriptToEvaluateOnNewDocument`, and navigated. No clicks.
+- Load count: 2 page loads. The GRU→LIS one-way 2026-11-10 cash URL
+  (§1 of latam.md, 18:16:30 UTC), then the same URL with
+  `redemption=true` (18:17:30 UTC).
+
+### Result: both searches return prices
+
+- **Cash:** `GET /bff/air-offers/v2/offers/search?…&redemption=false`
+  returned **200**, 29 itineraries. The cheapest was LA8146 nonstop,
+  LIGHT R$ 1.907,43 (STANDARD 2.136,04, FULL 2.414,35). Both calendar
+  calls returned 200 as before.
+- **Award:** the results page called a different path,
+  **`GET /bff/air-offers/v2/offers/search/redemption?…&redemption=true`**,
+  which returned **200**, 17 itineraries. There was no login wall.
+- No challenge, no error page, no Akamai denial.
+
+So the stricter check on `offers/search` passes for a headed browser
+with a warmed profile and the CDP port open. What changed from the
+Xvfb probe was the display (GPU-backed Wayland, not Xvfb's software
+rendering) and the profile (warmed and logged in, not new). One load
+of each cannot tell which of the two mattered.
+
+### Award response
+
+The same shape as the cash response (`content[].summary.brands[]`).
+Per brand:
+
+```json
+"price":           { "currency": "LOYALTY_POINTS", "amount": 63848, "display": "63.848 milhas" },
+"priceWithOutTax": { "currency": "BRL", "amount": 1838.82 },
+"taxes":           { "currency": "BRL", "amount": 68.61 },
+"seatsRemaining":  { "count": 9, "lowAvailability": false },
+"offerId":         "…loyalty"
+```
+
+`content[].newPrices[]` repeats `{ fare, taxes, total }` per brand
+(miles, BRL, miles). Economy and business brands come in the same
+response ("PREMIUM BUSINESS STANDARD/FULL").
+
+**Miles are the fare before taxes × 34.72**, on every brand of every
+itinerary in this response (LIGHT 63,848 = R$ 1.838,82 × 34.72;
+PREMIUM BUSINESS FULL 328,214 = R$ 9.452,55 × 34.72). That is about
+R$ 28.80 per 1,000 miles. Taxes are paid in BRL on top. For most
+itineraries the award's fare before taxes plus taxes equals the cash
+price of the same brand, so the award price follows the cash price.
+Some itineraries do not: LA8084 LIGHT costs 145,298 miles (a fare of
+R$ 4.184,57 before taxes) but R$ 6.982,80 in cash, and LA8066 lists two
+award fares for one brand. So the award series cannot be fully derived
+from the cash one.
+
+The calendar calls on the award page are the cash calendar (BRL
+amounts, no `redemption` parameter). There is no award calendar: an
+award price costs one page load per route × direction × date.
+
+### What this means for the daemon
+
+- Headless stays refused at the edge. A headed Chromium works, so
+  LATAM needs a display. The daemon runs as a user service with no
+  window; the plan is an offscreen Wayland compositor on the GPU
+  render node, run by the daemon itself (as moonshine does), with
+  Chromium on `--ozone-platform=wayland`.
+- The profile matters as much as the display: it must be the
+  lasting, logged-in `miles-latam_pass` profile, not a new one.
+- Award checks are expensive (no calendar) and run under the user's
+  real account: keep them rare and targeted, for example the dates
+  where the cash price is already low.
+
+### Fixtures
+
+| File | Source |
+| ---- | ------ |
+| `../latam/offers-search-ow-gru-lis-2026-11-10-br-headed-warm.json` | The cash `offers/search` response from this probe |
+| `offers-search-redemption-ow-gru-lis-2026-11-10-br.json` | The award `offers/search/redemption` response |
+
+The session IDs in `extraDetails` were replaced with `<removed>`. No
+screenshot was kept: the page header shows the account holder's name.
