@@ -3,12 +3,16 @@
 # one source and one Cargo.lock.
 {
   lib,
+  addDriverRunpath,
   makeRustPlatform,
   makeWrapper,
+  patchelf,
   pkg-config,
   chromium,
+  libglvnd,
   rust,
   guiLibs,
+  compositorLibs,
   src,
 }:
 let
@@ -69,10 +73,20 @@ in
         "tm-daemon"
       ];
 
-      # The crates that need neither a browser nor a display. tm-browser's
+      # The offscreen compositor for LATAM's headed Chromium (0081).
+      buildInputs = compositorLibs;
+      nativeBuildInputs = common.nativeBuildInputs ++ [
+        addDriverRunpath
+        patchelf
+      ];
+
+      # The crates that need neither a browser nor a display (the
+      # compositor's GPU tests skip without a render node). tm-browser's
       # integration tests drive a real Chromium (they read TM_CHROMIUM and
       # skip when it is unset); the sandbox has none, so they stay out.
       cargoTestFlags = [
+        "--package"
+        "tm-compositor"
         "--package"
         "tm-domain"
         "--package"
@@ -89,7 +103,14 @@ in
       # The daemon starts its own Chromium (0021). The home-manager module
       # passes `--chromium` explicitly; this default is for running it by
       # hand.
+      #
+      # smithay opens libEGL with dlopen, so it is not in DT_NEEDED and
+      # the automatic RUNPATH misses it: add glvnd, and
+      # /run/opengl-driver/lib (addDriverRunpath) for the GPU's own
+      # driver libraries, as moonshine's package does.
       postFixup = ''
+        patchelf --add-rpath ${lib.makeLibraryPath [ libglvnd ]} $out/bin/tmd
+        addDriverRunpath $out/bin/tmd
         wrapProgram $out/bin/tmd --set-default TM_CHROMIUM ${lib.getExe chromium}
       '';
 
@@ -114,7 +135,9 @@ in
       # need a display.
       doCheck = false;
 
-      buildInputs = guiLibs;
+      # tm-browser links the compositor (0081), though the app never
+      # starts one.
+      buildInputs = guiLibs ++ compositorLibs;
 
       # gpui opens Vulkan, Wayland and X11 with dlopen, so the binary needs
       # them on its library path. The app opens the daemon's Chromium

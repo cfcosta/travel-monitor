@@ -60,8 +60,17 @@
                 wayland
               ];
 
+              # tm-compositor (DECISIONS.md 0081) links GBM and xkbcommon,
+              # and smithay opens libEGL (glvnd) with dlopen; glvnd finds
+              # the GPU's driver under /run/opengl-driver.
+              compositorLibs = with pkgs; [
+                libgbm
+                libglvnd
+                libxkbcommon
+              ];
+
               packages = pkgs.callPackage ./nix/packages.nix {
-                inherit rust guiLibs;
+                inherit rust guiLibs compositorLibs;
                 src = ./.;
               };
 
@@ -98,6 +107,7 @@
             in
             {
               inherit
+                compositorLibs
                 formatter
                 guiLibs
                 packages
@@ -134,6 +144,7 @@
 
       devShells = forEachSupportedSystem (
         {
+          compositorLibs,
           formatter,
           guiLibs,
           pkgs,
@@ -159,11 +170,12 @@
                 jq
                 sqlite
               ]
-              ++ guiLibs;
+              ++ guiLibs
+              ++ compositorLibs;
 
             nativeBuildInputs = [ pkgs.pkg-config ];
 
-            LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath guiLibs;
+            LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath (guiLibs ++ compositorLibs);
             # tm-store's queries are checked against the committed .sqlx
             # data; no database is needed to build.
             SQLX_OFFLINE = "true";

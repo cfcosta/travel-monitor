@@ -55,6 +55,7 @@ url = "2"
 
 tm-app = { path = "crates/tm-app" }
 tm-browser = { path = "crates/tm-browser" }
+tm-compositor = { path = "crates/tm-compositor" }
 tm-daemon = { path = "crates/tm-daemon" }
 tm-domain = { path = "crates/tm-domain" }
 tm-gflights = { path = "crates/tm-gflights" }
