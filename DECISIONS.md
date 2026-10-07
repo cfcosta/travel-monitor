@@ -1311,3 +1311,19 @@ reader runs yet. A LATAM Pass login counts only if `_xp_session` on
 www.latamairlines.com is persistent and unexpired: LATAM's other
 cookies are set for any visitor, so 0064's general rule read every
 visit as a login.
+
+## 0084: LATAM shares one warm profile, and award dates come from the date strip
+
+- Date: 2026-10-07
+- Refines [0062](#0062-a-browser-profile-per-site-and-sites-checked-in-parallel)
+  and [0082](#0082-latam-pass-miles-are-measured-against-cash-and-its-login-is-_xp_session).
+
+- **One LATAM profile.** `airline:LA` and `miles:latam_pass` run in the
+  same Chromium profile (`miles-latam_pass`), the one the user logged
+  in to and warmed up by hand, so there is one login and one warm-up.
+  Both hit latamairlines.com, so they share one browser, one budget and
+  one pace instead of two sites checking LATAM at the same time.
+- **The date strip.** After one results page loads for a route and
+  direction, the reader may click up to six other days on the page's
+  date strip. Each click is the site's own search with no page load; it
+  counts against the budget as a load and is spaced like one (20–45 s).
