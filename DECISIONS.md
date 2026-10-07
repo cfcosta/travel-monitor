@@ -1285,3 +1285,29 @@ Chromium is never started on DevTools port 0: Chromium 151 then marks
 every page as automated (`navigator.webdriver` is true), headless or
 not. The launch picks a free port itself, as a person debugging would.
 Nothing is added to hide automation (0052).
+
+## 0082: LATAM Pass miles are measured against cash, and its login is _xp_session
+
+- Date: 2026-10-07
+- Refines [0023](#0023-award-prices-are-tracked-in-smiles-latam-pass-and-azul-fidelidade),
+  [0050](#0050-airline-and-miles-sites-are-probed-before-they-run),
+  [0064](#0064-a-login-counts-only-if-the-profile-holds-a-session) and
+  [0081](#0081-latams-chromium-runs-headed-on-the-daemons-own-offscreen-compositor).
+- Research: [docs/research/sites/latam-pass.md](docs/research/sites/latam-pass.md), "Measuring cash against miles".
+
+LATAM Pass prices an award at its fare before taxes × 34.72 (R$ 28,80
+per 1,000 miles), with silent route discounts, and its fare is the cash
+fare of the same booking class when the award search offers that class.
+A round-trip award can cost much less than its two one-way awards, so
+round trips are searched as round trips. There is no award calendar and
+the site's API refuses calls the page did not make itself, so award
+checks are chosen from cash: the dates where the cash fare is low, plus
+a rotating spot check, one page load per route and direction. Award
+deals are judged against the award series' own baseline; each award
+observation also keeps its rate in R$ per 1,000 miles, computed from
+its own prices, never assumed. `airline:LA` and `miles:latam_pass` are
+known sites that need the offscreen display, LATAM Pass a login; no
+reader runs yet. A LATAM Pass login counts only if `_xp_session` on
+www.latamairlines.com is persistent and unexpired: LATAM's other
+cookies are set for any visitor, so 0064's general rule read every
+visit as a login.
