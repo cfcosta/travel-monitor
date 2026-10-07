@@ -1462,3 +1462,23 @@ airports or the metro is known, otherwise the airport). When the last
 sweep's price is the deal threshold (20%) under that median, the daemon
 notifies once; the drop ends when the price is back within 10% or the
 destination leaves the sweep.
+
+## 0090: LATAM award dates are read with page loads; the strip is off
+
+- Date: 2026-10-07
+- Refines [0084](#0084-latam-shares-one-warm-profile-and-award-dates-come-from-the-date-strip)
+  and [0085](#0085-latams-reader-shares-latam-passs-worker-award-dates-follow-cash).
+
+In the live run a search started by a click on the results page's date
+strip got Akamai's 403, and the check's good award results were lost.
+The strip stays, behind `--latam-strip`, off by default: each award
+date is its own results page, one load, paced like any LATAM check. A
+check reads one date: the cheapest cash day within 15% of the leg's
+cheapest not read in 72 hours, else (and once a week) a spot check on
+the day farthest from what the family read lately, never in the next
+three days unless nothing later qualifies. A check that fails after its
+page was read records what it read and is still a block. LATAM round
+trips are not checked: their return price needs a click on an outbound
+fare, and two one-ways are not the same price; they wait for a live run
+that shows the click works. LATAM Pass's worker, which also runs
+LATAM's cash checks, starts at 80 loads a day, at most 160.
