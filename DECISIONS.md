@@ -1259,3 +1259,24 @@ its next confirmation and when it starts. `tmd --no-notify` sends
 nothing and leaves deals unseen. Only confirmed deals are announced:
 candidates still need their round-trip check (0031), which is what
 weeds out a one-off leg price that the real round trip does not match.
+
+## 0081: LATAM's Chromium runs headed on the daemon's own offscreen compositor
+
+- Date: 2026-10-07
+- Refines [0021](#0021-the-daemon-runs-its-own-headless-chromium),
+  [0052](#0052-sites-that-deny-the-daemons-browser-stay-off) and
+  [0062](#0062-a-browser-profile-per-site-and-sites-checked-in-parallel).
+
+Akamai denies LATAM to a headless Chromium, and a headed one in Xvfb
+(software GL) got 403 on `offers/search`; a headed Chromium on a GPU
+Wayland display with a warmed profile got prices
+(docs/research/sites/latam-pass.md). The daemon is a user service with
+no display, so it runs one: `tm-compositor`, a minimal Wayland
+compositor on the GPU render node (no DRM master, seat or logind) that
+draws every window into a GBM buffer nobody sees. Each offscreen
+Chromium gets its own, started before it and stopped with it, and runs
+with `--ozone-platform=wayland` and only that `WAYLAND_DISPLAY`. The
+seat has a keyboard and a pointer but no input. LATAM's sites
+(`airline:LA`, `miles:latam_pass`) use it; Google Flights and TAP stay
+headless, and `--headed` still shows real windows. Upstream smithay,
+modelled on moonshine's compositor (BSD-2).
