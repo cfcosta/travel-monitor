@@ -3,15 +3,25 @@
 //!
 //! Every toplevel is configured maximized and activated at the output's
 //! size, mapped at the origin and given keyboard focus, as a single
-//! browser window on its own desktop would be. The seat has a keyboard
-//! and a pointer but receives no input. Popups (menus, `<select>`
-//! lists) are tracked so they draw over their window.
+//! browser window on its own desktop would be. The seat has a keyboard,
+//! which receives no input, and a pointer driven by
+//! [`crate::PointerHandle`]: the surface under the cursor (a window, its
+//! subsurfaces or its popups) has pointer focus. Popups (menus,
+//! `<select>` lists) are tracked so they draw over their window, and a
+//! popup's grab is honoured, so a click outside it closes it.
 //!
-//! Follows moonshine's state and handlers
-//! (moonshine-core/src/session/compositor/{state,handlers}.rs, BSD-2,
-//! © Hans Gaiser), without Xwayland, input injection or HDR.
+//! Follows moonshine's state, handlers and input
+//! (moonshine-core/src/session/compositor/{state,handlers,input}.rs,
+//! BSD-2, © Hans Gaiser) and smithay's anvil for popup grabs, without
+//! Xwayland, keyboard input or HDR.
 
-use std::time::{Duration, Instant};
+use std::{
+    sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+    },
+    time::{Duration, Instant},
+};
 
 use smithay::{
     backend::{
@@ -28,13 +38,24 @@ use smithay::{
     delegate_viewporter,
     delegate_xdg_shell,
     desktop::{
+        PopupKeyboardGrab,
         PopupKind,
         PopupManager,
+        PopupPointerGrab,
+        PopupUngrabStrategy,
         Space,
         Window,
+        WindowSurfaceType,
+        find_popup_root_surface,
         utils::OutputPresentationFeedback,
     },
-    input::{Seat, SeatHandler, SeatState, keyboard::XkbConfig},
+    input::{
+        Seat,
+        SeatHandler,
+        SeatState,
+        keyboard::XkbConfig,
+        pointer::{ButtonEvent, Focus, MotionEvent},
+    },
     output::Output,
     reexports::{
         wayland_protocols::{
@@ -48,7 +69,7 @@ use smithay::{
             protocol::{wl_buffer, wl_seat, wl_surface::WlSurface},
         },
     },
-    utils::{Clock, Monotonic, SERIAL_COUNTER, Serial},
+    utils::{Clock, Logical, Monotonic, Point, SERIAL_COUNTER, Serial, Time},
     wayland::{
         buffer::BufferHandler,
         compositor::{
@@ -88,7 +109,11 @@ use smithay::{
     },
 };
 
-use crate::{Error, gpu::Gpu};
+use crate::{
+    Error,
+    gpu::Gpu,
+    pointer::{PointerEvent, PointerInput, button_state, wheel_frame},
+};
 
 /// How often a frame is drawn on a still screen, so a client that
 /// waits for a frame callback without changing anything still gets one
@@ -120,6 +145,11 @@ pub(crate) struct State {
     last_frame: Instant,
     /// Frames drawn, for presentation feedback.
     frames: u64,
+    /// The newest pointer event's time, so event times never go back.
+    last_input: Option<Time<Monotonic>>,
+    /// Set while a surface is under the cursor, for
+    /// [`crate::PointerHandle::is_over_window`].
+    over_surface: Arc<AtomicBool>,
 }
 
 impl State {
@@ -129,6 +159,7 @@ impl State {
         output: Output,
         gpu: Gpu,
         frame_interval: Duration,
+        over_surface: Arc<AtomicBool>,
     ) -> Result<Self, Error> {
         let clock = Clock::<Monotonic>::new();
         let compositor = CompositorState::new::<Self>(&display);
@@ -148,7 +179,13 @@ impl State {
         if let Err(e) = seat.add_keyboard(XkbConfig::default(), 600, 25) {
             tracing::warn!("the seat has no keyboard: {e}");
         }
-        seat.add_pointer();
+        // The cursor rests at the output's centre until it moves.
+        let pointer = seat.add_pointer();
+        if let Some(mode) = output.current_mode() {
+            let centre =
+                (f64::from(mode.size.w) / 2.0, f64::from(mode.size.h) / 2.0);
+            pointer.set_location(centre.into());
+        }
 
         // linux-dmabuf v5 with the render node as the main device, so
         // the browser's GPU process allocates its buffers there.
@@ -188,6 +225,8 @@ impl State {
             dirty: true,
             last_frame: Instant::now(),
             frames: 0,
+            last_input: None,
+            over_surface,
         })
     }
 
@@ -200,6 +239,7 @@ impl State {
         }
         self.space.refresh();
         self.popups.cleanup();
+        self.refresh_pointer_focus();
         if let Err(e) = self.display.flush_clients() {
             tracing::debug!("cannot flush the clients: {e}");
         }
@@ -234,6 +274,100 @@ impl State {
             self.frames,
             wp_presentation_feedback::Kind::Vsync,
         );
+    }
+
+    /// Sends one pointer event to the client under the cursor, then
+    /// ends the pointer frame and flushes, so it arrives at once.
+    pub(crate) fn apply_pointer(&mut self, event: &PointerEvent) {
+        let Some(pointer) = self.seat.get_pointer() else {
+            return;
+        };
+        let time = self
+            .last_input
+            .map_or(event.time, |last| last.max(event.time));
+        self.last_input = Some(time);
+        let time = time.as_millis();
+        let serial = SERIAL_COUNTER.next_serial();
+        match event.input {
+            PointerInput::Motion { x, y } => {
+                let location = Point::from((x, y));
+                let under = self.surface_under(location);
+                pointer.motion(
+                    self,
+                    under,
+                    &MotionEvent {
+                        location,
+                        serial,
+                        time,
+                    },
+                );
+            }
+            PointerInput::Button { button, pressed } => pointer.button(
+                self,
+                &ButtonEvent {
+                    serial,
+                    time,
+                    button: button.code(),
+                    state: button_state(pressed),
+                },
+            ),
+            PointerInput::Scroll {
+                notches_x,
+                notches_y,
+            } => pointer.axis(self, wheel_frame(time, notches_x, notches_y)),
+        }
+        pointer.frame(self);
+        self.over_surface
+            .store(pointer.current_focus().is_some(), Ordering::Release);
+        if let Err(e) = self.display.flush_clients() {
+            tracing::debug!("cannot flush the clients: {e}");
+        }
+    }
+
+    /// Gives the pointer focus to whatever is under a still cursor now,
+    /// as a desktop does when a window first draws or a menu opens
+    /// under the mouse: the surface gets an enter at the cursor.
+    fn refresh_pointer_focus(&mut self) {
+        let Some(pointer) = self.seat.get_pointer() else {
+            return;
+        };
+        let location = pointer.current_location();
+        let under = self.surface_under(location);
+        if under.as_ref().map(|(surface, _)| surface)
+            == pointer.current_focus().as_ref()
+        {
+            return;
+        }
+        let time = self.clock.now();
+        let time = self.last_input.map_or(time, |last| last.max(time));
+        self.last_input = Some(time);
+        pointer.motion(
+            self,
+            under,
+            &MotionEvent {
+                location,
+                serial: SERIAL_COUNTER.next_serial(),
+                time: time.as_millis(),
+            },
+        );
+        pointer.frame(self);
+        self.over_surface
+            .store(pointer.current_focus().is_some(), Ordering::Release);
+    }
+
+    /// The surface at `location` on the output and its origin there:
+    /// the topmost window's popups first, then its subsurfaces and the
+    /// window itself.
+    fn surface_under(
+        &self,
+        location: Point<f64, Logical>,
+    ) -> Option<(WlSurface, Point<f64, Logical>)> {
+        self.space.elements().rev().find_map(|window| {
+            let origin = self.space.element_location(window)?.to_f64();
+            let (surface, offset) = window
+                .surface_under(location - origin, WindowSurfaceType::ALL)?;
+            Some((surface, offset.to_f64() + origin))
+        })
     }
 
     fn window_of(&self, surface: &WlSurface) -> Option<&Window> {
@@ -377,14 +511,56 @@ impl XdgShellHandler for State {
         surface.send_repositioned(token);
     }
 
-    /// Popup grabs follow pointer and keyboard input, which this
-    /// compositor never receives.
+    /// A menu asks for the input while it is open: it gets the
+    /// pointer and keyboard until it closes, and a click outside it
+    /// closes it (anvil's handler). A grab not asked for in answer to
+    /// a click the client received is refused.
     fn grab(
         &mut self,
-        _surface: PopupSurface,
-        _seat: wl_seat::WlSeat,
-        _serial: Serial,
+        surface: PopupSurface,
+        seat: wl_seat::WlSeat,
+        serial: Serial,
     ) {
+        let Some(seat) = Seat::<Self>::from_resource(&seat) else {
+            return;
+        };
+        let popup = PopupKind::Xdg(surface);
+        let Ok(root) = find_popup_root_surface(&popup) else {
+            return;
+        };
+        let mut grab = match self.popups.grab_popup(root, popup, &seat, serial)
+        {
+            Ok(grab) => grab,
+            Err(e) => {
+                tracing::debug!("a popup grab was refused: {e:?}");
+                return;
+            }
+        };
+        let previous = grab.previous_serial().unwrap_or(serial);
+        if let Some(keyboard) = seat.get_keyboard() {
+            if keyboard.is_grabbed()
+                && !(keyboard.has_grab(serial) || keyboard.has_grab(previous))
+            {
+                grab.ungrab(PopupUngrabStrategy::All);
+                return;
+            }
+            keyboard.set_focus(self, grab.current_grab(), serial);
+            keyboard.set_grab(self, PopupKeyboardGrab::new(&grab), serial);
+        }
+        if let Some(pointer) = seat.get_pointer() {
+            if pointer.is_grabbed()
+                && !(pointer.has_grab(serial) || pointer.has_grab(previous))
+            {
+                grab.ungrab(PopupUngrabStrategy::All);
+                return;
+            }
+            pointer.set_grab(
+                self,
+                PopupPointerGrab::new(&grab),
+                serial,
+                Focus::Keep,
+            );
+        }
     }
 }
 

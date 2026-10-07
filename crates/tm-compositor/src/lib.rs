@@ -12,6 +12,11 @@
 //! back. Chromium joins it with `WAYLAND_DISPLAY` set to
 //! [`Compositor::wayland_display`] and `--ozone-platform=wayland`.
 //!
+//! The seat's pointer takes input from [`Compositor::pointer`]: a
+//! [`PointerHandle`] any thread can move, click and scroll with, whose
+//! events reach the window under the cursor as a mouse's would
+//! (DECISIONS.md 0091). The keyboard takes none.
+//!
 //! The compositor runs a calloop event loop on its own thread. The
 //! handle stops and joins it on [`Compositor::shutdown`] or drop, which
 //! also removes the socket. One compositor serves one Chromium.
@@ -20,6 +25,7 @@
 //! Gaiser), with upstream smithay and none of its streaming parts.
 
 mod gpu;
+mod pointer;
 mod render_node;
 mod state;
 
@@ -30,6 +36,7 @@ use std::{
     time::{Duration, Instant},
 };
 
+pub use pointer::{Button, PointerHandle, SCROLL_PER_NOTCH};
 pub use render_node::{RENDER_NODE_VAR, find_render_node};
 use smithay::{
     output::{Mode, Output, PhysicalProperties, Subpixel},
@@ -40,6 +47,7 @@ use smithay::{
             LoopSignal,
             Mode as Trigger,
             PostAction,
+            channel::{self, Event as ChannelEvent},
             generic::Generic,
             timer::{TimeoutAction, Timer},
         },
@@ -75,6 +83,10 @@ pub enum Error {
     /// The compositor thread did not report back in time, or died.
     #[error("the compositor did not start: {0}")]
     Startup(String),
+
+    /// The compositor has stopped, so its pointer moves nothing.
+    #[error("the compositor has stopped")]
+    Stopped,
 }
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
@@ -110,6 +122,7 @@ pub struct Compositor {
     socket: String,
     render_node: PathBuf,
     signal: LoopSignal,
+    pointer: PointerHandle,
     thread: Option<JoinHandle<()>>,
 }
 
@@ -118,6 +131,7 @@ struct Ready {
     socket: String,
     render_node: PathBuf,
     signal: LoopSignal,
+    pointer: PointerHandle,
 }
 
 impl Compositor {
@@ -155,6 +169,7 @@ impl Compositor {
             socket: ready.socket,
             render_node: ready.render_node,
             signal: ready.signal,
+            pointer: ready.pointer,
             thread: Some(thread),
         })
     }
@@ -168,6 +183,14 @@ impl Compositor {
     /// The render node it draws on.
     pub fn render_node(&self) -> &std::path::Path {
         &self.render_node
+    }
+
+    /// The seat's pointer, to move, click and scroll with as a mouse
+    /// would. The window under the cursor gets the events; keyboard
+    /// focus stays with the newest window. Once the compositor stops,
+    /// every call is [`Error::Stopped`].
+    pub fn pointer(&self) -> PointerHandle {
+        self.pointer.clone()
     }
 
     /// Stops the event loop and waits for its thread. The socket is
@@ -199,14 +222,14 @@ impl Drop for Compositor {
 /// The compositor thread: sets everything up, reports the outcome on
 /// `ready`, then runs the event loop until it is stopped.
 fn serve(config: &CompositorConfig, ready: &mpsc::SyncSender<Result<Ready>>) {
-    let (mut event_loop, mut state, socket, render_node) = match set_up(config)
-    {
-        Ok(parts) => parts,
-        Err(e) => {
-            let _ = ready.send(Err(e));
-            return;
-        }
-    };
+    let (mut event_loop, mut state, socket, render_node, pointer) =
+        match set_up(config) {
+            Ok(parts) => parts,
+            Err(e) => {
+                let _ = ready.send(Err(e));
+                return;
+            }
+        };
     tracing::debug!(
         socket = %socket,
         render_node = %render_node.display(),
@@ -221,6 +244,7 @@ fn serve(config: &CompositorConfig, ready: &mpsc::SyncSender<Result<Ready>>) {
             socket: socket.clone(),
             render_node,
             signal,
+            pointer,
         }))
         .is_err()
     {
@@ -232,7 +256,13 @@ fn serve(config: &CompositorConfig, ready: &mpsc::SyncSender<Result<Ready>>) {
     }
 }
 
-type Parts = (EventLoop<'static, State>, State, String, PathBuf);
+type Parts = (
+    EventLoop<'static, State>,
+    State,
+    String,
+    PathBuf,
+    PointerHandle,
+);
 
 fn set_up(config: &CompositorConfig) -> Result<Parts> {
     let wayland = |what: &str, e: &dyn std::fmt::Display| {
@@ -248,7 +278,16 @@ fn set_up(config: &CompositorConfig) -> Result<Parts> {
         .map_err(|e| wayland("cannot create the Wayland display", &e))?;
     let handle = display.handle();
     let interval = frame_interval(config.refresh_hz);
-    let state = State::new(handle.clone(), output, gpu, interval)?;
+    // Pointer input from any thread, applied as it arrives.
+    let (pointer_tx, pointer_rx) = channel::channel();
+    let pointer = PointerHandle::new(pointer_tx, config.size);
+    let state = State::new(
+        handle.clone(),
+        output,
+        gpu,
+        interval,
+        pointer.over_surface_flag(),
+    )?;
 
     let socket_source = ListeningSocketSource::new_auto()
         .map_err(|e| wayland("cannot bind a Wayland socket", &e))?;
@@ -288,6 +327,15 @@ fn set_up(config: &CompositorConfig) -> Result<Parts> {
         )
         .map_err(|e| wayland("cannot watch the display", &e))?;
 
+    event_loop
+        .handle()
+        .insert_source(pointer_rx, |event, _, state| {
+            if let ChannelEvent::Msg(event) = event {
+                state.apply_pointer(&event);
+            }
+        })
+        .map_err(|e| wayland("cannot watch the pointer's input", &e))?;
+
     // The refresh: a frame every interval, scheduled against the clock
     // so time spent drawing does not slow the rate down.
     let mut next = Instant::now() + interval;
@@ -304,7 +352,7 @@ fn set_up(config: &CompositorConfig) -> Result<Parts> {
         })
         .map_err(|e| wayland("cannot start the frame timer", &e))?;
 
-    Ok((event_loop, state, socket, render_node))
+    Ok((event_loop, state, socket, render_node, pointer))
 }
 
 /// The one output, at the configured size and rate, with the physical

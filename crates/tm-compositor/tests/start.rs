@@ -5,7 +5,13 @@
 
 use std::{os::unix::net::UnixStream, path::PathBuf};
 
-use tm_compositor::{Compositor, CompositorConfig, find_render_node};
+use tm_compositor::{
+    Button,
+    Compositor,
+    CompositorConfig,
+    Error,
+    find_render_node,
+};
 
 fn runtime_dir() -> Option<PathBuf> {
     let Some(dir) = std::env::var_os("XDG_RUNTIME_DIR") else {
@@ -55,4 +61,23 @@ fn compositors_get_their_own_sockets() {
     let a = Compositor::start(CompositorConfig::default()).expect("starts");
     let b = Compositor::start(CompositorConfig::default()).expect("starts");
     assert_ne!(a.wayland_display(), b.wayland_display());
+}
+
+#[test]
+fn the_pointer_moves_until_shutdown() {
+    if runtime_dir().is_none() {
+        return;
+    }
+    let compositor =
+        Compositor::start(CompositorConfig::default()).expect("starts");
+    let pointer = compositor.pointer();
+    assert_eq!(pointer.position(), (720.0, 500.0));
+    assert!(!pointer.is_over_window(), "no window, nothing under it");
+    pointer.move_to(100.5, 2000.0).expect("moves");
+    assert_eq!(pointer.position(), (100.5, 999.0));
+    pointer.press(Button::Left).expect("presses");
+    pointer.release(Button::Left).expect("releases");
+    pointer.scroll(0, 2).expect("scrolls");
+    compositor.shutdown();
+    assert!(matches!(pointer.move_to(1.0, 1.0), Err(Error::Stopped)));
 }
