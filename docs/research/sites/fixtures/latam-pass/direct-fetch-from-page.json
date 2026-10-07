@@ -1,0 +1,82 @@
+{
+ "_note": "Two offers/search/redemption calls made with fetch() from a loaded award results page (same origin, same cookies), 2026-10-07 18:46-18:47 UTC. Headers sent: the page's X-latam-* set, a fresh X-latam-Track-Id/Request-Id/App-Session-Id, x-latam-device-width, x-latam-search-token from sessionStorage, and x-latam-captcha-token from grecaptcha.enterprise.execute(siteKey, {action: \"SEARCH_OFFERS\"}). Values not kept. Both returned 200 with no itineraries; the page's own call for 2027-06-15 had returned 17.",
+ "calls": [
+  {
+   "url": "/bff/air-offers/v2/offers/search/redemption?sort=RECOMMENDED&adult=1&child=0&infant=0&cabinType=Economy&locale=pt-br&outOfferId=null&inOfferId=null&outFlightDate=null&inFlightDate=null&inFrom=null&utm_source=undefined&utm_campaign=undefined&utm_medium=undefined&kayakclickid=undefined&utm_term=undefined&utm_content=undefined&idMetasearch=undefined&origin=GRU&destination=LIS&outFrom=2027-06-16&redemption=true",
+   "status": 200,
+   "headers_sent": [
+    "Accept",
+    "X-latam-Application-Country",
+    "X-latam-Application-Lang",
+    "X-latam-Application-Oc",
+    "X-latam-Client-Name",
+    "X-latam-Application-Name",
+    "X-latam-Track-Id",
+    "X-latam-Request-Id",
+    "X-latam-App-Session-Id",
+    "X-latam-Action-Name",
+    "x-latam-device-width",
+    "x-latam-search-token",
+    "x-latam-captcha-token"
+   ],
+   "body": {
+    "content": [],
+    "empty": true,
+    "first": true,
+    "last": true,
+    "number": 0,
+    "numberOfElements": 0,
+    "pageable": "INSTANCE",
+    "size": 0,
+    "sort": {
+     "empty": true,
+     "sorted": false,
+     "unsorted": true
+    },
+    "totalElements": 0,
+    "totalPages": 1
+   }
+  },
+  {
+   "url": "/bff/air-offers/v2/offers/search/redemption?sort=RECOMMENDED&adult=1&child=0&infant=0&cabinType=Economy&locale=pt-br&outOfferId=null&inOfferId=null&outFlightDate=null&inFlightDate=null&inFrom=null&utm_source=undefined&utm_campaign=undefined&utm_medium=undefined&kayakclickid=undefined&utm_term=undefined&utm_content=undefined&idMetasearch=undefined&origin=GRU&destination=LIS&outFrom=2027-06-15&redemption=true",
+   "status": 200,
+   "headers_sent": [
+    "Accept",
+    "X-latam-Application-Country",
+    "X-latam-Application-Lang",
+    "X-latam-Application-Oc",
+    "X-latam-Client-Name",
+    "X-latam-Application-Name",
+    "X-latam-Track-Id",
+    "X-latam-Request-Id",
+    "X-latam-App-Session-Id",
+    "X-latam-Action-Name",
+    "x-latam-device-width",
+    "x-latam-search-token",
+    "x-latam-captcha-token"
+   ],
+   "body": {
+    "content": [],
+    "empty": true,
+    "first": true,
+    "last": true,
+    "number": 0,
+    "numberOfElements": 0,
+    "pageable": "INSTANCE",
+    "size": 0,
+    "sort": {
+     "empty": true,
+     "sorted": false,
+     "unsorted": true
+    },
+    "totalElements": 0,
+    "totalPages": 1
+   }
+  }
+ ],
+ "calendar_with_redemption": {
+  "url": "/bff/air-offers/v2/calendar?origin=GRU&destination=LIS&month=6&year=2027&isRoundTrip=false&extended=true&redemption=true",
+  "status": 200,
+  "note": "byte-identical to the page's own calendar call without redemption=true (BRL amounts)"
+ }
+}

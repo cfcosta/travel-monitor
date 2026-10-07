@@ -278,17 +278,25 @@ response ("PREMIUM BUSINESS STANDARD/FULL").
 **Miles are the fare before taxes × 34.72**, on every brand of every
 itinerary in this response (LIGHT 63,848 = R$ 1.838,82 × 34.72;
 PREMIUM BUSINESS FULL 328,214 = R$ 9.452,55 × 34.72). That is about
-R$ 28.80 per 1,000 miles. Taxes are paid in BRL on top. For most
-itineraries the award's fare before taxes plus taxes equals the cash
-price of the same brand, so the award price follows the cash price.
-Some itineraries do not: LA8084 LIGHT costs 145,298 miles (a fare of
-R$ 4.184,57 before taxes) but R$ 6.982,80 in cash, and LA8066 lists two
-award fares for one brand. So the award series cannot be fully derived
-from the cash one.
+R$ 28.80 per 1,000 miles. Taxes are paid in BRL on top. For every
+award itinerary in this sample, the award's fare before taxes plus
+taxes equals the cash price of the same brand on the same itinerary.
+
+(Corrected on 2026-10-07. This paragraph first said that LA8084 LIGHT
+cost 145,298 miles but R$ 6.982,80 in cash, and that LA8066 listed two
+award fares for one brand. Both came from matching itineraries on the
+first flight's number and departure time only. LA8084 and LA8066 each
+start several itineraries with different connections. Matched on every
+segment, the award LA8084/BA512 costs R$ 4.348,81 in cash
+(R$ 4.184,57 + R$ 164,24 taxes), and LA8066's two prices belong to two
+itineraries (via LA1587 and via LA1670). The R$ 6.982,80 itinerary is
+LA8084/TP1357, which is not in the award results. See "Measuring cash
+against miles" below for where the award price does differ from cash.)
 
 The calendar calls on the award page are the cash calendar (BRL
 amounts, no `redemption` parameter). There is no award calendar: an
-award price costs one page load per route × direction × date.
+award price costs one search per route × direction × date (one page
+load, or one date-carousel click on a loaded page; see below).
 
 ### What this means for the daemon
 
@@ -312,3 +320,258 @@ award price costs one page load per route × direction × date.
 
 The session IDs in `extraDetails` were replaced with `<removed>`. No
 screenshot was kept: the page header shows the account holder's name.
+
+## Measuring cash against miles (2026-10-07)
+
+Question: how does a LATAM Pass award price relate to the cash price,
+and what is the cheapest way for the daemon to find a deal in either?
+
+Setup: the same headed Chromium 151 and logged-in `miles-latam_pass`
+profile as the section above, still running on the user's desktop.
+`chrome-cdp` opened its own tab and installed a hook with
+`Page.addScriptToEvaluateOnNewDocument` that recorded each BFF call's
+URL, status, request header names and body. Loads were 20–45 s apart.
+Nothing was booked, no seat was chosen, nothing was typed.
+
+Load count: 12 searches, no block, no challenge, no login wall.
+
+| # | UTC | What |
+| - | --- | ---- |
+| 1 | 18:35:56 | Award RT GRU–MIA 2027-03-04/11, page load (outbound) |
+| 2 | 18:37:54 | Click: LA8198 LIGHT on the outbound, which loads the award return leg |
+| 3 | 18:38:50 | Cash RT GRU–MIA, same dates, page load (outbound) |
+| 4 | 18:40:08 | Award OW GRU→MIA 2027-03-04 |
+| 5 | 18:40:50 | Award OW CGH→SDU 2026-10-21 (domestic, two weeks out) |
+| 6 | 18:42:00 | Cash OW CGH→SDU 2026-10-21 |
+| 7 | 18:44:39 | Award OW GRU→LIS 2027-06-15 (eight months out) |
+| 8 | 18:45:59 | `fetch` from the page: `calendar … extended=true&redemption=true` |
+| 9 | 18:46:23 | `fetch` from the page: `offers/search/redemption` GRU→LIS 2027-06-16 |
+| 10 | 18:47:01 | `fetch` from the page: the page's own search (2027-06-15) again |
+| 11 | 18:47:38 | Click on 16/06 in the date carousel of the award page |
+| 12 | 18:48:26 | Award OW MIA→GRU 2027-03-11 |
+
+Every itinerary below is matched on all of its segments (flight number
+and departure of each), never on the first flight alone.
+
+### 1. Miles are the award fare × 34.72, with route discounts
+
+Across 8 award responses (1,120 brands, every cabin), the miles price
+is the brand's own `priceWithOutTax` (BRL) divided by R$ 0,0288,
+rounded to a whole mile:
+
+| Rate (miles per R$ of fare) | Brands | Where |
+| --------------------------- | ------ | ----- |
+| 34.72 (R$ 28,80 per 1,000 miles) | 1,042 | every response; every J and W brand; partner flights |
+| 32.98 (34.72 × 0.95) | 69 | CGH→SDU, all Y brands (LIGHT, STANDARD, FULL) of all 23 flights |
+| 31.95 (34.72 × 0.92) | 9 | GRU→MIA RT outbound, Y brands of the three LATAM nonstops (LA8198, LA8194, LA8190) |
+
+- The rate held on near and far dates (October 2026 to June 2027),
+  long-haul and domestic, one way and round trip, economy, premium
+  economy and business.
+- The two discounts are not marked anywhere in the response:
+  `promotionalText.show` is false, `messages` is empty, no
+  `discountPercent`. Premium economy (CGH→SDU) and business (GRU→MIA)
+  on the same flights stayed at 34.72. The same nonstops priced one way
+  (load 4) and on the return leg (load 2) were at 34.72. They are not
+  explained by an elite tier or a co-branded card, since neither applies
+  to this account. So whether another account sees the same discount is
+  unknown.
+- Partner and codeshare flights are priced at 34.72 too: Delta
+  (GRU–MIA), Iberia, British Airways and Lufthansa connections
+  (GRU–LIS). Connections on TAP, Air France, Air Europa (`UX`) and
+  Vueling appear in the cash results but never in the award results.
+
+### 2. The award fare equals the cash fare of the same fare basis
+
+When the award and cash results offer the same fare basis on the same
+itinerary, the BRL fare before taxes is identical to the cent:
+
+| Search | Matched brands | Same fare | Different fare |
+| ------ | -------------- | --------- | -------------- |
+| GRU→LIS OW 2026-11-10 (both from the previous section) | 80 | 80 | 0 |
+| GRU–MIA RT outbound 2027-03-04 (loads 1 and 3) | 186 | 177 | 9 |
+| CGH→SDU OW 2026-10-21 (loads 5 and 6) | 92 | 80 | 12 |
+
+The differences come from **award inventory**: the award search offers
+only some booking classes.
+
+- CGH→SDU LA3902: the cash LIGHT fare is R$ 904,90 (fare basis
+  `NLEX0H1`, the cheapest seat of the day). The award search offers
+  only `XJEX0N1` on that flight, R$ 1.230,90, so 40,597 miles. The cash
+  fare × 32.98 would have been about 29,850 miles. On the other 22
+  flights the cheapest bucket was `XJEX0N1` in both.
+- GRU–MIA Delta connections: the award offers `VLX…` fares where cash
+  offers `LLX…`. Some come out cheaper in miles than the cash fare ×
+  34.72 (LA6346/LA6183 STANDARD 151,165 miles; cash fare R$ 4.775,97),
+  others dearer.
+
+Taxes differ on international round trips: R$ 160,98 on the award
+outbound against R$ 277,27 in cash, and R$ 27,83 on the award return.
+One-way GRU→LIS (R$ 68,61) and domestic CGH→SDU (R$ 62,14) charge the
+same taxes in both.
+
+The cheapest award price of a search followed the cheapest cash fare
+on long-haul: GRU–MIA RT outbound, 67,644 miles = R$ 1.948,16 × 34.72,
+the cheapest cash fare of the same itinerary (LA8212/LA4400). On
+CGH→SDU it did not (inventory, above).
+
+So the cash price predicts the award price closely, **but not
+always**: an award can cost more than the cash fare implies (a closed
+bucket) or less (a discount, or a cheaper partner bucket). Only an award
+search shows which.
+
+### 3. Round trips
+
+`redemption=true` works with `trip=RT`. It is the same two-call flow as
+cash (latam.md §2), both on `offers/search/redemption`: the first call
+has `outOfferId=null`, the second (after choosing an outbound brand)
+`outOfferId=<offerId ending in "loyalty">` and
+`outFlightDate=<arrival>`. Round-trip fare bases end in `/XP`.
+
+GRU–MIA, 2027-03-04/11, LATAM nonstops, LIGHT:
+
+| | Outbound | Return | Total |
+| - | -------- | ------ | ----- |
+| Round trip | 69,069 (LA8198) | 75,065 (LA8199) | **144,134 miles** + R$ 188,81 |
+| Two one-ways | 139,258 (load 4) | 85,418 (load 12) | 224,676 miles + R$ 188,81 |
+
+The award round trip is 36% cheaper than the two one-ways, for the
+same reason as in cash (the round-trip fare is split over its legs).
+An award round trip is not the sum of one-ways; it needs its own
+search and one click.
+
+### 4. No award calendar; one page can search several dates
+
+- `GET /bff/air-offers/v2/calendar` ignores `redemption=true`: the
+  response was byte-identical to the page's own call without it (BRL
+  amounts). The date carousel on the award page shows those cash
+  amounts (R$ 5.749,09 per day around 2027-06-15).
+- The results app's code (its `_next` bundles, read from the browser
+  cache; no extra load) builds the calendar URL from `origin`,
+  `destination`, `month`, `year`, `isRoundTrip` and `extended` only.
+  The search box's calendar, `/bff/web-products-searchbox/v1/calendar`,
+  takes the same parameters. Neither has an award variant.
+- Other award paths in the bundle: `offers/search/redemption/promo/<code>`
+  (used when the URL carries `promocode`; the response then carries a
+  `discountPercent`; error codes `LGE12` and `LGE14` say a promotion
+  can require a LATAM Pass tier or a co-branded card),
+  `offers/search/multicity-redemption`, and `offers/redemption-options`
+  (a POST after choosing flights: miles-plus-money splits). None gives
+  several dates. Promo codes were not tested.
+- **The date carousel re-searches without a page load.** Clicking
+  another day (load 11) made the app fetch
+  `/pt-br/flights/_next/data/<build>/pt-br/flights.json?…` (Next.js
+  page data for the new date) and then `offers/search/redemption` for
+  that day, which returned 200 with 13 itineraries. The URL changed by
+  client-side routing; the document was not reloaded. The carousel
+  shows seven days around the searched date.
+
+### 5. Calling the BFF directly does not work
+
+- The calendar answers a `fetch` from the page with only the plain
+  `X-latam-*` headers (as in latam.md §3).
+- `offers/search/redemption` called with `fetch` from a loaded award
+  page, with every header the page sends (the `X-latam-*` set,
+  `x-latam-device-width`, `x-latam-search-token` from sessionStorage,
+  and a fresh `x-latam-captcha-token` from
+  `grecaptcha.enterprise.execute(<site key>, {action: "SEARCH_OFFERS"})`,
+  the action the app uses), returned **200 with no itineraries**
+  (`totalElements: 0`) twice: for 2027-06-16, and for 2027-06-15, the
+  page's own search, which had just returned 17. A refusal that looks
+  like an empty result.
+- Where the tokens come from: the Next.js page data
+  (`pageProps.tokensToSearch`) carries a new `searchToken` (HS512 JWT,
+  20 minutes, bound to origin and destination), `nextAuth` and
+  `searchSession` for each search. The app can also ask
+  `/bff/air-offers/v2/give-me-search-token` with `x-latam-next-auth`,
+  `x-latam-search-session`, `x-latam-control`, `x-latam-control-bot`
+  and `x-latam-csrf-token`. Reproducing that chain from outside the
+  app is reproducing its bot protection, which 0052 rules out. We
+  stopped after two empty answers.
+
+So a direct API call is not a way to save page loads. A carousel click
+is: it is the app's own search, triggered by the same input a person
+uses.
+
+### 6. Where the session lives
+
+Cookies on LATAM's domains after the login (names, domains and expiry
+only; `fixtures/latam-pass/session-cookies.json`):
+
+| Cookie | Domain | Lifetime | What it is |
+| ------ | ------ | -------- | ---------- |
+| `_xp_session` | `www.latamairlines.com` (host-only), httpOnly, secure | 5 days, **renewed by every page load** (18:17:38 → 10-12 18:17:38; after load 12, 10-12 18:48:36) | the web session |
+| `auth0`, `auth0_compat` | `auth.latamairlines.com`, httpOnly | 3 days from the login (18:15:06 → 10-10 18:15:06), not renewed by `www` loads | Auth0 SSO session |
+| `did`, `did_compat` | `auth.latamairlines.com`, httpOnly | 1 year | Auth0 device id, set by any visit to the login page |
+| `fpid-af`, `ps-af`, `pt-af` | `auth.latamairlines.com`, path `/u/login` | session | login-page anti-fraud |
+| `thx_guid`, `tmx_guid` | `loyaltyprogram.latam.com`, httpOnly | 13 months | ThreatMetrix device ids |
+| `_xp_show_login_incentive` | `www.latamairlines.com` | 1 day | set at 18:14:46, **before** the login |
+| `_xp_metadata_br_pt`, `_xp_exp_id` | `www…`, `.latamairlines.com` | 7 days, 13 months | point of sale, A/B experiment |
+| `_abck`, `bm_*`, `ak_bmsc`, `akavpau_*`, `AKA_A2`, `RT` | `.latamairlines.com`, `www…`, `.auth…` | hours to 1 year | Akamai Bot Manager, waiting room, mPulse |
+| `_ga*`, `_gcl_au`, `__gads`, `__gpi`, `__eoi`, `fs_uid`, `fs_lua`, `kampyle*`, `__exponea_*` | `.latamairlines.com`, `www…` | up to 13 months | analytics, ads, survey, CDP |
+
+- localStorage holds no token (`_grecaptcha`, consent, analytics).
+  sessionStorage holds the per-search JWTs above
+  (`latam-airline-search-token`, `-search-session-token`,
+  `-next-auth-token`), which name origin and destination, not the
+  user. The page learns who is logged in from the server
+  (`pageProps.user`), so the session is the cookies, mainly
+  `_xp_session`.
+- Whether `_xp_session` keeps the login alive after `auth0` expires
+  (day 3) was not tested. A daemon that loads a LATAM page at least
+  every few days keeps `_xp_session` renewed.
+- **The 0064 heuristic reads any LATAM visit as a login.** A
+  logged-out visit leaves persistent cookies that are not on its
+  tracker list (`_xp_show_login_incentive`, `_xp_metadata_br_pt`,
+  `_xp_exp_id`, `kampyle_userid`, `fs_uid`, `__eoi`, `__gads`, `did`,
+  `thx_guid`). For LATAM Pass the check must look for the session
+  cookie itself: `_xp_session` on `www.latamairlines.com`, unexpired.
+  `_xp_session` may also exist for a logged-out visitor (not tested: we
+  did not log out); the first award search is the real proof, since a
+  logged-out award URL redirects to `auth.latamairlines.com` (§1).
+
+### What this means for the daemon
+
+- **Cash** (`airline:LA`): as latam.md §6. One OW page load per route,
+  direction and date gives every cabin; the cash calendar ranks dates.
+- **Miles** (`miles:latam_pass`) cannot be derived from cash, but cash
+  tells where to look. A cash check already gives the expected award
+  price, (cash fare before taxes) × 34.72. Award searches are worth
+  spending on:
+  1. the dates whose cash fare is low for the series (where an award
+     deal would be, if the bucket is open), and
+  2. a rotating spot check of other dates, to catch the silent
+     discounts (×0.95, ×0.92) and partner buckets that cash does not
+     show.
+- **Cost:** one award page load per route and direction, plus up to
+  six carousel clicks for the neighbouring days on the same page, each
+  click one search. A round trip adds one click (choose the outbound)
+  per date. Space clicks like loads.
+- **Deal for an award series:** miles against the series' own
+  baseline (0023 keeps award and cash apart), as for cash. Each award
+  observation can also carry its effective rate, miles ÷ (award fare
+  in BRL), against the standard 34.72, and the cash fare of the same
+  itinerary when one was read: below 34.72 is a discount, above it a
+  closed bucket. Taxes are in BRL and sometimes lower than cash.
+- **Login check:** `_xp_session` on `www.latamairlines.com`, not the
+  generic heuristic.
+
+### Fixtures
+
+| File | Source |
+| ---- | ------ |
+| `offers-search-redemption-rt-gru-mia-2027-03-04-outbound-br.json` | Load 1, first 13 of 50 itineraries plus LA6346/LA6183 (Delta) |
+| `offers-search-redemption-rt-gru-mia-2027-03-11-inbound-br.json` | Load 2, first 8 of 45 |
+| `../latam/offers-search-rt-gru-mia-2027-03-04-outbound-br-2026-10-07.json` | Load 3 (cash), first 13 of 50 plus LA6346/LA6183 |
+| `offers-search-redemption-ow-gru-mia-2027-03-04-br.json` | Load 4, first 8 of 50 |
+| `offers-search-redemption-ow-cgh-sdu-2026-10-21-br.json` | Load 5, all 23 |
+| `../latam/offers-search-ow-cgh-sdu-2026-10-21-br.json` | Load 6 (cash), all 23 |
+| `offers-search-redemption-ow-gru-lis-2027-06-15-br.json` | Load 7, all 15 |
+| `direct-fetch-from-page.json` | Loads 8–10: URLs, header names, statuses and bodies |
+| `offers-search-redemption-ow-gru-lis-2027-06-16-br-carousel.json` | Load 11, first 6 of 13 |
+| `offers-search-redemption-ow-mia-gru-2027-03-11-br.json` | Load 12, first 8 of 50 |
+| `session-cookies.json` | Cookie names, domains, flags and expiry on LATAM's domains (no values) |
+
+`extraDetails` (session and track ids) is `<removed>` in every
+response. The fixtures were checked for the account's name, email,
+LATAM Pass number and balance; none is in them. No screenshot was kept.

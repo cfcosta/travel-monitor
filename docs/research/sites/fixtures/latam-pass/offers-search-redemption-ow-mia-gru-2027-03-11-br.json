@@ -1,0 +1,3209 @@
+{
+ "pageable": {
+  "pageNumber": 0,
+  "pageSize": 50,
+  "sort": [
+   {
+    "direction": "ASC",
+    "property": "RECOMMENDED",
+    "ignoreCase": false,
+    "nullHandling": "NATIVE",
+    "ascending": true,
+    "descending": false
+   }
+  ],
+  "offset": 0,
+  "paged": true,
+  "unpaged": false
+ },
+ "totalPages": 1,
+ "totalElements": 50,
+ "last": true,
+ "sort": [
+  {
+   "direction": "ASC",
+   "property": "RECOMMENDED",
+   "ignoreCase": false,
+   "nullHandling": "NATIVE",
+   "ascending": true,
+   "descending": false
+  }
+ ],
+ "numberOfElements": 8,
+ "first": true,
+ "size": 50,
+ "number": 0,
+ "empty": false,
+ "content": [
+  {
+   "summary": {
+    "tags": [
+     "FASTEST"
+    ],
+    "stopOvers": 0,
+    "duration": 500,
+    "flightCode": "LA8199",
+    "origin": {
+     "departure": "2027-03-11T22:30:00",
+     "departureTime": "22:30",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "destination": {
+     "arrival": "2027-03-12T08:50:00",
+     "arrivalTime": "8:50",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "brands": [
+     {
+      "id": "SL",
+      "offerId": "e62d0ff67a64e2f1bd84a0b6ce2fd3eff810d8c100b0e6c7cc371b36eb3d2e20loyalty",
+      "brandText": "LIGHT",
+      "brandDescription": "xp_sales_web_brand_economy_light_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLESLZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 85418,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 85.418",
+       "display": "85.418 milhas",
+       "srLabel": "85418 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 0,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 0",
+       "display": "0 milhas",
+       "srLabel": "0 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 85418,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 85.418",
+       "display": "85.418 milhas",
+       "srLabel": "85418 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 2460.05,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.460,05",
+       "display": "BRL 2.460,05"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "SE",
+      "offerId": "86537469ba62e9347fe72c9d835a452fd1180a455cb56ca570a2b263357c7771loyalty",
+      "brandText": "PLUS",
+      "brandDescription": "xp_sales_web_brand_economy_plus_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLESEZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 103538,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 103.538",
+       "display": "103.538 milhas",
+       "srLabel": "103538 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 18120,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 18.120",
+       "display": "18.120 milhas",
+       "srLabel": "18120 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 103538,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 103.538",
+       "display": "103.538 milhas",
+       "srLabel": "103538 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 2981.88,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.981,88",
+       "display": "BRL 2.981,88"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "KD",
+      "offerId": "ef9cf8c5126d4bac22435f86aea752edb932c81d030b8829c8434db10c1638cfloyalty",
+      "brandText": "FULL",
+      "brandDescription": "xp_sales_web_brand_economy_full_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLEKDZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 118205,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 118.205",
+       "display": "118.205 milhas",
+       "srLabel": "118205 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 32787,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 32.787",
+       "display": "32.787 milhas",
+       "srLabel": "32787 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 118205,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 118.205",
+       "display": "118.205 milhas",
+       "srLabel": "118205 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 3404.31,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.404,31",
+       "display": "BRL 3.404,31"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "EV",
+      "offerId": "7895491dd7e11042dcafd39d7f70e37cf73ad2f52c285f62fb153cd0c0a62b79loyalty",
+      "brandText": "PREMIUM BUSINESS STANDARD",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessstandard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ILXEVZBX/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 448663,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 448.663",
+       "display": "448.663 milhas",
+       "srLabel": "448663 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 363245,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 363.245",
+       "display": "363.245 milhas",
+       "srLabel": "363245 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 448663,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 448.663",
+       "display": "448.663 milhas",
+       "srLabel": "448663 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 7,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 12921.48,
+       "displayCurrency": "R$",
+       "displayAmount": " 12.921,48",
+       "display": "BRL 12.921,48"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "EJ",
+      "offerId": "baf58314c56e70dbf7d18ab5f18b59c911a2f800d315d3a7db2485ce94e3c1e1loyalty",
+      "brandText": "PREMIUM BUSINESS FULL",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessfull_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ILXEJZBX/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 491803,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 491.803",
+       "display": "491.803 milhas",
+       "srLabel": "491803 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 406385,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 406.385",
+       "display": "406.385 milhas",
+       "srLabel": "406385 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 491803,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 491.803",
+       "display": "491.803 milhas",
+       "srLabel": "491803 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 7,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 14163.93,
+       "displayCurrency": "R$",
+       "displayAmount": " 14.163,93",
+       "display": "BRL 14.163,93"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     }
+    ],
+    "lowestBrandText": "LIGHT",
+    "lowestPrice": {
+     "currency": "LOYALTY_POINTS",
+     "amount": 85418,
+     "displayCurrency": "Milhas",
+     "displayAmount": " 85.418",
+     "display": "85.418 milhas",
+     "srLabel": "85418 milhas"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Brasil"
+    ],
+    "changeOfAirport": false,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 500,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "789",
+     "aircraftLeaseText": "LATAM AIRLINES BRASIL",
+     "flight": {
+      "flightNumber": 8199,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": null,
+      "flightOperator": "JJ",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": "3"
+     },
+     "origin": "MIA",
+     "destination": "GRU",
+     "departure": "2027-03-11T22:30:00",
+     "arrival": "2027-03-12T08:50:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 85418,
+     "taxes": 27.83,
+     "total": 85418
+    },
+    {
+     "fare": 103538,
+     "taxes": 27.83,
+     "total": 103538
+    },
+    {
+     "fare": 118205,
+     "taxes": 27.83,
+     "total": 118205
+    },
+    {
+     "fare": 448663,
+     "taxes": 27.83,
+     "total": 448663
+    },
+    {
+     "fare": 491803,
+     "taxes": 27.83,
+     "total": 491803
+    }
+   ]
+  },
+  {
+   "summary": {
+    "tags": [],
+    "stopOvers": 0,
+    "duration": 505,
+    "flightCode": "LA8195",
+    "origin": {
+     "departure": "2027-03-11T09:20:00",
+     "departureTime": "9:20",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "destination": {
+     "arrival": "2027-03-11T19:45:00",
+     "arrivalTime": "19:45",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "brands": [
+     {
+      "id": "SL",
+      "offerId": "c69e01deb164260c81e9db882e1655adadaf2c57384d573a96b1cff07b3f970aloyalty",
+      "brandText": "LIGHT",
+      "brandDescription": "xp_sales_web_brand_economy_light_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLESLZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 85418,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 85.418",
+       "display": "85.418 milhas",
+       "srLabel": "85418 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 0,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 0",
+       "display": "0 milhas",
+       "srLabel": "0 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 85418,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 85.418",
+       "display": "85.418 milhas",
+       "srLabel": "85418 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 2460.05,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.460,05",
+       "display": "BRL 2.460,05"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "SE",
+      "offerId": "6e1874d9b136dada442fa960d68e43f703557fdc49b1bdc5380bd09df6ef3e08loyalty",
+      "brandText": "PLUS",
+      "brandDescription": "xp_sales_web_brand_economy_plus_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLESEZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 103538,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 103.538",
+       "display": "103.538 milhas",
+       "srLabel": "103538 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 18120,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 18.120",
+       "display": "18.120 milhas",
+       "srLabel": "18120 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 103538,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 103.538",
+       "display": "103.538 milhas",
+       "srLabel": "103538 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 2981.88,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.981,88",
+       "display": "BRL 2.981,88"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "KD",
+      "offerId": "0a6e7624506f811ebc6d2d5ada7680f5a21342bacaca2e7ecd93342784ea7912loyalty",
+      "brandText": "FULL",
+      "brandDescription": "xp_sales_web_brand_economy_full_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLEKDZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 118205,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 118.205",
+       "display": "118.205 milhas",
+       "srLabel": "118205 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 32787,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 32.787",
+       "display": "32.787 milhas",
+       "srLabel": "32787 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 118205,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 118.205",
+       "display": "118.205 milhas",
+       "srLabel": "118205 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 3404.31,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.404,31",
+       "display": "BRL 3.404,31"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "EV",
+      "offerId": "49da58a4c63f415b910db2afc5ddb8fe24aa3494f16580ccc617201d72dd7462loyalty",
+      "brandText": "PREMIUM BUSINESS STANDARD",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessstandard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ILXEVZBX/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 448663,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 448.663",
+       "display": "448.663 milhas",
+       "srLabel": "448663 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 363245,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 363.245",
+       "display": "363.245 milhas",
+       "srLabel": "363245 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 448663,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 448.663",
+       "display": "448.663 milhas",
+       "srLabel": "448663 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 12921.48,
+       "displayCurrency": "R$",
+       "displayAmount": " 12.921,48",
+       "display": "BRL 12.921,48"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "EJ",
+      "offerId": "ec4d1a8523c1371e90037cbe3e93be8ee0384f3dc26b75f37f135dc60d95cc58loyalty",
+      "brandText": "PREMIUM BUSINESS FULL",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessfull_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ILXEJZBX/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 491803,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 491.803",
+       "display": "491.803 milhas",
+       "srLabel": "491803 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 406385,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 406.385",
+       "display": "406.385 milhas",
+       "srLabel": "406385 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 491803,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 491.803",
+       "display": "491.803 milhas",
+       "srLabel": "491803 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 14163.93,
+       "displayCurrency": "R$",
+       "displayAmount": " 14.163,93",
+       "display": "BRL 14.163,93"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     }
+    ],
+    "lowestBrandText": "LIGHT",
+    "lowestPrice": {
+     "currency": "LOYALTY_POINTS",
+     "amount": 85418,
+     "displayCurrency": "Milhas",
+     "displayAmount": " 85.418",
+     "display": "85.418 milhas",
+     "srLabel": "85418 milhas"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Brasil"
+    ],
+    "changeOfAirport": false,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 505,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "789",
+     "aircraftLeaseText": "LATAM AIRLINES BRASIL",
+     "flight": {
+      "flightNumber": 8195,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": null,
+      "flightOperator": "JJ",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": "3"
+     },
+     "origin": "MIA",
+     "destination": "GRU",
+     "departure": "2027-03-11T09:20:00",
+     "arrival": "2027-03-11T19:45:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 85418,
+     "taxes": 27.83,
+     "total": 85418
+    },
+    {
+     "fare": 103538,
+     "taxes": 27.83,
+     "total": 103538
+    },
+    {
+     "fare": 118205,
+     "taxes": 27.83,
+     "total": 118205
+    },
+    {
+     "fare": 448663,
+     "taxes": 27.83,
+     "total": 448663
+    },
+    {
+     "fare": 491803,
+     "taxes": 27.83,
+     "total": 491803
+    }
+   ]
+  },
+  {
+   "summary": {
+    "tags": [],
+    "stopOvers": 0,
+    "duration": 510,
+    "flightCode": "LA8191",
+    "origin": {
+     "departure": "2027-03-11T19:10:00",
+     "departureTime": "19:10",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "destination": {
+     "arrival": "2027-03-12T05:40:00",
+     "arrivalTime": "5:40",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "brands": [
+     {
+      "id": "SL",
+      "offerId": "862a9711b82e9f561811259b6e6e76fbf7a05dc0dd28fbc004bf8508a7a02d5floyalty",
+      "brandText": "LIGHT",
+      "brandDescription": "xp_sales_web_brand_economy_light_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLESLZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 85418,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 85.418",
+       "display": "85.418 milhas",
+       "srLabel": "85418 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 0,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 0",
+       "display": "0 milhas",
+       "srLabel": "0 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 85418,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 85.418",
+       "display": "85.418 milhas",
+       "srLabel": "85418 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 2460.05,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.460,05",
+       "display": "BRL 2.460,05"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "SE",
+      "offerId": "6da74ac3136c456ea8edc2ad883b9d82158c51c5377ca2295ee541f5177caea8loyalty",
+      "brandText": "PLUS",
+      "brandDescription": "xp_sales_web_brand_economy_plus_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLESEZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 103538,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 103.538",
+       "display": "103.538 milhas",
+       "srLabel": "103538 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 18120,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 18.120",
+       "display": "18.120 milhas",
+       "srLabel": "18120 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 103538,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 103.538",
+       "display": "103.538 milhas",
+       "srLabel": "103538 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 2981.88,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.981,88",
+       "display": "BRL 2.981,88"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "KD",
+      "offerId": "4606ba25832cfe5eeb9bc80065e8daa3a131580f3eb9d8608364214e307d06f5loyalty",
+      "brandText": "FULL",
+      "brandDescription": "xp_sales_web_brand_economy_full_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLEKDZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 118205,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 118.205",
+       "display": "118.205 milhas",
+       "srLabel": "118205 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 32787,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 32.787",
+       "display": "32.787 milhas",
+       "srLabel": "32787 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 118205,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 118.205",
+       "display": "118.205 milhas",
+       "srLabel": "118205 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 3404.31,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.404,31",
+       "display": "BRL 3.404,31"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "EV",
+      "offerId": "180c21787e0e439097965906b5ae8697459188dfe058add0e0a275c38f9cfd1aloyalty",
+      "brandText": "PREMIUM BUSINESS STANDARD",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessstandard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ILXEVZBX/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 448663,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 448.663",
+       "display": "448.663 milhas",
+       "srLabel": "448663 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 363245,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 363.245",
+       "display": "363.245 milhas",
+       "srLabel": "363245 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 448663,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 448.663",
+       "display": "448.663 milhas",
+       "srLabel": "448663 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 12921.48,
+       "displayCurrency": "R$",
+       "displayAmount": " 12.921,48",
+       "display": "BRL 12.921,48"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "EJ",
+      "offerId": "2007a6a93d2c7646730554f2a96ac533268bf022f622450c97f39ff5a5da98f3loyalty",
+      "brandText": "PREMIUM BUSINESS FULL",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessfull_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ILXEJZBX/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 491803,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 491.803",
+       "display": "491.803 milhas",
+       "srLabel": "491803 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 406385,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 406.385",
+       "display": "406.385 milhas",
+       "srLabel": "406385 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 491803,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 491.803",
+       "display": "491.803 milhas",
+       "srLabel": "491803 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 14163.93,
+       "displayCurrency": "R$",
+       "displayAmount": " 14.163,93",
+       "display": "BRL 14.163,93"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     }
+    ],
+    "lowestBrandText": "LIGHT",
+    "lowestPrice": {
+     "currency": "LOYALTY_POINTS",
+     "amount": 85418,
+     "displayCurrency": "Milhas",
+     "displayAmount": " 85.418",
+     "display": "85.418 milhas",
+     "srLabel": "85418 milhas"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Brasil"
+    ],
+    "changeOfAirport": false,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 510,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "773",
+     "aircraftLeaseText": "LATAM AIRLINES BRASIL",
+     "flight": {
+      "flightNumber": 8191,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": null,
+      "flightOperator": "JJ",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": "3"
+     },
+     "origin": "MIA",
+     "destination": "GRU",
+     "departure": "2027-03-11T19:10:00",
+     "arrival": "2027-03-12T05:40:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 85418,
+     "taxes": 27.83,
+     "total": 85418
+    },
+    {
+     "fare": 103538,
+     "taxes": 27.83,
+     "total": 103538
+    },
+    {
+     "fare": 118205,
+     "taxes": 27.83,
+     "total": 118205
+    },
+    {
+     "fare": 448663,
+     "taxes": 27.83,
+     "total": 448663
+    },
+    {
+     "fare": 491803,
+     "taxes": 27.83,
+     "total": 491803
+    }
+   ]
+  },
+  {
+   "summary": {
+    "tags": [
+     "CHEAPEST"
+    ],
+    "stopOvers": 1,
+    "duration": 770,
+    "flightCode": "LA2695",
+    "origin": {
+     "departure": "2027-03-11T16:45:00",
+     "departureTime": "16:45",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "destination": {
+     "arrival": "2027-03-12T07:35:00",
+     "arrivalTime": "7:35",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "brands": [
+     {
+      "id": "SL",
+      "offerId": "02866bdcca3fa6a092ba3a9f4cba24da17701c9fb7d43da6935a6116e666462floyalty",
+      "brandText": "LIGHT",
+      "brandDescription": "xp_sales_web_brand_economy_light_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLESLZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 76963,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 76.963",
+       "display": "76.963 milhas",
+       "srLabel": "76963 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 0,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 0",
+       "display": "0 milhas",
+       "srLabel": "0 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 76963,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 76.963",
+       "display": "76.963 milhas",
+       "srLabel": "76963 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 2216.53,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.216,53",
+       "display": "BRL 2.216,53"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "SE",
+      "offerId": "9702d90a83adf45da1b426b7e3f2ae6f611a547fd57c30ba8c7a3c8d14890d73loyalty",
+      "brandText": "PLUS",
+      "brandDescription": "xp_sales_web_brand_economy_plus_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLESEZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 93184,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 93.184",
+       "display": "93.184 milhas",
+       "srLabel": "93184 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 16221,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 16.221",
+       "display": "16.221 milhas",
+       "srLabel": "16221 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 93184,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 93.184",
+       "display": "93.184 milhas",
+       "srLabel": "93184 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 2683.69,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.683,69",
+       "display": "BRL 2.683,69"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "KD",
+      "offerId": "04cd787af65c346fd489e4cea7a3383025d646b6c4ab0094a376257a9967e204loyalty",
+      "brandText": "FULL",
+      "brandDescription": "xp_sales_web_brand_economy_full_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLEKDZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 106471,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 106.471",
+       "display": "106.471 milhas",
+       "srLabel": "106471 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 29508,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 29.508",
+       "display": "29.508 milhas",
+       "srLabel": "29508 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 106471,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 106.471",
+       "display": "106.471 milhas",
+       "srLabel": "106471 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 3066.36,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.066,36",
+       "display": "BRL 3.066,36"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "EV",
+      "offerId": "f0f4381452e09f752c93ec87e7c12c40cd385bc859dfacc33ea81f67676ec779loyalty",
+      "brandText": "PREMIUM BUSINESS STANDARD",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessstandard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ILXEVZBX/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 448663,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 448.663",
+       "display": "448.663 milhas",
+       "srLabel": "448663 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 371700,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 371.700",
+       "display": "371.700 milhas",
+       "srLabel": "371700 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 448663,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 448.663",
+       "display": "448.663 milhas",
+       "srLabel": "448663 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 12921.48,
+       "displayCurrency": "R$",
+       "displayAmount": " 12.921,48",
+       "display": "BRL 12.921,48"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "EJ",
+      "offerId": "7e2210c4cf9dce195734a65a7943a4662f1cb3cdb86690c87b13309dcea4d28eloyalty",
+      "brandText": "PREMIUM BUSINESS FULL",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessfull_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ILXEJZBX/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 491803,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 491.803",
+       "display": "491.803 milhas",
+       "srLabel": "491803 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 414840,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 414.840",
+       "display": "414.840 milhas",
+       "srLabel": "414840 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 491803,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 491.803",
+       "display": "491.803 milhas",
+       "srLabel": "491803 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 14163.93,
+       "displayCurrency": "R$",
+       "displayAmount": " 14.163,93",
+       "display": "BRL 14.163,93"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     }
+    ],
+    "lowestBrandText": "LIGHT",
+    "lowestPrice": {
+     "currency": "LOYALTY_POINTS",
+     "amount": 76963,
+     "displayCurrency": "Milhas",
+     "displayAmount": " 76.963",
+     "display": "76.963 milhas",
+     "srLabel": "76963 milhas"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Perú",
+     "LATAM Airlines Brasil"
+    ],
+    "changeOfAirport": false,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 345,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "763",
+     "aircraftLeaseText": "LATAM AIRLINES PERU",
+     "flight": {
+      "flightNumber": 2695,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": null,
+      "flightOperator": "LP",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": null
+     },
+     "origin": "MIA",
+     "destination": "LIM",
+     "departure": "2027-03-11T16:45:00",
+     "arrival": "2027-03-11T22:30:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    },
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 305,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "320",
+     "aircraftLeaseText": "LATAM AIRLINES BRASIL",
+     "flight": {
+      "flightNumber": 8041,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": null,
+      "flightOperator": "JJ",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": "3"
+     },
+     "origin": "LIM",
+     "destination": "GRU",
+     "departure": "2027-03-12T00:30:00",
+     "arrival": "2027-03-12T07:35:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 76963,
+     "taxes": 27.83,
+     "total": 76963
+    },
+    {
+     "fare": 93184,
+     "taxes": 27.83,
+     "total": 93184
+    },
+    {
+     "fare": 106471,
+     "taxes": 27.83,
+     "total": 106471
+    },
+    {
+     "fare": 448663,
+     "taxes": 27.83,
+     "total": 448663
+    },
+    {
+     "fare": 491803,
+     "taxes": 27.83,
+     "total": 491803
+    }
+   ]
+  },
+  {
+   "summary": {
+    "tags": [],
+    "stopOvers": 1,
+    "duration": 810,
+    "flightCode": "LA2993",
+    "origin": {
+     "departure": "2027-03-11T12:45:00",
+     "departureTime": "12:45",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "destination": {
+     "arrival": "2027-03-12T04:15:00",
+     "arrivalTime": "4:15",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "brands": [
+     {
+      "id": "SL",
+      "offerId": "b98453d7fe0be3e6b096700ee49986d1a786b60f1fb8b30203076a854c7740ecloyalty",
+      "brandText": "LIGHT",
+      "brandDescription": "xp_sales_web_brand_economy_light_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLESLZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 85418,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 85.418",
+       "display": "85.418 milhas",
+       "srLabel": "85418 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 0,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 0",
+       "display": "0 milhas",
+       "srLabel": "0 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 85418,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 85.418",
+       "display": "85.418 milhas",
+       "srLabel": "85418 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 2460.05,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.460,05",
+       "display": "BRL 2.460,05"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "SE",
+      "offerId": "9d74f3c19c96cbfcdbe6d02f50ad3f656349694a55e4c29915576031afc660b9loyalty",
+      "brandText": "PLUS",
+      "brandDescription": "xp_sales_web_brand_economy_plus_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLESEZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 103538,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 103.538",
+       "display": "103.538 milhas",
+       "srLabel": "103538 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 18120,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 18.120",
+       "display": "18.120 milhas",
+       "srLabel": "18120 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 103538,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 103.538",
+       "display": "103.538 milhas",
+       "srLabel": "103538 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 2981.88,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.981,88",
+       "display": "BRL 2.981,88"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "KD",
+      "offerId": "9f09e13fac386e4dd847814baf3e1d4c377bd07f70a0c1b5a56bbd957ef7b3cbloyalty",
+      "brandText": "FULL",
+      "brandDescription": "xp_sales_web_brand_economy_full_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLEKDZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 118205,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 118.205",
+       "display": "118.205 milhas",
+       "srLabel": "118205 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 32787,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 32.787",
+       "display": "32.787 milhas",
+       "srLabel": "32787 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 118205,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 118.205",
+       "display": "118.205 milhas",
+       "srLabel": "118205 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 3404.31,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.404,31",
+       "display": "BRL 3.404,31"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "RY",
+      "offerId": "be64749cba79ac4bbf106f15a3cc0839c5dc487a12d2d3a63af37d9dc270e059loyalty",
+      "brandText": "PREMIUM ECONOMY",
+      "brandDescription": "xp_sales_web_brand_premiumeconomy_premiumeconomy_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "W",
+       "label": "PremiumEconomy"
+      },
+      "rules": {},
+      "farebasis": "VLERYZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 209663,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 209.663",
+       "display": "209.663 milhas",
+       "srLabel": "209663 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 124245,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 124.245",
+       "display": "124.245 milhas",
+       "srLabel": "124245 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 209663,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 209.663",
+       "display": "209.663 milhas",
+       "srLabel": "209663 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 6,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 6038.3,
+       "displayCurrency": "R$",
+       "displayAmount": " 6.038,30",
+       "display": "BRL 6.038,30"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     }
+    ],
+    "lowestBrandText": "LIGHT",
+    "lowestPrice": {
+     "currency": "LOYALTY_POINTS",
+     "amount": 85418,
+     "displayCurrency": "Milhas",
+     "displayAmount": " 85.418",
+     "display": "85.418 milhas",
+     "srLabel": "85418 milhas"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Perú"
+    ],
+    "changeOfAirport": false,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 345,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "320",
+     "aircraftLeaseText": "LATAM AIRLINES PERU",
+     "flight": {
+      "flightNumber": 2993,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": null,
+      "flightOperator": "LP",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": null
+     },
+     "origin": "MIA",
+     "destination": "LIM",
+     "departure": "2027-03-11T12:45:00",
+     "arrival": "2027-03-11T18:30:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    },
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 300,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "319",
+     "aircraftLeaseText": "LATAM AIRLINES PERU",
+     "flight": {
+      "flightNumber": 2418,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": null,
+      "flightOperator": "LP",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": "3"
+     },
+     "origin": "LIM",
+     "destination": "GRU",
+     "departure": "2027-03-11T21:15:00",
+     "arrival": "2027-03-12T04:15:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 85418,
+     "taxes": 27.83,
+     "total": 85418
+    },
+    {
+     "fare": 103538,
+     "taxes": 27.83,
+     "total": 103538
+    },
+    {
+     "fare": 118205,
+     "taxes": 27.83,
+     "total": 118205
+    },
+    {
+     "fare": 209663,
+     "taxes": 27.83,
+     "total": 209663
+    }
+   ]
+  },
+  {
+   "summary": {
+    "tags": [],
+    "stopOvers": 1,
+    "duration": 835,
+    "flightCode": "LA4403",
+    "origin": {
+     "departure": "2027-03-11T16:25:00",
+     "departureTime": "16:25",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "destination": {
+     "arrival": "2027-03-12T08:20:00",
+     "arrivalTime": "8:20",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "brands": [
+     {
+      "id": "SL",
+      "offerId": "6c5fd0500020f577dfa195feddaf3d5b93f81713a545a4c199c58a2b014af116loyalty",
+      "brandText": "LIGHT",
+      "brandDescription": "xp_sales_web_brand_economy_light_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLESLZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 85418,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 85.418",
+       "display": "85.418 milhas",
+       "srLabel": "85418 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 0,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 0",
+       "display": "0 milhas",
+       "srLabel": "0 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 85418,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 85.418",
+       "display": "85.418 milhas",
+       "srLabel": "85418 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 2460.05,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.460,05",
+       "display": "BRL 2.460,05"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "SE",
+      "offerId": "62073de965f4a98073cc97ca2dc82048cfd2677c4a8a74693fecae02349a9837loyalty",
+      "brandText": "PLUS",
+      "brandDescription": "xp_sales_web_brand_economy_plus_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLESEZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 103538,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 103.538",
+       "display": "103.538 milhas",
+       "srLabel": "103538 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 18120,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 18.120",
+       "display": "18.120 milhas",
+       "srLabel": "18120 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 103538,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 103.538",
+       "display": "103.538 milhas",
+       "srLabel": "103538 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 2981.88,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.981,88",
+       "display": "BRL 2.981,88"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "KD",
+      "offerId": "90c158dff927dc5658bb1545f8dec059c1c382486ff81ec38bd67c9da471ecf1loyalty",
+      "brandText": "FULL",
+      "brandDescription": "xp_sales_web_brand_economy_full_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLEKDZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 118205,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 118.205",
+       "display": "118.205 milhas",
+       "srLabel": "118205 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 32787,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 32.787",
+       "display": "32.787 milhas",
+       "srLabel": "32787 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 118205,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 118.205",
+       "display": "118.205 milhas",
+       "srLabel": "118205 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 3404.31,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.404,31",
+       "display": "BRL 3.404,31"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     }
+    ],
+    "lowestBrandText": "LIGHT",
+    "lowestPrice": {
+     "currency": "LOYALTY_POINTS",
+     "amount": 85418,
+     "displayCurrency": "Milhas",
+     "displayAmount": " 85.418",
+     "display": "85.418 milhas",
+     "srLabel": "85418 milhas"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Colombia",
+     "Wamos Air"
+    ],
+    "changeOfAirport": false,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 225,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "320",
+     "aircraftLeaseText": "LATAM AIRLINES COLOMBIA",
+     "flight": {
+      "flightNumber": 4403,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": null,
+      "flightOperator": "4C",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": "1"
+     },
+     "origin": "MIA",
+     "destination": "BOG",
+     "departure": "2027-03-11T16:25:00",
+     "arrival": "2027-03-11T20:10:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    },
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 385,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "330",
+     "aircraftLeaseText": "WAMOS FOR LATAM AIRLINES GROUP",
+     "flight": {
+      "flightNumber": 4907,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": null,
+      "flightOperator": "EB",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": "3"
+     },
+     "origin": "BOG",
+     "destination": "GRU",
+     "departure": "2027-03-11T23:55:00",
+     "arrival": "2027-03-12T08:20:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 85418,
+     "taxes": 27.83,
+     "total": 85418
+    },
+    {
+     "fare": 103538,
+     "taxes": 27.83,
+     "total": 103538
+    },
+    {
+     "fare": 118205,
+     "taxes": 27.83,
+     "total": 118205
+    }
+   ]
+  },
+  {
+   "summary": {
+    "tags": [],
+    "stopOvers": 1,
+    "duration": 840,
+    "flightCode": "LA2695",
+    "origin": {
+     "departure": "2027-03-11T16:45:00",
+     "departureTime": "16:45",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "destination": {
+     "arrival": "2027-03-12T08:45:00",
+     "arrivalTime": "8:45",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "brands": [
+     {
+      "id": "SL",
+      "offerId": "551178e66ba3f3d8b971c36adf8a12eb91cc398fc793658aa0e1e46a1f0f7f71loyalty",
+      "brandText": "LIGHT",
+      "brandDescription": "xp_sales_web_brand_economy_light_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLESLZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 85418,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 85.418",
+       "display": "85.418 milhas",
+       "srLabel": "85418 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 0,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 0",
+       "display": "0 milhas",
+       "srLabel": "0 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 85418,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 85.418",
+       "display": "85.418 milhas",
+       "srLabel": "85418 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 2460.05,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.460,05",
+       "display": "BRL 2.460,05"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "SE",
+      "offerId": "06c18ad2b822d705d127de58fd17232ccdfe25bf28d54f56bec907f7e3463657loyalty",
+      "brandText": "PLUS",
+      "brandDescription": "xp_sales_web_brand_economy_plus_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLESEZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 103538,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 103.538",
+       "display": "103.538 milhas",
+       "srLabel": "103538 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 18120,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 18.120",
+       "display": "18.120 milhas",
+       "srLabel": "18120 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 103538,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 103.538",
+       "display": "103.538 milhas",
+       "srLabel": "103538 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 2981.88,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.981,88",
+       "display": "BRL 2.981,88"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "KD",
+      "offerId": "bf05a3e60dbbc32f716ada3669cbef807b814d653d4a3d09fa24f591dba0d09eloyalty",
+      "brandText": "FULL",
+      "brandDescription": "xp_sales_web_brand_economy_full_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLEKDZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 118205,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 118.205",
+       "display": "118.205 milhas",
+       "srLabel": "118205 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 32787,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 32.787",
+       "display": "32.787 milhas",
+       "srLabel": "32787 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 118205,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 118.205",
+       "display": "118.205 milhas",
+       "srLabel": "118205 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 3404.31,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.404,31",
+       "display": "BRL 3.404,31"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "EV",
+      "offerId": "0c572b13b88c3751294e26f00cbfd0ea5297350d17d5c7c6f01626611077a8fbloyalty",
+      "brandText": "PREMIUM BUSINESS STANDARD",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessstandard_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ILXEVZBX/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 448663,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 448.663",
+       "display": "448.663 milhas",
+       "srLabel": "448663 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 363245,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 363.245",
+       "display": "363.245 milhas",
+       "srLabel": "363245 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 448663,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 448.663",
+       "display": "448.663 milhas",
+       "srLabel": "448663 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 12921.48,
+       "displayCurrency": "R$",
+       "displayAmount": " 12.921,48",
+       "display": "BRL 12.921,48"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     },
+     {
+      "id": "EJ",
+      "offerId": "876387c9ad8f5f7e3cbf624f5da617ccb6511951641a8bf4e766421f80d96871loyalty",
+      "brandText": "PREMIUM BUSINESS FULL",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessfull_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "ILXEJZBX/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 491803,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 491.803",
+       "display": "491.803 milhas",
+       "srLabel": "491803 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 406385,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 406.385",
+       "display": "406.385 milhas",
+       "srLabel": "406385 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 491803,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 491.803",
+       "display": "491.803 milhas",
+       "srLabel": "491803 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 14163.93,
+       "displayCurrency": "R$",
+       "displayAmount": " 14.163,93",
+       "display": "BRL 14.163,93"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 27.83,
+       "displayCurrency": "R$",
+       "displayAmount": " 27,83",
+       "display": "BRL 27,83"
+      }
+     }
+    ],
+    "lowestBrandText": "LIGHT",
+    "lowestPrice": {
+     "currency": "LOYALTY_POINTS",
+     "amount": 85418,
+     "displayCurrency": "Milhas",
+     "displayAmount": " 85.418",
+     "display": "85.418 milhas",
+     "srLabel": "85418 milhas"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Perú",
+     "LATAM Airlines Brasil"
+    ],
+    "changeOfAirport": false,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 345,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "763",
+     "aircraftLeaseText": "LATAM AIRLINES PERU",
+     "flight": {
+      "flightNumber": 2695,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": null,
+      "flightOperator": "LP",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": null
+     },
+     "origin": "MIA",
+     "destination": "LIM",
+     "departure": "2027-03-11T16:45:00",
+     "arrival": "2027-03-11T22:30:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    },
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 300,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "321",
+     "aircraftLeaseText": "LATAM AIRLINES BRASIL",
+     "flight": {
+      "flightNumber": 8123,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": null,
+      "flightOperator": "JJ",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": "3"
+     },
+     "origin": "LIM",
+     "destination": "GRU",
+     "departure": "2027-03-12T01:45:00",
+     "arrival": "2027-03-12T08:45:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 85418,
+     "taxes": 27.83,
+     "total": 85418
+    },
+    {
+     "fare": 103538,
+     "taxes": 27.83,
+     "total": 103538
+    },
+    {
+     "fare": 118205,
+     "taxes": 27.83,
+     "total": 118205
+    },
+    {
+     "fare": 448663,
+     "taxes": 27.83,
+     "total": 448663
+    },
+    {
+     "fare": 491803,
+     "taxes": 27.83,
+     "total": 491803
+    }
+   ]
+  },
+  {
+   "summary": {
+    "tags": [],
+    "stopOvers": 1,
+    "duration": 890,
+    "flightCode": "LA543",
+    "origin": {
+     "departure": "2027-03-11T22:50:00",
+     "departureTime": "22:50",
+     "iataCode": "MIA",
+     "airport": "Miami Intl.",
+     "city": "Miami"
+    },
+    "destination": {
+     "arrival": "2027-03-12T15:40:00",
+     "arrivalTime": "15:40",
+     "iataCode": "GRU",
+     "airport": "Guarulhos Intl.",
+     "city": "São Paulo"
+    },
+    "brands": [
+     {
+      "id": "SL",
+      "offerId": "881c6611d34e59fd7195bc90e82fdc0e50a0b777c53f6a63d7cadc52e1bbe7edloyalty",
+      "brandText": "LIGHT",
+      "brandDescription": "xp_sales_web_brand_economy_light_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLESLZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 85418,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 85.418",
+       "display": "85.418 milhas",
+       "srLabel": "85418 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 0,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 0",
+       "display": "0 milhas",
+       "srLabel": "0 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 85418,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 85.418",
+       "display": "85.418 milhas",
+       "srLabel": "85418 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 2460.05,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.460,05",
+       "display": "BRL 2.460,05"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 34.78,
+       "displayCurrency": "R$",
+       "displayAmount": " 34,78",
+       "display": "BRL 34,78"
+      }
+     },
+     {
+      "id": "SE",
+      "offerId": "7fa2bfaa9d3e82dedf409c221e489967b3e1b0a7f3b013401326ad1990b3791cloyalty",
+      "brandText": "PLUS",
+      "brandDescription": "xp_sales_web_brand_economy_plus_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLESEZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 103538,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 103.538",
+       "display": "103.538 milhas",
+       "srLabel": "103538 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 18120,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 18.120",
+       "display": "18.120 milhas",
+       "srLabel": "18120 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 103538,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 103.538",
+       "display": "103.538 milhas",
+       "srLabel": "103538 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 2981.88,
+       "displayCurrency": "R$",
+       "displayAmount": " 2.981,88",
+       "display": "BRL 2.981,88"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 34.78,
+       "displayCurrency": "R$",
+       "displayAmount": " 34,78",
+       "display": "BRL 34,78"
+      }
+     },
+     {
+      "id": "KD",
+      "offerId": "b6eed5827818f4b91c0929cdadc7bcbb22815c9bc01dcaff7b8c35b85c62ff2cloyalty",
+      "brandText": "FULL",
+      "brandDescription": "xp_sales_web_brand_economy_full_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "Y",
+       "label": "Economy"
+      },
+      "rules": {},
+      "farebasis": "VLEKDZ8X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 118205,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 118.205",
+       "display": "118.205 milhas",
+       "srLabel": "118205 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 32787,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 32.787",
+       "display": "32.787 milhas",
+       "srLabel": "32787 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 118205,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 118.205",
+       "display": "118.205 milhas",
+       "srLabel": "118205 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 9,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 3404.31,
+       "displayCurrency": "R$",
+       "displayAmount": " 3.404,31",
+       "display": "BRL 3.404,31"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 34.78,
+       "displayCurrency": "R$",
+       "displayAmount": " 34,78",
+       "display": "BRL 34,78"
+      }
+     },
+     {
+      "id": "EJ",
+      "offerId": "79738902e12363440f125e09290a9e18d82af689bf155a2fac4423b26204f407loyalty",
+      "brandText": "PREMIUM BUSINESS FULL",
+      "brandDescription": "xp_sales_web_brand_business_premiumbusinessfull_description",
+      "promotionalText": {
+       "show": false,
+       "label": ""
+      },
+      "cabin": {
+       "id": "J",
+       "label": "Business"
+      },
+      "rules": {},
+      "farebasis": "DLXEJZ6X/XP",
+      "price": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 621225,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 621.225",
+       "display": "621.225 milhas",
+       "srLabel": "621225 milhas",
+       "currencyAnalytics": "BRL"
+      },
+      "lowestPriceDifference": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 535807,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 535.807",
+       "display": "535.807 milhas",
+       "srLabel": "535807 milhas"
+      },
+      "lowestPriceBrand": "SL",
+      "messages": [],
+      "priceAfterSelection": {
+       "currency": "LOYALTY_POINTS",
+       "amount": 621225,
+       "displayCurrency": "Milhas",
+       "displayAmount": " 621.225",
+       "display": "621.225 milhas",
+       "srLabel": "621225 milhas"
+      },
+      "attributes": {},
+      "seatsRemaining": {
+       "count": 4,
+       "lowAvailability": false
+      },
+      "priceWithOutTax": {
+       "currency": "BRL",
+       "amount": 17891.28,
+       "displayCurrency": "R$",
+       "displayAmount": " 17.891,28",
+       "display": "BRL 17.891,28"
+      },
+      "taxes": {
+       "currency": "BRL",
+       "amount": 34.78,
+       "displayCurrency": "R$",
+       "displayAmount": " 34,78",
+       "display": "BRL 34,78"
+      }
+     }
+    ],
+    "lowestBrandText": "LIGHT",
+    "lowestPrice": {
+     "currency": "LOYALTY_POINTS",
+     "amount": 85418,
+     "displayCurrency": "Milhas",
+     "displayAmount": " 85.418",
+     "display": "85.418 milhas",
+     "srLabel": "85418 milhas"
+    },
+    "messages": [],
+    "flightOperators": [
+     "LATAM Airlines Group",
+     "LATAM Airlines Brasil"
+    ],
+    "changeOfAirport": true,
+    "showAllBrands": false,
+    "isInterlinealFlight": false
+   },
+   "itinerary": [
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 540,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "788",
+     "aircraftLeaseText": "LATAM AIRLINES GROUP",
+     "flight": {
+      "flightNumber": 543,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": null,
+      "flightOperator": "LA",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": "IA"
+     },
+     "origin": "MIA",
+     "destination": "EZE",
+     "departure": "2027-03-11T22:50:00",
+     "arrival": "2027-03-12T09:50:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    },
+    {
+     "codeShare": false,
+     "interLine": false,
+     "subjectToGovernmentApproval": false,
+     "fareComponentBeginAirport": null,
+     "fareComponentEndAirport": null,
+     "fareComponentDirectionality": null,
+     "duration": 165,
+     "flightsMiles": null,
+     "cabinClass": null,
+     "equipment": "320",
+     "aircraftLeaseText": "LATAM AIRLINES BRASIL",
+     "flight": {
+      "flightNumber": 8033,
+      "airlineCode": "LA",
+      "operatingAirlineCode": "LA",
+      "operatingFlightNumber": null,
+      "flightOperator": "JJ",
+      "stopAirports": [],
+      "departureTerminal": null,
+      "arrivalTerminal": "3"
+     },
+     "origin": "AEP",
+     "destination": "GRU",
+     "departure": "2027-03-12T12:55:00",
+     "arrival": "2027-03-12T15:40:00",
+     "bookingClass": null,
+     "fareBasis": null,
+     "type": null
+    }
+   ],
+   "newPrices": [
+    {
+     "fare": 85418,
+     "taxes": 34.78,
+     "total": 85418
+    },
+    {
+     "fare": 103538,
+     "taxes": 34.78,
+     "total": 103538
+    },
+    {
+     "fare": 118205,
+     "taxes": 34.78,
+     "total": 118205
+    },
+    {
+     "fare": 621225,
+     "taxes": 34.78,
+     "total": 621225
+    }
+   ]
+  }
+ ],
+ "promo": {
+  "active": false,
+  "messages": []
+ },
+ "extraDetails": {
+  "X-latam-Track-Id": "<removed>",
+  "X-latam-App-Session-Id": "<removed>"
+ }
+}

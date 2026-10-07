@@ -1,0 +1,445 @@
+{
+ "_note": "Cookies on LATAM domains in the miles-latam_pass profile after a hand login (2026-10-07 18:15 UTC) and this probe, from CDP Network.getAllCookies at 18:34 UTC. Names, domains, flags and expiry only; no values. \"role\" is what we infer.",
+ "cookies": [
+  {
+   "domain": ".auth.latamairlines.com",
+   "name": "RT",
+   "path": "/",
+   "expires_utc": "2026-10-14T18:15:08",
+   "session": false,
+   "httpOnly": false,
+   "secure": false,
+   "role": "Akamai mPulse (boomerang) round-trip timer."
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "AKA_A2",
+   "path": "/",
+   "expires_utc": "2026-10-07T19:14:47",
+   "session": false,
+   "httpOnly": true,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "PIM-SESSION-ID",
+   "path": "/",
+   "expires_utc": null,
+   "session": true,
+   "httpOnly": false,
+   "secure": false,
+   "role": "Session cookie (ends with the browser)."
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "__eoi",
+   "path": "/",
+   "expires_utc": "2027-04-05T18:14:35",
+   "session": false,
+   "httpOnly": false,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "__exponea_etc__",
+   "path": "/",
+   "expires_utc": "2027-11-11T18:17:32",
+   "session": false,
+   "httpOnly": false,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "__exponea_time2__",
+   "path": "/",
+   "expires_utc": "2026-10-07T19:17:32",
+   "session": false,
+   "httpOnly": false,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "__gads",
+   "path": "/",
+   "expires_utc": "2027-11-01T18:14:35",
+   "session": false,
+   "httpOnly": false,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "__gpi",
+   "path": "/",
+   "expires_utc": "2027-11-01T18:14:35",
+   "session": false,
+   "httpOnly": false,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "_abck",
+   "path": "/",
+   "expires_utc": "2027-10-07T18:34:35",
+   "session": false,
+   "httpOnly": false,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "_ga",
+   "path": "/",
+   "expires_utc": "2027-11-11T18:17:32",
+   "session": false,
+   "httpOnly": false,
+   "secure": false,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "_ga_0FQ5F9TMWN",
+   "path": "/",
+   "expires_utc": "2027-11-11T18:17:38",
+   "session": false,
+   "httpOnly": false,
+   "secure": false,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "_ga_9B86N9EBLE",
+   "path": "/",
+   "expires_utc": "2027-11-11T18:34:24",
+   "session": false,
+   "httpOnly": false,
+   "secure": false,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "_gcl_au",
+   "path": "/",
+   "expires_utc": "2027-01-05T18:14:48",
+   "session": false,
+   "httpOnly": false,
+   "secure": false,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "_xp_application_country",
+   "path": "/",
+   "expires_utc": null,
+   "session": true,
+   "httpOnly": true,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "_xp_application_lang",
+   "path": "/",
+   "expires_utc": null,
+   "session": true,
+   "httpOnly": true,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "_xp_exp_id",
+   "path": "/",
+   "expires_utc": "2027-11-11T18:17:31",
+   "session": false,
+   "httpOnly": false,
+   "secure": true,
+   "role": "A/B experiment id."
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "ak_bmsc",
+   "path": "/",
+   "expires_utc": "2026-10-07T20:14:32",
+   "session": false,
+   "httpOnly": true,
+   "secure": false,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "bm_s",
+   "path": "/",
+   "expires_utc": "2026-11-07T18:27:31",
+   "session": false,
+   "httpOnly": true,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "bm_so",
+   "path": "/",
+   "expires_utc": "2026-10-08T18:27:31",
+   "session": false,
+   "httpOnly": false,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "bm_sv",
+   "path": "/",
+   "expires_utc": "2026-10-07T20:14:34",
+   "session": false,
+   "httpOnly": false,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "bm_sz",
+   "path": "/",
+   "expires_utc": "2026-10-07T22:14:32",
+   "session": false,
+   "httpOnly": false,
+   "secure": false,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "fs_lua",
+   "path": "/",
+   "expires_utc": "2026-10-07T19:02:32",
+   "session": false,
+   "httpOnly": false,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".latamairlines.com",
+   "name": "fs_uid",
+   "path": "/",
+   "expires_utc": "2027-10-07T18:15:03",
+   "session": false,
+   "httpOnly": false,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": ".www.latamairlines.com",
+   "name": "RT",
+   "path": "/",
+   "expires_utc": "2026-10-14T18:17:31",
+   "session": false,
+   "httpOnly": false,
+   "secure": false,
+   "role": "Akamai mPulse (boomerang) round-trip timer."
+  },
+  {
+   "domain": ".www.latamairlines.com",
+   "name": "bm_lso",
+   "path": "/",
+   "expires_utc": "2026-11-06T18:27:31",
+   "session": false,
+   "httpOnly": false,
+   "secure": false,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": "auth.latamairlines.com",
+   "name": "auth0",
+   "path": "/",
+   "expires_utc": "2026-10-10T18:15:06",
+   "session": false,
+   "httpOnly": true,
+   "secure": true,
+   "role": "Auth0 SSO session on the login domain, set when the login completed (18:15:06). 3 days; not refreshed by www page loads."
+  },
+  {
+   "domain": "auth.latamairlines.com",
+   "name": "auth0_compat",
+   "path": "/",
+   "expires_utc": "2026-10-10T18:15:06",
+   "session": false,
+   "httpOnly": true,
+   "secure": true,
+   "role": "Auth0 SSO session (legacy SameSite variant of auth0)."
+  },
+  {
+   "domain": "auth.latamairlines.com",
+   "name": "did",
+   "path": "/",
+   "expires_utc": "2027-10-08T00:15:02",
+   "session": false,
+   "httpOnly": true,
+   "secure": true,
+   "role": "Auth0 device id. Set by any visit to the login page; not a session."
+  },
+  {
+   "domain": "auth.latamairlines.com",
+   "name": "did_compat",
+   "path": "/",
+   "expires_utc": "2027-10-08T00:15:02",
+   "session": false,
+   "httpOnly": true,
+   "secure": true,
+   "role": "Auth0 device id (legacy variant)."
+  },
+  {
+   "domain": "auth.latamairlines.com",
+   "name": "fpid-af",
+   "path": "/u/login",
+   "expires_utc": null,
+   "session": true,
+   "httpOnly": false,
+   "secure": false,
+   "role": "Login-page anti-fraud (session cookie, path /u/login)."
+  },
+  {
+   "domain": "auth.latamairlines.com",
+   "name": "ps-af",
+   "path": "/u/login",
+   "expires_utc": null,
+   "session": true,
+   "httpOnly": false,
+   "secure": false,
+   "role": "Login-page anti-fraud (session cookie, path /u/login)."
+  },
+  {
+   "domain": "auth.latamairlines.com",
+   "name": "pt-af",
+   "path": "/u/login",
+   "expires_utc": null,
+   "session": true,
+   "httpOnly": false,
+   "secure": false,
+   "role": "Login-page anti-fraud (session cookie, path /u/login)."
+  },
+  {
+   "domain": "loyaltyprogram.latam.com",
+   "name": "thx_guid",
+   "path": "/",
+   "expires_utc": "2027-11-11T18:14:48",
+   "session": false,
+   "httpOnly": true,
+   "secure": true,
+   "role": "ThreatMetrix device id (loyaltyprogram.latam.com), set at 18:14:48."
+  },
+  {
+   "domain": "loyaltyprogram.latam.com",
+   "name": "tmx_guid",
+   "path": "/",
+   "expires_utc": "2027-11-11T18:14:48",
+   "session": false,
+   "httpOnly": true,
+   "secure": true,
+   "role": "ThreatMetrix device id."
+  },
+  {
+   "domain": "www.latamairlines.com",
+   "name": "_xp_metadata_br_pt",
+   "path": "/",
+   "expires_utc": "2026-10-14T18:15:42",
+   "session": false,
+   "httpOnly": false,
+   "secure": false,
+   "role": "Point-of-sale metadata, set before the login."
+  },
+  {
+   "domain": "www.latamairlines.com",
+   "name": "_xp_session",
+   "path": "/",
+   "expires_utc": "2026-10-12T18:17:38",
+   "session": false,
+   "httpOnly": true,
+   "secure": true,
+   "role": "LATAM web session (logged in). httpOnly, host-only on www. Expiry slides: 5 days after the last page load (18:17:38 -> 2026-10-12T18:17:38, re-set to 2026-10-12T18:48:36 by the last load of this probe)."
+  },
+  {
+   "domain": "www.latamairlines.com",
+   "name": "_xp_show_login_incentive",
+   "path": "/",
+   "expires_utc": "2026-10-08T18:14:46",
+   "session": false,
+   "httpOnly": false,
+   "secure": false,
+   "role": "Set at 18:14:46, before the login: a logged-out visitor gets it."
+  },
+  {
+   "domain": "www.latamairlines.com",
+   "name": "akavpau_CyberLatam",
+   "path": "/",
+   "expires_utc": null,
+   "session": true,
+   "httpOnly": true,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": "www.latamairlines.com",
+   "name": "akavpau_latamairlines_BBB",
+   "path": "/",
+   "expires_utc": null,
+   "session": true,
+   "httpOnly": true,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": "www.latamairlines.com",
+   "name": "kampyleSessionPageCounter",
+   "path": "/",
+   "expires_utc": "2027-10-07T18:17:32",
+   "session": false,
+   "httpOnly": false,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": "www.latamairlines.com",
+   "name": "kampyleUserPercentile",
+   "path": "/",
+   "expires_utc": "2027-10-07T18:17:32",
+   "session": false,
+   "httpOnly": false,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": "www.latamairlines.com",
+   "name": "kampyleUserSession",
+   "path": "/",
+   "expires_utc": "2027-10-07T18:17:32",
+   "session": false,
+   "httpOnly": false,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": "www.latamairlines.com",
+   "name": "kampyleUserSessionsCount",
+   "path": "/",
+   "expires_utc": "2027-10-07T18:17:32",
+   "session": false,
+   "httpOnly": false,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  },
+  {
+   "domain": "www.latamairlines.com",
+   "name": "kampyle_userid",
+   "path": "/",
+   "expires_utc": "2027-10-07T18:14:35",
+   "session": false,
+   "httpOnly": false,
+   "secure": true,
+   "role": "analytics / bot manager / consent"
+  }
+ ]
+}
