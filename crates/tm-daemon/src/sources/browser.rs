@@ -13,6 +13,9 @@
 //! - TAP (0051): load the deep link, read the page's availability
 //!   search, open the "Datas" step and scroll it, reading each month the
 //!   page fetches from TAP's calendar ([`crate::sites::tap`]).
+//! - LATAM and LATAM Pass (0085): the results page's offers calls, its
+//!   date strip and the round trip's second call ([`super::latam`]), in
+//!   the profile's own context, where the login lives.
 //! - Other airline sites and miles programs have no reader (0052,
 //!   0059).
 //!
@@ -78,11 +81,16 @@ use super::{
     Confirmation,
     ExploreJob,
     Fetch,
+    LatamFound,
+    LatamJob,
     ResolveJob,
     Sources,
     TapJob,
 };
-use crate::{jobs::rebase, sites::tap};
+use crate::{
+    jobs::rebase,
+    sites::{self, tap},
+};
 
 /// How long each step may take.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -96,6 +104,10 @@ pub struct Timeouts {
     pub settle: Duration,
     /// Between presses of "Scroll forward", random up to twice this.
     pub scroll_pause: Duration,
+    /// Before each click on LATAM's date strip (and the round trip's
+    /// outbound choice), random between the two: each is a search,
+    /// spaced like a page load (0084: 20–45 s).
+    pub strip_pause: (Duration, Duration),
 }
 
 impl Default for Timeouts {
@@ -106,6 +118,7 @@ impl Default for Timeouts {
             response: Duration::from_secs(25),
             settle: Duration::from_millis(1500),
             scroll_pause: Duration::from_millis(700),
+            strip_pause: (Duration::from_secs(20), Duration::from_secs(45)),
         }
     }
 }
@@ -124,8 +137,10 @@ const CONSENT_JS: &str = r#"(() => {
 /// ([`tm_browser::profile::site_profile_dir`]), the directory the app's
 /// login window opens for that site. A fixed `--cdp-port` goes to Google
 /// Flights; every other site picks a free port, so the processes never
-/// collide. LATAM's sites draw offscreen instead of headless
-/// ([`OFFSCREEN_SITES`]); a visible window (`--headed`) stays visible.
+/// collide. Sites whose bot protection denies a headless Chromium but
+/// lets a headed one through, with a warmed profile, on a GPU display
+/// (LATAM's, [`sites::needs_display`], 0081) draw offscreen instead of
+/// headless; a visible window (`--headed`) stays visible.
 pub fn site_config(base: &ChromiumConfig, site: &str) -> ChromiumConfig {
     ChromiumConfig {
         user_data_dir: tm_browser::profile::site_profile_dir(
@@ -138,7 +153,7 @@ pub fn site_config(base: &ChromiumConfig, site: &str) -> ChromiumConfig {
             0
         },
         display: match base.display {
-            Display::Headless if OFFSCREEN_SITES.contains(&site) => {
+            Display::Headless if sites::needs_display(site) => {
                 Display::Offscreen
             }
             display => display,
@@ -146,12 +161,6 @@ pub fn site_config(base: &ChromiumConfig, site: &str) -> ChromiumConfig {
         ..base.clone()
     }
 }
-
-/// The sites whose bot protection denies a headless Chromium but lets a
-/// headed one through, with a warmed profile, on a GPU display
-/// (docs/research/sites/latam-pass.md, 0081): LATAM's airline site and
-/// LATAM Pass.
-pub const OFFSCREEN_SITES: &[&str] = &["airline:LA", "miles:latam_pass"];
 
 struct Running {
     chromium: Chromium,
@@ -203,6 +212,16 @@ impl BrowserSources {
         };
         Ok(context.new_page().await?)
     }
+
+    /// A new page in the profile's own context, whose cookies persist in
+    /// the profile: a miles login and a warm-up made by hand (0024,
+    /// 0084).
+    async fn profile_page(&self) -> anyhow::Result<Page> {
+        let running = self
+            .running()
+            .ok_or_else(|| anyhow::anyhow!("the browser is not running"))?;
+        Ok(running.chromium.browser().new_page().await?)
+    }
 }
 
 /// Whether the page is a block page. A consent interstitial is answered
@@ -237,7 +256,7 @@ async fn blocked(page: &Page) -> Option<QueryOutcome> {
     }
 }
 
-async fn navigate(
+pub(crate) async fn navigate(
     page: &Page,
     url: &str,
     timeout: Duration,
@@ -1007,6 +1026,20 @@ impl Sources for BrowserSources {
     async fn tap(&self, job: &TapJob) -> Fetch<Vec<Cell>> {
         let t = self.timeouts;
         on_page!(self, job.pos, |page| tap_on(&page, job, t).await)
+    }
+
+    async fn latam(&self, job: &LatamJob) -> Fetch<LatamFound> {
+        let t = self.timeouts;
+        match self.profile_page().await {
+            Ok(page) => {
+                let result = super::latam::latam_on(&page, job, t).await;
+                if let Err(e) = page.close().await {
+                    debug!("closing a page failed: {e}");
+                }
+                result
+            }
+            Err(e) => Fetch::error(format!("no page: {e}")),
+        }
     }
 
     async fn confirm(&self, job: &ConfirmJob) -> Fetch<Option<Confirmation>> {

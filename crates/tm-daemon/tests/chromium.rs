@@ -208,6 +208,7 @@ fn fast() -> Timeouts {
         response: Duration::from_secs(10),
         settle: Duration::from_millis(300),
         scroll_pause: Duration::from_millis(50),
+        strip_pause: (Duration::from_millis(50), Duration::from_millis(100)),
     }
 }
 

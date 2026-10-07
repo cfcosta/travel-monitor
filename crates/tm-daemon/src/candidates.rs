@@ -111,6 +111,9 @@ pub struct Context {
     pub passengers: Passengers,
     /// Families whose last check that loaded found no flights (0067).
     pub no_flights: HashSet<FamilyId>,
+    /// Miles programs without a live login (logged out, or a session
+    /// that ended): their award families wait for the user (0024, 0085).
+    pub logged_out: HashSet<String>,
 }
 
 /// Why a family is not a candidate.
@@ -128,6 +131,9 @@ pub enum Skip {
     /// A family its site cannot run ([`sites::unsupported`]): TAP's
     /// round trips, or a party TAP's calendar does not price.
     Unsupported,
+    /// A miles program that is not logged in, or whose session ended
+    /// (0085).
+    LoggedOut,
 }
 
 /// Whether `family` may be checked now, ignoring the budget and the
@@ -139,10 +145,13 @@ pub fn eligibility(family: &FamilyRecord, cx: &Context) -> Result<(), Skip> {
     if !selected(family, cx) {
         return Err(Skip::NotSelected);
     }
-    if cx.paused.contains(&family.site) {
+    // A site that shares another's worker shares its login pause and
+    // its cooldown (0084).
+    let site = sites::worker_site(&family.site);
+    if cx.paused.contains(site) {
         return Err(Skip::Paused);
     }
-    if cx.cooling.contains(&family.site) {
+    if cx.cooling.contains(site) {
         return Err(Skip::CoolingDown);
     }
     if !matches!(family.key.source, Source::GoogleFlights)
@@ -152,6 +161,11 @@ pub fn eligibility(family: &FamilyRecord, cx: &Context) -> Result<(), Skip> {
     }
     if sites::unsupported(&family.key, &cx.passengers).is_some() {
         return Err(Skip::Unsupported);
+    }
+    if let Source::Miles { program } = &family.key.source
+        && cx.logged_out.contains(program)
+    {
+        return Err(Skip::LoggedOut);
     }
     // Scripted sites search by IATA code: they need no Freebase ID.
     if cx.unresolved.contains(&family.key.route)
@@ -180,10 +194,14 @@ fn selected(family: &FamilyRecord, cx: &Context) -> bool {
 /// Which never-checked families go first (DECISIONS.md 0049): home
 /// point of sale before foreign ones; within each, economy legs and the
 /// Explore sweep, then economy round trips, then the premium cabins.
-/// Airline and miles sources come last.
+/// Airline and miles sources come last, their legs before their round
+/// trips (a LATAM round trip costs a search more, 0085).
 pub fn bootstrap_rank(key: &FamilyKey, home_pos: Option<PosId>) -> u8 {
     if !matches!(key.source, Source::GoogleFlights) {
-        return 6;
+        return match key.kind {
+            FamilyKind::RoundTrip { .. } => 7,
+            _ => 6,
+        };
     }
     let within = match (key.cabin, key.kind) {
         (Cabin::Economy, FamilyKind::Leg { .. } | FamilyKind::Explore) => 0,
@@ -240,7 +258,7 @@ pub fn build<'a>(
                 let (min_interval, max_interval) = intervals(f, cx);
                 out.push(Candidate {
                     family: f.id,
-                    site: f.site.clone(),
+                    site: sites::worker_site(&f.site).to_owned(),
                     weight: f.weight,
                     state: to_state(&f.state),
                     active: true,
@@ -320,7 +338,7 @@ mod tests {
     fn sites_without_a_reader_are_skipped() {
         let families = vec![
             family(1, 1, Source::GoogleFlights),
-            family(2, 1, Source::Airline { code: "LA".into() }),
+            family(2, 1, Source::Airline { code: "G3".into() }),
             miles(3, "smiles"),
         ];
         let (cands, skipped) = build(&families, &cx());
@@ -331,30 +349,49 @@ mod tests {
         assert_eq!(eligibility(&families[2], &cx()), Err(Skip::Unprobed));
     }
 
-    /// The daemon's own readers (0051, 0052, 0059): TAP runs; every other
-    /// airline and miles site stays off.
+    /// The daemon's own readers (0051, 0052, 0059, 0085): TAP, LATAM and
+    /// LATAM Pass run; every other airline and miles site stays off.
     #[test]
-    fn only_tap_has_a_reader() {
+    fn only_tap_and_latam_have_a_reader() {
         let mut families = vec![
             family(1, 1, Source::GoogleFlights),
             family(2, 1, Source::Airline { code: "TP".into() }),
+            family(3, 1, Source::Airline { code: "LA".into() }),
+            miles(4, "latam_pass"),
         ];
         let mut id = 10;
-        for code in ["LA", "AD", "G3", "IB", "AF", "AA", "UA", "EK", "QR", "TK"]
-        {
+        for code in ["AD", "G3", "IB", "AF", "AA", "UA", "EK", "QR", "TK"] {
             families.push(family(id, 1, Source::Airline { code: code.into() }));
             id += 1;
         }
-        for program in ["smiles", "latam_pass", "azul_fidelidade"] {
+        for program in ["smiles", "azul_fidelidade"] {
             families.push(miles(id, program));
             id += 1;
         }
         let mut cx = Context::default();
         let (cands, skipped) = build(&families, &cx);
         let ids: Vec<i64> = cands.iter().map(|c| c.family.0).collect();
-        assert_eq!(ids, vec![1, 2]);
-        assert_eq!(skipped.get(&Skip::Unprobed), Some(&13));
+        assert_eq!(ids, vec![1, 2, 3, 4]);
+        assert_eq!(skipped.get(&Skip::Unprobed), Some(&11));
         assert_eq!(skipped.len(), 1);
+        // LATAM's cash site runs on LATAM Pass's worker (0084).
+        assert_eq!(cands[2].site, "miles:latam_pass");
+        assert_eq!(cands[3].site, "miles:latam_pass");
+
+        // A program without a live login waits; LATAM's cash does not.
+        cx.logged_out.insert("latam_pass".into());
+        let (cands, skipped) = build(&families[..4], &cx);
+        let ids: Vec<i64> = cands.iter().map(|c| c.family.0).collect();
+        assert_eq!(ids, vec![1, 2, 3]);
+        assert_eq!(skipped.get(&Skip::LoggedOut), Some(&1));
+        // A login window on LATAM Pass's profile pauses LATAM's cash too.
+        cx.logged_out.clear();
+        cx.paused.insert("miles:latam_pass".into());
+        let (cands, skipped) = build(&families[..4], &cx);
+        let ids: Vec<i64> = cands.iter().map(|c| c.family.0).collect();
+        assert_eq!(ids, vec![1, 2]);
+        assert_eq!(skipped.get(&Skip::Paused), Some(&2));
+        cx.paused.clear();
 
         // TAP's round trips, and legs for a party its calendar does not
         // price, are left out with their own reason.
@@ -401,6 +438,8 @@ mod tests {
         let mut airline = key(Cabin::Economy, 1, leg);
         airline.source = Source::Airline { code: "LA".into() };
         assert_eq!(bootstrap_rank(&airline, home), 6);
+        airline.kind = rt;
+        assert_eq!(bootstrap_rank(&airline, home), 7);
         assert_eq!(
             core_interval(&key(Cabin::Economy, 1, leg), home),
             Some(chrono::TimeDelta::hours(24))

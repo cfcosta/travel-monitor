@@ -25,10 +25,20 @@
 //!   app can open the same profile; `Resume` reads the profile's cookie
 //!   jar for the program's session (0064) and lets the site run again.
 //!
+//! - **LATAM shares one (0084, 0085).** `airline:LA` and
+//!   `miles:latam_pass` run on one worker, named for LATAM Pass, with
+//!   its profile, browser, budget and pace ([`crate::sites::worker_site`]):
+//!   one check at a time, 20–45 s apart. It chooses each check's dates
+//!   from the database ([`crate::sites::latam::dates`]), keeps the cash
+//!   calendar the pages fetched to rank later dates (never recorded),
+//!   follows LATAM Pass's session cookie, and judges and confirms award
+//!   deals itself.
+//!
 //! The store is shared by every worker: each writes its own budget row
 //! and status row, and the families, observations, deals and query log
-//! they check. Deals and confirmations are Google Flights' (only its
-//! checks evaluate trips), so they run on that worker alone. Fan-out and
+//! they check. Cash deals and their confirmations are Google Flights'
+//! (only its checks evaluate trips), so they run on that worker alone;
+//! award deals are LATAM's (0083, 0085). Fan-out and
 //! Explore hints raise other sites' families from here; a check re-reads
 //! its family's state just before writing it, so a raise that lands
 //! while it runs is kept.
@@ -50,6 +60,7 @@ use anyhow::Context as _;
 use chrono::{DateTime, Days, NaiveDate, Utc};
 use rand::{Rng, SeedableRng, rngs::StdRng};
 use tm_domain::{
+    AwardDates,
     Cabin,
     Deal,
     DealId,
@@ -72,6 +83,7 @@ use tm_domain::{
     RequestId,
     Route,
     RouteId,
+    Series,
     Settings,
     Source,
 };
@@ -80,6 +92,7 @@ use tm_scheduler::{
     CheckSummary,
     FxTable,
     Params,
+    awards::{AwardKey, award_points, cheapest_by_dates},
     fanout,
     hints::{HintTarget, add_hint, hinted_families},
     plan_tick,
@@ -115,13 +128,32 @@ use crate::{
         to_state,
     },
     deals::{self, Group},
-    jobs::{self, Job, JobError, JobOptions},
+    jobs::{self, Job, JobError, JobOptions, LatamDates},
     notify,
-    sources::{Cell, ConfirmJob, Fetch, Sources},
+    sites::{
+        self,
+        latam::{
+            self,
+            dates::{self as latam_dates, Known, Pick, Strip},
+        },
+    },
+    sources::{Cell, ConfirmJob, Fetch, LatamFound, Sources},
 };
 
 /// Cells older than this are not paired into trips.
 const FRESH_HOURS: i64 = 48;
+
+/// How far back a LATAM check looks for the departures its family read
+/// and for LATAM's own cash (0085).
+const LATAM_READ_DAYS: i64 = 30;
+
+/// Award deals recorded per series and check: each is confirmed by a
+/// fresh read of its date, one search (0085).
+const AWARD_CONFIRMS: usize = 1;
+
+/// LATAM's pause between searches, in seconds (0084), unless the
+/// command line pauses longer.
+const LATAM_PACE: (u64, u64) = (20, 45);
 
 /// The configuration every worker works from, published by the
 /// coordinator whenever it reloads (0035).
@@ -202,6 +234,9 @@ pub(crate) enum Command {
     /// Manual checks of a request (0046); the request is completed by
     /// whichever worker runs its last check.
     Queue(Vec<FamilyId>, Option<RequestId>),
+    /// Manual checks of given dates: the app's "Check award" (0083,
+    /// 0085), one LATAM search per leg.
+    QueueDated(Vec<(FamilyId, AwardKey)>, Option<RequestId>),
     /// Re-check a deal (Google Flights).
     Confirm(DealId, RequestId),
     /// A login window is about to open this site's profile (0024).
@@ -222,6 +257,7 @@ pub(crate) enum Command {
 enum Found {
     Cells(Vec<Cell>),
     Explore(Vec<ExploreDestination>),
+    Latam(LatamFound),
 }
 
 /// A check whose fetch is in flight (0072): what recording it needs.
@@ -233,6 +269,21 @@ struct Flight {
     reason: QueryReason,
     /// The manual request it serves (0046).
     request: Option<RequestId>,
+    /// The award deal this check confirms, by reading its dates again
+    /// (0085).
+    confirms: Option<DealId>,
+}
+
+/// A LATAM cash calendar as a page fetched it, and when (0085).
+type Calendar = (DateTime<Utc>, BTreeMap<NaiveDate, i64>);
+
+/// A LATAM check of given dates instead of the dates the worker would
+/// choose (0085): the app's "Check award", or an award candidate's
+/// confirmation.
+#[derive(Debug, Clone, Copy)]
+struct Dated {
+    at: AwardKey,
+    confirms: Option<DealId>,
 }
 
 /// A fetch that came back.
@@ -256,7 +307,11 @@ enum Mode {
 
 enum Manual {
     Check(FamilyId, Option<RequestId>),
+    /// A LATAM check of given dates (0085).
+    Dated(FamilyId, AwardKey, Option<RequestId>),
     Confirm(DealId, RequestId),
+    /// An award candidate's confirmation: its dates read again (0085).
+    ConfirmAward(DealId),
 }
 
 /// Which queued manual check goes next: the first one for a request
@@ -272,8 +327,11 @@ impl Manual {
     /// The app request this check serves, if any.
     fn request(&self) -> Option<RequestId> {
         match self {
-            Manual::Check(_, request) => *request,
+            Manual::Check(_, request) | Manual::Dated(_, _, request) => {
+                *request
+            }
             Manual::Confirm(_, request) => Some(*request),
+            Manual::ConfirmAward(_) => None,
         }
     }
 }
@@ -287,6 +345,8 @@ pub struct World {
     pub pos: HashMap<PosId, PointOfSale>,
     /// Families whose last check that loaded found no flights (0067).
     pub no_flights: HashSet<FamilyId>,
+    /// Miles programs without a live login (0085).
+    pub logged_out: HashSet<String>,
 }
 
 impl World {
@@ -316,12 +376,20 @@ pub async fn world(store: &Store) -> anyhow::Result<World> {
         .map(|p| (p.id, p))
         .collect();
     let no_flights = store.no_flights_families().await?.into_iter().collect();
+    let logged_out = store
+        .list_miles_programs()
+        .await?
+        .into_iter()
+        .filter(|p| p.login_state != LoginState::LoggedIn)
+        .map(|p| p.program)
+        .collect();
     Ok(World {
         families,
         routes,
         sweeps,
         pos,
         no_flights,
+        logged_out,
     })
 }
 
@@ -361,6 +429,7 @@ pub fn context(
         home_pos: world.pos.values().find(|p| p.is_home).map(|p| p.id),
         passengers: settings.passengers,
         no_flights: world.no_flights.clone(),
+        logged_out: world.logged_out.clone(),
     }
 }
 
@@ -413,6 +482,12 @@ pub(crate) struct Worker<S: Sources> {
     resting: Vec<Instant>,
     /// When the browser last did something, to close it when idle.
     last_work: Instant,
+    /// LATAM's cash calendar per route and leg, as the pages fetched it,
+    /// and when: it ranks later checks' dates (0085), never recorded.
+    calendars: HashMap<(RouteId, Leg), Calendar>,
+    /// When each award family last had its weekly spot check (0085).
+    /// Lost on a restart, which brings one spot check forward.
+    last_spot: HashMap<FamilyId, DateTime<Utc>>,
 }
 
 impl<S: Sources + 'static> Worker<S> {
@@ -453,6 +528,8 @@ impl<S: Sources + 'static> Worker<S> {
             flight_ids: HashMap::new(),
             resting: Vec::new(),
             last_work: Instant::now(),
+            calendars: HashMap::new(),
+            last_spot: HashMap::new(),
         };
         (tx, tokio::spawn(worker.run()))
     }
@@ -483,6 +560,32 @@ impl<S: Sources + 'static> Worker<S> {
         self.site == GOOGLE_FLIGHTS
     }
 
+    /// LATAM's worker, for `airline:LA` and `miles:latam_pass` (0084).
+    fn is_latam(&self) -> bool {
+        sites::is_latam(&self.site)
+    }
+
+    /// How many checks run at once: LATAM runs one, every check a search
+    /// under the user's own account (0084); other sites `--parallel`.
+    fn lanes(&self) -> usize {
+        if self.is_latam() {
+            1
+        } else {
+            self.config().parallel.max(1)
+        }
+    }
+
+    /// The random pause after a check, in seconds: LATAM's is a page
+    /// load's 20–45 s (0084), unless pauses are off.
+    fn pace_range(&self) -> (u64, u64) {
+        let (min, max) = self.config().pace;
+        if self.is_latam() && max > 0 {
+            (min.max(LATAM_PACE.0), max.max(LATAM_PACE.1))
+        } else {
+            (min, max)
+        }
+    }
+
     /// This site's Chromium profile (0062), whose cookie jar says
     /// whether a miles login took (0064).
     fn profile_dir(&self) -> Option<PathBuf> {
@@ -499,8 +602,12 @@ impl<S: Sources + 'static> Worker<S> {
     async fn run(mut self) {
         info!(site = %self.site, reader = self.reader, "site worker started");
         self.status().await;
+        // LATAM Pass's session, as the profile holds it (0085).
+        if self.is_latam() && self.reader {
+            self.read_profile_session().await;
+        }
         // Deals confirmed while no notification could be shown.
-        if self.is_google()
+        if (self.is_google() || self.is_latam())
             && let Err(e) = self.notify_deals().await
         {
             warn!("cannot announce deals: {e:#}");
@@ -623,6 +730,14 @@ impl<S: Sources + 'static> Worker<S> {
             Command::Queue(families, request) => {
                 self.manual.extend(
                     families.into_iter().map(|f| Manual::Check(f, request)),
+                );
+                Ok(())
+            }
+            Command::QueueDated(checks, request) => {
+                self.manual.extend(
+                    checks
+                        .into_iter()
+                        .map(|(f, at)| Manual::Dated(f, at, request)),
                 );
                 Ok(())
             }
@@ -796,6 +911,10 @@ impl<S: Sources + 'static> Worker<S> {
                     };
                     info!(%program, profile = %dir.display(), ?state, "login window closed");
                     self.store().set_miles_login(&program, state, now).await?;
+                    let until = cookies.iter().filter_map(|c| c.expires).max();
+                    self.store()
+                        .set_miles_session_until(&program, until)
+                        .await?;
                 }
                 Err(e) => warn!(%program, "login not checked: {e}"),
             }
@@ -818,6 +937,7 @@ impl<S: Sources + 'static> Worker<S> {
         if loaded.version == self.loaded.version {
             return;
         }
+        self.reread_budget().await;
         self.loaded = loaded;
         if self.is_google() {
             let limits = self.loaded.settings.google_flights_limits();
@@ -825,6 +945,32 @@ impl<S: Sources + 'static> Worker<S> {
                 && let Err(e) = self.budget.save(self.store()).await
             {
                 warn!("saving the budget failed: {e:#}");
+            }
+        }
+    }
+
+    /// Takes the limits the app wrote into this site's budget row
+    /// (`configure_site_budget`, a program's daily award loads, 0083)
+    /// instead of keeping, and later saving over them, the copy in
+    /// memory. Google Flights' limits are the settings'.
+    async fn reread_budget(&mut self) {
+        if self.is_google() || !self.reader {
+            return;
+        }
+        match self.store().site_budget(&self.site).await {
+            Ok(Some(row)) => {
+                if self.budget.adopt(&row) {
+                    info!(
+                        site = %self.site,
+                        start = row.start_budget,
+                        max = row.max_daily_budget,
+                        "budget limits changed"
+                    );
+                }
+            }
+            Ok(None) => {}
+            Err(e) => {
+                warn!(site = %self.site, "reading the budget failed: {e}")
             }
         }
     }
@@ -880,7 +1026,7 @@ impl<S: Sources + 'static> Worker<S> {
 
     /// A random pause between page loads, cut short by a shutdown.
     async fn pace(&mut self) {
-        let (min, max) = self.config().pace;
+        let (min, max) = self.pace_range();
         if max == 0 {
             return;
         }
@@ -904,7 +1050,7 @@ impl<S: Sources + 'static> Worker<S> {
 
     /// Rests the lane a check just freed for a random pause (0039).
     fn rest(&mut self) {
-        let (min, max) = self.config().pace;
+        let (min, max) = self.pace_range();
         if max == 0 {
             return;
         }
@@ -923,9 +1069,7 @@ impl<S: Sources + 'static> Worker<S> {
     /// Lanes neither checking nor resting.
     fn free_lanes(&mut self) -> usize {
         self.next_rest();
-        self.config()
-            .parallel
-            .max(1)
+        self.lanes()
             .saturating_sub(self.flights.len() + self.resting.len())
     }
 
@@ -970,7 +1114,18 @@ impl<S: Sources + 'static> Worker<S> {
                 self.last_manual = item.request();
                 match item {
                     Manual::Check(family, request) => {
-                        self.launch(family, QueryReason::Manual, request).await;
+                        self.launch(family, QueryReason::Manual, request, None)
+                            .await;
+                    }
+                    Manual::Dated(family, at, request) => {
+                        let dated = Dated { at, confirms: None };
+                        self.launch(
+                            family,
+                            QueryReason::Manual,
+                            request,
+                            Some(dated),
+                        )
+                        .await;
                     }
                     Manual::Confirm(id, request) => {
                         if let Err(e) = self.confirm_request(id, request).await
@@ -978,6 +1133,11 @@ impl<S: Sources + 'static> Worker<S> {
                             warn!(deal = %id, "confirmation failed: {e:#}");
                         }
                         self.rest();
+                    }
+                    Manual::ConfirmAward(id) => {
+                        if let Err(e) = self.confirm_award(id).await {
+                            warn!(deal = %id, "award confirmation failed: {e:#}");
+                        }
                     }
                 }
             } else if pick {
@@ -989,7 +1149,7 @@ impl<S: Sources + 'static> Worker<S> {
                 let Some((family, reason)) = self.scheduled.pop_front() else {
                     return false;
                 };
-                self.launch(family, reason, None).await;
+                self.launch(family, reason, None, None).await;
             } else {
                 return false;
             }
@@ -1003,8 +1163,9 @@ impl<S: Sources + 'static> Worker<S> {
         family: FamilyId,
         reason: QueryReason,
         request: Option<RequestId>,
+        dated: Option<Dated>,
     ) {
-        match self.launch_check(family, reason, request).await {
+        match self.launch_check(family, reason, request, dated).await {
             Ok(Some(_)) => {}
             Ok(None) => self.finish_request(request).await,
             Err(e) => {
@@ -1077,6 +1238,7 @@ impl<S: Sources + 'static> Worker<S> {
     /// the queue. A family in flight is not picked again.
     async fn plan(&mut self) -> anyhow::Result<()> {
         self.refresh_loaded().await;
+        self.reread_budget().await;
         let now = Utc::now();
         let params = self.loaded.params.clone();
         if self.reader && self.budget.advance(now, budget::today(), &params) {
@@ -1107,10 +1269,9 @@ impl<S: Sources + 'static> Worker<S> {
         let flying: HashSet<FamilyId> =
             self.checks.iter().map(|c| c.family).collect();
         let (candidates, skipped) = candidates::build(
-            world
-                .families
-                .iter()
-                .filter(|f| f.site == site && !flying.contains(&f.id)),
+            world.families.iter().filter(|f| {
+                sites::worker_site(&f.site) == site && !flying.contains(&f.id)
+            }),
             &cx,
         );
         let ticks_left = if self.config().once {
@@ -1313,7 +1474,8 @@ impl<S: Sources + 'static> Worker<S> {
         family_id: FamilyId,
         reason: QueryReason,
     ) -> anyhow::Result<()> {
-        let Some(query) = self.launch_check(family_id, reason, None).await?
+        let Some(query) =
+            self.launch_check(family_id, reason, None, None).await?
         else {
             return Ok(());
         };
@@ -1335,6 +1497,7 @@ impl<S: Sources + 'static> Worker<S> {
         family_id: FamilyId,
         reason: QueryReason,
         request: Option<RequestId>,
+        dated: Option<Dated>,
     ) -> anyhow::Result<Option<QueryId>> {
         // Rows by id, not the whole world: starting a check stays cheap.
         let Some(family) = self.store().family(family_id).await? else {
@@ -1351,12 +1514,18 @@ impl<S: Sources + 'static> Worker<S> {
             .await?
             .context("the family's point of sale is not configured")?;
         let today = budget::today();
+        let latam = if sites::is_latam(&family.site) {
+            self.latam_dates(&family, dated.map(|d| d.at)).await?
+        } else {
+            None
+        };
         let options = JobOptions {
             cheapest_departure: match family.key.source {
                 Source::GoogleFlights => None,
                 _ => self.cheapest_departure(&family).await,
             },
             now: Some(Utc::now()),
+            latam,
             ..self.config().jobs.clone()
         };
         let job = match jobs::build(
@@ -1405,6 +1574,7 @@ impl<S: Sources + 'static> Worker<S> {
             query,
             reason,
             request,
+            confirms: dated.and_then(|d| d.confirms),
         };
         let expected = flight_cost(&flight.family);
         let sources = Arc::clone(&self.sources);
@@ -1414,6 +1584,7 @@ impl<S: Sources + 'static> Worker<S> {
                     split(sources.calendar(j).await, Found::Cells)
                 }
                 Job::Tap(j) => split(sources.tap(j).await, Found::Cells),
+                Job::Latam(j) => split(sources.latam(j).await, Found::Latam),
                 Job::Explore(j) => {
                     split(sources.explore(j).await, Found::Explore)
                 }
@@ -1498,6 +1669,7 @@ impl<S: Sources + 'static> Worker<S> {
                     query,
                     reason,
                     request: _,
+                    confirms,
                 },
             fetch,
             found,
@@ -1523,7 +1695,11 @@ impl<S: Sources + 'static> Worker<S> {
                 return Ok(());
             }
             QueryOutcome::LoggedOut => {
-                if let Source::Miles { program } = &family.key.source {
+                if self.is_latam() {
+                    // Any LATAM page on the login wall: LATAM Pass's
+                    // session ended (0085).
+                    self.session_ended(finished).await?;
+                } else if let Source::Miles { program } = &family.key.source {
                     warn!(%program, "logged out: the app will ask for a login");
                     self.store()
                         .set_miles_login(program, LoginState::Expired, finished)
@@ -1537,6 +1713,12 @@ impl<S: Sources + 'static> Worker<S> {
             QueryOutcome::NoFlights => {
                 info!(family = %family.id, "no flights: next check in a week");
                 self.mark_checked(family.id, finished).await?;
+                if let Some(deal) = confirms {
+                    info!(deal = %deal, "the award's date has no flights: rejected");
+                    self.store()
+                        .set_deal_status(deal, DealStatus::Rejected, finished)
+                        .await?;
+                }
                 return Ok(());
             }
             QueryOutcome::Unexpected { .. } | QueryOutcome::Error { .. } => {
@@ -1574,6 +1756,42 @@ impl<S: Sources + 'static> Worker<S> {
                     reason,
                 )
                 .await
+            }
+            Found::Latam(found) => {
+                let LatamFound {
+                    cells,
+                    calendar,
+                    session,
+                    clicks,
+                } = found;
+                debug!(family = %family.id, clicks, "LATAM strip clicks");
+                self.after_cells(
+                    &family,
+                    &route,
+                    &pos,
+                    query,
+                    cells,
+                    &world,
+                    finished,
+                    fetch.page_loads,
+                    reason,
+                )
+                .await?;
+                if let FamilyKind::Leg { leg } = family.key.kind
+                    && !calendar.is_empty()
+                {
+                    self.calendars
+                        .insert((route.id, leg), (finished, calendar));
+                }
+                if let Some(until) = session {
+                    self.observe_session(until, finished).await?;
+                }
+                if let Some(deal) = confirms {
+                    self.judge_award(deal, family.id, finished).await?;
+                } else {
+                    self.evaluate_awards(&family, &route, &pos, query).await?;
+                }
+                Ok(())
             }
         }
     }
@@ -1691,8 +1909,8 @@ impl<S: Sources + 'static> Worker<S> {
                 stops: c.stops,
                 duration_minutes: c.duration_minutes,
                 seller: c.seller,
-                flights: None,
-                award: None,
+                flights: c.flights,
+                award: c.award,
             })
             .collect();
         if !observations.is_empty() {
@@ -1837,6 +2055,499 @@ impl<S: Sources + 'static> Worker<S> {
         }
         let min = hints.iter().map(|h| h.price.minor).min();
         self.learn(family, min, page_loads, reason, at).await?;
+        Ok(())
+    }
+
+    // -----------------------------------------------------------------
+    // LATAM (0084, 0085)
+    // -----------------------------------------------------------------
+
+    /// The home point of sale's family of `key`'s route, cabin and kind
+    /// on `source`.
+    async fn sibling(
+        &self,
+        family: &FamilyRecord,
+        source: Source,
+        kind: FamilyKind,
+    ) -> anyhow::Result<Option<FamilyId>> {
+        let Some(home) = self.store().home_point_of_sale().await? else {
+            return Ok(None);
+        };
+        Ok(self
+            .store()
+            .family_id(&FamilyKey {
+                route: family.key.route,
+                cabin: family.key.cabin,
+                source,
+                pos: home.id,
+                kind,
+            })
+            .await?)
+    }
+
+    /// One leg's cash per departure for choosing LATAM dates: Google
+    /// Flights' latest graph, LATAM's own cash read in the last
+    /// [`LATAM_READ_DAYS`] (it wins: it is the airline's live price), and
+    /// the cached calendar a LATAM page fetched in the last two days
+    /// where neither has the day. Minor units.
+    async fn leg_cash(
+        &self,
+        family: &FamilyRecord,
+        leg: Leg,
+        now: DateTime<Utc>,
+    ) -> anyhow::Result<BTreeMap<NaiveDate, i64>> {
+        let kind = FamilyKind::Leg { leg };
+        let mut cash: BTreeMap<NaiveDate, i64> = BTreeMap::new();
+        if let Some((at, calendar)) =
+            self.calendars.get(&(family.key.route, leg))
+            && now - *at <= chrono::TimeDelta::hours(FRESH_HOURS)
+        {
+            cash.extend(calendar.iter().map(|(d, p)| (*d, *p)));
+        }
+        if let Some(id) =
+            self.sibling(family, Source::GoogleFlights, kind).await?
+        {
+            cash.extend(deals::leg_prices(
+                &self.store().latest_cells(id).await?,
+            ));
+        }
+        let airline = Source::Airline {
+            code: latam::CODE.to_owned(),
+        };
+        if let Some(id) = self.sibling(family, airline, kind).await? {
+            let since = now - chrono::TimeDelta::days(LATAM_READ_DAYS);
+            let mut own: BTreeMap<NaiveDate, (DateTime<Utc>, i64)> =
+                BTreeMap::new();
+            for o in self.store().history(id, since).await? {
+                if let (Some(p), None) = (&o.price, o.return_date) {
+                    own.insert(o.departure, (o.observed_at, p.minor));
+                }
+            }
+            cash.extend(own.into_iter().map(|(d, (_, p))| (d, p)));
+        }
+        Ok(cash)
+    }
+
+    /// The departures `family` read in the last [`LATAM_READ_DAYS`], and
+    /// when it last read each.
+    async fn read_dates(
+        &self,
+        family: FamilyId,
+        now: DateTime<Utc>,
+    ) -> anyhow::Result<BTreeMap<NaiveDate, DateTime<Utc>>> {
+        let since = now - chrono::TimeDelta::days(LATAM_READ_DAYS);
+        let mut read = BTreeMap::new();
+        for o in self.store().history(family, since).await? {
+            read.entry(o.departure)
+                .and_modify(|at: &mut DateTime<Utc>| {
+                    *at = (*at).max(o.observed_at)
+                })
+                .or_insert(o.observed_at);
+        }
+        Ok(read)
+    }
+
+    /// Which dates a LATAM check of `family` reads (0085): `at` when
+    /// given, else the anchor and strip [`latam_dates`] chooses from
+    /// the cash in the database, what the family read lately and, for
+    /// awards, the program's setting and its weekly spot check. Strip
+    /// clicks are cut to what today's budget has left.
+    async fn latam_dates(
+        &mut self,
+        family: &FamilyRecord,
+        at: Option<AwardKey>,
+    ) -> anyhow::Result<Option<LatamDates>> {
+        if let Some((departure, return_date)) = at {
+            return Ok(Some(LatamDates {
+                departure,
+                return_date,
+                strip: Strip::none(),
+            }));
+        }
+        let now = Utc::now();
+        let today = budget::today();
+        let first = jobs::first_departure(today);
+        let last = jobs::horizon_end(today, self.settings());
+        let cash = match family.key.kind {
+            FamilyKind::Leg { leg } => self.leg_cash(family, leg, now).await?,
+            FamilyKind::RoundTrip { days } => {
+                // The round trip's cash: Google Flights' real round
+                // trips, else the two legs' sum.
+                let mut cash: BTreeMap<NaiveDate, i64> = BTreeMap::new();
+                let out = self.leg_cash(family, Leg::Outbound, now).await?;
+                let back = self.leg_cash(family, Leg::Return, now).await?;
+                for (d, p) in &out {
+                    if let Some(r) =
+                        back.get(&(*d + Days::new(u64::from(days))))
+                    {
+                        cash.insert(*d, p + r);
+                    }
+                }
+                let kind = FamilyKind::RoundTrip { days };
+                if let Some(id) =
+                    self.sibling(family, Source::GoogleFlights, kind).await?
+                {
+                    for ((d, _), p) in deals::round_trip_prices(
+                        &self.store().latest_cells(id).await?,
+                    ) {
+                        cash.insert(d, p);
+                    }
+                }
+                cash
+            }
+            FamilyKind::Explore => return Ok(None),
+        };
+        let known = Known {
+            first,
+            last,
+            cash,
+            read: self.read_dates(family.id, now).await?,
+        };
+        let pick = match &family.key.source {
+            Source::Miles { program } => {
+                let dates = self
+                    .store()
+                    .list_miles_programs()
+                    .await?
+                    .into_iter()
+                    .find(|p| &p.program == program)
+                    .map_or(AwardDates::default(), |p| p.dates);
+                let spot_due = self.last_spot.get(&family.id).is_none_or(|t| {
+                    now - *t >= chrono::TimeDelta::days(latam_dates::SPOT_DAYS)
+                });
+                Pick::of(dates, spot_due)
+            }
+            _ => Pick::Cheap,
+        };
+        let Some((departure, used)) = latam_dates::anchor(pick, &known, now)
+        else {
+            return Ok(None);
+        };
+        let award = matches!(family.key.source, Source::Miles { .. });
+        if award && used == Pick::Spot {
+            self.last_spot.insert(family.id, now);
+        }
+        let return_date = match family.key.kind {
+            FamilyKind::RoundTrip { days } => {
+                Some(departure + Days::new(u64::from(days)))
+            }
+            _ => None,
+        };
+        // Strip clicks are for awards, which have no calendar; cash has
+        // one and reads one date a check (0085). Each click is a load.
+        let left = self
+            .budget
+            .daily(now, &self.loaded.params)
+            .saturating_sub(self.budget.loads_today)
+            .saturating_sub(1);
+        let strip = if award && return_date.is_none() {
+            Strip::plan(used, &known, now, left)
+        } else {
+            Strip::none()
+        };
+        info!(
+            family = %family.id,
+            %departure,
+            pick = ?used,
+            clicks = strip.max_clicks,
+            "LATAM dates chosen"
+        );
+        Ok(Some(LatamDates {
+            departure,
+            return_date,
+            strip,
+        }))
+    }
+
+    /// LATAM Pass's login state as stored.
+    async fn latam_login(&self) -> anyhow::Result<Option<LoginState>> {
+        Ok(self
+            .store()
+            .list_miles_programs()
+            .await?
+            .into_iter()
+            .find(|p| p.program == latam::PROGRAM)
+            .map(|p| p.login_state))
+    }
+
+    /// Reads LATAM Pass's session from the profile's cookie jar while no
+    /// Chromium runs on it (the worker's start, 0064, 0085).
+    async fn read_profile_session(&mut self) {
+        let Some(dir) = self.profile_dir() else {
+            return;
+        };
+        if self.sources.is_running() {
+            return;
+        }
+        let now = Utc::now();
+        let domains = tm_domain::miles_session_domains(latam::PROGRAM);
+        match tm_browser::profile::login_cookies(&dir, domains, now).await {
+            Ok(cookies) => {
+                let until = cookies.iter().filter_map(|c| c.expires).max();
+                info!(profile = %dir.display(), ?until, "LATAM Pass session in the profile");
+                if let Err(e) = self.observe_session(until, now).await {
+                    warn!("recording LATAM Pass's session failed: {e:#}");
+                }
+            }
+            Err(e) => {
+                warn!(profile = %dir.display(), "LATAM Pass's session not read: {e}")
+            }
+        }
+    }
+
+    /// Records LATAM Pass's session as its cookie shows it (0082): when
+    /// it ends, and whether there is one. A profile with a live session
+    /// counts as logged in unless an earlier check found it expired
+    /// (only the login window clears that, 0064); one without has
+    /// ended.
+    async fn observe_session(
+        &mut self,
+        until: Option<DateTime<Utc>>,
+        at: DateTime<Utc>,
+    ) -> anyhow::Result<()> {
+        self.store()
+            .set_miles_session_until(latam::PROGRAM, until)
+            .await?;
+        match (until, self.latam_login().await?) {
+            (Some(_), Some(LoginState::LoggedOut)) => {
+                info!("LATAM Pass's profile holds a session: logged in");
+                self.store()
+                    .set_miles_login(latam::PROGRAM, LoginState::LoggedIn, at)
+                    .await?;
+            }
+            (None, _) => self.session_ended(at).await?,
+            _ => {}
+        }
+        Ok(())
+    }
+
+    /// LATAM Pass's session ended: its award families wait for a login
+    /// (`candidates::Skip::LoggedOut`), and the user is told once per
+    /// expiry, since checks run with the app closed (0083, 0085).
+    async fn session_ended(&mut self, at: DateTime<Utc>) -> anyhow::Result<()> {
+        if self.latam_login().await? != Some(LoginState::LoggedIn) {
+            return Ok(());
+        }
+        warn!("LATAM Pass's session ended: award checks wait for a login");
+        self.store()
+            .set_miles_login(latam::PROGRAM, LoginState::Expired, at)
+            .await?;
+        if let Some(notifier) = self.config().notifier.clone() {
+            let notice = notify::login_notice(latam::PROGRAM);
+            match tokio::task::spawn_blocking(move || notifier.show(&notice))
+                .await
+            {
+                Ok(Ok(())) => info!("login notice shown"),
+                Ok(Err(e)) => warn!("the login notice was not shown: {e:#}"),
+                Err(e) => warn!("the login notice task failed: {e}"),
+            }
+        }
+        Ok(())
+    }
+
+    /// The Google Flights cash price of an award's leg (or round trip)
+    /// and dates, under the home point of sale, for scale (0083).
+    async fn award_cash(
+        &self,
+        family: &FamilyRecord,
+        (departure, return_date): AwardKey,
+    ) -> anyhow::Result<Option<Money>> {
+        let Some(id) = self
+            .sibling(family, Source::GoogleFlights, family.key.kind)
+            .await?
+        else {
+            return Ok(None);
+        };
+        Ok(self
+            .store()
+            .latest_cells(id)
+            .await?
+            .into_iter()
+            .filter(|c| {
+                c.departure == departure && c.return_date == return_date
+            })
+            .filter_map(|c| c.price)
+            .min_by_key(|p| p.minor))
+    }
+
+    /// The award series' deals after a LATAM Pass check (0083, 0085):
+    /// confirmed deals whose miles rose are expired; the check's awards
+    /// that beat the series' own baseline become candidates, each
+    /// confirmed by reading its dates again.
+    async fn evaluate_awards(
+        &mut self,
+        family: &FamilyRecord,
+        route: &Route,
+        pos: &PointOfSale,
+        query: QueryId,
+    ) -> anyhow::Result<()> {
+        let Source::Miles { program } = &family.key.source else {
+            return Ok(());
+        };
+        let leg = match family.key.kind {
+            FamilyKind::Leg { leg } => Some(leg),
+            FamilyKind::RoundTrip { .. } => None,
+            FamilyKind::Explore => return Ok(()),
+        };
+        let store = self.store().clone();
+        let now = Utc::now();
+        let today = budget::today();
+        let params = self.loaded.params.clone();
+        let cells: Vec<Observation> = store
+            .latest_cells(family.id)
+            .await?
+            .into_iter()
+            .filter(|c| c.query == query)
+            .collect();
+        let current = cheapest_by_dates(&cells);
+        if current.is_empty() {
+            return Ok(());
+        }
+        let history = store
+            .history(family.id, now - params.baseline_window)
+            .await?;
+        let points = award_points(&history, family.id, &[query].into());
+        let first = today + Days::new(1);
+        let last = jobs::horizon_end(today, self.settings());
+        let found =
+            deals::find_awards(&current, &points, now, &params, first, last);
+        let series = Series::Award {
+            program: program.clone(),
+        };
+        let cabin = family.key.cabin;
+        let known = store
+            .list_deals(&DealFilter {
+                limit: Some(1000),
+                ..DealFilter::default()
+            })
+            .await?;
+        for d in known.iter().filter(|d| {
+            d.status == DealStatus::Confirmed
+                && d.series == series
+                && d.route == route.id
+                && d.cabin == cabin
+                && d.leg == leg
+        }) {
+            if deals::award_expired(d, &current, today)
+                && let Some(id) = d.id
+            {
+                info!(deal = %id, "award deal expired");
+                store.set_deal_status(id, DealStatus::Expired, now).await?;
+            }
+        }
+        let picked = deals::select_awards(
+            found,
+            &known,
+            &series,
+            (route.id, cabin, leg),
+            now,
+            AWARD_CONFIRMS,
+        );
+        for f in picked {
+            let dates = (f.award.departure, f.award.return_date);
+            let cash = self.award_cash(family, dates).await?;
+            let mut deal = deals::award_candidate(
+                &f, program, leg, route.id, cabin, pos, cash, now,
+            );
+            deal.url =
+                award_url(route, leg, dates, &self.settings().passengers);
+            let id = store.insert_deal(&deal).await?;
+            info!(
+                deal = %id,
+                route = %route.destination.code,
+                ?leg,
+                departure = %dates.0,
+                miles = ?deal.miles,
+                change = f.change,
+                "award candidate: reading its date again"
+            );
+            self.manual.push_front(Manual::ConfirmAward(id));
+        }
+        Ok(())
+    }
+
+    /// Starts an award candidate's confirmation: its family's dates read
+    /// again, one search (0085).
+    async fn confirm_award(&mut self, id: DealId) -> anyhow::Result<()> {
+        let Some(deal) = self.store().deal(id).await? else {
+            return Ok(());
+        };
+        if deal.status != DealStatus::Candidate {
+            return Ok(());
+        }
+        let Series::Award { program } = &deal.series else {
+            return Ok(());
+        };
+        let kind = match (deal.leg, deal.return_date) {
+            (Some(leg), _) => FamilyKind::Leg { leg },
+            (None, Some(r)) => FamilyKind::RoundTrip {
+                days: u16::try_from((r - deal.departure).num_days())
+                    .unwrap_or(0),
+            },
+            (None, None) => return Ok(()),
+        };
+        let Some(family) = self
+            .store()
+            .family_id(&FamilyKey {
+                route: deal.route,
+                cabin: deal.cabin,
+                source: Source::Miles {
+                    program: program.clone(),
+                },
+                pos: deal.pos,
+                kind,
+            })
+            .await?
+        else {
+            return Ok(());
+        };
+        let dated = Dated {
+            at: (deal.departure, deal.return_date),
+            confirms: Some(id),
+        };
+        self.launch(family, QueryReason::Confirmation, None, Some(dated))
+            .await;
+        Ok(())
+    }
+
+    /// Judges an award candidate against the check that read its dates
+    /// again: it holds when the cheapest award of those dates still costs
+    /// at most [`deals::HOLD_TOLERANCE`] times its miles. A held deal is
+    /// announced (0080).
+    async fn judge_award(
+        &mut self,
+        id: DealId,
+        family: FamilyId,
+        at: DateTime<Utc>,
+    ) -> anyhow::Result<()> {
+        let store = self.store().clone();
+        let Some(deal) = store.deal(id).await? else {
+            return Ok(());
+        };
+        if deal.status != DealStatus::Candidate {
+            return Ok(());
+        }
+        let cells = store.latest_cells(family).await?;
+        let current = cheapest_by_dates(&cells);
+        let fresh = current
+            .get(&(deal.departure, deal.return_date))
+            .and_then(|o| o.miles);
+        let held = match (fresh, deal.miles) {
+            (Some(now), Some(was)) => {
+                now as f64 <= was as f64 * deals::HOLD_TOLERANCE
+            }
+            _ => false,
+        };
+        let status = if held {
+            DealStatus::Confirmed
+        } else {
+            DealStatus::Rejected
+        };
+        store.set_deal_status(id, status, at).await?;
+        info!(deal = %id, ?status, candidate = ?deal.miles, read_again = ?fresh, "award confirmation");
+        if held && let Err(e) = self.notify_deals().await {
+            warn!("cannot announce deals: {e:#}");
+        }
         Ok(())
     }
 
@@ -2051,19 +2762,35 @@ impl<S: Sources + 'static> Worker<S> {
 
     /// Shows a desktop notification for each confirmed deal not shown
     /// yet, oldest first, and marks it seen (0080). One that cannot be
-    /// shown stays unseen and is tried after the next confirmation.
+    /// shown stays unseen and is tried after the next confirmation. Each
+    /// worker announces its own: Google Flights the cash deals, LATAM
+    /// the award deals (0085), so no deal is announced twice.
     async fn notify_deals(&self) -> anyhow::Result<()> {
         let Some(notifier) = self.config().notifier.clone() else {
             return Ok(());
         };
         let store = self.store();
+        let values: HashMap<String, Money> = store
+            .list_miles_programs()
+            .await?
+            .into_iter()
+            .filter_map(|p| Some((p.program, p.value_per_1000?)))
+            .collect();
         for deal in store.unseen_confirmed().await? {
+            if deal.series.is_award() != self.is_latam() {
+                continue;
+            }
             let (Some(id), Some(route)) =
                 (deal.id, store.route(deal.route).await?)
             else {
                 continue;
             };
-            let notice = notify::notice(&deal, &route);
+            let notice = match deal.series.program() {
+                Some(program) => {
+                    notify::award_notice(&deal, &route, values.get(program))
+                }
+                None => notify::notice(&deal, &route),
+            };
             let notifier = Arc::clone(&notifier);
             tokio::task::spawn_blocking(move || notifier.show(&notice))
                 .await
@@ -2279,6 +3006,30 @@ fn route_search(
         cabin,
         settings.passengers,
     ))
+}
+
+/// The LATAM Pass results page of an award deal's leg (or round trip)
+/// and dates, for the app's link.
+fn award_url(
+    route: &Route,
+    leg: Option<Leg>,
+    (departure, return_date): AwardKey,
+    passengers: &tm_domain::Passengers,
+) -> Option<String> {
+    let (from, to) = match leg {
+        Some(Leg::Return) => (&route.destination, &route.origin),
+        _ => (&route.origin, &route.destination),
+    };
+    latam::Search {
+        origin: latam::airport(&from.code).to_owned(),
+        destination: latam::airport(&to.code).to_owned(),
+        outbound: departure,
+        inbound: return_date,
+        passengers: *passengers,
+        cabin: Cabin::Economy,
+        redemption: true,
+    }
+    .url(latam::BASE)
 }
 
 /// A fetch's bookkeeping, and its value as a [`Found`].

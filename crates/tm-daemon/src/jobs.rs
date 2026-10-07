@@ -1,6 +1,6 @@
-//! What one check of a family loads (DECISIONS.md 0041, 0042, 0051):
-//! pure functions from a family, its route, its point of sale and the
-//! settings to a job for a [`crate::sources::Sources`].
+//! What one check of a family loads (DECISIONS.md 0041, 0042, 0051,
+//! 0085): pure functions from a family, its route, its point of sale and
+//! the settings to a job for a [`crate::sources::Sources`].
 
 use chrono::{DateTime, Days, NaiveDate, Utc};
 use tm_domain::{
@@ -23,8 +23,8 @@ use tm_gflights::{
 };
 
 use crate::{
-    sites::{self, tap},
-    sources::{CalendarJob, ExploreJob, ResolveJob, TapJob},
+    sites::{self, latam, latam::dates::Strip, tap},
+    sources::{CalendarJob, ExploreJob, LatamJob, ResolveJob, TapJob},
 };
 
 /// What a family's check loads.
@@ -33,6 +33,18 @@ pub enum Job {
     Calendar(CalendarJob),
     Explore(ExploreJob),
     Tap(TapJob),
+    Latam(LatamJob),
+}
+
+/// The dates one LATAM check reads (0085), chosen by the worker from
+/// the database ([`crate::sites::latam::dates`]).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LatamDates {
+    pub departure: NaiveDate,
+    /// A round trip's return; a leg's is ignored.
+    pub return_date: Option<NaiveDate>,
+    /// The strip days the check may click (one-way searches only).
+    pub strip: Strip,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
@@ -71,6 +83,11 @@ pub struct JobOptions {
     pub now: Option<DateTime<Utc>>,
     /// Replace TAP's `https://booking.flytap.com` (tests).
     pub tap_base: Option<String>,
+    /// Replace LATAM's `https://www.latamairlines.com` (tests).
+    pub latam_base: Option<String>,
+    /// What a LATAM check reads; without it, the date a TAP search
+    /// without a calendar would price, and no strip.
+    pub latam: Option<LatamDates>,
 }
 
 /// The `hl`/`gl`/`curr` of a point of sale.
@@ -178,6 +195,14 @@ pub fn build(
             tap_job(key, kind, route, pos, settings, today, options)
                 .map(Job::Tap)
         }
+        (Source::Airline { code }, kind) if code == latam::CODE => {
+            latam_job(key, kind, route, pos, settings, today, options)
+                .map(Job::Latam)
+        }
+        (Source::Miles { program }, kind) if program == latam::PROGRAM => {
+            latam_job(key, kind, route, pos, settings, today, options)
+                .map(Job::Latam)
+        }
         (source, _) => Err(JobError::NoReader(source.site())),
     }
 }
@@ -248,6 +273,85 @@ fn tap_job(
         horizon_end: end,
         max_months: tap::months_needed(first, end),
         fresh_since: tap::fresh_since(now),
+    })
+}
+
+/// A LATAM search (0085): the Brazilian results page, cash or award, for
+/// one leg or the round trip, under the family's (home) point of sale.
+/// The page is always searched in economy, which returns every cabin
+/// (latam.md §2); the job keeps the family's.
+fn latam_job(
+    key: &FamilyKey,
+    kind: FamilyKind,
+    route: &Route,
+    pos: &PointOfSale,
+    settings: &Settings,
+    today: NaiveDate,
+    options: &JobOptions,
+) -> Result<LatamJob, JobError> {
+    if let Some(why) = sites::unsupported(key, &settings.passengers) {
+        return Err(JobError::Unsupported(why));
+    }
+    let (from, to, days) = match kind {
+        FamilyKind::Leg { leg: Leg::Outbound } => {
+            (&route.origin, &route.destination, None)
+        }
+        FamilyKind::Leg { leg: Leg::Return } => {
+            (&route.destination, &route.origin, None)
+        }
+        FamilyKind::RoundTrip { days } => {
+            (&route.origin, &route.destination, Some(days))
+        }
+        FamilyKind::Explore => return Err(JobError::Mismatch),
+    };
+    let first = first_departure(today);
+    let dates = options.latam.clone().unwrap_or_else(|| LatamDates {
+        departure: options
+            .cheapest_departure
+            .filter(|d| *d > today)
+            .unwrap_or(today + Days::new(45)),
+        return_date: None,
+        strip: Strip::none(),
+    });
+    let departure = dates.departure.max(first);
+    let return_date = days.map(|days| {
+        dates
+            .return_date
+            .filter(|r| *r > departure)
+            .unwrap_or(departure + Days::new(u64::from(days)))
+    });
+    let origin = latam::airport(&from.code).to_owned();
+    let destination = latam::airport(&to.code).to_owned();
+    let award = matches!(key.source, Source::Miles { .. });
+    let search = latam::Search {
+        origin: origin.clone(),
+        destination: destination.clone(),
+        outbound: departure,
+        inbound: return_date,
+        passengers: settings.passengers,
+        cabin: Cabin::Economy,
+        redemption: award,
+    };
+    let base = options.latam_base.as_deref().unwrap_or(latam::BASE);
+    let url = search.url(base).ok_or(JobError::Unsupported(
+        "LATAM's results URL cannot say this party",
+    ))?;
+    Ok(LatamJob {
+        pos: pos.id,
+        url,
+        base: base.trim_end_matches('/').to_owned(),
+        origin,
+        destination,
+        cabin: key.cabin,
+        departure,
+        return_date,
+        award,
+        seller: key.source.site(),
+        strip: if return_date.is_some() {
+            Strip::none()
+        } else {
+            dates.strip
+        },
     })
 }
 
@@ -431,12 +535,13 @@ mod tests {
         );
     }
 
-    /// Airline and miles sites other than TAP have no reader (0059).
+    /// Airline and miles sites other than TAP and LATAM have no reader
+    /// (0059).
     #[test]
     fn other_airline_and_miles_sites_have_no_reader() {
         let settings = Settings::default();
         for (source, site) in [
-            (Source::Airline { code: "LA".into() }, "airline:LA"),
+            (Source::Airline { code: "G3".into() }, "airline:G3"),
             (
                 Source::Miles {
                     program: "smiles".into(),
@@ -549,6 +654,17 @@ mod tests {
         // Round trips and larger parties are not TAP's.
         assert!(matches!(
             build(
+                &tap(Cabin::Economy, FamilyKind::Explore),
+                &route(PlaceKind::Airport),
+                &home_pos(),
+                &settings,
+                day(10, 6),
+                &options,
+            ),
+            Err(JobError::Mismatch)
+        ));
+        assert!(matches!(
+            build(
                 &tap(Cabin::Economy, FamilyKind::RoundTrip { days: 7 }),
                 &route(PlaceKind::Airport),
                 &home_pos(),
@@ -563,6 +679,105 @@ mod tests {
         assert!(matches!(
             build(
                 &tap(Cabin::Economy, FamilyKind::Leg { leg: Leg::Outbound }),
+                &route(PlaceKind::Airport),
+                &home_pos(),
+                &two,
+                day(10, 6),
+                &options,
+            ),
+            Err(JobError::Unsupported(_))
+        ));
+    }
+
+    #[test]
+    fn latam_checks_are_results_pages() {
+        let settings = Settings::default();
+        let key = |source, cabin, kind| FamilyKey {
+            route: RouteId(1),
+            cabin,
+            source,
+            pos: PosId(1),
+            kind,
+        };
+        let pass = Source::Miles {
+            program: "latam_pass".into(),
+        };
+        let strip = Strip {
+            max_clicks: 6,
+            ..Strip::none()
+        };
+        let options = JobOptions {
+            latam_base: Some("http://127.0.0.1:9/".into()),
+            latam: Some(LatamDates {
+                departure: day(11, 10),
+                return_date: None,
+                strip: strip.clone(),
+            }),
+            ..JobOptions::default()
+        };
+        // An award leg: GRU for SAO, redemption, every cabin searched.
+        let job = build(
+            &key(
+                pass.clone(),
+                Cabin::Business,
+                FamilyKind::Leg { leg: Leg::Return },
+            ),
+            &route(PlaceKind::Airport),
+            &home_pos(),
+            &settings,
+            day(10, 6),
+            &options,
+        );
+        let Ok(Job::Latam(job)) = job else {
+            panic!("a LATAM job: {job:?}");
+        };
+        assert_eq!(
+            (job.origin.as_str(), job.destination.as_str()),
+            ("LIS", "GRU")
+        );
+        assert!(job.award);
+        assert_eq!(job.cabin, Cabin::Business);
+        assert_eq!(job.seller, "miles:latam_pass");
+        assert_eq!(job.base, "http://127.0.0.1:9");
+        assert_eq!(job.strip, strip);
+        assert!(job.url.starts_with("http://127.0.0.1:9/br/pt/oferta-voos?origin=LIS&destination=GRU&outbound=2026-11-10T"));
+        assert!(job.url.contains("&trip=OW&cabin=Economy&redemption=true"));
+
+        // A cash round trip: its length, and no strip.
+        let job = build(
+            &key(
+                Source::Airline { code: "LA".into() },
+                Cabin::Economy,
+                FamilyKind::RoundTrip { days: 7 },
+            ),
+            &route(PlaceKind::Airport),
+            &home_pos(),
+            &settings,
+            day(10, 6),
+            &options,
+        );
+        let Ok(Job::Latam(job)) = job else {
+            panic!("a LATAM job: {job:?}");
+        };
+        assert!(!job.award);
+        assert_eq!(job.return_date, Some(day(11, 17)));
+        assert_eq!(job.strip, Strip::none());
+        assert!(job.url.contains("&inbound=2026-11-17T12%3A00%3A00.000Z"));
+        assert!(job.url.contains("&trip=RT&cabin=Economy&redemption=false"));
+        assert!(job.url.starts_with(
+            "http://127.0.0.1:9/br/pt/oferta-voos?origin=GRU&destination=LIS&"
+        ));
+
+        // Larger parties are not LATAM's.
+        let mut two = settings.clone();
+        two.passengers.adults = 2;
+        assert!(matches!(
+            build(
+                &key(
+                    pass,
+                    Cabin::Economy,
+                    FamilyKind::Leg { leg: Leg::Outbound }
+                ),
                 &route(PlaceKind::Airport),
                 &home_pos(),
                 &two,

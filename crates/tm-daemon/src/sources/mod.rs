@@ -4,13 +4,26 @@
 //! [`browser::BrowserSources`] is the real one: Google Flights through
 //! the page's own RPCs (0032), TAP through its booking site's own
 //! calendar and availability calls (0051), both in the daemon's
-//! headless Chromium (0021).
+//! headless Chromium (0021), and LATAM's cash and LATAM Pass awards
+//! through its results page's offers calls ([`latam`], 0085), headed on
+//! the offscreen display (0081).
 
 pub mod browser;
+pub mod latam;
+
+use std::collections::BTreeMap;
 
 use async_trait::async_trait;
 use chrono::{DateTime, NaiveDate, Utc};
-use tm_domain::{Cabin, Currency, Money, PointOfSale, PosId, QueryOutcome};
+use tm_domain::{
+    AwardDetail,
+    Cabin,
+    Currency,
+    Money,
+    PointOfSale,
+    PosId,
+    QueryOutcome,
+};
 use tm_gflights::{
     Locale,
     Search,
@@ -28,6 +41,11 @@ pub struct Cell {
     pub stops: Option<u8>,
     pub duration_minutes: Option<u32>,
     pub seller: Option<String>,
+    /// The itinerary's key, when the source lists its segments
+    /// (`Observation::flights`).
+    pub flights: Option<String>,
+    /// An award's brand, fare and seats (0083).
+    pub award: Option<AwardDetail>,
 }
 
 impl Cell {
@@ -45,6 +63,8 @@ impl Cell {
             stops: None,
             duration_minutes: None,
             seller: None,
+            flights: None,
+            award: None,
         }
     }
 }
@@ -142,6 +162,48 @@ pub struct TapJob {
     pub fresh_since: DateTime<Utc>,
 }
 
+/// One LATAM search (0085): the results page for one leg (or round
+/// trip) and date, cash or LATAM Pass, read through the offers call
+/// the page makes. A one-way search may then click days of the page's
+/// date strip ([`crate::sites::latam::dates::Strip`]), each one more
+/// search. Every cabin comes in one search; the job keeps its family's.
+#[derive(Debug, Clone, PartialEq)]
+pub struct LatamJob {
+    pub pos: PosId,
+    /// The results page (`sites::latam::Search::url`).
+    pub url: String,
+    /// The site's origin (`sites::latam::BASE`, or a test server), whose
+    /// cookies hold the session.
+    pub base: String,
+    pub origin: String,
+    pub destination: String,
+    pub cabin: Cabin,
+    pub departure: NaiveDate,
+    /// A round trip when set.
+    pub return_date: Option<NaiveDate>,
+    /// LATAM Pass miles instead of cash.
+    pub award: bool,
+    /// The seller the cells name (`airline:LA`, `miles:latam_pass`).
+    pub seller: String,
+    pub strip: crate::sites::latam::dates::Strip,
+}
+
+/// What a LATAM search saw besides its cells.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct LatamFound {
+    pub cells: Vec<Cell>,
+    /// The page's cash calendar for the job's direction, one way, minor
+    /// units per departure: it ranks later checks' dates and is never
+    /// recorded (0053).
+    pub calendar: BTreeMap<NaiveDate, i64>,
+    /// The session cookie after the check: `None` when it was not read,
+    /// `Some(None)` when it is gone, `Some(Some(t))` when it lasts until
+    /// `t` (0082).
+    pub session: Option<Option<DateTime<Utc>>>,
+    /// Strip days clicked, each counted as a page load (0084).
+    pub clicks: u32,
+}
+
 /// The second query of a deal candidate (0031): a round-trip search
 /// for those exact dates under the deal's point of sale, then that
 /// point of sale's own booking page (0034).
@@ -193,6 +255,7 @@ pub trait Sources: Send + Sync {
     async fn explore(&self, job: &ExploreJob)
     -> Fetch<Vec<ExploreDestination>>;
     async fn tap(&self, job: &TapJob) -> Fetch<Vec<Cell>>;
+    async fn latam(&self, job: &LatamJob) -> Fetch<LatamFound>;
     async fn confirm(&self, job: &ConfirmJob) -> Fetch<Option<Confirmation>>;
     async fn resolve(&self, job: &ResolveJob) -> Fetch<Option<String>>;
 }

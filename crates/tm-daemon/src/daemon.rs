@@ -3,7 +3,9 @@
 //! site ([`crate::worker`]) running that site's checks.
 //!
 //! Each site (`Source::site()`: Google Flights, TAP, each miles program)
-//! has its own worker task with its own Chromium profile and process,
+//! has its own worker task with its own Chromium profile and process
+//! (LATAM's cash site shares LATAM Pass's, [`crate::sites::worker_site`],
+//! 0084),
 //! its own budget, its own pacing and its own scheduler tick, so
 //! different sites check in parallel, and each runs up to
 //! [`Config::parallel`] checks at once (0072). A worker starts when the site has eligible families (or a
@@ -12,9 +14,9 @@
 //!
 //! Requests are routed by site: a route's manual check goes to every
 //! site the route has families on, a deal confirmation to Google
-//! Flights, and a miles login (`OpenLogin`/`CloseLogin`) to that
-//! program's site alone, which pauses while every other site keeps
-//! running.
+//! Flights, a "Check award" to the miles programs' workers (0085), and
+//! a miles login (`OpenLogin`/`CloseLogin`) to that program's site
+//! alone, which pauses while every other site keeps running.
 //!
 //! The coordinator writes the global heartbeat (process alive, totals);
 //! each worker writes its own row of `site_status` (what it checks now)
@@ -32,14 +34,26 @@ use rand::{Rng, SeedableRng, rngs::StdRng};
 use tm_domain::{
     DealStatus,
     FamilyId,
+    FamilyKey,
+    FamilyKind,
     GOOGLE_FLIGHTS,
+    Leg,
     QueryReason,
     RequestId,
     SiteLimits,
     Source,
+    has_award_reader,
+    program_name,
 };
-use tm_scheduler::Params;
-use tm_store::{Heartbeat, RequestKind, RequestRecord, SiteStatus, Store};
+use tm_scheduler::{Params, awards::AwardKey};
+use tm_store::{
+    Heartbeat,
+    LoginState,
+    RequestKind,
+    RequestRecord,
+    SiteStatus,
+    Store,
+};
 use tokio::sync::{mpsc, oneshot, watch};
 use tracing::{error, info, warn};
 
@@ -48,6 +62,7 @@ use crate::{
     candidates::{self, Context, Only},
     jobs::JobOptions,
     notify::Notifier,
+    sites::worker_site,
     sources::Sources,
     worker::{self, Command, Loaded, Shared, Tracker, Worker, World},
 };
@@ -415,7 +430,7 @@ impl<S: Sources + 'static> Daemon<S> {
             .families
             .iter()
             .filter(|f| candidates::eligibility(f, &cx).is_ok())
-            .map(|f| f.site.clone())
+            .map(|f| worker_site(&f.site).to_owned())
             .collect();
         for site in sites {
             self.worker(&site).await?;
@@ -532,16 +547,15 @@ impl<S: Sources + 'static> Daemon<S> {
             .family(family)
             .await?
             .ok_or_else(|| anyhow::anyhow!("no family {family}"))?;
-        self.worker(&record.site).await?;
-        self.ask(&record.site, |reply| Command::Check {
+        let site = worker_site(&record.site).to_owned();
+        self.worker(&site).await?;
+        self.ask(&site, |reply| Command::Check {
             family,
             reason,
             reply,
         })
         .await
-        .unwrap_or_else(|| {
-            Err(anyhow::anyhow!("the {} worker stopped", record.site))
-        })
+        .unwrap_or_else(|| Err(anyhow::anyhow!("the {site} worker stopped")))
     }
 
     /// Everything a tick needs from the configuration.
@@ -663,11 +677,17 @@ impl<S: Sources + 'static> Daemon<S> {
                     .collect();
                 self.queue_manual(id, &world, ids).await?;
             }
-            // No miles program has a reader in the daemon yet (0083).
-            RequestKind::CheckAward { .. } => {
-                self.store
-                    .complete(id, false, Some("no award reader yet"))
-                    .await?;
+            RequestKind::CheckAward {
+                route,
+                cabin,
+                departure,
+                return_date,
+            } => {
+                let dates = [
+                    (Leg::Outbound, Some(departure)),
+                    (Leg::Return, return_date),
+                ];
+                self.check_award(id, route, cabin, dates).await?;
             }
             RequestKind::ConfirmDeal { deal } => match self
                 .store
@@ -696,6 +716,72 @@ impl<S: Sources + 'static> Daemon<S> {
         Ok(())
     }
 
+    /// "Check award" (0083, 0085): the selected trip's legs, each a
+    /// LATAM search of its own date, on every active miles program with
+    /// a reader and a live login. They run on the program's worker in
+    /// turn with its schedule, as "Check now" does (0071).
+    async fn check_award(
+        &mut self,
+        request: RequestId,
+        route: tm_domain::RouteId,
+        cabin: tm_domain::Cabin,
+        dates: [(Leg, Option<chrono::NaiveDate>); 2],
+    ) -> anyhow::Result<()> {
+        let world = self.world().await?;
+        let Some(home) = self.store.home_point_of_sale().await? else {
+            self.store
+                .complete(request, false, Some("no home point of sale"))
+                .await?;
+            return Ok(());
+        };
+        let mut why = "no active miles program can price awards".to_owned();
+        let mut by_site: BTreeMap<String, Vec<(FamilyId, AwardKey)>> =
+            BTreeMap::new();
+        for program in self.store.list_miles_programs().await? {
+            if !program.active || !has_award_reader(&program.program) {
+                continue;
+            }
+            if program.login_state != LoginState::LoggedIn {
+                why = format!(
+                    "{} is not logged in",
+                    program_name(&program.program)
+                );
+                continue;
+            }
+            for (leg, date) in dates {
+                let Some(date) = date else { continue };
+                let key = FamilyKey {
+                    route,
+                    cabin,
+                    source: Source::Miles {
+                        program: program.program.clone(),
+                    },
+                    pos: home.id,
+                    kind: FamilyKind::Leg { leg },
+                };
+                if let Some(f) =
+                    world.families.iter().find(|f| f.key == key && f.active)
+                {
+                    by_site
+                        .entry(worker_site(&f.site).to_owned())
+                        .or_default()
+                        .push((f.id, (date, None)));
+                }
+            }
+        }
+        if by_site.is_empty() {
+            self.store.complete(request, false, Some(&why)).await?;
+            return Ok(());
+        }
+        self.tracker
+            .expect(request, by_site.values().map(Vec::len).sum());
+        for (site, checks) in by_site {
+            self.send(&site, Command::QueueDated(checks, Some(request)))
+                .await?;
+        }
+        Ok(())
+    }
+
     /// The filters of a manual check: as a tick's, except that a paused
     /// site's checks wait for it to resume instead of being dropped.
     async fn manual_context(&self, world: &World) -> anyhow::Result<Context> {
@@ -720,7 +806,10 @@ impl<S: Sources + 'static> Daemon<S> {
         let mut by_site: BTreeMap<String, Vec<FamilyId>> = BTreeMap::new();
         for id in ids {
             if let Some(f) = world.families.iter().find(|f| f.id == id) {
-                by_site.entry(f.site.clone()).or_default().push(id);
+                by_site
+                    .entry(worker_site(&f.site).to_owned())
+                    .or_default()
+                    .push(id);
             }
         }
         self.tracker

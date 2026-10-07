@@ -31,6 +31,8 @@ use tm_daemon::{
         Confirmation,
         ExploreJob,
         Fetch,
+        LatamFound,
+        LatamJob,
         ResolveJob,
         Sources,
         TapJob,
@@ -85,6 +87,7 @@ struct Log {
     calendar: Vec<CalendarJob>,
     explore: Vec<ExploreJob>,
     tap: Vec<TapJob>,
+    latam: Vec<LatamJob>,
     confirm: Vec<ConfirmJob>,
     resolve: Vec<ResolveJob>,
 }
@@ -94,6 +97,7 @@ struct Answers {
     calendar: Answer<CalendarJob, Vec<Cell>>,
     explore: Answer<ExploreJob, Vec<ExploreDestination>>,
     tap: Answer<TapJob, Vec<Cell>>,
+    latam: Answer<LatamJob, LatamFound>,
     confirm: Answer<ConfirmJob, Option<Confirmation>>,
     /// How long a calendar or TAP fetch takes.
     delay: Duration,
@@ -105,6 +109,7 @@ impl Default for Answers {
             calendar: Box::new(|_| Fetch::ok(Vec::new(), 2)),
             explore: Box::new(|_| Fetch::ok(Vec::new(), 1)),
             tap: Box::new(|_| Fetch::ok(Vec::new(), 1)),
+            latam: Box::new(|_| Fetch::ok(LatamFound::default(), 1)),
             confirm: Box::new(|_| Fetch::ok(None, 1)),
             delay: Duration::ZERO,
         }
@@ -174,6 +179,13 @@ impl Sources for Fake {
         self.log().tap.push(job.clone());
         self.timed().await;
         (self.answers.tap)(job)
+    }
+    async fn latam(&self, job: &LatamJob) -> Fetch<LatamFound> {
+        // Cash and awards share LATAM Pass's worker and profile (0084).
+        assert_eq!(self.site, "miles:latam_pass");
+        self.log().latam.push(job.clone());
+        self.timed().await;
+        (self.answers.latam)(job)
     }
     async fn confirm(&self, job: &ConfirmJob) -> Fetch<Option<Confirmation>> {
         assert_eq!(self.site, "google_flights");
@@ -423,9 +435,15 @@ async fn startup_seeds_and_learns_freebase_ids() {
     let google = h.site_budget("google_flights").await;
     assert_eq!((google.daily_budget, google.loads_today), (300, 9));
     // A worker per site with a reader and eligible families.
-    assert_eq!(h.daemon.sites(), ["airline:TP", "google_flights"]);
+    // LATAM's cash and awards share one worker, named for LATAM Pass
+    // (0084).
+    assert_eq!(
+        h.daemon.sites(),
+        ["airline:TP", "google_flights", "miles:latam_pass"]
+    );
     assert_eq!(h.status("google_flights").await.state, "idle");
     assert_eq!(h.status("airline:TP").await.state, "idle");
+    assert_eq!(h.status("miles:latam_pass").await.state, "idle");
 }
 
 /// The site's status says what it checks while the source runs, and
@@ -1153,7 +1171,7 @@ async fn sites_without_a_reader_load_nothing() {
         &store_probe,
         lis,
         Cabin::Economy,
-        Source::Airline { code: "LA".into() },
+        Source::Airline { code: "IB".into() },
         pos,
         FamilyKind::Leg { leg: Leg::Outbound },
     )
@@ -1241,6 +1259,7 @@ async fn tap_legs_run_and_record_cells() {
             .filter(|f| f.site.starts_with("airline:")
                 && f.site != "airline:TP"
                 || f.site.starts_with("miles:"))
+            .filter(|f| !tm_daemon::sites::is_latam(&f.site))
             .all(|f| tm_daemon::candidates::eligibility(f, &cx)
                 == Err(tm_daemon::candidates::Skip::Unprobed))
     );
@@ -1406,10 +1425,10 @@ async fn sites_check_in_parallel_one_check_each_at_a_time() {
         Config {
             budget: Some(12),
             max_budget: Some(12),
-            site_budgets: vec![(
-                "airline:TP".into(),
-                SiteLimits { start: 12, max: 12 },
-            )],
+            site_budgets: vec![
+                ("airline:TP".into(), SiteLimits { start: 12, max: 12 }),
+                ("miles:latam_pass".into(), SiteLimits { start: 12, max: 12 }),
+            ],
             ..test_config(Only {
                 family: None,
                 destination: Some("LIS".into()),
@@ -1444,14 +1463,28 @@ async fn sites_check_in_parallel_one_check_each_at_a_time() {
             }
         }
     }
-    // Each site counted its own loads, against its own budget.
+    // Each site counted its own loads, against its own budget; LATAM's
+    // cash checks count on LATAM Pass's (0084).
+    let latam: Vec<&Span> = spans
+        .iter()
+        .filter(|s| s.site == "miles:latam_pass")
+        .collect();
     let google_budget = h.site_budget("google_flights").await;
     let tap_budget = h.site_budget("airline:TP").await;
+    let latam_budget = h.site_budget("miles:latam_pass").await;
     assert_eq!(google_budget.loads_today, 3 * google.len() as u32);
     assert_eq!(tap_budget.loads_today, 2 * tap.len() as u32);
+    assert_eq!(latam_budget.loads_today, latam.len() as u32);
     assert_eq!(
         (google_budget.daily_budget, tap_budget.daily_budget),
         (12, 12)
+    );
+    assert!(
+        h.store()
+            .site_budget("airline:LA")
+            .await
+            .expect("reads")
+            .is_none()
     );
     let beat = h
         .store()
@@ -1461,13 +1494,17 @@ async fn sites_check_in_parallel_one_check_each_at_a_time() {
         .expect("a heartbeat");
     assert_eq!(
         beat.loads_today,
-        google_budget.loads_today + tap_budget.loads_today
+        google_budget.loads_today
+            + tap_budget.loads_today
+            + latam_budget.loads_today
     );
-    assert_eq!(beat.budget, 24);
-    // Each site's browser is its own.
+    assert_eq!(beat.budget, 36);
+    // Each site's browser is its own; LATAM's two sites have one.
     let starts = h.log().starts.clone();
     assert_eq!(starts.iter().filter(|s| *s == "google_flights").count(), 1);
     assert_eq!(starts.iter().filter(|s| *s == "airline:TP").count(), 1);
+    assert!(starts.iter().filter(|s| *s == "miles:latam_pass").count() <= 1);
+    assert!(!starts.iter().any(|s| s == "airline:LA"));
 }
 
 /// The most spans running at any one instant.
@@ -1640,12 +1677,14 @@ async fn a_shutdown_stops_every_site() {
             tokio::time::sleep(Duration::from_millis(20)).await;
         }
     };
-    tokio::time::timeout(Duration::from_secs(20), started)
+    // Generous: with the whole suite running side by side (now with
+    // LATAM's tests too) a site can take well over 20 s to get going.
+    tokio::time::timeout(Duration::from_secs(90), started)
         .await
         .expect("both sites start checking");
     stop.send(true).expect("signals");
     let (daemon, result) =
-        tokio::time::timeout(Duration::from_secs(20), running)
+        tokio::time::timeout(Duration::from_secs(60), running)
             .await
             .expect("stops in time")
             .expect("joins");
@@ -1671,4 +1710,886 @@ async fn a_shutdown_stops_every_site() {
         .expect("reads")
         .expect("a heartbeat");
     assert_eq!(beat.state, "stopped");
+}
+
+// ---------------------------------------------------------------------
+// LATAM and LATAM Pass (0084, 0085)
+// ---------------------------------------------------------------------
+
+/// An offers response from `docs/research/sites/fixtures/`.
+fn latam_offers(name: &str) -> tm_daemon::sites::latam::Offers {
+    let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../docs/research/sites/fixtures")
+        .join(name);
+    let body = std::fs::read_to_string(&path)
+        .unwrap_or_else(|e| panic!("{}: {e}", path.display()));
+    tm_daemon::sites::latam::parse_offers(&body)
+        .unwrap_or_else(|e| panic!("{}: {e}", path.display()))
+}
+
+/// The real pages' cells for a job, from the GRU → LIS captures: the
+/// award response for an award job, the cash one otherwise, for the
+/// job's date.
+fn latam_cells(job: &LatamJob) -> Vec<Cell> {
+    let name = if job.award {
+        "latam-pass/offers-search-redemption-ow-gru-lis-2026-11-10-br.json"
+    } else {
+        "latam/offers-search-ow-gru-lis-2026-11-10-br-headed-warm.json"
+    };
+    tm_daemon::sources::latam::leg_cells(
+        &latam_offers(name),
+        job.cabin,
+        job.departure,
+        &job.seller,
+    )
+}
+
+async fn latam_family(
+    store: &Store,
+    dest: &str,
+    source: Source,
+    kind: FamilyKind,
+) -> FamilyId {
+    let r = route(store, dest).await;
+    let pos = home(store).await;
+    family(store, r, Cabin::Economy, source, pos, kind).await
+}
+
+fn pass() -> Source {
+    Source::Miles {
+        program: "latam_pass".into(),
+    }
+}
+
+fn latam_airline() -> Source {
+    Source::Airline { code: "LA".into() }
+}
+
+const OUTBOUND: FamilyKind = FamilyKind::Leg { leg: Leg::Outbound };
+
+async fn log_in(store: &Store) {
+    store
+        .set_miles_login("latam_pass", LoginState::LoggedIn, Utc::now())
+        .await
+        .expect("sets");
+}
+
+async fn latam_pass(store: &Store) -> tm_store::MilesProgram {
+    store
+        .list_miles_programs()
+        .await
+        .expect("reads")
+        .into_iter()
+        .find(|m| m.program == "latam_pass")
+        .expect("latam_pass")
+}
+
+/// LATAM's cash and LATAM Pass's awards run on one worker, named for
+/// LATAM Pass, with its profile, browser, budget and pace (0084): never
+/// two Chromiums on `miles-latam_pass`, never two LATAM checks at once.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn latam_cash_and_awards_share_one_worker() {
+    let mut h = harness_with(
+        Config {
+            parallel: 3,
+            // Google Flights all but idle: the tick is LATAM's.
+            budget: Some(1),
+            max_budget: Some(1),
+            site_budgets: vec![(
+                "miles:latam_pass".into(),
+                SiteLimits { start: 80, max: 80 },
+            )],
+            ..test_config(Only {
+                family: None,
+                destination: Some("LIS".into()),
+            })
+        },
+        |a| {
+            a.latam = Box::new(|job| {
+                Fetch::ok(
+                    LatamFound {
+                        cells: latam_cells(job),
+                        ..LatamFound::default()
+                    },
+                    1,
+                )
+            });
+            a.delay = Duration::from_millis(60);
+        },
+    )
+    .await;
+    let store = h.store().clone();
+    log_in(&store).await;
+    let cash = latam_family(&store, "LIS", latam_airline(), OUTBOUND).await;
+    let award = latam_family(&store, "LIS", pass(), OUTBOUND).await;
+    assert!(!h.daemon.sites().iter().any(|s| s == "airline:LA"));
+
+    h.daemon
+        .run_check(cash, QueryReason::Manual)
+        .await
+        .expect("checks");
+    h.daemon
+        .run_check(award, QueryReason::Manual)
+        .await
+        .expect("checks");
+    h.daemon.tick().await.expect("ticks");
+
+    {
+        let log = h.log();
+        let starts: Vec<&String> =
+            log.starts.iter().filter(|s| s.contains("la")).collect();
+        assert!(
+            starts.iter().all(|s| *s == "miles:latam_pass"),
+            "{starts:?}"
+        );
+        // One browser: started once, never twice without a stop between.
+        let latam_starts =
+            log.starts.iter().filter(|s| *s == "miles:latam_pass");
+        let latam_stops = log.stops.iter().filter(|s| *s == "miles:latam_pass");
+        assert!(latam_starts.count() <= latam_stops.count() + 1);
+        // One check at a time, though the other sites run three.
+        let spans: Vec<&Span> = log
+            .spans
+            .iter()
+            .filter(|s| s.site == "miles:latam_pass")
+            .collect();
+        assert!(spans.len() >= 2, "{spans:?}");
+        assert_eq!(most_at_once(&spans), 1);
+        // Cash and award jobs on LATAM's results page.
+        let cash_job = log.latam.iter().find(|j| !j.award).expect("a cash job");
+        assert_eq!(cash_job.seller, "airline:LA");
+        assert_eq!(
+            (cash_job.origin.as_str(), cash_job.destination.as_str()),
+            ("GRU", "LIS")
+        );
+        assert!(cash_job.url.contains("redemption=false"));
+        assert_eq!(cash_job.strip.max_clicks, 0);
+        let award_job =
+            log.latam.iter().find(|j| j.award).expect("an award job");
+        assert_eq!(award_job.seller, "miles:latam_pass");
+        assert!(award_job.url.contains("redemption=true"));
+    }
+    // Both counted on LATAM Pass's budget; none on airline:LA's.
+    let budget = h.site_budget("miles:latam_pass").await;
+    assert_eq!(budget.loads_today, h.log().latam.len() as u32);
+    assert!(
+        store
+            .site_budget("airline:LA")
+            .await
+            .expect("reads")
+            .is_none()
+    );
+
+    // Cash: one cell per date, the cheapest brand, with its itinerary.
+    let since = Utc::now() - TimeDelta::hours(1);
+    let cash_obs = store.history(cash, since).await.expect("reads");
+    let first_cash = cash_obs
+        .iter()
+        .find(|o| o.query == cash_obs[0].query)
+        .expect("a cash cell");
+    assert_eq!(first_cash.price, Some(Money::new(190_743, Currency::brl())));
+    assert_eq!(
+        first_cash.flights.as_deref(),
+        Some("LA8146@2026-11-10T17:40")
+    );
+    assert_eq!(first_cash.stops, Some(0));
+    assert_eq!(first_cash.seller.as_deref(), Some("airline:LA"));
+    assert!(first_cash.award.is_none());
+}
+
+/// Award cells keep everything the model expects (0083): miles, taxes
+/// as the price, the itinerary, stops, and the brand's fare, basis and
+/// seats; one per itinerary × brand of the cabin.
+#[tokio::test]
+async fn award_cells_keep_every_field() {
+    let mut h = harness(Only::default(), |a| {
+        a.latam = Box::new(|job| {
+            Fetch::ok(
+                LatamFound {
+                    cells: latam_cells(job),
+                    ..LatamFound::default()
+                },
+                1,
+            )
+        });
+    })
+    .await;
+    let store = h.store().clone();
+    log_in(&store).await;
+    let award = latam_family(&store, "LIS", pass(), OUTBOUND).await;
+    h.daemon
+        .run_check(award, QueryReason::Manual)
+        .await
+        .expect("checks");
+    let obs = store
+        .history(award, Utc::now() - TimeDelta::hours(1))
+        .await
+        .expect("reads");
+    let fixture = latam_offers(
+        "latam-pass/offers-search-redemption-ow-gru-lis-2026-11-10-br.json",
+    );
+    let economy: usize = fixture
+        .itineraries
+        .iter()
+        .map(|i| {
+            i.fares
+                .iter()
+                .filter(|f| f.cabin == Some(Cabin::Economy))
+                .count()
+        })
+        .sum();
+    assert_eq!(obs.len(), economy);
+    let light = obs
+        .iter()
+        .find(|o| {
+            o.flights.as_deref() == Some("LA8146@2026-11-10T17:40")
+                && o.award.as_ref().and_then(|a| a.brand.as_deref())
+                    == Some("LIGHT")
+        })
+        .expect("LA8146 LIGHT");
+    assert_eq!(light.miles, Some(63_848));
+    assert_eq!(light.price, Some(Money::new(6861, Currency::brl())));
+    assert_eq!(light.stops, Some(0));
+    assert_eq!(light.return_date, None);
+    let detail = light.award.as_ref().expect("an award");
+    assert_eq!(detail.fare, Some(Money::new(183_882, Currency::brl())));
+    assert_eq!(detail.fare_basis.as_deref(), Some("AKTSLZ6E"));
+    assert_eq!(
+        detail.seats,
+        Some(tm_domain::Seats {
+            count: 9,
+            low: false
+        })
+    );
+    // The family's minimum is in miles.
+    let f = store.family(award).await.expect("reads").expect("exists");
+    assert_eq!(f.state.last_min_price_minor, Some(63_848));
+    // Its value of a mile is measured (0083): R$28.80 per 1,000.
+    let rates = store
+        .award_rates("latam_pass", Utc::now() - TimeDelta::hours(1))
+        .await
+        .expect("reads");
+    assert_eq!(rates.len(), 1);
+    assert!((rates[0].brl_per_1000 - 28.8).abs() < 0.05, "{rates:?}");
+}
+
+/// An award round trip is the outbound brand chosen plus each return
+/// (latam-pass.md §3): its cells carry both dates.
+#[tokio::test]
+async fn award_round_trips_record_both_dates() {
+    let mut h = harness(Only::default(), |a| {
+        a.latam = Box::new(|job| {
+            let out = latam_offers(
+                "latam-pass/offers-search-redemption-rt-gru-mia-2027-03-04-outbound-br.json",
+            );
+            let back = latam_offers(
+                "latam-pass/offers-search-redemption-rt-gru-mia-2027-03-11-inbound-br.json",
+            );
+            let (_, _, itinerary, fare) =
+                tm_daemon::sources::latam::chosen_outbound(&out, job.cabin)
+                    .expect("an outbound");
+            let cells = tm_daemon::sources::latam::round_trip_cells(
+                (itinerary, fare),
+                &back,
+                job.cabin,
+                (job.departure, job.return_date.expect("a round trip")),
+                &job.seller,
+            );
+            // The page load and the outbound's choice.
+            Fetch::ok(
+                LatamFound {
+                    cells,
+                    ..LatamFound::default()
+                },
+                2,
+            )
+        });
+    })
+    .await;
+    let store = h.store().clone();
+    log_in(&store).await;
+    let rt =
+        latam_family(&store, "MIA", pass(), FamilyKind::RoundTrip { days: 7 })
+            .await;
+    h.daemon
+        .run_check(rt, QueryReason::Manual)
+        .await
+        .expect("checks");
+    let job = h.log().latam.last().cloned().expect("a job");
+    let ret = job.return_date.expect("a round trip");
+    assert_eq!((ret - job.departure).num_days(), 7);
+    assert_eq!(job.strip.max_clicks, 0);
+    assert!(job.url.contains("&trip=RT&"));
+    let obs = store
+        .history(rt, Utc::now() - TimeDelta::hours(1))
+        .await
+        .expect("reads");
+    assert!(!obs.is_empty());
+    assert!(obs.iter().all(|o| o.return_date == Some(ret)));
+    assert!(obs.iter().all(|o| o.miles.is_some()));
+    let recent = store.recent_queries(1).await.expect("reads");
+    assert_eq!(recent[0].page_loads, Some(2));
+}
+
+/// An award check reads the cheapest cash day not read lately, and
+/// clicks the strip days whose cash is low, each a load counted against
+/// LATAM's budget, never more than the budget has left (0084, 0085).
+#[tokio::test]
+async fn strip_clicks_follow_cash_and_the_budget() {
+    let first = today() + Days::new(40);
+    let mut h = harness_with(
+        Config {
+            site_budgets: vec![(
+                "miles:latam_pass".into(),
+                SiteLimits { start: 4, max: 4 },
+            )],
+            ..test_config(Only::default())
+        },
+        |a| {
+            a.latam = Box::new(|job| {
+                let calendar = std::collections::BTreeMap::new();
+                let shown =
+                    tm_daemon::sites::latam::dates::strip_days(job.departure);
+                let picks = job.strip.clicks(job.departure, &shown, &calendar);
+                let mut cells = Vec::new();
+                for day in std::iter::once(job.departure).chain(picks.clone()) {
+                    let mut j = job.clone();
+                    j.departure = day;
+                    cells.extend(latam_cells(&j));
+                }
+                let clicks = picks.len() as u32;
+                Fetch::ok(
+                    LatamFound {
+                        cells,
+                        clicks,
+                        ..LatamFound::default()
+                    },
+                    1 + clicks,
+                )
+            });
+        },
+    )
+    .await;
+    let store = h.store().clone();
+    log_in(&store).await;
+    // Cheapest trips only: no weekly spot check.
+    store
+        .save_miles_settings(
+            "latam_pass",
+            &tm_domain::ProgramSettings {
+                active: true,
+                dates: tm_domain::AwardDates::CheapTrips,
+                ..tm_domain::ProgramSettings::default()
+            },
+        )
+        .await
+        .expect("saves");
+    // Google Flights' outbound: R$1,000 a day, with a dip around
+    // first + 5.
+    let google = leg(&store, "LIS", Leg::Outbound).await;
+    let q = store
+        .start_query(google, &QueryReason::Random, Utc::now())
+        .await
+        .expect("starts");
+    let obs: Vec<Observation> = (0..20)
+        .map(|i| Observation {
+            id: None,
+            query: q,
+            family: google,
+            observed_at: Utc::now(),
+            departure: first + Days::new(i),
+            return_date: None,
+            price: Some(Money::brl_whole(match i {
+                5 => 800,
+                6 => 850,
+                4 => 900,
+                _ => 1_000,
+            })),
+            miles: None,
+            carrier: None,
+            stops: None,
+            duration_minutes: None,
+            seller: None,
+            flights: None,
+            award: None,
+        })
+        .collect();
+    store.insert_observations(&obs).await.expect("inserts");
+    store
+        .finish_query(q, &QueryOutcome::Ok, 8, Utc::now())
+        .await
+        .expect("finishes");
+
+    let award = latam_family(&store, "LIS", pass(), OUTBOUND).await;
+    h.daemon
+        .run_check(award, QueryReason::Manual)
+        .await
+        .expect("checks");
+    let job = h.log().latam.last().cloned().expect("a job");
+    assert_eq!(job.departure, first + Days::new(5));
+    // Four loads a day: the page, then at most three clicks.
+    assert_eq!(job.strip.max_clicks, 3);
+    let picks = job.strip.clicks(
+        job.departure,
+        &tm_daemon::sites::latam::dates::strip_days(job.departure),
+        &std::collections::BTreeMap::new(),
+    );
+    assert_eq!(picks, vec![first + Days::new(6), first + Days::new(4)]);
+    let budget = h.site_budget("miles:latam_pass").await;
+    assert_eq!(budget.loads_today, 3);
+    let read: std::collections::BTreeSet<NaiveDate> = store
+        .history(award, Utc::now() - TimeDelta::hours(1))
+        .await
+        .expect("reads")
+        .into_iter()
+        .map(|o| o.departure)
+        .collect();
+    assert_eq!(
+        read,
+        [4, 5, 6]
+            .map(|d| first + Days::new(d))
+            .into_iter()
+            .collect()
+    );
+
+    // The next check leaves the days just read: the next cheapest.
+    h.daemon
+        .run_check(award, QueryReason::Manual)
+        .await
+        .expect("checks");
+    let job = h.log().latam.last().cloned().expect("a job");
+    assert!(
+        job.departure < first + Days::new(4)
+            || job.departure > first + Days::new(6)
+    );
+    // One load left today: no click.
+    assert_eq!(job.strip.max_clicks, 0);
+}
+
+/// A login wall ends LATAM Pass's session: the program is expired, its
+/// award families wait, and the user is told once (0085). The session
+/// cookie each check reads is recorded; a missing one ends the session
+/// too.
+#[tokio::test]
+async fn a_login_wall_expires_latam_pass_once() {
+    let notices = Arc::new(Recorder::default());
+    let walled = Arc::new(AtomicBool::new(false));
+    let until = Utc::now() + TimeDelta::days(5);
+    let mut h = harness_with(
+        Config {
+            notifier: Some(notices.clone()),
+            ..test_config(Only::default())
+        },
+        {
+            let walled = Arc::clone(&walled);
+            move |a| {
+                a.latam = Box::new(move |job| {
+                    if walled.load(Ordering::SeqCst) {
+                        return Fetch::failed(QueryOutcome::LoggedOut, 1);
+                    }
+                    Fetch::ok(
+                        LatamFound {
+                            cells: latam_cells(job),
+                            session: Some(Some(until)),
+                            ..LatamFound::default()
+                        },
+                        1,
+                    )
+                });
+            }
+        },
+    )
+    .await;
+    let store = h.store().clone();
+    let cash = latam_family(&store, "LIS", latam_airline(), OUTBOUND).await;
+    let award = latam_family(&store, "LIS", pass(), OUTBOUND).await;
+    // Not logged in: award families wait; cash runs.
+    let world = h.daemon.world().await.expect("loads");
+    let cx = h.daemon.context(&world, Utc::now()).await.expect("builds");
+    let skip = |id| {
+        let f = world.families.iter().find(|f| f.id == id).expect("family");
+        tm_daemon::candidates::eligibility(f, &cx)
+    };
+    assert_eq!(skip(award), Err(tm_daemon::candidates::Skip::LoggedOut));
+    assert_eq!(skip(cash), Ok(()));
+
+    // A cash check finds a live session cookie: logged in, until when.
+    h.daemon
+        .run_check(cash, QueryReason::Manual)
+        .await
+        .expect("checks");
+    let program = latam_pass(&store).await;
+    assert_eq!(program.login_state, LoginState::LoggedIn);
+    let recorded = program.session_until.expect("a session end");
+    assert!((recorded - until).num_seconds().abs() <= 1);
+
+    // The award page shows the login: expired, and one notice.
+    walled.store(true, Ordering::SeqCst);
+    h.daemon
+        .run_check(award, QueryReason::Manual)
+        .await
+        .expect("checks");
+    assert_eq!(latam_pass(&store).await.login_state, LoginState::Expired);
+    // A second wall on the cash site: still one notice.
+    h.daemon
+        .run_check(cash, QueryReason::Manual)
+        .await
+        .expect("checks");
+    let shown = notices.shown();
+    assert_eq!(shown.len(), 1, "{shown:?}");
+    assert_eq!(shown[0].title, "LATAM Pass: log in again");
+    let world = h.daemon.world().await.expect("loads");
+    let cx = h.daemon.context(&world, Utc::now()).await.expect("builds");
+    let f = world
+        .families
+        .iter()
+        .find(|f| f.id == award)
+        .expect("family");
+    assert_eq!(
+        tm_daemon::candidates::eligibility(f, &cx),
+        Err(tm_daemon::candidates::Skip::LoggedOut)
+    );
+    // Nothing was a block.
+    let blocks = store
+        .blocks_since(Utc::now() - TimeDelta::hours(1))
+        .await
+        .expect("reads");
+    assert!(blocks.is_empty());
+}
+
+/// A check whose session cookie is gone ends a live login the same way
+/// (0082, 0085).
+#[tokio::test]
+async fn a_missing_session_cookie_expires_latam_pass() {
+    let notices = Arc::new(Recorder::default());
+    let mut h = harness_with(
+        Config {
+            notifier: Some(notices.clone()),
+            ..test_config(Only::default())
+        },
+        |a| {
+            a.latam = Box::new(|job| {
+                Fetch::ok(
+                    LatamFound {
+                        cells: latam_cells(job),
+                        session: Some(None),
+                        ..LatamFound::default()
+                    },
+                    1,
+                )
+            });
+        },
+    )
+    .await;
+    let store = h.store().clone();
+    log_in(&store).await;
+    let cash = latam_family(&store, "LIS", latam_airline(), OUTBOUND).await;
+    h.daemon
+        .run_check(cash, QueryReason::Manual)
+        .await
+        .expect("checks");
+    let program = latam_pass(&store).await;
+    assert_eq!(program.login_state, LoginState::Expired);
+    assert_eq!(program.session_until, None);
+    assert_eq!(notices.shown().len(), 1);
+}
+
+/// Akamai's denial is a block of LATAM's one worker (0039, 0060): its
+/// budget halves, it cools down, and both LATAM sites wait.
+#[tokio::test]
+async fn an_akamai_denial_blocks_both_latam_sites() {
+    let quiet = Config {
+        budget: Some(1),
+        max_budget: Some(1),
+        ..test_config(Only::default())
+    };
+    let mut h = harness_with(quiet, |a| {
+        a.latam = Box::new(|_| {
+            Fetch::failed(
+                QueryOutcome::Blocked {
+                    detail: "Akamai denied the offers search (403)".into(),
+                },
+                1,
+            )
+        });
+    })
+    .await;
+    let store = h.store().clone();
+    log_in(&store).await;
+    let cash = latam_family(&store, "LIS", latam_airline(), OUTBOUND).await;
+    let award = latam_family(&store, "LIS", pass(), OUTBOUND).await;
+    h.daemon
+        .run_check(cash, QueryReason::Manual)
+        .await
+        .expect("checks");
+    let blocks = store
+        .blocks_since(Utc::now() - TimeDelta::hours(1))
+        .await
+        .expect("reads");
+    assert_eq!(blocks.len(), 1);
+    assert_eq!(blocks[0].site, "miles:latam_pass");
+    // Halved, but never under the site's start of 40 (0039).
+    let budget = h.site_budget("miles:latam_pass").await;
+    assert_eq!(budget.daily_budget, 40, "{budget:?}");
+    assert_eq!(h.status("miles:latam_pass").await.state, "cooling down");
+    let world = h.daemon.world().await.expect("loads");
+    let cx = h.daemon.context(&world, Utc::now()).await.expect("builds");
+    for id in [cash, award] {
+        let f = world.families.iter().find(|f| f.id == id).expect("family");
+        assert_eq!(
+            tm_daemon::candidates::eligibility(f, &cx),
+            Err(tm_daemon::candidates::Skip::CoolingDown)
+        );
+    }
+    // A tick while cooling down loads nothing more.
+    h.daemon.tick().await.expect("ticks");
+    assert_eq!(h.log().latam.len(), 1);
+    // The login is not touched by a block.
+    assert_eq!(latam_pass(&store).await.login_state, LoginState::LoggedIn);
+}
+
+/// One award cell, as the reader writes it.
+fn award_cell(date: NaiveDate, miles: i64) -> Cell {
+    let mut c =
+        Cell::priced(date, None, Some(Money::new(6861, Currency::brl())));
+    c.miles = Some(miles);
+    c.seller = Some("miles:latam_pass".into());
+    c.stops = Some(0);
+    c.flights = Some(format!("LA8146@{date}T17:40"));
+    c.award = Some(tm_domain::AwardDetail {
+        fare: Some(Money::new(
+            (miles as f64 * 2.88).round() as i64,
+            Currency::brl(),
+        )),
+        brand: Some("LIGHT".into()),
+        fare_basis: Some("AKTSLZ6E".into()),
+        seats: Some(tm_domain::Seats {
+            count: 2,
+            low: true,
+        }),
+    });
+    c
+}
+
+/// An award well under its own series' baseline becomes a candidate,
+/// is confirmed by reading its date again, and is announced in miles
+/// (0083, 0085).
+#[tokio::test]
+async fn award_deals_are_confirmed_by_a_fresh_read_and_announced() {
+    let store_probe = Store::open_in_memory().await.expect("opens");
+    store_probe.seed_defaults().await.expect("seeds");
+    let award = latam_family(&store_probe, "LIS", pass(), OUTBOUND).await;
+    let first = today() + Days::new(50);
+    let notices = Arc::new(Recorder::default());
+    let mut h = harness_with(
+        Config {
+            notifier: Some(notices.clone()),
+            ..test_config(Only {
+                family: Some(award),
+                destination: None,
+            })
+        },
+        move |a| {
+            // 40% under the usual 100,000 miles on `first`.
+            a.latam = Box::new(move |_| {
+                Fetch::ok(
+                    LatamFound {
+                        cells: vec![award_cell(first, 60_000)],
+                        ..LatamFound::default()
+                    },
+                    1,
+                )
+            });
+        },
+    )
+    .await;
+    let store = h.store().clone();
+    log_in(&store).await;
+    // Five weeks of 100,000 miles.
+    let now = Utc::now();
+    for k in (1..=36).rev() {
+        let at = now - TimeDelta::days(k) - TimeDelta::hours(1);
+        let q = store
+            .start_query(award, &QueryReason::Random, at)
+            .await
+            .expect("starts");
+        let obs: Vec<Observation> = (0..20)
+            .map(|i| {
+                let cell = award_cell(first + Days::new(i), 100_000 + k * 100);
+                Observation {
+                    id: None,
+                    query: q,
+                    family: award,
+                    observed_at: at,
+                    departure: cell.departure,
+                    return_date: None,
+                    price: cell.price,
+                    miles: cell.miles,
+                    carrier: None,
+                    stops: cell.stops,
+                    duration_minutes: None,
+                    seller: cell.seller,
+                    flights: cell.flights,
+                    award: cell.award,
+                }
+            })
+            .collect();
+        store.insert_observations(&obs).await.expect("inserts");
+        store
+            .finish_query(q, &QueryOutcome::Ok, 1, at)
+            .await
+            .expect("finishes");
+    }
+
+    h.daemon
+        .run_check(award, QueryReason::Manual)
+        .await
+        .expect("checks");
+    let deals = store
+        .list_deals(&DealFilter::default())
+        .await
+        .expect("lists");
+    assert_eq!(deals.len(), 1, "{deals:?}");
+    let d = &deals[0];
+    assert_eq!(d.status, DealStatus::Candidate);
+    assert_eq!(
+        d.series,
+        tm_domain::Series::Award {
+            program: "latam_pass".into()
+        }
+    );
+    assert_eq!(d.leg, Some(Leg::Outbound));
+    assert_eq!((d.departure, d.return_date), (first, None));
+    assert_eq!(d.miles, Some(60_000));
+    assert!(
+        d.url
+            .as_deref()
+            .is_some_and(|u| u.contains("redemption=true"))
+    );
+    assert!(notices.shown().is_empty(), "candidates are not announced");
+
+    // The confirmation reads the same date again, alone.
+    h.daemon.run_manual().await;
+    let job = h.log().latam.last().cloned().expect("a job");
+    assert_eq!(job.departure, first);
+    assert_eq!(job.strip.max_clicks, 0);
+    let recent = store.recent_queries(1).await.expect("reads");
+    assert_eq!(recent[0].reason, QueryReason::Confirmation);
+    let d = store
+        .deal(d.id.expect("an id"))
+        .await
+        .expect("reads")
+        .expect("exists");
+    assert_eq!(d.status, DealStatus::Confirmed);
+    let shown = notices.shown();
+    assert_eq!(shown.len(), 1, "{shown:?}");
+    assert!(
+        shown[0]
+            .title
+            .starts_with("SAO → LIS one way: 60,000 mi + R$69"),
+        "{:?}",
+        shown[0]
+    );
+    assert!(shown[0].body.contains("LATAM Pass"), "{:?}", shown[0]);
+    assert!(shown[0].body.contains("2 seats left"), "{:?}", shown[0]);
+    // Announced once.
+    h.daemon.run_manual().await;
+    assert_eq!(notices.shown().len(), 1);
+}
+
+/// The app's "Check award" prices the selected trip's legs, each a LATAM
+/// Pass search of its own date, on the shared worker (0083, 0085).
+#[tokio::test]
+async fn check_award_reads_the_trips_legs() {
+    let mut h = harness(Only::default(), |a| {
+        a.latam = Box::new(|job| {
+            Fetch::ok(
+                LatamFound {
+                    cells: latam_cells(job),
+                    ..LatamFound::default()
+                },
+                1,
+            )
+        });
+    })
+    .await;
+    let store = h.store().clone();
+    let lis = route(&store, "LIS").await;
+    let departure = today() + Days::new(30);
+    let return_date = departure + Days::new(8);
+    let ask = RequestKind::CheckAward {
+        route: lis,
+        cabin: Cabin::Economy,
+        departure,
+        return_date: Some(return_date),
+    };
+    // Logged out: refused, with why.
+    let refused = store.enqueue(&ask).await.expect("enqueues");
+    h.daemon.process_requests().await.expect("processes");
+    let r = store
+        .request(refused)
+        .await
+        .expect("reads")
+        .expect("exists");
+    assert_eq!(r.status, RequestStatus::Failed);
+    assert_eq!(r.detail.as_deref(), Some("LATAM Pass is not logged in"));
+    assert!(h.log().latam.is_empty());
+
+    log_in(&store).await;
+    let request = store.enqueue(&ask).await.expect("enqueues");
+    h.daemon.process_requests().await.expect("processes");
+    h.daemon.run_manual().await;
+    let jobs = h.log().latam.clone();
+    assert_eq!(jobs.len(), 2, "{jobs:?}");
+    let out = jobs.iter().find(|j| j.origin == "GRU").expect("outbound");
+    assert_eq!(
+        (out.destination.as_str(), out.departure),
+        ("LIS", departure)
+    );
+    let back = jobs.iter().find(|j| j.origin == "LIS").expect("return");
+    assert_eq!(
+        (back.destination.as_str(), back.departure),
+        ("GRU", return_date)
+    );
+    assert!(jobs.iter().all(|j| j.award && j.strip.max_clicks == 0));
+    let r = store
+        .request(request)
+        .await
+        .expect("reads")
+        .expect("exists");
+    assert_eq!(r.status, RequestStatus::Done);
+    let recent = store.recent_queries(2).await.expect("reads");
+    assert!(recent.iter().all(|q| q.reason == QueryReason::Manual));
+}
+
+/// The app sets a program's daily loads in its budget row; the worker
+/// takes them instead of saving its own copy over them (0083, 0085).
+#[tokio::test]
+async fn the_worker_keeps_the_budget_the_app_sets() {
+    let quiet = Config {
+        budget: Some(1),
+        max_budget: Some(1),
+        ..test_config(Only::default())
+    };
+    let mut h = harness_with(quiet, |_| {}).await;
+    let store = h.store().clone();
+    assert!(h.daemon.sites().iter().any(|s| s == "miles:latam_pass"));
+    store
+        .configure_site_budget(
+            "miles:latam_pass",
+            SiteLimits { start: 10, max: 20 },
+            today(),
+            Utc::now(),
+        )
+        .await
+        .expect("configures");
+    h.daemon.tick().await.expect("ticks");
+    h.daemon.stop().await;
+    let row = store
+        .site_budget("miles:latam_pass")
+        .await
+        .expect("reads")
+        .expect("a row");
+    assert_eq!((row.start_budget, row.max_daily_budget), (10, 20));
+    assert!(row.daily_budget <= 20);
 }

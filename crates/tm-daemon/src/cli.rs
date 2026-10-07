@@ -102,6 +102,10 @@ pub struct Cli {
     #[arg(long, hide = true, value_name = "URL")]
     pub google_origin: Option<String>,
 
+    /// Replace `https://www.latamairlines.com` in generated URLs (tests).
+    #[arg(long, hide = true, value_name = "URL")]
+    pub latam_origin: Option<String>,
+
     /// Seconds without work before a site's browser closes (0062).
     #[arg(long, hide = true, default_value_t = 300, value_name = "N")]
     pub idle_close_seconds: u64,

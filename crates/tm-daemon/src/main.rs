@@ -59,7 +59,8 @@ async fn run(cli: Cli) -> anyhow::Result<()> {
     };
     chromium.port = cli.cdp_port;
     // Each site gets its own profile under --profile-dir and its own
-    // Chromium process (0062); LATAM's runs headed offscreen (0081).
+    // Chromium process (0062); LATAM's runs headed offscreen (0081), its
+    // cash and awards on LATAM Pass's profile (0084).
     let sources =
         move |site: &str| BrowserSources::new(site_config(&chromium, site));
 
@@ -75,6 +76,7 @@ async fn run(cli: Cli) -> anyhow::Result<()> {
         jobs: JobOptions {
             max_graph_pages: cli.max_graph_pages,
             origin_override: cli.google_origin.clone(),
+            latam_base: cli.latam_origin.clone(),
             ..JobOptions::default()
         },
         budget: cli.budget,

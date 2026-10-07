@@ -5,8 +5,9 @@
 //!
 //! - [`tap`]: TAP Air Portugal, `airline:TP` (0051). Has a reader.
 //! - [`latam`]: LATAM, `airline:LA` and LATAM Pass `miles:latam_pass`
-//!   (0081, 0082). Probed and parsed, no reader yet: both need the
-//!   offscreen display, LATAM Pass a login.
+//!   (0081, 0082, 0084, 0085). Both have a reader; both need the
+//!   offscreen display, LATAM Pass a login. They share one profile and
+//!   one worker ([`worker_site`]).
 //!
 //! [`KNOWN`] says what each probed site needs.
 
@@ -44,14 +45,14 @@ pub const KNOWN: &[KnownSite] = &[
         site: latam::AIRLINE_SITE,
         needs_display: true,
         needs_login: false,
-        has_reader: false,
+        has_reader: true,
         research: "docs/research/sites/latam.md",
     },
     KnownSite {
         site: latam::MILES_SITE,
         needs_display: true,
         needs_login: true,
-        has_reader: false,
+        has_reader: true,
         research: "docs/research/sites/latam-pass.md",
     },
 ];
@@ -71,10 +72,33 @@ pub fn needs_login(site: &str) -> bool {
     known(site).is_some_and(|k| k.needs_login)
 }
 
+/// The site whose worker, browser, profile, budget and pace a site's
+/// families run under (0062, 0084). LATAM's cash site runs in LATAM
+/// Pass's: both are latamairlines.com, and the `miles-latam_pass`
+/// profile is the one the user logged in to and warmed up, so the two
+/// never run two Chromiums on it, nor check LATAM at the same time.
+/// Every other site is its own.
+pub fn worker_site(site: &str) -> &str {
+    if site == latam::AIRLINE_SITE {
+        latam::MILES_SITE
+    } else {
+        site
+    }
+}
+
+/// Whether `site`'s worker reads LATAM (cash and awards, 0085).
+pub fn is_latam(site: &str) -> bool {
+    worker_site(site) == latam::MILES_SITE
+}
+
 /// Whether `source` is an airline or miles site with its own reader in
 /// the daemon. Every other one is skipped.
 pub fn scripted(source: &Source) -> bool {
-    matches!(source, Source::Airline { code } if code == tap::CODE)
+    match source {
+        Source::Airline { code } => code == tap::CODE || code == latam::CODE,
+        Source::Miles { program } => program == latam::PROGRAM,
+        Source::GoogleFlights => false,
+    }
 }
 
 /// Why a family of a scripted site cannot be checked under these
@@ -86,6 +110,12 @@ pub fn unsupported(
     match &key.source {
         Source::Airline { code } if code == tap::CODE => {
             tap::unsupported(key.kind, passengers)
+        }
+        Source::Airline { code } if code == latam::CODE => {
+            latam::unsupported(key.kind, passengers)
+        }
+        Source::Miles { program } if program == latam::PROGRAM => {
+            latam::unsupported(key.kind, passengers)
         }
         _ => None,
     }
@@ -112,9 +142,12 @@ mod tests {
         assert!(!needs_display("google_flights"));
         assert!(needs_login("miles:latam_pass"));
         assert!(!needs_login("airline:LA"));
-        assert!(!scripted(&Source::Airline { code: "LA".into() }));
-        assert!(!scripted(&Source::Miles {
+        assert!(scripted(&Source::Airline { code: "LA".into() }));
+        assert!(scripted(&Source::Miles {
             program: latam::PROGRAM.into()
+        }));
+        assert!(!scripted(&Source::Miles {
+            program: "smiles".into()
         }));
         let program = Source::Miles {
             program: latam::PROGRAM.into(),
@@ -122,19 +155,25 @@ mod tests {
         assert_eq!(program.site(), latam::MILES_SITE);
     }
 
-    /// The browser source draws exactly the sites that need a display
-    /// offscreen.
+    /// LATAM's cash site runs on LATAM Pass's worker and profile (0084);
+    /// every other site is its own.
     #[test]
-    fn the_offscreen_sites_are_the_ones_that_need_a_display() {
-        let mut needing: Vec<_> = KNOWN
-            .iter()
-            .filter(|k| k.needs_display)
-            .map(|k| k.site)
-            .collect();
-        let mut offscreen = crate::sources::browser::OFFSCREEN_SITES.to_vec();
-        needing.sort_unstable();
-        offscreen.sort_unstable();
-        assert_eq!(needing, offscreen);
+    fn latam_shares_one_worker() {
+        assert_eq!(worker_site("airline:LA"), "miles:latam_pass");
+        assert_eq!(worker_site("miles:latam_pass"), "miles:latam_pass");
+        assert_eq!(worker_site("airline:TP"), "airline:TP");
+        assert_eq!(worker_site("google_flights"), "google_flights");
+        assert!(is_latam("airline:LA") && is_latam("miles:latam_pass"));
+        assert!(!is_latam("miles:smiles"));
+        // Every site that shares a worker draws the same way.
+        for k in KNOWN {
+            assert_eq!(
+                needs_display(k.site),
+                needs_display(worker_site(k.site)),
+                "{}",
+                k.site
+            );
+        }
     }
 
     #[test]

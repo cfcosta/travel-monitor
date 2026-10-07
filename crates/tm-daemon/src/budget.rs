@@ -271,6 +271,26 @@ impl Budget {
         true
     }
 
+    /// The limits of `row`, this site's stored budget, when someone else
+    /// (the app's settings, `configure_site_budget`) changed them: the
+    /// row's start, maximum and budget in force replace the copy in
+    /// memory, so the next save keeps them. True when they changed.
+    pub fn adopt(&mut self, row: &SiteBudget) -> bool {
+        let limits = SiteLimits {
+            start: row.start_budget,
+            max: row.max_daily_budget,
+        }
+        .normalized();
+        if limits == self.limits {
+            return false;
+        }
+        self.limits = limits;
+        self.state.daily_budget = row
+            .daily_budget
+            .clamp(MIN_DAILY_BUDGET.min(limits.start).max(1), limits.max);
+        true
+    }
+
     /// Applies due ramp steps and the day change. True when something
     /// changed that should be saved.
     pub fn advance(
