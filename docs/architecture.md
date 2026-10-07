@@ -133,10 +133,10 @@ reads while the daemon writes (0020, 0040).
   turned the old single `budget` row into Google Flights' row and
   dropped the table. Block events are per site.
 - Exchange rates (0038). The heartbeat (process state, totals over the
-  sites) and `site_status` (per site: `idle`, `checking` with the check
-  in progress, `paused for login: …`, `cooling down`, `browser
-  unavailable`, `stopped`; 0057, 0062) for the app's status chip and
-  activity screen.
+  sites) and `site_status` (per site: `idle`, `checking`, `paused for
+  login: …`, `cooling down`, `browser unavailable`, `stopped`; 0057,
+  0062) with `site_checks` (the checks in progress, several per site,
+  0072) for the app's status chip and activity screen.
 
 ### tm-scheduler (pure)
 
@@ -180,11 +180,14 @@ A coordinator and one worker per site (0060, 0062).
   when the site has work, closed after 5 idle minutes), its `Budget`
   (count, ramp, halving and cooldown of its own), its pacing, and its
   own `plan_tick` over the site's candidates with the site's budget.
-  It runs one check at a time: reload, take requests, run manual checks
-  first, then the picks; write observations, update scheduler state,
-  evaluate trips and confirm deals (Google Flights only), record blocks
-  on its own budget, and write its `site_status` row as checks start and
-  end. A `Pause` closes its browser for a login window; `Resume` reads
+  It runs up to three checks at once (`--parallel`, 0072), each on its
+  own tab: it reloads, takes requests, and starts manual checks and
+  picks in turn (0071) on free lanes, each lane resting 4–15 s after
+  its check. A check's fetch runs on a task of its own; when it lands,
+  the worker writes observations, updates scheduler state, evaluates
+  trips and confirms deals (Google Flights only), records blocks on its
+  own budget, and writes its `site_status` and `site_checks` rows as
+  checks start and end. A `Pause` closes its browser for a login window; `Resume` reads
   the program's profile for a session (0064) and lets the site run.
   Different sites run at the same time; a block, cooldown or login on
   one never slows another.
@@ -192,7 +195,8 @@ A coordinator and one worker per site (0060, 0062).
   sites' families; a check re-reads its family's state just before
   writing it, so a raise that lands while it runs is kept.
 
-Flags: `--budget`/`--max-budget` are Google Flights' start and maximum
+Flags: `--parallel` (default 3) is how many checks each site runs at
+once; `--budget`/`--max-budget` are Google Flights' start and maximum
 (the settings' `daily_budget`/`max_daily_budget`); `--site-budget
 airline:TP=300:1000` (repeatable) sets another site's; `--cdp-port` is
 Google Flights' Chromium (other sites pick free ports). Sources: Google

@@ -18,9 +18,14 @@
 //!
 //! Each site has its own Chromium profile and process ([`site_config`],
 //! 0062); inside it, each point of sale has its own browser context
-//! (isolated cookies, 0033).
+//! (isolated cookies, 0033). A site's checks run side by side, each on
+//! its own page (0072).
 
-use std::{collections::HashMap, time::Duration};
+use std::{
+    collections::{HashMap, hash_map::Entry},
+    sync::{Arc, Mutex},
+    time::Duration,
+};
 
 use async_trait::async_trait;
 use rand::Rng;
@@ -128,13 +133,16 @@ pub fn site_config(base: &ChromiumConfig, site: &str) -> ChromiumConfig {
 
 struct Running {
     chromium: Chromium,
-    contexts: HashMap<PosId, Context>,
+    /// Locked while a page opens, so a context is created once.
+    contexts: tokio::sync::Mutex<HashMap<PosId, Context>>,
 }
 
 pub struct BrowserSources {
     config: ChromiumConfig,
     timeouts: Timeouts,
-    running: Option<Running>,
+    /// Held briefly, never across an await: a fetch takes its own
+    /// handle and opens its page with it.
+    running: Mutex<Option<Arc<Running>>>,
 }
 
 impl BrowserSources {
@@ -142,7 +150,7 @@ impl BrowserSources {
         Self {
             config,
             timeouts: Timeouts::default(),
-            running: None,
+            running: Mutex::new(None),
         }
     }
 
@@ -151,24 +159,26 @@ impl BrowserSources {
         self
     }
 
+    fn running(&self) -> Option<Arc<Running>> {
+        self.running.lock().ok()?.clone()
+    }
+
     /// A new page under `pos`'s context (created if missing).
-    async fn page(&mut self, pos: PosId) -> anyhow::Result<Page> {
+    async fn page(&self, pos: PosId) -> anyhow::Result<Page> {
         let running = self
-            .running
-            .as_mut()
+            .running()
             .ok_or_else(|| anyhow::anyhow!("the browser is not running"))?;
-        if !running.contexts.contains_key(&pos) {
-            let context = running
-                .chromium
-                .browser()
-                .new_context(ContextOptions::default())
-                .await?;
-            running.contexts.insert(pos, context);
-        }
-        let context = running
-            .contexts
-            .get(&pos)
-            .ok_or_else(|| anyhow::anyhow!("no context for {pos}"))?;
+        let mut contexts = running.contexts.lock().await;
+        let context = match contexts.entry(pos) {
+            Entry::Occupied(entry) => entry.into_mut(),
+            Entry::Vacant(entry) => entry.insert(
+                running
+                    .chromium
+                    .browser()
+                    .new_context(ContextOptions::default())
+                    .await?,
+            ),
+        };
         Ok(context.new_page().await?)
     }
 }
@@ -899,10 +909,10 @@ macro_rules! on_page {
 #[async_trait]
 impl Sources for BrowserSources {
     async fn start(
-        &mut self,
+        &self,
         points_of_sale: &[PointOfSale],
     ) -> anyhow::Result<()> {
-        if self.running.is_some() {
+        if self.running().is_some() {
             return Ok(());
         }
         info!(
@@ -921,15 +931,30 @@ impl Sources for BrowserSources {
             contexts.insert(pos.id, context);
         }
         info!(contexts = contexts.len(), ws = %chromium.ws_url(), "Chromium is up");
-        self.running = Some(Running { chromium, contexts });
+        let running = Arc::new(Running {
+            chromium,
+            contexts: tokio::sync::Mutex::new(contexts),
+        });
+        if let Ok(mut slot) = self.running.lock() {
+            *slot = Some(running);
+        }
         Ok(())
     }
 
-    async fn stop(&mut self) {
-        let Some(running) = self.running.take() else {
+    async fn stop(&self) {
+        let Some(running) = self.running.lock().ok().and_then(|mut r| r.take())
+        else {
             return;
         };
-        for (_, context) in running.contexts {
+        // No fetch runs while the worker stops the browser, so no page
+        // is opening and this handle is the last.
+        let Some(running) = Arc::into_inner(running) else {
+            warn!(
+                "a page was still opening: Chromium closes when it is dropped"
+            );
+            return;
+        };
+        for (_, context) in running.contexts.into_inner() {
             let _ = context.close().await;
         }
         if let Err(e) = running.chromium.shutdown().await {
@@ -940,38 +965,34 @@ impl Sources for BrowserSources {
     }
 
     fn is_running(&self) -> bool {
-        self.running
-            .as_ref()
+        self.running()
             .is_some_and(|r| !r.chromium.browser().is_closed())
     }
 
-    async fn calendar(&mut self, job: &CalendarJob) -> Fetch<Vec<Cell>> {
+    async fn calendar(&self, job: &CalendarJob) -> Fetch<Vec<Cell>> {
         let t = self.timeouts;
         on_page!(self, job.pos, |page| calendar_on(&page, job, t).await)
     }
 
     async fn explore(
-        &mut self,
+        &self,
         job: &ExploreJob,
     ) -> Fetch<Vec<ExploreDestination>> {
         let t = self.timeouts;
         on_page!(self, job.pos, |page| explore_on(&page, job, t).await)
     }
 
-    async fn tap(&mut self, job: &TapJob) -> Fetch<Vec<Cell>> {
+    async fn tap(&self, job: &TapJob) -> Fetch<Vec<Cell>> {
         let t = self.timeouts;
         on_page!(self, job.pos, |page| tap_on(&page, job, t).await)
     }
 
-    async fn confirm(
-        &mut self,
-        job: &ConfirmJob,
-    ) -> Fetch<Option<Confirmation>> {
+    async fn confirm(&self, job: &ConfirmJob) -> Fetch<Option<Confirmation>> {
         let t = self.timeouts;
         on_page!(self, job.pos, |page| confirm_on(&page, job, t).await)
     }
 
-    async fn resolve(&mut self, job: &ResolveJob) -> Fetch<Option<String>> {
+    async fn resolve(&self, job: &ResolveJob) -> Fetch<Option<String>> {
         let t = self.timeouts;
         on_page!(self, job.pos, |page| resolve_on(&page, job, t).await)
     }

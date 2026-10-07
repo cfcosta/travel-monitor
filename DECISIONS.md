@@ -1038,3 +1038,40 @@ check. When several requests are pending, the next manual check comes
 from a different request than the last, so several clicks take turns.
 A single click on a big route (36 families) no longer holds Google
 Flights for twenty minutes.
+
+## 0072: Each site runs three checks at once
+
+- Date: 2026-10-07
+- Refines [0062](#0062-a-browser-profile-per-site-and-sites-checked-in-parallel)
+  and [0039](#0039-the-page-load-budget-starts-conservative-and-ramps-up).
+
+A test on the live profile ran one, two and three Google Flights checks
+side by side: each still took about 15 s (8 page loads), with no blocks
+and no errors. The time goes to waiting on Google's pages, not to the
+machine, so each site's worker now runs up to three checks at once,
+each in its own tab of the site's Chromium. TAP gets the same.
+
+- **Lanes.** A worker has three lanes. A check starts on a free one:
+  the worker writes its query row and its fetch runs on a task of its
+  own; when it lands, the worker records it as before. Starting and
+  recording stay on the worker, one at a time, so two checks never
+  write the same rows at once; only the browser work overlaps.
+- **Pacing is per lane.** After its check, a lane rests the usual
+  random 4–15 s (0039) before taking the next, so the lanes drift apart
+  and a site makes about three times as many checks an hour. The daily
+  budget still caps the total: at 4,800 loads Google Flights spends its
+  day sooner, not more.
+- **Queues.** A tick's picks wait in a queue and take turns with manual
+  checks as before (0071). A new tick is planned once the last one's
+  picks have all started, without the families still in flight; the
+  loads of up to three checks in flight are not yet counted, so a tick
+  can overshoot the budget by that much.
+- **What stays one at a time.** Deal confirmations and Freebase lookups
+  run on the worker itself, beside the lanes. A block ends the tick's
+  picks; the checks already in flight still land. A login pause and a
+  shutdown wait for the checks in flight before closing the browser.
+- **Status.** A site's running checks move from `site_status` into a
+  `site_checks` table (migration 0005), and the app shows each one.
+
+`tmd --parallel <n>` changes the number of lanes (1 gives the old
+behaviour).

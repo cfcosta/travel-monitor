@@ -267,13 +267,19 @@ async fn configuring_a_site_keeps_or_resets_its_budget() {
     assert_eq!(reset.last_ramp_at, Some(at(7, 2)));
 }
 
-/// Several sites check at once, each with its own row (0062).
+/// Several sites check at once, each with its own row (0062), and a
+/// site runs several checks at once (0072).
 #[tokio::test]
 async fn site_statuses_carry_their_checks() {
     let store = seeded().await;
     let lis = outbound(&store, route(&store, "SAO", "LIS").await).await;
+    let mad = outbound(&store, route(&store, "SAO", "MAD").await).await;
     let query = store
         .start_query(lis.id, &QueryReason::Manual, at(6, 12))
+        .await
+        .expect("starts");
+    let second = store
+        .start_query(mad.id, &QueryReason::Manual, at(6, 12))
         .await
         .expect("starts");
     let checking = SiteStatus {
@@ -281,22 +287,30 @@ async fn site_statuses_carry_their_checks() {
         updated_at: at(6, 12),
         state: "checking".into(),
         next_check_at: None,
-        check: Some(CheckInProgress {
-            family: lis.id,
-            query: Some(query),
-            reason: QueryReason::Scheduled {
-                score: 0.41,
-                runner_up: Some(0.2),
+        checks: vec![
+            CheckInProgress {
+                family: lis.id,
+                query: Some(query),
+                reason: QueryReason::Scheduled {
+                    score: 0.41,
+                    runner_up: Some(0.2),
+                },
+                started_at: at(6, 12),
             },
-            started_at: at(6, 12),
-        }),
+            CheckInProgress {
+                family: mad.id,
+                query: Some(second),
+                reason: QueryReason::Manual,
+                started_at: at(6, 12),
+            },
+        ],
     };
     let tap = SiteStatus {
         site: "airline:TP".into(),
         updated_at: at(6, 12),
         state: "paused for login: smiles".into(),
         next_check_at: Some(at(6, 13)),
-        check: None,
+        checks: Vec::new(),
     };
     store.write_site_status(&tap).await.expect("writes");
     store.write_site_status(&checking).await.expect("writes");
@@ -309,7 +323,7 @@ async fn site_statuses_carry_their_checks() {
         updated_at: at(6, 13),
         state: "idle".into(),
         next_check_at: Some(at(6, 14)),
-        check: None,
+        checks: Vec::new(),
         ..checking
     };
     store.write_site_status(&idle).await.expect("writes");

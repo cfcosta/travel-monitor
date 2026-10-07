@@ -176,26 +176,23 @@ pub struct ResolveJob {
 }
 
 /// Every source the daemon reads, and the browser's life cycle.
+///
+/// A site runs several fetches at once (0072), each on its own page, so
+/// every method takes `&self`. The worker never starts or stops the
+/// browser while a fetch runs.
 #[async_trait]
-pub trait Sources: Send {
+pub trait Sources: Send + Sync {
     /// Starts the browser with one isolated context per point of sale
     /// (0033).
-    async fn start(
-        &mut self,
-        points_of_sale: &[PointOfSale],
-    ) -> anyhow::Result<()>;
+    async fn start(&self, points_of_sale: &[PointOfSale])
+    -> anyhow::Result<()>;
     /// Closes the browser, releasing the profile (0024).
-    async fn stop(&mut self);
+    async fn stop(&self);
     fn is_running(&self) -> bool;
-    async fn calendar(&mut self, job: &CalendarJob) -> Fetch<Vec<Cell>>;
-    async fn explore(
-        &mut self,
-        job: &ExploreJob,
-    ) -> Fetch<Vec<ExploreDestination>>;
-    async fn tap(&mut self, job: &TapJob) -> Fetch<Vec<Cell>>;
-    async fn confirm(
-        &mut self,
-        job: &ConfirmJob,
-    ) -> Fetch<Option<Confirmation>>;
-    async fn resolve(&mut self, job: &ResolveJob) -> Fetch<Option<String>>;
+    async fn calendar(&self, job: &CalendarJob) -> Fetch<Vec<Cell>>;
+    async fn explore(&self, job: &ExploreJob)
+    -> Fetch<Vec<ExploreDestination>>;
+    async fn tap(&self, job: &TapJob) -> Fetch<Vec<Cell>>;
+    async fn confirm(&self, job: &ConfirmJob) -> Fetch<Option<Confirmation>>;
+    async fn resolve(&self, job: &ResolveJob) -> Fetch<Option<String>>;
 }

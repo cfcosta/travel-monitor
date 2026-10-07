@@ -64,6 +64,7 @@ async fn run(cli: Cli) -> anyhow::Result<()> {
             destination: cli.only_route.clone(),
         },
         pace: cli.pace,
+        parallel: usize::from(cli.parallel),
         jobs: JobOptions {
             max_graph_pages: cli.max_graph_pages,
             origin_override: cli.google_origin.clone(),

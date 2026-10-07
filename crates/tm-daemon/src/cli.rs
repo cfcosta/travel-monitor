@@ -86,6 +86,11 @@ pub struct Cli {
     #[arg(long, hide = true, value_name = "N")]
     pub max_graph_pages: Option<u32>,
 
+    /// How many checks each site runs at once, each in its own tab
+    /// (DECISIONS.md 0072).
+    #[arg(long, default_value_t = 3, value_parser = clap::value_parser!(u16).range(1..=16), value_name = "N")]
+    pub parallel: u16,
+
     /// Seconds of random pause between page loads, as `min,max`.
     #[arg(long, hide = true, default_value = "4,15", value_parser = parse_pace)]
     pub pace: (u64, u64),
@@ -235,6 +240,7 @@ mod tests {
         assert!(!cli.once);
         assert_eq!(cli.tick(), Duration::from_secs(60));
         assert_eq!(cli.pace, (4, 15));
+        assert_eq!(cli.parallel, 3);
     }
 
     /// Headless: the module leaves `--headed` out.
@@ -263,6 +269,8 @@ mod tests {
             "2",
             "--pace",
             "0,0",
+            "--parallel",
+            "1",
         ])
         .expect("parses");
         assert!(!cli.headed);
@@ -272,6 +280,7 @@ mod tests {
         assert_eq!(cli.only_route.as_deref(), Some("LIS"));
         assert_eq!(cli.max_graph_pages, Some(2));
         assert_eq!(cli.pace, (0, 0));
+        assert_eq!(cli.parallel, 1);
     }
 
     #[test]
@@ -284,6 +293,7 @@ mod tests {
         assert!(cli.site_budgets.is_empty());
         assert_eq!(cli.idle_close(), Duration::from_secs(300));
         assert!(Cli::try_parse_from(["tmd", "--pace", "5,1"]).is_err());
+        assert!(Cli::try_parse_from(["tmd", "--parallel", "0"]).is_err());
         for bad in [
             "google_flights=1:2",
             "airline:TP",

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO site_checks (site, family_id, query_id,\n                     reason_json, started_at)\n                 VALUES (?1, ?2, ?3, ?4, ?5)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": []
+  },
+  "hash": "ab29f20c67d100548befd3ade09d64fd8b431d5bba6c4c849b24e3d11d7698d8"
+}

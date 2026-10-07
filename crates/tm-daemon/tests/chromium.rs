@@ -218,7 +218,7 @@ async fn the_source_reads_a_price_graph() {
         return;
     };
     let address = server().await;
-    let mut sources = BrowserSources::new(config).with_timeouts(fast());
+    let sources = BrowserSources::new(config).with_timeouts(fast());
     let pos = PointOfSale {
         id: PosId(1),
         country: CountryCode::new("BR"),

@@ -414,8 +414,8 @@ pub struct Heartbeat {
 }
 
 /// What one site's worker is doing (DECISIONS.md 0057, 0062): a row of
-/// `site_status`, written when its check starts and ends and when its
-/// state changes.
+/// `site_status` and its `site_checks`, written when a check starts and
+/// ends and when its state changes.
 #[derive(Debug, Clone, PartialEq)]
 pub struct SiteStatus {
     pub site: String,
@@ -425,8 +425,9 @@ pub struct SiteStatus {
     pub state: String,
     /// When the site looks for work again, if it knows.
     pub next_check_at: Option<DateTime<Utc>>,
-    /// The check in progress, while `state` is `"checking"`.
-    pub check: Option<CheckInProgress>,
+    /// The checks in progress, oldest first, while `state` is
+    /// `"checking"` (0072: several at once).
+    pub checks: Vec<CheckInProgress>,
 }
 
 /// The check the daemon is running (DECISIONS.md 0057). The family

@@ -1,0 +1,62 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT site AS \"site!: String\",\n                      updated_at AS \"updated_at: DateTime<Utc>\", state,\n                      next_check_at AS \"next_check_at: DateTime<Utc>\"\n               FROM site_status\n               ORDER BY site <> 'google_flights', site",
+  "describe": {
+    "columns": [
+      {
+        "name": "site!: String",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "site_status",
+            "name": "site"
+          }
+        }
+      },
+      {
+        "name": "updated_at: DateTime<Utc>",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "site_status",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "name": "state",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "site_status",
+            "name": "state"
+          }
+        }
+      },
+      {
+        "name": "next_check_at: DateTime<Utc>",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "site_status",
+            "name": "next_check_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "e0d99849af0daf74afc0e1bae4d5e131c13b377ee6d0943310b60324f99f8b39"
+}

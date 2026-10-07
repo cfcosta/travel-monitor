@@ -1,6 +1,6 @@
 //! One site's worker (DECISIONS.md 0060, 0062): a tokio task that owns
-//! the site's browser, budget, pacing and scheduler tick, and runs the
-//! site's checks one at a time.
+//! the site's browser, budget, pacing and scheduler tick, and runs up to
+//! [`Config::parallel`] of the site's checks at once (0072).
 //!
 //! - **Its own browser.** The worker's [`Sources`] start a Chromium on
 //!   the site's own profile directory (`<profile-dir>/<site slug>`,
@@ -12,7 +12,15 @@
 //!   (0060), and random pauses between its own page loads (0039). One
 //!   site's blocks, cooldowns and pace never slow another.
 //! - **Its own tick.** `plan_tick` over the site's candidates only, with
-//!   the site's budget; the scheduler is unchanged.
+//!   the site's budget; the scheduler is unchanged. The picks wait in a
+//!   queue, taking turns with manual checks (0071).
+//! - **Checks side by side (0072).** A check starts on a free *lane*:
+//!   the worker writes its query row, then its fetch runs on a task of
+//!   its own while the worker starts others; when the fetch lands, the
+//!   worker records it. Each lane rests for a random pause after its
+//!   check (0039), so the lanes drift apart. Starting and recording stay
+//!   on the worker, one at a time; only the browser work overlaps. The
+//!   browser starts or stops only with no fetch in flight.
 //! - **Logins pause it alone.** `Pause` closes the site's browser so the
 //!   app can open the same profile; `Resume` reads the profile's cookie
 //!   jar for the program's session (0064) and lets the site run again.
@@ -87,7 +95,11 @@ use tm_store::{
     SiteStatus,
     Store,
 };
-use tokio::sync::{mpsc, oneshot, watch};
+use tokio::{
+    sync::{mpsc, oneshot, watch},
+    task::{JoinError, JoinSet},
+    time::Instant,
+};
 use tracing::{debug, info, warn};
 
 use crate::{
@@ -211,6 +223,36 @@ enum Found {
     Explore(Vec<ExploreDestination>),
 }
 
+/// A check whose fetch is in flight (0072): what recording it needs.
+struct Flight {
+    family: FamilyRecord,
+    route: Route,
+    pos: PointOfSale,
+    query: QueryId,
+    reason: QueryReason,
+    /// The manual request it serves (0046).
+    request: Option<RequestId>,
+}
+
+/// A fetch that came back.
+struct Landed {
+    flight: Flight,
+    fetch: Fetch<()>,
+    found: Found,
+}
+
+/// Which queues a worker draws its next check from.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Mode {
+    /// Both, in turn (the daemon's loop).
+    All,
+    /// A tick's picks, each with a manual check before it while any
+    /// wait (0071).
+    Tick,
+    /// Manual checks only.
+    Manual,
+}
+
 enum Manual {
     Check(FamilyId, Option<RequestId>),
     Confirm(DealId, RequestId),
@@ -328,7 +370,8 @@ pub(crate) struct Worker<S: Sources> {
     /// logins and never spends.
     reader: bool,
     shared: Shared,
-    sources: S,
+    /// Shared with the fetches in flight.
+    sources: Arc<S>,
     loaded: Arc<Loaded>,
     budget: Budget,
     rng: StdRng,
@@ -341,6 +384,10 @@ pub(crate) struct Worker<S: Sources> {
     /// Manual checks (0046), interleaved one-for-one with the
     /// scheduler's picks (0071).
     manual: VecDeque<Manual>,
+    /// The last tick's picks still to start.
+    scheduled: VecDeque<(FamilyId, QueryReason)>,
+    /// Whether a manual check goes before the next pick (0071).
+    manual_turn: bool,
     /// The request the last manual check served, so the next one comes
     /// from another pending request when there is one (0071).
     last_manual: Option<RequestId>,
@@ -353,10 +400,17 @@ pub(crate) struct Worker<S: Sources> {
     stopped: bool,
     /// When the site looks for work again, for the app's countdown.
     next_check_at: Option<DateTime<Utc>>,
-    /// The check running now (0057).
-    check: Option<CheckInProgress>,
+    /// The checks running now (0057, 0072).
+    checks: Vec<CheckInProgress>,
+    /// The fetches in flight, at most [`Config::parallel`] (0072).
+    flights: JoinSet<Landed>,
+    /// Each fetch's query and request, to close them should its task
+    /// panic.
+    flight_ids: HashMap<tokio::task::Id, (QueryId, Option<RequestId>)>,
+    /// Lanes resting after a check, until these instants (0039).
+    resting: Vec<Instant>,
     /// When the browser last did something, to close it when idle.
-    last_work: tokio::time::Instant,
+    last_work: Instant,
 }
 
 impl<S: Sources + 'static> Worker<S> {
@@ -375,7 +429,7 @@ impl<S: Sources + 'static> Worker<S> {
             reader: candidates::has_reader(&site),
             site,
             shared,
-            sources,
+            sources: Arc::new(sources),
             loaded,
             budget,
             rng: StdRng::seed_from_u64(seed),
@@ -384,20 +438,25 @@ impl<S: Sources + 'static> Worker<S> {
             pending: VecDeque::new(),
             paused: None,
             manual: VecDeque::new(),
+            scheduled: VecDeque::new(),
+            manual_turn: true,
             last_manual: None,
             resolve_tried: HashSet::new(),
             resolve_version: -1,
             unavailable: false,
             stopped: false,
             next_check_at: None,
-            check: None,
-            last_work: tokio::time::Instant::now(),
+            checks: Vec::new(),
+            flights: JoinSet::new(),
+            flight_ids: HashMap::new(),
+            resting: Vec::new(),
+            last_work: Instant::now(),
         };
         (tx, tokio::spawn(worker.run()))
     }
 }
 
-impl<S: Sources> Worker<S> {
+impl<S: Sources + 'static> Worker<S> {
     fn store(&self) -> &Store {
         &self.shared.store
     }
@@ -438,7 +497,7 @@ impl<S: Sources> Worker<S> {
     async fn run(mut self) {
         info!(site = %self.site, reader = self.reader, "site worker started");
         self.status().await;
-        let mut next_tick = tokio::time::Instant::now();
+        let mut next_tick = Instant::now();
         let mut shutdown = self.shared.shutdown.clone();
         // A dropped sender cannot signal any more: stop watching it.
         let mut watch_shutdown = true;
@@ -449,19 +508,15 @@ impl<S: Sources> Worker<S> {
             if self.stopping() {
                 break;
             }
+            // Whether queued work waits on something other than a lane.
+            let mut stalled = false;
             if self.autonomous {
-                // One manual check per turn (0071): the tick below
-                // interleaves the rest with its picks, and between ticks
-                // the loop comes straight back for the next one.
-                if let Err(e) = self.run_manual(Some(1)).await {
-                    warn!(site = %self.site, "manual checks: {e:#}");
-                }
-                if tokio::time::Instant::now() >= next_tick {
-                    if let Err(e) = self.tick().await {
+                // A new tick once the last one's picks have all started.
+                if Instant::now() >= next_tick && self.scheduled.is_empty() {
+                    if let Err(e) = self.plan().await {
                         warn!(site = %self.site, "tick failed: {e:#}");
                     }
-                    next_tick =
-                        tokio::time::Instant::now() + self.config().tick;
+                    next_tick = Instant::now() + self.config().tick;
                     self.next_check_at = Some(
                         Utc::now()
                             + chrono::TimeDelta::from_std(self.config().tick)
@@ -469,29 +524,37 @@ impl<S: Sources> Worker<S> {
                     );
                     self.status().await;
                 }
+                stalled = self.dispatch(Mode::All).await;
                 self.close_when_idle().await;
-                if !self.pending.is_empty()
-                    || self.stopping()
-                    || (!self.manual.is_empty() && self.paused.is_none())
-                {
+                if !self.pending.is_empty() || self.stopping() {
                     continue;
                 }
             }
             let wake = if self.autonomous {
-                let idle = self.last_work + self.config().idle_close;
-                if self.sources.is_running() {
-                    next_tick.min(idle.max(tokio::time::Instant::now()))
-                } else {
-                    next_tick
+                let mut wake = next_tick;
+                if self.sources.is_running() && self.flights.is_empty() {
+                    let idle = self.last_work + self.config().idle_close;
+                    wake = wake.min(idle.max(Instant::now()));
                 }
+                if !stalled
+                    && self.has_work(Mode::All)
+                    && let Some(rest) = self.next_rest()
+                {
+                    wake = wake.min(rest);
+                }
+                wake
             } else {
-                tokio::time::Instant::now() + Duration::from_secs(86_400)
+                Instant::now() + Duration::from_secs(86_400)
             };
             tokio::select! {
                 command = self.rx.recv() => match command {
                     Some(command) => self.pending.push_back(command),
                     None => break,
                 },
+                Some(joined) = self.flights.join_next_with_id() => {
+                    // Logged by `landed`.
+                    let _ = self.landed(joined).await;
+                }
                 () = tokio::time::sleep_until(wake) => {}
                 changed = shutdown.changed(), if watch_shutdown => {
                     watch_shutdown = changed.is_ok();
@@ -510,14 +573,18 @@ impl<S: Sources> Worker<S> {
     async fn handle(&mut self, command: Command) {
         match command {
             Command::Tick(reply) => {
-                if let Err(e) = self.tick().await {
-                    warn!(site = %self.site, "tick failed: {e:#}");
+                match self.plan().await {
+                    Ok(()) => self.drain(Mode::Tick).await,
+                    Err(e) => warn!(site = %self.site, "tick failed: {e:#}"),
                 }
+                // A tick ends with its picks, started or not.
+                self.scheduled.clear();
                 let _ = reply.send(());
             }
             Command::RunManual(reply) => {
-                if let Err(e) = self.run_manual(None).await {
-                    warn!(site = %self.site, "manual checks: {e:#}");
+                if !self.manual.is_empty() && self.paused.is_none() {
+                    self.refresh_loaded().await;
+                    self.drain(Mode::Manual).await;
                 }
                 let _ = reply.send(());
             }
@@ -590,11 +657,13 @@ impl<S: Sources> Worker<S> {
         self.pending.extend(heavy);
     }
 
-    /// Closes the browser, saves the budget and says the site stopped.
+    /// Lets every fetch in flight land, closes the browser, saves the
+    /// budget and says the site stopped.
     async fn finish(&mut self) {
+        self.land_all().await;
         self.sources.stop().await;
         self.stopped = true;
-        self.check = None;
+        self.checks.clear();
         self.next_check_at = None;
         if self.reader
             && let Err(e) = self.budget.save(self.store()).await
@@ -607,7 +676,8 @@ impl<S: Sources> Worker<S> {
 
     /// Closes a browser that has had no work for `idle_close` (0062).
     async fn close_when_idle(&mut self) {
-        if self.sources.is_running()
+        if self.flights.is_empty()
+            && self.sources.is_running()
             && self.last_work.elapsed() >= self.config().idle_close
         {
             info!(site = %self.site, "no work: closing the browser");
@@ -625,7 +695,7 @@ impl<S: Sources> Worker<S> {
             "stopped".to_owned()
         } else if let Some(program) = &self.paused {
             format!("paused for login: {program}")
-        } else if self.check.is_some() {
+        } else if !self.checks.is_empty() {
             "checking".to_owned()
         } else if self.reader && self.budget.is_cooling(Utc::now()) {
             "cooling down".to_owned()
@@ -642,7 +712,7 @@ impl<S: Sources> Worker<S> {
             updated_at: Utc::now(),
             state: self.state(),
             next_check_at: self.next_check_at,
-            check: self.check.clone(),
+            checks: self.checks.clone(),
         };
         if let Err(e) = self.store().write_site_status(&status).await {
             warn!(site = %self.site, "status failed: {e}");
@@ -656,7 +726,7 @@ impl<S: Sources> Worker<S> {
         reason: &QueryReason,
         started_at: DateTime<Utc>,
     ) {
-        self.check = Some(CheckInProgress {
+        self.checks.push(CheckInProgress {
             family,
             query: Some(query),
             reason: reason.clone(),
@@ -666,8 +736,10 @@ impl<S: Sources> Worker<S> {
         self.status().await;
     }
 
-    async fn end_check(&mut self) {
-        if self.check.take().is_some() {
+    async fn end_check(&mut self, query: QueryId) {
+        let before = self.checks.len();
+        self.checks.retain(|c| c.query != Some(query));
+        if self.checks.len() != before {
             self.status().await;
         }
     }
@@ -682,8 +754,10 @@ impl<S: Sources> Worker<S> {
         request: Option<RequestId>,
     ) -> anyhow::Result<()> {
         info!(site = %self.site, %program, "pausing the site for a login");
-        self.sources.stop().await;
+        // Nothing new starts; the checks in flight land first.
         self.paused = Some(program);
+        self.land_all().await;
+        self.sources.stop().await;
         self.status().await;
         if let Some(id) = request {
             self.store()
@@ -784,7 +858,7 @@ impl<S: Sources> Worker<S> {
         match self.sources.start(&pos).await {
             Ok(()) => {
                 self.unavailable = false;
-                self.last_work = tokio::time::Instant::now();
+                self.last_work = Instant::now();
                 true
             }
             Err(e) => {
@@ -817,11 +891,183 @@ impl<S: Sources> Worker<S> {
     }
 
     // -----------------------------------------------------------------
+    // Lanes (0072)
+    // -----------------------------------------------------------------
+
+    /// Rests the lane a check just freed for a random pause (0039).
+    fn rest(&mut self) {
+        let (min, max) = self.config().pace;
+        if max == 0 {
+            return;
+        }
+        let secs = self.rng.random_range(min..=max);
+        self.resting
+            .push(Instant::now() + Duration::from_secs(secs));
+    }
+
+    /// When the next resting lane is free again.
+    fn next_rest(&mut self) -> Option<Instant> {
+        let now = Instant::now();
+        self.resting.retain(|&at| at > now);
+        self.resting.iter().min().copied()
+    }
+
+    /// Lanes neither checking nor resting.
+    fn free_lanes(&mut self) -> usize {
+        self.next_rest();
+        self.config()
+            .parallel
+            .max(1)
+            .saturating_sub(self.flights.len() + self.resting.len())
+    }
+
+    /// Whether a check waits in the queues `mode` draws from.
+    fn has_work(&self, mode: Mode) -> bool {
+        if self.paused.is_some() || self.stopping() {
+            return false;
+        }
+        match mode {
+            Mode::All => !self.manual.is_empty() || !self.scheduled.is_empty(),
+            Mode::Tick => !self.scheduled.is_empty(),
+            Mode::Manual => !self.manual.is_empty(),
+        }
+    }
+
+    /// Starts queued checks on the free lanes: a manual check, then a
+    /// pick, and so on (0071). True when work is left that cannot start
+    /// for another reason than a busy lane (no browser).
+    async fn dispatch(&mut self, mode: Mode) -> bool {
+        loop {
+            if self.reader && self.budget.is_cooling(Utc::now()) {
+                // A block ends the tick (0039).
+                self.scheduled.clear();
+            }
+            if !self.has_work(mode) || self.free_lanes() == 0 {
+                return false;
+            }
+            let manual = !self.manual.is_empty();
+            let pick = !self.scheduled.is_empty() && mode != Mode::Manual;
+            let take_manual = manual && (self.manual_turn || !pick);
+            if take_manual {
+                self.manual_turn = false;
+                let Some(item) = self.next_manual() else {
+                    return false;
+                };
+                // Reader-less sites check nothing, so need no browser.
+                if self.reader && !self.ensure_browser().await {
+                    self.manual.push_front(item);
+                    return true;
+                }
+                self.refresh_loaded().await;
+                self.last_manual = item.request();
+                match item {
+                    Manual::Check(family, request) => {
+                        self.launch(family, QueryReason::Manual, request).await;
+                    }
+                    Manual::Confirm(id, request) => {
+                        if let Err(e) = self.confirm_request(id, request).await
+                        {
+                            warn!(deal = %id, "confirmation failed: {e:#}");
+                        }
+                        self.rest();
+                    }
+                }
+            } else if pick {
+                self.manual_turn = true;
+                if !self.ensure_browser().await {
+                    self.scheduled.clear();
+                    return true;
+                }
+                let Some((family, reason)) = self.scheduled.pop_front() else {
+                    return false;
+                };
+                self.launch(family, reason, None).await;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    /// Starts one check; a manual request is told at once when it does
+    /// not start.
+    async fn launch(
+        &mut self,
+        family: FamilyId,
+        reason: QueryReason,
+        request: Option<RequestId>,
+    ) {
+        match self.launch_check(family, reason, request).await {
+            Ok(Some(_)) => {}
+            Ok(None) => self.finish_request(request).await,
+            Err(e) => {
+                warn!(%family, "check failed: {e:#}");
+                self.finish_request(request).await;
+            }
+        }
+    }
+
+    /// Counts one check of a manual request done, completing the request
+    /// with its last (0046).
+    async fn finish_request(&mut self, request: Option<RequestId>) {
+        if let Some(request) = request
+            && self.shared.tracker.done(request)
+            && let Err(e) = self.store().complete(request, true, None).await
+        {
+            warn!(%request, "completing the request failed: {e}");
+        }
+    }
+
+    /// Starts and lands checks from `mode`'s queues until none is left
+    /// or none can start, then lets the last ones land (tests and
+    /// `--once`).
+    async fn drain(&mut self, mode: Mode) {
+        loop {
+            self.poll().await;
+            let stalled = self.dispatch(mode).await;
+            let rest = (!stalled && self.has_work(mode))
+                .then(|| self.next_rest())
+                .flatten();
+            if self.flights.is_empty() {
+                match rest {
+                    Some(at) => {
+                        let mut shutdown = self.shared.shutdown.clone();
+                        tokio::select! {
+                            () = tokio::time::sleep_until(at) => {}
+                            _ = shutdown.changed() => {}
+                        }
+                    }
+                    None => break,
+                }
+                continue;
+            }
+            let wake = rest.unwrap_or_else(|| {
+                Instant::now() + Duration::from_secs(86_400)
+            });
+            tokio::select! {
+                Some(joined) = self.flights.join_next_with_id() => {
+                    // Logged by `landed`.
+                    let _ = self.landed(joined).await;
+                }
+                () = tokio::time::sleep_until(wake) => {}
+            }
+        }
+    }
+
+    /// Lets every fetch in flight land, recording each.
+    async fn land_all(&mut self) {
+        while let Some(joined) = self.flights.join_next_with_id().await {
+            // Logged by `landed`.
+            let _ = self.landed(joined).await;
+        }
+    }
+
+    // -----------------------------------------------------------------
     // The tick (0028) and manual checks (0046)
     // -----------------------------------------------------------------
 
-    /// One scheduler tick over this site's candidates.
-    async fn tick(&mut self) -> anyhow::Result<()> {
+    /// One scheduler tick over this site's candidates: its picks join
+    /// the queue. A family in flight is not picked again.
+    async fn plan(&mut self) -> anyhow::Result<()> {
         self.refresh_loaded().await;
         let now = Utc::now();
         let params = self.loaded.params.clone();
@@ -850,8 +1096,13 @@ impl<S: Sources> Worker<S> {
             HashSet::new(),
         );
         let site = self.site.clone();
+        let flying: HashSet<FamilyId> =
+            self.checks.iter().map(|c| c.family).collect();
         let (candidates, skipped) = candidates::build(
-            world.families.iter().filter(|f| f.site == site),
+            world
+                .families
+                .iter()
+                .filter(|f| f.site == site && !flying.contains(&f.id)),
             &cx,
         );
         let ticks_left = if self.config().once {
@@ -874,85 +1125,9 @@ impl<S: Sources> Worker<S> {
             picks = picks.len(),
             "tick planned"
         );
-        for (i, pick) in picks.iter().enumerate() {
-            if self.stopping() {
-                break;
-            }
-            self.poll().await;
-            if self.paused.is_some() {
-                info!(site = %self.site, "paused for a login: ending the tick early");
-                break;
-            }
-            // One manual check, then one scheduled pick (0071).
-            if !self.manual.is_empty() {
-                self.run_manual(Some(1)).await?;
-            }
-            if self.paused.is_some() || self.budget.is_cooling(Utc::now()) {
-                break;
-            }
-            if i > 0 {
-                self.pace().await;
-            }
-            if !self.ensure_browser().await {
-                break;
-            }
-            if let Err(e) =
-                self.run_check(pick.family, pick.reason.clone()).await
-            {
-                warn!(family = %pick.family, "check failed: {e:#}");
-            }
-        }
-        Ok(())
-    }
-
-    /// Runs up to `limit` queued manual checks (all with `None`), taking
-    /// each from a different pending request than the last when it can
-    /// (0071), and pacing them like any other check.
-    async fn run_manual(&mut self, limit: Option<usize>) -> anyhow::Result<()> {
-        if self.manual.is_empty() || self.paused.is_some() {
-            return Ok(());
-        }
-        self.refresh_loaded().await;
-        let mut first = !self.recently_worked();
-        let mut ran = 0;
-        while limit.is_none_or(|n| ran < n) {
-            let Some(item) = self.next_manual() else {
-                break;
-            };
-            ran += 1;
-            if self.stopping() || self.paused.is_some() {
-                self.manual.push_front(item);
-                break;
-            }
-            // Reader-less sites check nothing, so need no browser.
-            if self.reader && !self.ensure_browser().await {
-                self.manual.push_front(item);
-                break;
-            }
-            if !first {
-                self.pace().await;
-            }
-            first = false;
-            self.last_manual = item.request();
-            match item {
-                Manual::Check(family, request) => {
-                    let result =
-                        self.run_check(family, QueryReason::Manual).await;
-                    if let Err(e) = &result {
-                        warn!(%family, "manual check failed: {e:#}");
-                    }
-                    if let Some(request) = request
-                        && self.shared.tracker.done(request)
-                    {
-                        self.store().complete(request, true, None).await?;
-                    }
-                }
-                Manual::Confirm(id, request) => {
-                    self.confirm_request(id, request).await?;
-                }
-            }
-            self.poll().await;
-        }
+        self.scheduled
+            .extend(picks.into_iter().map(|p| (p.family, p.reason)));
+        self.manual_turn = true;
         Ok(())
     }
 
@@ -961,12 +1136,6 @@ impl<S: Sources> Worker<S> {
     fn next_manual(&mut self) -> Option<Manual> {
         let i = next_manual_index(&self.manual, self.last_manual);
         self.manual.remove(i)
-    }
-
-    /// A check ran within the pacing window, so the next one waits its
-    /// turn even when it is the first of a call.
-    fn recently_worked(&self) -> bool {
-        self.last_work.elapsed() < Duration::from_secs(60)
     }
 
     async fn confirm_request(
@@ -1064,7 +1233,7 @@ impl<S: Sources> Worker<S> {
             );
             info!(code = %place.code, url = %job.url, "learning a Freebase ID");
             let fetch = self.sources.resolve(&job).await;
-            self.last_work = tokio::time::Instant::now();
+            self.last_work = Instant::now();
             self.spend(fetch.page_loads).await?;
             match (&fetch.outcome, &fetch.value) {
                 (QueryOutcome::Ok, Some(id)) => {
@@ -1094,9 +1263,8 @@ impl<S: Sources> Worker<S> {
     async fn cheapest_departure(
         &mut self,
         family: &FamilyRecord,
-        world: &World,
     ) -> Option<NaiveDate> {
-        let home = world.pos.values().find(|p| p.is_home)?;
+        let home = self.store().home_point_of_sale().await.ok()??;
         let leg = match family.key.kind {
             FamilyKind::Leg { leg } => leg,
             _ => Leg::Outbound,
@@ -1108,7 +1276,7 @@ impl<S: Sources> Worker<S> {
             pos: home.id,
             kind: FamilyKind::Leg { leg },
         };
-        let id = world.family_by_key(&key)?.id;
+        let id = self.store().family_id(&key).await.ok()??;
         let tomorrow = budget::today() + Days::new(1);
         self.store()
             .latest_cells(id)
@@ -1121,43 +1289,55 @@ impl<S: Sources> Worker<S> {
             .map(|(_, d)| d)
     }
 
-    /// Runs one check of `family` and records everything it saw. The
-    /// site's status says so while it runs (0057).
+    /// Runs one check of `family` to the end, with every other check in
+    /// flight (tests).
     pub(crate) async fn run_check(
         &mut self,
         family_id: FamilyId,
         reason: QueryReason,
     ) -> anyhow::Result<()> {
-        let world = world(self.store()).await?;
-        let result = self.check_family(family_id, reason, &world).await;
-        self.end_check().await;
+        let Some(query) = self.launch_check(family_id, reason, None).await?
+        else {
+            return Ok(());
+        };
+        let mut result = Ok(());
+        while let Some(joined) = self.flights.join_next_with_id().await {
+            let (landed, r) = self.landed(joined).await;
+            if landed == Some(query) {
+                result = r;
+            }
+        }
         result
     }
 
-    async fn check_family(
+    /// Starts one check of `family`: writes its query row, says so in
+    /// the site's status (0057) and sends its fetch off on a task of its
+    /// own (0072). `None` when there was nothing to load.
+    async fn launch_check(
         &mut self,
         family_id: FamilyId,
         reason: QueryReason,
-        world: &World,
-    ) -> anyhow::Result<()> {
+        request: Option<RequestId>,
+    ) -> anyhow::Result<Option<QueryId>> {
+        // Rows by id, not the whole world: starting a check stays cheap.
         let Some(family) = self.store().family(family_id).await? else {
             anyhow::bail!("no family {family_id}");
         };
-        let route = world
-            .routes
-            .get(&family.key.route)
-            .cloned()
+        let route = self
+            .store()
+            .route(family.key.route)
+            .await?
             .context("the family's route is not configured")?;
-        let pos = world
-            .pos
-            .get(&family.key.pos)
-            .cloned()
+        let pos = self
+            .store()
+            .point_of_sale(family.key.pos)
+            .await?
             .context("the family's point of sale is not configured")?;
         let today = budget::today();
         let options = JobOptions {
             cheapest_departure: match family.key.source {
                 Source::GoogleFlights => None,
-                _ => self.cheapest_departure(&family, world).await,
+                _ => self.cheapest_departure(&family).await,
             },
             now: Some(Utc::now()),
             ..self.config().jobs.clone()
@@ -1173,12 +1353,12 @@ impl<S: Sources> Worker<S> {
             Ok(job) => job,
             Err(e @ JobError::Unresolved(_)) => {
                 debug!(family = %family.id, "{e}");
-                return Ok(());
+                return Ok(None);
             }
             Err(e) => {
                 warn!(family = %family.id, "cannot check: {e}");
                 self.mark_checked(family.id, Utc::now()).await?;
-                return Ok(());
+                return Ok(None);
             }
         };
         if !self.ensure_browser().await {
@@ -1198,24 +1378,117 @@ impl<S: Sources> Worker<S> {
             pos = %pos.country,
             kind = ?family.key.kind,
             reason = reason.label(),
+            in_flight = self.flights.len() + 1,
             "checking"
         );
-        let (fetch, found) = match &job {
-            Job::Calendar(j) => {
-                split(self.sources.calendar(j).await, Found::Cells)
+        let flight = Flight {
+            family,
+            route,
+            pos,
+            query,
+            reason,
+            request,
+        };
+        let sources = Arc::clone(&self.sources);
+        let task = self.flights.spawn(async move {
+            let (fetch, found) = match &job {
+                Job::Calendar(j) => {
+                    split(sources.calendar(j).await, Found::Cells)
+                }
+                Job::Tap(j) => split(sources.tap(j).await, Found::Cells),
+                Job::Explore(j) => {
+                    split(sources.explore(j).await, Found::Explore)
+                }
+            };
+            Landed {
+                flight,
+                fetch,
+                found,
             }
-            Job::Tap(j) => split(self.sources.tap(j).await, Found::Cells),
-            Job::Explore(j) => {
-                split(self.sources.explore(j).await, Found::Explore)
+        });
+        self.flight_ids.insert(task.id(), (query, request));
+        Ok(Some(query))
+    }
+
+    /// Records a fetch that came back (or whose task panicked), rests
+    /// its lane and counts it for its request. Returns its query and how
+    /// recording went, which is already logged.
+    async fn landed(
+        &mut self,
+        joined: Result<(tokio::task::Id, Landed), JoinError>,
+    ) -> (Option<QueryId>, anyhow::Result<()>) {
+        self.last_work = Instant::now();
+        self.rest();
+        let (query, request, result) = match joined {
+            Ok((id, landed)) => {
+                self.flight_ids.remove(&id);
+                let (query, request) =
+                    (landed.flight.query, landed.flight.request);
+                let family = landed.flight.family.id;
+                let result = self.land(landed).await;
+                if let Err(e) = &result {
+                    warn!(%family, "check failed: {e:#}");
+                }
+                (Some(query), request, result)
+            }
+            Err(e) => {
+                warn!(site = %self.site, "a check's task failed: {e}");
+                let Some((query, request)) = self.flight_ids.remove(&e.id())
+                else {
+                    return (None, Err(e.into()));
+                };
+                let outcome = QueryOutcome::Error {
+                    detail: format!("the check's task failed: {e}"),
+                };
+                if let Err(e) = self
+                    .store()
+                    .finish_query(query, &outcome, 0, Utc::now())
+                    .await
+                {
+                    warn!(%query, "closing the query failed: {e}");
+                }
+                (Some(query), request, Err(e.into()))
             }
         };
-        self.last_work = tokio::time::Instant::now();
+        if let Some(query) = query {
+            self.end_check(query).await;
+        }
+        self.finish_request(request).await;
+        if self.checks.is_empty()
+            && self.has_work(Mode::All)
+            && let Some(at) = self.next_rest()
+        {
+            let wait = at.saturating_duration_since(Instant::now());
+            self.next_check_at = Some(
+                Utc::now()
+                    + chrono::TimeDelta::from_std(wait).unwrap_or_default(),
+            );
+            self.status().await;
+        }
+        (query, result)
+    }
+
+    /// Records everything a check saw.
+    async fn land(&mut self, landed: Landed) -> anyhow::Result<()> {
+        let Landed {
+            flight:
+                Flight {
+                    family,
+                    route,
+                    pos,
+                    query,
+                    reason,
+                    request: _,
+                },
+            fetch,
+            found,
+        } = landed;
         let finished = Utc::now();
         self.store()
             .finish_query(query, &fetch.outcome, fetch.page_loads, finished)
             .await?;
         self.spend(fetch.page_loads).await?;
-        self.end_check().await;
+        self.end_check(query).await;
         info!(
             family = %family.id,
             site = %family.site,
@@ -1252,6 +1525,8 @@ impl<S: Sources> Worker<S> {
                 return Ok(());
             }
         }
+        // The configuration as it is now: other checks landed meanwhile.
+        let world = world(self.store()).await?;
         match found {
             Found::Explore(destinations) => {
                 self.after_explore(
@@ -1260,7 +1535,7 @@ impl<S: Sources> Worker<S> {
                     &pos,
                     query,
                     destinations,
-                    world,
+                    &world,
                     finished,
                     fetch.page_loads,
                     reason,
@@ -1274,7 +1549,7 @@ impl<S: Sources> Worker<S> {
                     &pos,
                     query,
                     cells,
-                    world,
+                    &world,
                     finished,
                     fetch.page_loads,
                     reason,
@@ -1740,8 +2015,13 @@ impl<S: Sources> Worker<S> {
         deal: &Deal,
         legs_sum: Option<i64>,
     ) -> anyhow::Result<()> {
+        let before = self.checks.len();
         let result = self.confirm_deal(id, deal, legs_sum).await;
-        self.end_check().await;
+        // The confirmation's own entry, should it have ended early.
+        if self.checks.len() > before {
+            self.checks.truncate(before);
+            self.status().await;
+        }
         result
     }
 
@@ -1806,13 +2086,13 @@ impl<S: Sources> Worker<S> {
             origin_override: self.config().jobs.origin_override.clone(),
         };
         let fetch = self.sources.confirm(&job).await;
-        self.last_work = tokio::time::Instant::now();
+        self.last_work = Instant::now();
         let finished = Utc::now();
         store
             .finish_query(query, &fetch.outcome, fetch.page_loads, finished)
             .await?;
         self.spend(fetch.page_loads).await?;
-        self.end_check().await;
+        self.end_check(query).await;
         match &fetch.outcome {
             QueryOutcome::Ok => {}
             QueryOutcome::Blocked { detail } => {

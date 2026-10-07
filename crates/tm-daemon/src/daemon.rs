@@ -5,8 +5,8 @@
 //! Each site (`Source::site()`: Google Flights, TAP, each miles program)
 //! has its own worker task with its own Chromium profile and process,
 //! its own budget, its own pacing and its own scheduler tick, so
-//! different sites check in parallel while each runs at most one check
-//! at a time. A worker starts when the site has eligible families (or a
+//! different sites check in parallel, and each runs up to
+//! [`Config::parallel`] checks at once (0072). A worker starts when the site has eligible families (or a
 //! login request names it) and lives until the daemon stops; its browser
 //! starts when the site has work and closes when the site is idle.
 //!
@@ -60,6 +60,8 @@ pub struct Config {
     pub only: Only,
     /// Seconds of random pause between one site's page loads.
     pub pace: (u64, u64),
+    /// How many checks each site runs at once (0072).
+    pub parallel: usize,
     pub jobs: JobOptions,
     /// Google Flights' starting daily budget (`--budget`).
     pub budget: Option<u32>,
@@ -87,6 +89,7 @@ impl Default for Config {
             once: false,
             only: Only::default(),
             pace: (4, 15),
+            parallel: 3,
             jobs: JobOptions::default(),
             budget: None,
             max_budget: None,
@@ -322,7 +325,7 @@ impl<S: Sources + 'static> Daemon<S> {
             updated_at: Utc::now(),
             state: "stopped".into(),
             next_check_at: None,
-            check: None,
+            checks: Vec::new(),
         };
         if let Err(e) = self.store.write_site_status(&status).await {
             warn!(%site, "status failed: {e}");

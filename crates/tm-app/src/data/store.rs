@@ -913,8 +913,9 @@ async fn daemon_status(
                 ..SiteRow::default()
             }),
         }
-        match &status.check {
-            Some(c) if status.state == "checking" => {
+        if status.state == "checking" {
+            // Several per site (0072).
+            for c in &status.checks {
                 if let Some(mut check) = current_check(store, c, pos).await? {
                     if status.site != tm_domain::GOOGLE_FLIGHTS {
                         check.site = Some(label(&status.site));
@@ -922,14 +923,10 @@ async fn daemon_status(
                     checks.push(check);
                 }
             }
-            _ => {
-                if status.state == "idle"
-                    && let Some(at) = status.next_check_at
-                {
-                    next_check_at =
-                        Some(next_check_at.map_or(at, |n| n.min(at)));
-                }
-            }
+        } else if status.state == "idle"
+            && let Some(at) = status.next_check_at
+        {
+            next_check_at = Some(next_check_at.map_or(at, |n| n.min(at)));
         }
     }
     // Google Flights first, then by site (the store's order).
@@ -1580,12 +1577,12 @@ mod tests {
                     updated_at: started,
                     state: "checking".into(),
                     next_check_at: None,
-                    check: Some(tm_store::CheckInProgress {
+                    checks: vec![tm_store::CheckInProgress {
                         family,
                         query: Some(query),
                         reason,
                         started_at: started,
-                    }),
+                    }],
                 })
                 .await
                 .expect("writes");
@@ -1596,7 +1593,7 @@ mod tests {
                 updated_at: started,
                 state: "paused for login: smiles".into(),
                 next_check_at: None,
-                check: None,
+                checks: Vec::new(),
             })
             .await
             .expect("writes");

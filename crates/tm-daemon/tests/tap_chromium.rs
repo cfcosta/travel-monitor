@@ -268,7 +268,7 @@ async fn the_tap_source_reads_the_calendar() {
         return;
     };
     let address = server().await;
-    let mut sources = BrowserSources::new(config).with_timeouts(fast());
+    let sources = BrowserSources::new(config).with_timeouts(fast());
     let pos = PointOfSale {
         id: PosId(1),
         country: CountryCode::new("BR"),

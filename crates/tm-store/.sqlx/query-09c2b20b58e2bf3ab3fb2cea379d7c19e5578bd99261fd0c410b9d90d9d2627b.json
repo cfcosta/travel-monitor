@@ -1,0 +1,74 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT site, family_id, query_id, reason_json,\n                      started_at AS \"started_at: DateTime<Utc>\"\n               FROM site_checks\n               ORDER BY started_at, rowid",
+  "describe": {
+    "columns": [
+      {
+        "name": "site",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "site_checks",
+            "name": "site"
+          }
+        }
+      },
+      {
+        "name": "family_id",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "site_checks",
+            "name": "family_id"
+          }
+        }
+      },
+      {
+        "name": "query_id",
+        "ordinal": 2,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "site_checks",
+            "name": "query_id"
+          }
+        }
+      },
+      {
+        "name": "reason_json",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "site_checks",
+            "name": "reason_json"
+          }
+        }
+      },
+      {
+        "name": "started_at: DateTime<Utc>",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "site_checks",
+            "name": "started_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "09c2b20b58e2bf3ab3fb2cea379d7c19e5578bd99261fd0c410b9d90d9d2627b"
+}

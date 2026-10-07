@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO site_status (site, updated_at, state, next_check_at)\n             VALUES (?1, ?2, ?3, ?4)\n             ON CONFLICT (site) DO UPDATE SET\n                 updated_at = excluded.updated_at,\n                 state = excluded.state,\n                 next_check_at = excluded.next_check_at",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "fa0e40d889cef28dbc2ca900b0a34b5f146a45a3c77d223e17902c82b024323a"
+}

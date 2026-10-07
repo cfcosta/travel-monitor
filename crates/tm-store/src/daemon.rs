@@ -322,86 +322,97 @@ impl Store {
         .transpose()
     }
 
-    /// Writes what one site is doing, replacing its last status (0062).
+    /// Writes what one site is doing, replacing its last status and its
+    /// checks in progress (0062, 0072).
     pub async fn write_site_status(&self, status: &SiteStatus) -> Result<()> {
-        let check = status.check.as_ref();
-        let family = check.map(|c| c.family.0);
-        let query = check.and_then(|c| c.query).map(|q| q.0);
-        let reason = check
-            .map(|c| serde_json::to_string(&c.reason))
-            .transpose()?;
-        let started_at = check.map(|c| c.started_at);
+        let mut tx = self.pool.begin().await?;
         sqlx::query!(
-            "INSERT INTO site_status (site, updated_at, state, next_check_at,
-                 check_family_id, check_query_id, check_reason_json,
-                 check_started_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
+            "INSERT INTO site_status (site, updated_at, state, next_check_at)
+             VALUES (?1, ?2, ?3, ?4)
              ON CONFLICT (site) DO UPDATE SET
                  updated_at = excluded.updated_at,
                  state = excluded.state,
-                 next_check_at = excluded.next_check_at,
-                 check_family_id = excluded.check_family_id,
-                 check_query_id = excluded.check_query_id,
-                 check_reason_json = excluded.check_reason_json,
-                 check_started_at = excluded.check_started_at",
+                 next_check_at = excluded.next_check_at",
             status.site,
             status.updated_at,
             status.state,
-            status.next_check_at,
-            family,
-            query,
-            reason,
-            started_at
+            status.next_check_at
         )
-        .execute(&self.pool)
+        .execute(&mut *tx)
         .await?;
+        sqlx::query!("DELETE FROM site_checks WHERE site = ?1", status.site)
+            .execute(&mut *tx)
+            .await?;
+        for check in &status.checks {
+            let query = check.query.map(|q| q.0);
+            let reason = serde_json::to_string(&check.reason)?;
+            sqlx::query!(
+                "INSERT INTO site_checks (site, family_id, query_id,
+                     reason_json, started_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5)",
+                status.site,
+                check.family.0,
+                query,
+                reason,
+                check.started_at
+            )
+            .execute(&mut *tx)
+            .await?;
+        }
+        tx.commit().await?;
         Ok(())
     }
 
-    /// Every site's status, Google Flights first, then by site.
+    /// Every site's status, Google Flights first, then by site; each
+    /// site's checks oldest first.
     pub async fn site_statuses(&self) -> Result<Vec<SiteStatus>> {
         let rows = sqlx::query!(
             r#"SELECT site AS "site!: String",
                       updated_at AS "updated_at: DateTime<Utc>", state,
-                      next_check_at AS "next_check_at: DateTime<Utc>",
-                      check_family_id, check_query_id, check_reason_json,
-                      check_started_at AS "check_started_at: DateTime<Utc>"
+                      next_check_at AS "next_check_at: DateTime<Utc>"
                FROM site_status
                ORDER BY site <> 'google_flights', site"#
         )
         .fetch_all(&self.pool)
         .await?;
-        rows.into_iter()
-            .map(|r| {
-                let check = match (
-                    r.check_family_id,
-                    r.check_reason_json,
-                    r.check_started_at,
-                ) {
-                    (Some(family), Some(reason), Some(started_at)) => {
-                        Some(CheckInProgress {
-                            family: FamilyId(family),
-                            query: r.check_query_id.map(QueryId),
-                            reason: serde_json::from_str(&reason)?,
-                            started_at,
-                        })
-                    }
-                    _ => None,
-                };
-                Ok(SiteStatus {
-                    site: r.site,
-                    updated_at: r.updated_at,
-                    state: r.state,
-                    next_check_at: r.next_check_at,
-                    check,
-                })
+        let checks = sqlx::query!(
+            r#"SELECT site, family_id, query_id, reason_json,
+                      started_at AS "started_at: DateTime<Utc>"
+               FROM site_checks
+               ORDER BY started_at, rowid"#
+        )
+        .fetch_all(&self.pool)
+        .await?;
+        let mut statuses: Vec<SiteStatus> = rows
+            .into_iter()
+            .map(|r| SiteStatus {
+                site: r.site,
+                updated_at: r.updated_at,
+                state: r.state,
+                next_check_at: r.next_check_at,
+                checks: Vec::new(),
             })
-            .collect()
+            .collect();
+        for c in checks {
+            if let Some(status) = statuses.iter_mut().find(|s| s.site == c.site)
+            {
+                status.checks.push(CheckInProgress {
+                    family: FamilyId(c.family_id),
+                    query: c.query_id.map(QueryId),
+                    reason: serde_json::from_str(&c.reason_json)?,
+                    started_at: c.started_at,
+                });
+            }
+        }
+        Ok(statuses)
     }
 
     /// Forgets every site's status (a previous run's), when the daemon
     /// starts.
     pub async fn clear_site_statuses(&self) -> Result<()> {
+        sqlx::query!("DELETE FROM site_checks")
+            .execute(&self.pool)
+            .await?;
         sqlx::query!("DELETE FROM site_status")
             .execute(&self.pool)
             .await?;

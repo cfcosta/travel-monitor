@@ -7,7 +7,12 @@
 )]
 
 use std::{
-    sync::{Arc, Mutex, OnceLock},
+    sync::{
+        Arc,
+        Mutex,
+        OnceLock,
+        atomic::{AtomicBool, Ordering},
+    },
     time::{Duration, Instant},
 };
 
@@ -108,7 +113,7 @@ impl Default for Answers {
 /// One site's sources (0062): the daemon makes one per site.
 struct Fake {
     site: String,
-    running: bool,
+    running: AtomicBool,
     log: Arc<Mutex<Log>>,
     answers: Arc<Answers>,
 }
@@ -134,51 +139,47 @@ impl Fake {
 
 #[async_trait]
 impl Sources for Fake {
-    async fn start(&mut self, _: &[PointOfSale]) -> anyhow::Result<()> {
+    async fn start(&self, _: &[PointOfSale]) -> anyhow::Result<()> {
         let site = self.site.clone();
         self.log().starts.push(site);
-        self.running = true;
+        self.running.store(true, Ordering::SeqCst);
         Ok(())
     }
-    async fn stop(&mut self) {
-        if self.running {
+    async fn stop(&self) {
+        if self.running.swap(false, Ordering::SeqCst) {
             let site = self.site.clone();
             self.log().stops.push(site);
         }
-        self.running = false;
     }
     fn is_running(&self) -> bool {
-        self.running
+        self.running.load(Ordering::SeqCst)
     }
-    async fn calendar(&mut self, job: &CalendarJob) -> Fetch<Vec<Cell>> {
+    async fn calendar(&self, job: &CalendarJob) -> Fetch<Vec<Cell>> {
         assert_eq!(self.site, "google_flights");
         self.log().calendar.push(job.clone());
         self.timed().await;
         (self.answers.calendar)(job)
     }
     async fn explore(
-        &mut self,
+        &self,
         job: &ExploreJob,
     ) -> Fetch<Vec<ExploreDestination>> {
         assert_eq!(self.site, "google_flights");
         self.log().explore.push(job.clone());
         (self.answers.explore)(job)
     }
-    async fn tap(&mut self, job: &TapJob) -> Fetch<Vec<Cell>> {
+    async fn tap(&self, job: &TapJob) -> Fetch<Vec<Cell>> {
         assert_eq!(self.site, "airline:TP");
         self.log().tap.push(job.clone());
         self.timed().await;
         (self.answers.tap)(job)
     }
-    async fn confirm(
-        &mut self,
-        job: &ConfirmJob,
-    ) -> Fetch<Option<Confirmation>> {
+    async fn confirm(&self, job: &ConfirmJob) -> Fetch<Option<Confirmation>> {
         assert_eq!(self.site, "google_flights");
         self.log().confirm.push(job.clone());
         (self.answers.confirm)(job)
     }
-    async fn resolve(&mut self, job: &ResolveJob) -> Fetch<Option<String>> {
+    async fn resolve(&self, job: &ResolveJob) -> Fetch<Option<String>> {
         assert_eq!(self.site, "google_flights");
         self.log().resolve.push(job.clone());
         // "Flights to Rio de Janeiro" → "/m/rio-de-janeiro".
@@ -200,13 +201,15 @@ struct Harness {
     _stop: watch::Sender<bool>,
 }
 
-/// The test configuration: one tick at a time, no pauses, Google
-/// Flights at 300 loads a day.
+/// The test configuration: one tick at a time, one check per site at a
+/// time (so checks land in pick order), no pauses, Google Flights at 300
+/// loads a day.
 fn test_config(only: Only) -> Config {
     Config {
         once: true,
         only,
         pace: (0, 0),
+        parallel: 1,
         seed: Some(7),
         budget: Some(300),
         max_budget: Some(2000),
@@ -228,7 +231,7 @@ async fn daemon(
         let log = Arc::clone(&log);
         move |site: &str| Fake {
             site: site.to_owned(),
-            running: false,
+            running: AtomicBool::new(false),
             log: Arc::clone(&log),
             answers: Arc::clone(&answers),
         }
@@ -453,7 +456,7 @@ async fn a_check_writes_start_and_end_statuses() {
     let lis = leg(&store, "LIS", Leg::Outbound).await;
     let before = h.status("google_flights").await;
     assert_eq!(before.state, "idle");
-    assert_eq!(before.check, None);
+    assert!(before.checks.is_empty());
 
     h.daemon
         .run_check(lis, QueryReason::Manual)
@@ -464,7 +467,8 @@ async fn a_check_writes_start_and_end_statuses() {
     assert_eq!(during.len(), 1, "the source ran once");
     let status = &during[0];
     assert_eq!(status.state, "checking");
-    let check = status.check.as_ref().expect("the check in progress");
+    assert_eq!(status.checks.len(), 1, "the check in progress");
+    let check = &status.checks[0];
     assert_eq!(check.family, lis);
     assert_eq!(check.reason, QueryReason::Manual);
     assert!(check.started_at >= before.updated_at);
@@ -474,10 +478,10 @@ async fn a_check_writes_start_and_end_statuses() {
 
     let after = h.status("google_flights").await;
     assert_eq!(after.state, "idle");
-    assert_eq!(after.check, None);
+    assert!(after.checks.is_empty());
     assert!(after.updated_at >= status.updated_at);
     // The other site was not touched.
-    assert_eq!(h.status("airline:TP").await.check, None);
+    assert!(h.status("airline:TP").await.checks.is_empty());
 }
 
 /// A login pauses its own site only (0062): Google Flights and TAP keep
@@ -1444,6 +1448,70 @@ async fn sites_check_in_parallel_one_check_each_at_a_time() {
     assert_eq!(starts.iter().filter(|s| *s == "airline:TP").count(), 1);
 }
 
+/// The most spans running at any one instant.
+fn most_at_once(spans: &[&Span]) -> usize {
+    spans
+        .iter()
+        .map(|a| {
+            spans
+                .iter()
+                .filter(|b| b.start <= a.start && a.start < b.end)
+                .count()
+        })
+        .max()
+        .unwrap_or(0)
+}
+
+/// With three lanes, each site runs up to three checks at once and
+/// never more; every check is recorded and counted (0072).
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn each_site_runs_up_to_three_checks_at_once() {
+    let mut h = harness_with(
+        Config {
+            parallel: 3,
+            budget: Some(30),
+            max_budget: Some(30),
+            site_budgets: vec![(
+                "airline:TP".into(),
+                SiteLimits { start: 12, max: 12 },
+            )],
+            ..test_config(Only {
+                family: None,
+                destination: Some("LIS".into()),
+            })
+        },
+        |a| {
+            a.calendar = Box::new(|_| Fetch::ok(Vec::new(), 3));
+            a.tap = Box::new(|_| Fetch::ok(Vec::new(), 2));
+            a.delay = Duration::from_millis(150);
+        },
+    )
+    .await;
+    h.daemon.tick().await.expect("ticks");
+    let spans = h.log().spans.clone();
+    for (site, loads) in [("google_flights", 3), ("airline:TP", 2)] {
+        let ran: Vec<&Span> = spans.iter().filter(|s| s.site == site).collect();
+        assert!(ran.len() > 3, "{site}: {spans:?}");
+        assert_eq!(most_at_once(&ran), 3, "{site}: {spans:?}");
+        let budget = h.site_budget(site).await;
+        assert_eq!(budget.loads_today, loads * ran.len() as u32, "{site}");
+    }
+    // Every check finished, once each, and no site says it still checks.
+    let queries = h.store().recent_queries(100).await.expect("reads");
+    assert_eq!(queries.len(), spans.len());
+    assert!(queries.iter().all(|q| q.finished_at.is_some()));
+    let mut families: Vec<FamilyId> =
+        queries.iter().map(|q| q.family).collect();
+    families.sort();
+    families.dedup();
+    assert_eq!(families.len(), queries.len(), "a family checked twice");
+    for site in ["google_flights", "airline:TP"] {
+        let status = h.status(site).await;
+        assert!(status.checks.is_empty(), "{status:?}");
+        assert_eq!(status.state, "idle");
+    }
+}
+
 /// A block on TAP halves and cools TAP alone; Google Flights keeps its
 /// budget and keeps checking (0060).
 #[tokio::test]
@@ -1569,7 +1637,7 @@ async fn a_shutdown_stops_every_site() {
     assert!(statuses.len() >= 2);
     for status in &statuses {
         assert_eq!(status.state, "stopped", "{status:?}");
-        assert_eq!(status.check, None);
+        assert!(status.checks.is_empty());
     }
     let beat = store
         .heartbeat()
