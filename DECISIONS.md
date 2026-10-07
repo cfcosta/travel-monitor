@@ -1280,3 +1280,8 @@ seat has a keyboard and a pointer but no input. LATAM's sites
 (`airline:LA`, `miles:latam_pass`) use it; Google Flights and TAP stay
 headless, and `--headed` still shows real windows. Upstream smithay,
 modelled on moonshine's compositor (BSD-2).
+
+Chromium is never started on DevTools port 0: Chromium 151 then marks
+every page as automated (`navigator.webdriver` is true), headless or
+not. The launch picks a free port itself, as a person debugging would.
+Nothing is added to hide automation (0052).
