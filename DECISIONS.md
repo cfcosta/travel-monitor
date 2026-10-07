@@ -1353,3 +1353,24 @@ with bought miles and what it saves against cash. Nothing is valued
 until the user sets a value of 1,000 miles. The active program leads
 (only LATAM Pass for now). Each miles program starts at 40 award loads
 a day, at most 80. "Check award" asks for the selected trip's legs.
+
+## 0088: Airline sites get four times the budget
+
+- Date: 2026-10-07
+- Refines [0060](#0060-each-website-has-its-own-daily-budget) and
+  [0083](#0083-awards-are-their-own-series-the-value-of-a-mile-is-measured).
+
+TAP spent its 330 loads by mid-afternoon. Airline sites now start at
+1,200 page loads a day and ramp to 4,000 (were 300 and 1,000). LATAM's
+cash site keeps 300 ramping to 1,000 and miles programs keep 40 to 80:
+they run on the user's own LATAM Pass account (0084), and stay there
+until a live run shows more is safe. Google Flights is unchanged: it is
+paced, not budgeted (0077).
+
+At each start the daemon applies every site's configured limits, its
+defaults or `--site-budget`, to the stored rows, not only to new ones.
+A changed start resets the budget in force and the ramp's clock; today's
+count is kept. A miles program's limits are left to the app.
+
+TAP has 42 one-way legs and checks each at most every 6 hours, about
+500 loads a day, so for now its routes, not its budget, limit it.
