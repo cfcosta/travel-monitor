@@ -9,6 +9,8 @@ publish.workspace = true
 base64.workspace = true
 chrono.workspace = true
 futures-util.workspace = true
+# The mouse's seeded hand (src/motion.rs).
+rand.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 # Read-only access to a profile's cookie jar (src/profile.rs).

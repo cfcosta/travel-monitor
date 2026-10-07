@@ -59,6 +59,10 @@ pub enum Error {
     #[error("unsupported key {0:?}")]
     UnsupportedKey(String),
 
+    /// The offscreen display stopped, so its pointer moves nothing.
+    #[error("the offscreen display is gone: {0}")]
+    DisplayStopped(String),
+
     /// A profile's files on disk could not be read, such as its cookie
     /// jar while a Chromium holds it locked.
     #[error("{0}")]

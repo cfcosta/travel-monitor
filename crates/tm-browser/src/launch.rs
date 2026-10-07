@@ -8,7 +8,7 @@ use std::{
     time::Duration,
 };
 
-use tm_compositor::{Compositor, CompositorConfig};
+use tm_compositor::{Compositor, CompositorConfig, PointerHandle};
 use tokio::{
     io::{AsyncBufReadExt, BufReader},
     process::{Child, Command},
@@ -18,6 +18,7 @@ use tokio::{
 use crate::{
     browser::Browser,
     error::{Error, Result},
+    mouse::{Mouse, fresh_seed},
 };
 
 /// The environment variable holding the Chromium binary. The dev shell
@@ -264,6 +265,18 @@ impl Chromium {
     /// [`Display::Offscreen`].
     pub fn wayland_display(&self) -> Option<&str> {
         self.compositor.as_ref().map(Compositor::wayland_display)
+    }
+
+    /// The offscreen display's pointer, for [`Display::Offscreen`].
+    pub fn pointer(&self) -> Option<PointerHandle> {
+        self.compositor.as_ref().map(Compositor::pointer)
+    }
+
+    /// A mouse for this browser's pages, with fresh randomness: the
+    /// offscreen display's own pointer, or CDP mouse events on the
+    /// other displays. Use one at a time ([`Mouse`]).
+    pub fn mouse(&self) -> Mouse {
+        Mouse::new(self.pointer(), fresh_seed())
     }
 
     /// Closes the browser and waits for the process to exit, killing it

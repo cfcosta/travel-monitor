@@ -6436,6 +6436,7 @@ dependencies = [
  "base64 0.23.1",
  "chrono",
  "futures-util",
+ "rand 0.9.5",
  "serde",
  "serde_json",
  "sqlx",
