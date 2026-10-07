@@ -37,13 +37,17 @@ use tm_domain::{
     PlaceId,
     PointOfSale,
     PosId,
+    ProgramSettings,
     QueryOutcome,
     QueryReason,
     RequestId,
     Route,
+    Series,
     Settings,
+    SiteLimits,
     Source,
     effective_brl,
+    has_award_reader,
 };
 use tm_store::{
     ChangeWatch,
@@ -85,6 +89,7 @@ use super::{
     TicketState,
     Tone,
     Trip,
+    awards::{AwardInputs, AwardMarks, route_awards, summary},
     detail::{Baselines, DetailInputs, assemble},
     history::{self, History},
 };
@@ -98,6 +103,8 @@ type Stamped<T> = (Option<DateTime<Utc>>, Arc<T>);
 struct Cache {
     cells: HashMap<FamilyId, Stamped<Vec<Observation>>>,
     history: HashMap<RowKey, Stamped<History>>,
+    /// An award family's last 60 days (0083).
+    award_history: HashMap<FamilyId, Stamped<Vec<Observation>>>,
 }
 
 struct Inner {
@@ -229,6 +236,26 @@ impl Inner {
         Ok(cells)
     }
 
+    async fn award_history(
+        &self,
+        store: &Store,
+        family: &FamilyRecord,
+        now: DateTime<Utc>,
+    ) -> anyhow::Result<Arc<Vec<Observation>>> {
+        let stamp = family.state.last_check;
+        if let Some((at, obs)) = self.lock().award_history.get(&family.id)
+            && *at == stamp
+        {
+            return Ok(obs.clone());
+        }
+        let obs =
+            Arc::new(store.history(family.id, now - Duration::days(60)).await?);
+        self.lock()
+            .award_history
+            .insert(family.id, (stamp, obs.clone()));
+        Ok(obs)
+    }
+
     async fn history(
         &self,
         store: &Store,
@@ -275,6 +302,99 @@ fn row_families(
                 && !matches!(f.key.kind, FamilyKind::Explore)
         })
         .collect()
+}
+
+/// A miles program's family of a route × cabin at the home point of
+/// sale: a leg, or the round trip of `days` days.
+fn award_family<'a>(
+    families: &'a [FamilyRecord],
+    route: tm_domain::RouteId,
+    cabin: Cabin,
+    program: &str,
+    home: Option<PosId>,
+    kind: FamilyKind,
+) -> Option<&'a FamilyRecord> {
+    families.iter().find(|f| {
+        f.key.route == route
+            && f.key.cabin == cabin
+            && f.key.kind == kind
+            && home.is_none_or(|h| f.key.pos == h)
+            && matches!(&f.key.source, Source::Miles { program: p } if p == program)
+    })
+}
+
+/// The miles programs that may lead a row: active ones, those the
+/// daemon reads first (0083: with LATAM Pass alone, it leads).
+fn leading_programs(miles: &[MilesRow]) -> Vec<&MilesRow> {
+    let mut out: Vec<&MilesRow> = miles.iter().filter(|m| m.active()).collect();
+    out.sort_by_key(|m| !m.has_reader);
+    out
+}
+
+/// What a program's families say about a route × cabin, read once.
+struct AwardRead {
+    outbound: Arc<Vec<Observation>>,
+    inbound: Arc<Vec<Observation>>,
+    round_trip: Arc<Vec<Observation>>,
+    others: Vec<(Cabin, Observation)>,
+    history: Arc<Vec<Observation>>,
+    checked_at: Option<DateTime<Utc>>,
+}
+
+#[allow(clippy::too_many_arguments, reason = "one row's award read")]
+async fn read_awards(
+    inner: &Inner,
+    store: &Store,
+    families: &[FamilyRecord],
+    route: &Route,
+    cabin: Cabin,
+    program: &str,
+    home: Option<PosId>,
+    days: u16,
+    now: DateTime<Utc>,
+) -> anyhow::Result<Option<AwardRead>> {
+    let leg = |leg| FamilyKind::Leg { leg };
+    let find = |cabin, kind| {
+        award_family(families, route.id, cabin, program, home, kind)
+    };
+    let empty = || Arc::new(Vec::new());
+    let out = find(cabin, leg(Leg::Outbound));
+    let ret = find(cabin, leg(Leg::Return));
+    let rt = find(cabin, FamilyKind::RoundTrip { days });
+    let fams: Vec<&FamilyRecord> =
+        [out, ret, rt].into_iter().flatten().collect();
+    if fams.iter().all(|f| f.state.last_check.is_none()) {
+        return Ok(None);
+    }
+    let mut read = AwardRead {
+        outbound: empty(),
+        inbound: empty(),
+        round_trip: empty(),
+        others: Vec::new(),
+        history: empty(),
+        checked_at: fams.iter().filter_map(|f| f.state.last_check).max(),
+    };
+    if let Some(f) = out {
+        read.outbound = inner.cells(store, f).await?;
+        read.history = inner.award_history(store, f, now).await?;
+    }
+    if let Some(f) = ret {
+        read.inbound = inner.cells(store, f).await?;
+    }
+    if let Some(f) = rt {
+        read.round_trip = inner.cells(store, f).await?;
+    }
+    for &other in route.cabins() {
+        if other == cabin {
+            continue;
+        }
+        if let Some(f) = find(other, leg(Leg::Outbound)) {
+            for o in inner.cells(store, f).await?.iter() {
+                read.others.push((other, o.clone()));
+            }
+        }
+    }
+    Ok(Some(read))
 }
 
 fn discount_of(state: Option<tm_store::RouteTripState>) -> f64 {
@@ -356,6 +476,16 @@ fn reason_label(reason: &QueryReason) -> String {
     }
 }
 
+/// `out`, `return`, `round trip`: what an award check priced.
+fn award_kind(kind: FamilyKind) -> &'static str {
+    match kind {
+        FamilyKind::Leg { leg: Leg::Outbound } => "out",
+        FamilyKind::Leg { leg: Leg::Return } => "return",
+        FamilyKind::RoundTrip { .. } => "round trip",
+        FamilyKind::Explore => "explore",
+    }
+}
+
 fn activity_row(
     q: &QueryLogEntry,
     pos: &HashMap<PosId, CountryCode>,
@@ -365,6 +495,45 @@ fn activity_row(
         other => format!(" · {}", other.site()),
     };
     let pos = pos.get(&q.key.pos).map_or("?", CountryCode::as_str);
+    // An award check reads every cabin: it names the program (0083).
+    if let Source::Miles { program } = &q.key.source {
+        let (result, tone) = match &q.outcome {
+            None => ("running".to_owned(), Tone::System),
+            Some(QueryOutcome::Ok) => {
+                (format!("{} awards", q.cells), Tone::Neutral)
+            }
+            Some(QueryOutcome::NoFlights) => {
+                ("no award seats".to_owned(), Tone::Neutral)
+            }
+            Some(QueryOutcome::LoggedOut) => {
+                ("login needed".to_owned(), Tone::Bad)
+            }
+            Some(QueryOutcome::Blocked { detail }) => {
+                (format!("blocked: {detail}"), Tone::Bad)
+            }
+            Some(QueryOutcome::Unexpected { detail }) => {
+                (format!("unexpected page: {detail}"), Tone::Bad)
+            }
+            Some(QueryOutcome::Error { detail }) => {
+                (format!("error: {detail}"), Tone::Bad)
+            }
+        };
+        return ActivityRow {
+            id: q.id.0,
+            at: q.started_at,
+            route: format!("{} → {}", q.origin_code, q.destination_code),
+            query: format!(
+                "Award · {} · {} · {pos}",
+                tm_domain::program_name(program),
+                award_kind(q.key.kind)
+            ),
+            reason: reason_label(&q.reason),
+            result,
+            tone,
+            loads: q.page_loads,
+            running: q.outcome.is_none(),
+        };
+    }
     let (result, tone) = match &q.outcome {
         None => ("running".to_owned(), Tone::System),
         Some(QueryOutcome::Ok) if q.sweep => {
@@ -529,6 +698,10 @@ async fn snapshot(
         })
         .await?;
     let horizon_end = today + Duration::days(i64::from(settings.horizon_days));
+    let miles = miles_rows(store, now).await?;
+    let days = query
+        .calendar_days
+        .unwrap_or(settings.trips.round_trip_days);
 
     let mut rows = Vec::new();
     let mut detail = None;
@@ -624,7 +797,56 @@ async fn snapshot(
                 }
                 _ => None,
             };
+            // The first program with awards on this route leads (0083).
+            let mut award_read = None;
+            for program in leading_programs(&miles) {
+                if let Some(read) = read_awards(
+                    inner,
+                    store,
+                    &families,
+                    route,
+                    cabin,
+                    &program.program,
+                    home,
+                    settings.trips.round_trip_days,
+                    now,
+                )
+                .await?
+                {
+                    award_read = Some((program, read));
+                    break;
+                }
+            }
+            let award_inputs = award_read.as_ref().map(|(program, read)| {
+                let series = Series::Award {
+                    program: program.program.clone(),
+                };
+                AwardInputs {
+                    program,
+                    cabin,
+                    outbound: &read.outbound,
+                    inbound: &read.inbound,
+                    round_trip: &read.round_trip,
+                    other_cabins: &read.others,
+                    history: &read.history,
+                    deal: deals.iter().find(|d| {
+                        d.series == series
+                            && d.route == route.id
+                            && d.cabin == cabin
+                            && d.departure >= today
+                            && matches!(
+                                d.status,
+                                DealStatus::Confirmed | DealStatus::Candidate
+                            )
+                    }),
+                    checked_at: read.checked_at,
+                }
+            });
+            let award = award_inputs.as_ref().and_then(|a| {
+                summary(a, &inputs.legs, best.as_ref(), &settings, now)
+            });
             let row = RouteRow {
+                award,
                 route: route.clone(),
                 cabin,
                 status: match deal.map(|d| d.status) {
@@ -696,10 +918,20 @@ async fn snapshot(
                         .map(|q| activity_row(q, &pos_names))
                         .collect(),
                     next_check: None,
+                    awards: award_inputs.as_ref().map(|a| {
+                        route_awards(
+                            a,
+                            &inputs.legs,
+                            query
+                                .departure
+                                .or(best.as_ref().map(|t| t.departure)),
+                            days,
+                            &settings,
+                            now,
+                        )
+                    }),
+                    award_marks: award_inputs.as_ref().map(AwardMarks::of),
                 };
-                let days = query
-                    .calendar_days
-                    .unwrap_or(settings.trips.round_trip_days);
                 detail = Some(assemble(
                     key,
                     inputs,
@@ -749,12 +981,26 @@ async fn snapshot(
         .filter_map(|d| {
             let r = all_routes.iter().find(|r| r.id == d.route)?;
             let change = d.change.map(format::change).unwrap_or_default();
+            // An award deal reads in its own series (0083).
+            let price = match (d.award_price(), d.series.program()) {
+                (Some(a), Some(program)) => format!(
+                    "{} ({})",
+                    a.text(tm_domain::MilesUnit::of(program)),
+                    tm_domain::program_name(program)
+                ),
+                _ => d.effective_brl.to_string(),
+            };
+            let what = if d.series.is_award() {
+                "Miles deal"
+            } else {
+                "Deal"
+            };
             let (at, text, tone) = match d.status {
                 DealStatus::Confirmed => (
                     d.confirmed_at.unwrap_or(d.found_at),
                     format!(
-                        "Deal confirmed: {} {} {change}",
-                        r.destination.code, d.effective_brl
+                        "{what} confirmed: {} {price} {change}",
+                        r.destination.code
                     ),
                     Tone::Deal,
                 ),
@@ -798,22 +1044,6 @@ async fn snapshot(
     }));
     feed.sort_by_key(|f| std::cmp::Reverse(f.at));
     feed.truncate(8);
-    let miles = store
-        .list_miles_programs()
-        .await?
-        .into_iter()
-        .filter(|m| m.active)
-        .map(|m| MilesRow {
-            program: m.program,
-            name: m.name,
-            login: match m.login_state {
-                LoginState::LoggedIn => Login::LoggedIn,
-                LoginState::LoggedOut => Login::LoggedOut,
-                LoginState::Expired => Login::Expired,
-            },
-            last_checked: m.last_checked,
-        })
-        .collect();
     Ok(Snapshot {
         taken_at: now,
         today,
@@ -831,6 +1061,46 @@ async fn snapshot(
         explore,
         detail,
     })
+}
+
+/// Every miles program, with what the user set and its measured value
+/// of a mile: the median of its last 30 days of award checks (0083).
+async fn miles_rows(
+    store: &Store,
+    now: DateTime<Utc>,
+) -> anyhow::Result<Vec<MilesRow>> {
+    use tm_scheduler::awards::{RATE_WINDOW_DAYS, RatePoint, usual_rate};
+    let window = Duration::days(RATE_WINDOW_DAYS);
+    let mut out = Vec::new();
+    for m in store.list_miles_programs().await? {
+        let points: Vec<RatePoint> = store
+            .award_rates(&m.program, now - window)
+            .await?
+            .into_iter()
+            .map(|r| RatePoint {
+                observed_at: r.observed_at,
+                brl_per_1000: r.brl_per_1000,
+            })
+            .collect();
+        let usual = usual_rate(&points, now, window);
+        out.push(MilesRow {
+            settings: m.settings(),
+            has_reader: has_award_reader(&m.program),
+            unit: tm_domain::MilesUnit::of(&m.program),
+            usual_rate: usual.map(|u| u.median),
+            rate_checks: usual.map_or(0, |u| u.n),
+            session_until: m.session_until,
+            login: match m.login_state {
+                LoginState::LoggedIn => Login::LoggedIn,
+                LoginState::LoggedOut => Login::LoggedOut,
+                LoginState::Expired => Login::Expired,
+            },
+            last_checked: m.last_checked,
+            program: m.program,
+            name: m.name,
+        });
+    }
+    Ok(out)
 }
 
 /// The daemon's heartbeat, each site's budget and status, and the checks
@@ -967,7 +1237,9 @@ async fn current_check(
         return Ok(None);
     };
     let sweep = matches!(family.key.kind, FamilyKind::Explore);
+    let award = matches!(family.key.source, Source::Miles { .. });
     let kind = match (&check.reason, family.key.kind) {
+        (_, kind) if award => format!("award {}", award_kind(kind)),
         (QueryReason::Confirmation, _) => "confirm".to_owned(),
         (_, FamilyKind::Leg { leg: Leg::Outbound }) => "outbound".to_owned(),
         (_, FamilyKind::Leg { leg: Leg::Return }) => "return".to_owned(),
@@ -990,6 +1262,7 @@ async fn current_check(
             Source::GoogleFlights => None,
             other => Some(other.site()),
         },
+        award,
         reason: reason_label(&check.reason),
         started_at: check.started_at,
     }))
@@ -999,6 +1272,17 @@ fn request_kind(request: Request) -> RequestKind {
     match request {
         Request::CheckRoute(route) => RequestKind::CheckRoute { route },
         Request::ConfirmDeal(deal) => RequestKind::ConfirmDeal { deal },
+        Request::CheckAward {
+            route,
+            cabin,
+            departure,
+            return_date,
+        } => RequestKind::CheckAward {
+            route,
+            cabin,
+            departure,
+            return_date,
+        },
         Request::OpenLogin(program) => RequestKind::OpenLogin { program },
         Request::CloseLogin(program) => RequestKind::CloseLogin {
             program: Some(program),
@@ -1141,6 +1425,39 @@ impl Backend for StoreBackend {
                 .await?
                 .set_point_of_sale_active(pos, active)
                 .await?)
+        })
+        .await
+    }
+
+    async fn save_program(
+        &self,
+        program: String,
+        settings: ProgramSettings,
+    ) -> anyhow::Result<()> {
+        self.run(move |inner| async move {
+            Ok(inner
+                .store()
+                .await?
+                .save_miles_settings(&program, &settings)
+                .await?)
+        })
+        .await
+    }
+
+    async fn set_site_limits(
+        &self,
+        site: String,
+        limits: SiteLimits,
+    ) -> anyhow::Result<()> {
+        self.run(move |inner| async move {
+            let now = Utc::now();
+            let today = chrono::Local::now().date_naive();
+            inner
+                .store()
+                .await?
+                .configure_site_budget(&site, limits, today, now)
+                .await?;
+            Ok(())
         })
         .await
     }

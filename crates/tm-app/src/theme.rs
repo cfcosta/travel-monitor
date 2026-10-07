@@ -47,6 +47,11 @@ pub const DROP: u32 = 0x9FD3F5;
 pub const DROP_BG: u32 = 0x12304A;
 pub const FLAT_BG: u32 = 0x1A2232;
 pub const RED: u32 = 0xFF7A6B;
+/// Miles and points (0083): their unit, tag and rate chip. Never
+/// yellow, which stays for deals of either series.
+pub const MILES: u32 = 0xC3B5FF;
+pub const MILES_BG: u32 = 0x231D45;
+pub const MILES_BORDER: u32 = 0x4A3F86;
 
 // Map.
 /// Land dots, faded towards the globe's rim (0074).

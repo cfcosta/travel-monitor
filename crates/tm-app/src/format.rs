@@ -1,7 +1,7 @@
 //! How numbers, prices and dates read on screen.
 
 use chrono::{DateTime, Datelike, Local, NaiveDate, Utc};
-use tm_domain::Money;
+use tm_domain::{AwardPrice, MilesUnit, Money, Seats};
 
 /// The typographic minus the designs use (`−19%`).
 pub const MINUS: char = '\u{2212}';
@@ -152,6 +152,56 @@ pub fn per_km(brl: f64) -> String {
     format!("R${brl:.2}/km")
 }
 
+// Awards (0083): miles follow the app's English formatting, not the
+// site's pt-BR `63.848 milhas`.
+
+/// `63,848`.
+pub fn miles(n: i64) -> String {
+    tm_domain::format_miles(n)
+}
+
+/// `264k`, for map labels and the rail.
+pub fn miles_short(n: i64) -> String {
+    tm_domain::format_miles_short(n)
+}
+
+/// `R$28.80/k`.
+pub fn mile_value(brl_per_1000: f64) -> String {
+    tm_domain::format_mile_value(brl_per_1000)
+}
+
+/// `R$28.80 per 1,000 mi`, the long form.
+pub fn mile_value_long(brl_per_1000: f64, unit: MilesUnit) -> String {
+    let short = mile_value(brl_per_1000);
+    format!(
+        "{} per 1,000 {}",
+        short.trim_end_matches("/k"),
+        unit.label()
+    )
+}
+
+/// `≈R$1,346 at R$20/k`: an award's miles at a value per 1,000, plus
+/// its taxes. The only figure that adds miles and reais, always
+/// labelled.
+pub fn valued(price: &AwardPrice, per_1000: &Money) -> Option<String> {
+    let cost = tm_scheduler::awards::cost_at(price, per_1000)?;
+    Some(format!(
+        "≈{} at {}",
+        money(&cost),
+        mile_value(per_1000.as_f64())
+    ))
+}
+
+/// `2 seats left`, only when 3 or fewer (or flagged few).
+pub fn seats(seats: Option<Seats>) -> Option<String> {
+    seats.filter(Seats::few).map(|s| s.text())
+}
+
+/// Miles per kilometre: `8.1 mi/km`.
+pub fn miles_per_km(miles: f64, unit: MilesUnit) -> String {
+    format!("{miles:.1} {}/km", unit.label())
+}
+
 #[cfg(test)]
 mod tests {
     use chrono::TimeZone;
@@ -252,6 +302,42 @@ mod tests {
         assert_eq!(thousands(4800), "4,800");
         assert_eq!(thousands(12_000), "12,000");
         assert_eq!(thousands(1_234_567), "1,234,567");
+    }
+
+    #[test]
+    fn awards_read_like_the_designs() {
+        let award = AwardPrice::new(
+            63_848,
+            Money::new(6861, tm_domain::Currency::brl()),
+        );
+        assert_eq!(award.text(MilesUnit::Miles), "63,848 mi + R$69");
+        assert_eq!(miles(263_848), "263,848");
+        assert_eq!(miles_short(263_848), "264k");
+        assert_eq!(mile_value(28.80), "R$28.80/k");
+        assert_eq!(
+            mile_value_long(28.80, MilesUnit::Miles),
+            "R$28.80 per 1,000 mi"
+        );
+        assert_eq!(
+            valued(&award, &Money::brl_whole(20)).as_deref(),
+            Some("≈R$1,346 at R$20/k")
+        );
+        assert_eq!(
+            seats(Some(Seats {
+                count: 2,
+                low: false
+            }))
+            .as_deref(),
+            Some("2 seats left")
+        );
+        assert_eq!(
+            seats(Some(Seats {
+                count: 9,
+                low: false
+            })),
+            None
+        );
+        assert_eq!(miles_per_km(8.06, MilesUnit::Miles), "8.1 mi/km");
     }
 
     #[test]

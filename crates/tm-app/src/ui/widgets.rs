@@ -51,13 +51,99 @@ pub fn change_chip(fonts: &Fonts, change: Option<f64>, deal: bool) -> Div {
 
 /// `Deal`, `Confirming`, `Watching`.
 pub fn status_chip(status: RowStatus) -> Div {
+    labelled_status_chip(status, status.label())
+}
+
+/// The card's chip for both series (0083): `Deal` for cash, `Miles
+/// deal` for an award, `Deal · miles too` for both.
+pub fn series_chip(cash: RowStatus, miles: Option<RowStatus>) -> Div {
+    match miles.filter(|m| m.is_deal()) {
+        Some(m) if cash.is_deal() => {
+            let either = if cash == RowStatus::Deal || m == RowStatus::Deal {
+                RowStatus::Deal
+            } else {
+                RowStatus::Confirming
+            };
+            labelled_status_chip(either, "Deal · miles too")
+        }
+        Some(m) => labelled_status_chip(
+            m,
+            if m == RowStatus::Deal {
+                "Miles deal"
+            } else {
+                "Confirming"
+            },
+        ),
+        None => status_chip(cash),
+    }
+}
+
+/// The small `MI` tag of a miles row or line.
+pub fn miles_tag(fonts: &Fonts) -> Div {
+    mono(fonts, "MI")
+        .flex_none()
+        .px(px(4.))
+        .rounded(px(4.))
+        .border_1()
+        .border_color(color(theme::MILES_BORDER))
+        .text_size(px(10.))
+        .font_weight(FontWeight::BOLD)
+        .text_color(color(theme::MILES))
+}
+
+/// A lavender chip for an unusual value of a mile: `R$41/k`.
+pub fn rate_chip(fonts: &Fonts, brl_per_1000: f64) -> Div {
+    mono(fonts, format::mile_value(brl_per_1000))
+        .flex_none()
+        .px(px(8.))
+        .py(px(1.))
+        .rounded(px(10.))
+        .text_size(px(11.))
+        .font_weight(FontWeight::BOLD)
+        .bg(color(theme::MILES_BG))
+        .text_color(color(theme::MILES))
+}
+
+/// `63,848 mi`, the unit in lavender.
+pub fn miles_text(
+    fonts: &Fonts,
+    miles: i64,
+    unit: tm_domain::MilesUnit,
+) -> Div {
+    div()
+        .flex()
+        .flex_none()
+        .items_baseline()
+        .gap(px(5.))
+        .whitespace_nowrap()
+        .font_family(fonts.mono.clone())
+        .child(format::miles(miles))
+        .child(
+            div()
+                .font_weight(FontWeight::MEDIUM)
+                .text_color(color(theme::MILES))
+                .child(unit.label()),
+        )
+}
+
+/// `63,848 mi + R$69`, the unit in lavender.
+pub fn award_text(
+    fonts: &Fonts,
+    price: &tm_domain::AwardPrice,
+    unit: tm_domain::MilesUnit,
+) -> Div {
+    miles_text(fonts, price.miles, unit)
+        .child(format!("+ {}", format::money(&price.taxes)))
+}
+
+fn labelled_status_chip(status: RowStatus, text: &'static str) -> Div {
     let chip = div()
         .px(px(10.))
         .py(px(3.))
         .rounded(px(12.))
         .text_size(px(12.))
         .font_weight(FontWeight::BOLD)
-        .child(status.label());
+        .child(text);
     match status {
         RowStatus::Deal => chip
             .bg(color(theme::YELLOW))

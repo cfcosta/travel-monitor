@@ -32,6 +32,18 @@ query families (`FamilyKey` = route × cabin × source × pos × kind,
 deals, seller quotes, query reasons and outcomes, settings and their
 validation. Read the source: it is the shared vocabulary.
 
+Awards (`award`, 0083): `AwardPrice` (miles + taxes, `63,848 mi +
+R$69`), `MilesUnit` (`mi`, `pts`), `Seats`, `AwardDetail` on an
+observation (fare before taxes in BRL, brand, fare basis, seats),
+`Observation::flights` (the itinerary key, every segment's flight and
+departure), and `Series` (`Cash` or `Award { program }`) on a deal. A
+deal is a round trip, or for an award one leg (`leg`, no
+`return_date`) or its round trip; award deals carry miles, the award
+series' baseline in miles, brand, seats and the cash fare of the same
+dates for scale. `ProgramSettings` per miles program: active, the
+user's value of 1,000 miles and the program's price for 1,000 (both
+unset by default), and `AwardDates`.
+
 ### tm-gflights (pure)
 
 Everything about Google Flights that is not driving a browser.
@@ -137,6 +149,18 @@ reads while the daemon writes (0020, 0040).
   login: …`, `cooling down`, `browser unavailable`, `stopped`; 0057,
   0062) with `site_checks` (the checks in progress, several per site,
   0072) for the app's status chip and activity screen.
+- Awards (0083, migration 0006): observations gain `fare_minor`/
+  `fare_currency`, `brand`, `fare_basis`, `seats`, `low_availability`
+  and `flights`; `deals` was rebuilt so `return_date` may be NULL and
+  gained `program`, `leg`, `miles`, `baseline_miles`, `brand`, `seats`,
+  `low_availability`, `cash_minor`/`cash_currency`; `miles_programs`
+  gained `value_minor`, `buy_minor` (BRL per 1,000 miles), `dates` and
+  `session_until`; `settings` gained `unusual_rate`.
+  `award_rates(program, since)` is the program's implied rate per
+  award check; `save_miles_settings`, `set_miles_session_until`;
+  `RequestKind::CheckAward { route, cabin, departure, return_date }`.
+  A miles program always has its round-trip family, additive route or
+  not.
 
 ### tm-scheduler (pure)
 
@@ -155,6 +179,13 @@ reads while the daemon writes (0020, 0040).
 - `baseline`: days-to-departure buckets (3/7/14/21/45/90/180), Brazilian
   holiday and peak-season flags, 60-day median and MAD (0030).
 - `deals`: `evaluate` → `Option<(DealReason, change)>`.
+- `awards` (0083): award series (`cheapest_by_dates`, `award_points`
+  in miles, for the same baselines and `evaluate`, kept apart from
+  cash), the implied value of a mile (`implied_rate`: fare before taxes
+  ÷ miles × 1,000), the program's `usual_rate` (30-day median of its
+  checks) and `is_unusual`, `rate_against_cash` (display only), and
+  `cost_at` / `buy_miles` (an award paid with miles at a value or a
+  bought price, and its saving against cash).
 - `trips`: legs → trips in the 5–10 day range, with the learned
   round-trip discount; discount learning and the additive stop rule
   (0042, 0043).
@@ -205,7 +236,10 @@ Flights (legs, round trips, Explore, booking pages) and TAP's booking
 site (0051). A check whose page does not produce what is expected ends
 as `Unexpected` and is retried later. Other airline sites and miles
 programs have no reader and are skipped (0052, 0059); their workers only
-pause and resume for logins.
+pause and resume for logins. `deals` has the award half ready for the
+LATAM Pass reader (`find_awards`, `select_awards`, `award_candidate`,
+`award_expired`), and `notify` words miles deals and "log in again"
+(0083); `CheckAward` requests are answered "no award reader yet".
 
 ### tm-app (`tm`)
 
@@ -220,7 +254,12 @@ row per busy site) and each site's loads and budget today (`Google
 the app sends `OpenLogin`, waits until the daemon paused that program's
 site, and opens the program's own profile (`<profile-dir>/miles-<program>`)
 in a visible window; logins made in the shared profile before 0062 are
-not carried over.
+not carried over. Awards (0083): a Pay with switch (Both, Cash, Miles)
+on the deals list, award lines and miles-deal rows, the award block on
+the card and the detail (brands, taxes, seats, the measured value of a
+mile against the program's usual rate, the cost with bought miles), and
+a block per program in Settings (active, value, buy price, daily award
+loads, dates).
 
 ### nix
 

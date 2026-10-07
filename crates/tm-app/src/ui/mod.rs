@@ -42,6 +42,7 @@ use gpui::{
 use tm_domain::{Cabin, PlaceId};
 
 pub use self::settings::SettingsForm;
+pub use crate::data::PayWith;
 use crate::{
     data::{Request, RouteRow, RowKey, SharedBackend, Snapshot, SnapshotQuery},
     live::{self, Clock, Debounce, Fresh, Highlights},
@@ -104,12 +105,15 @@ impl Sort {
         Sort::RecentlyFound,
     ];
 
-    pub fn label(self) -> &'static str {
-        match self {
-            Sort::BiggestDrop => "Biggest drop",
-            Sort::LowestPrice => "Lowest price",
-            Sort::LowestPricePerKm => "Lowest price per km",
-            Sort::RecentlyFound => "Recently found",
+    /// The sort's name; paying in miles, prices are miles (0083).
+    pub fn label(self, pay: PayWith) -> &'static str {
+        match (self, pay) {
+            (Sort::BiggestDrop, _) => "Biggest drop",
+            (Sort::LowestPrice, PayWith::Miles) => "Fewest miles",
+            (Sort::LowestPrice, _) => "Lowest price",
+            (Sort::LowestPricePerKm, PayWith::Miles) => "Fewest miles per km",
+            (Sort::LowestPricePerKm, _) => "Lowest price per km",
+            (Sort::RecentlyFound, _) => "Recently found",
         }
     }
 }
@@ -167,6 +171,8 @@ pub struct TravelMonitor {
     pub(crate) error: Option<SharedString>,
     pub(crate) screen: Screen,
     pub(crate) list_tab: ListTab,
+    /// Cash, miles or both (0083).
+    pub(crate) pay: PayWith,
     pub(crate) cabin: Option<Cabin>,
     pub(crate) sort: Sort,
     pub(crate) routes_filter: RoutesFilter,
@@ -212,6 +218,7 @@ impl TravelMonitor {
             error: None,
             screen: Screen::Deals,
             list_tab: ListTab::Deals,
+            pay: PayWith::Both,
             cabin: None,
             sort: Sort::BiggestDrop,
             routes_filter: RoutesFilter::All,
@@ -425,10 +432,14 @@ impl TravelMonitor {
         let mut rows: Vec<&RouteRow> = s
             .rows
             .iter()
-            .filter(|r| self.list_tab == ListTab::All || r.status.is_deal())
+            .filter(|r| match self.list_tab {
+                ListTab::Deals => r.is_deal(self.pay),
+                // Paying in miles, only routes with an award are listed.
+                ListTab::All => self.pay != PayWith::Miles || r.award.is_some(),
+            })
             .filter(|r| self.cabin.is_none_or(|c| c == r.cabin))
             .collect();
-        sort_rows(&mut rows, self.sort);
+        sort_rows(&mut rows, self.sort, self.pay);
         rows
     }
 
@@ -521,6 +532,48 @@ impl TravelMonitor {
         self.enqueue(request, format!("Check requested: {label}"), cx);
     }
 
+    /// Asks the daemon to price the selected trip's legs on the miles
+    /// programs (0083): the outbound on its departure and the return.
+    pub fn check_award(&mut self, cx: &mut Context<Self>) {
+        let Some(s) = self.snapshot.as_ref() else {
+            return;
+        };
+        let Some(row) = self.selected.and_then(|k| s.row(k)) else {
+            return;
+        };
+        let days = self
+            .calendar_days
+            .unwrap_or(s.settings.trips.round_trip_days);
+        let departure = self
+            .departure
+            .or(row.best.as_ref().map(|t| t.departure))
+            .or(row.award.as_ref().map(|a| a.best.departure));
+        let Some(departure) = departure else {
+            return self.show_toast("No dates to check yet", cx);
+        };
+        let return_date = departure + chrono::Duration::days(i64::from(days));
+        let label = format!("{} → {}", row.route.origin.code, row.code());
+        let request = Request::CheckAward {
+            route: row.route.id,
+            cabin: row.cabin,
+            departure,
+            return_date: Some(return_date),
+        };
+        self.enqueue(request, format!("Award check requested: {label}"), cx);
+    }
+
+    /// A miles program the daemon reads that is active and logged in:
+    /// "Check award" is offered only then.
+    pub fn can_check_award(&self) -> bool {
+        self.snapshot.as_ref().is_some_and(|s| {
+            s.miles.iter().any(|m| {
+                m.active()
+                    && m.has_reader
+                    && m.login == crate::data::Login::LoggedIn
+            })
+        })
+    }
+
     pub fn enqueue(
         &mut self,
         request: Request,
@@ -590,22 +643,49 @@ impl TravelMonitor {
 
 /// Sorts rows: biggest drop first, lowest price first, lowest price per
 /// kilometre first, or newest deal first (rows without a value go last).
-pub fn sort_rows(rows: &mut [&RouteRow], sort: Sort) {
+/// Paying in miles, prices are miles (then taxes); paying either way,
+/// the bigger of a row's two drops counts, and rows priced only in miles
+/// come after the cash ones (0083).
+pub fn sort_rows(rows: &mut [&RouteRow], sort: Sort, pay: PayWith) {
     match sort {
         Sort::BiggestDrop => rows.sort_by(|a, b| {
-            let key = |r: &RouteRow| r.change.unwrap_or(f64::INFINITY);
+            let key = |r: &RouteRow| {
+                let cash = r.change.filter(|_| pay != PayWith::Miles);
+                let miles = r.award_for(pay).and_then(|a| a.change);
+                match (cash, miles) {
+                    (Some(c), Some(m)) => c.min(m),
+                    (c, m) => c.or(m).unwrap_or(f64::INFINITY),
+                }
+            };
             key(a).total_cmp(&key(b))
+        }),
+        Sort::LowestPrice if pay == PayWith::Miles => rows.sort_by_key(|r| {
+            r.award_for(pay).map_or((i64::MAX, i64::MAX), |a| {
+                (a.best.price.miles, a.best.price.taxes.minor)
+            })
         }),
         Sort::LowestPrice => rows.sort_by_key(|r| {
             r.best.as_ref().map_or(i64::MAX, |t| t.price.minor)
         }),
         Sort::LowestPricePerKm => rows.sort_by(|a, b| {
-            let key = |r: &RouteRow| r.price_per_km().unwrap_or(f64::INFINITY);
+            let key = |r: &RouteRow| {
+                if pay == PayWith::Miles {
+                    r.award_for(pay)
+                        .map(|a| a.best.price.miles as f64)
+                        .filter(|_| r.distance_km() >= 1.0)
+                        .map(|m| m / r.distance_km())
+                } else {
+                    r.price_per_km()
+                }
+                .unwrap_or(f64::INFINITY)
+            };
             key(a).total_cmp(&key(b))
         }),
-        Sort::RecentlyFound => {
-            rows.sort_by_key(|r| std::cmp::Reverse(r.found_at))
-        }
+        Sort::RecentlyFound => rows.sort_by_key(|r| {
+            let miles = r.award_for(pay).and_then(|a| a.found_at);
+            let cash = r.found_at.filter(|_| pay != PayWith::Miles);
+            std::cmp::Reverse(cash.max(miles))
+        }),
     }
 }
 

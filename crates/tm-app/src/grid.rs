@@ -157,6 +157,17 @@ pub fn tone(ratio: f64, threshold: f64) -> Tone {
     }
 }
 
+/// Whether a trip has an award (0083): both ways priced in miles (its
+/// two legs, or its round trip), one leg, or none. Drawn as a lavender
+/// dot, filled or hollow.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum AwardMark {
+    #[default]
+    None,
+    OneLeg,
+    BothLegs,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct CalendarDay {
     pub date: NaiveDate,
@@ -164,6 +175,7 @@ pub struct CalendarDay {
     pub baseline: Option<i64>,
     pub tone: Tone,
     pub selected: bool,
+    pub award: AwardMark,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -245,6 +257,7 @@ pub fn build_calendar(
                         baseline: base,
                         tone,
                         selected: selected == Some(date),
+                        award: AwardMark::None,
                     }
                 })
                 .collect();

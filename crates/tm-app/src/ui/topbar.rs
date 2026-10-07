@@ -16,7 +16,7 @@ use gpui::{
 
 use super::{Menu, Screen, TravelMonitor, widgets};
 use crate::{
-    data::{DaemonStatus, Live, SiteRow},
+    data::{DaemonStatus, Live, MilesRow, SiteRow},
     format,
     theme::{self, Fonts, color},
 };
@@ -27,9 +27,13 @@ use crate::{
 /// 3 s` when several sites check at once (0062), `idle · next in 3 min ·
 /// Google 212/4,800 · TAP 40/300` with each site's loads and budget
 /// today (0060), `Smiles paused for login`, `stale · seen 5 min ago`
-/// (0057).
+/// (0057). An award check names the program instead of the cabin and
+/// point of sale (`checking SAO→LIS · award out · LATAM Pass · 14 s`),
+/// and an active program whose session ended adds `LATAM Pass: log in
+/// again` (0083).
 pub(crate) fn status_line(
     d: &DaemonStatus,
+    miles: &[MilesRow],
     now: DateTime<Utc>,
 ) -> (u32, String, bool) {
     let mut loads: Vec<String> =
@@ -55,6 +59,13 @@ pub(crate) fn status_line(
             let mut parts = vec![state.to_owned()];
             parts.extend(loads);
             (theme::YELLOW, parts, false)
+        }
+        Live::Checking([c]) if c.award => {
+            let mut parts =
+                vec![format!("checking {}", c.route), c.kind.clone()];
+            parts.extend(c.site.clone());
+            parts.push(format::elapsed(now, c.started_at));
+            (theme::TEAL, parts, true)
         }
         Live::Checking([c]) => {
             let mut parts = vec![
@@ -102,6 +113,12 @@ pub(crate) fn status_line(
                 .map(|s| format!("{} paused for login", s.label)),
         );
     }
+    parts.extend(
+        miles
+            .iter()
+            .filter(|m| m.needs_login())
+            .map(|m| format!("{}: log in again", m.name)),
+    );
     if d.blocks_today > 0 {
         parts.push(format!(
             "{} block{}",
@@ -174,7 +191,7 @@ impl TravelMonitor {
                     .items_center()
                     .gap(px(12.))
                     .child(self.render_origin_picker(cx))
-                    .child(self.render_status(fonts)),
+                    .child(self.render_status(fonts, cx)),
             )
     }
 
@@ -219,13 +236,27 @@ impl TravelMonitor {
             .into_any_element()
     }
 
-    fn render_status(&self, fonts: &Fonts) -> Div {
+    fn render_status(
+        &self,
+        fonts: &Fonts,
+        cx: &mut Context<Self>,
+    ) -> gpui::Stateful<Div> {
         let Some(s) = &self.snapshot else {
-            return div();
+            return div().id("daemon-status");
         };
-        let (dot, text, checking) = status_line(&s.daemon, self.now);
+        let (dot, text, checking) = status_line(&s.daemon, &s.miles, self.now);
         let dot = widgets::dot(dot, 7., true);
+        // A program asking for a login opens the settings (0083).
+        let login = s.miles.iter().any(|m| m.needs_login());
         div()
+            .id("daemon-status")
+            .when(login, |d| {
+                d.cursor_pointer().on_click(cx.listener(
+                    |this, _, window, cx| {
+                        this.navigate(Screen::Settings, window, cx)
+                    },
+                ))
+            })
             .flex()
             .min_w_0()
             .items_center()

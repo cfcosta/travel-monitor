@@ -110,6 +110,40 @@ fn screenshots() -> anyhow::Result<()> {
             let path = dir.join("deals-zoomed.png");
             image.save(&path)?;
             eprintln!("wrote {}", path.display());
+            // Paying in miles, on LIS business, a deal in miles only
+            // (0083).
+            cx.update_window(window.into(), |_, window, cx| {
+                view.update(cx, |tm, cx| {
+                    tm.deals_map.set_view(crate::geo::GlobeView {
+                        lon: -30.0,
+                        lat: 0.0,
+                        zoom: 1.0,
+                    });
+                    tm.pay = super::PayWith::Miles;
+                    tm.list_tab = super::ListTab::All;
+                    let key = tm.snapshot.as_ref().and_then(|s| {
+                        s.rows
+                            .iter()
+                            .find(|r| {
+                                r.code() == "LIS"
+                                    && r.cabin == tm_domain::Cabin::Business
+                            })
+                            .map(|r| r.key())
+                    });
+                    if let Some(key) = key {
+                        tm.select(key, cx);
+                    }
+                    tm.navigate(Screen::Deals, window, cx);
+                });
+                window.refresh();
+            })?;
+            cx.run_until_parked();
+            cx.update_window(window.into(), |_, window, _| window.refresh())?;
+            cx.run_until_parked();
+            let image = cx.capture_screenshot(window.into())?;
+            let path = dir.join("deals-miles.png");
+            image.save(&path)?;
+            eprintln!("wrote {}", path.display());
         }
     }
     Ok(())

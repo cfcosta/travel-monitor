@@ -1,7 +1,10 @@
 //! Sample data shaped like the designs (`tm --fake`): the sixteen
 //! routes of "G · Map + list" with their prices, drops, carriers and
 //! sellers, legs and baselines that make a believable calendar, and an
-//! activity log. Edits change the in-memory state, so the settings
+//! activity log. LATAM Pass awards come from the GRU → LIS fixture of
+//! 2026-10-07 (docs/research/sites/fixtures/latam-pass), plus a miles
+//! deal on LIS business and an unusual rate on MIA, both illustrative
+//! (0083). Edits change the in-memory state, so the settings
 //! screen works too.
 //!
 //! Tests stand in for the daemon: [`FakeBackend::land_query`],
@@ -17,19 +20,31 @@ use anyhow::{Context as _, anyhow};
 use async_trait::async_trait;
 use chrono::{DateTime, Datelike, Duration, NaiveDate, Utc};
 use tm_domain::{
+    AwardDetail,
     Cabin,
     CountryCode,
     Currency,
     DealId,
+    DealReason,
+    DealStatus,
+    FamilyId,
+    Leg,
+    MilesUnit,
     Money,
+    Observation,
     Place,
     PlaceId,
     PlaceKind,
     PointOfSale,
     PosId,
+    ProgramSettings,
+    QueryId,
     Route,
     RouteId,
+    Seats,
+    Series,
     Settings,
+    SiteLimits,
     effective_brl,
 };
 
@@ -59,6 +74,7 @@ use super::{
     TicketState,
     Tone,
     Trip,
+    awards::{AwardInputs, AwardMarks, route_awards, summary},
     detail::{Baselines, DetailInputs, assemble},
 };
 use crate::grid::{LegPrices, TripInputs};
@@ -123,7 +139,7 @@ use Cabin::{Business, Economy};
 use RowStatus::{Confirming, Deal, Watching};
 
 #[rustfmt::skip]
-const SAMPLES: [Sample; 16] = [
+const SAMPLES: [Sample; 17] = [
     s("LIS", "Lisbon", "PT", false, (38.72, -9.14), (3932, -19), Deal, Economy, 35, ("TAP", 0, "Kiwi.com"), 11, 595),
     s("MIA", "Miami", "US", false, (25.79, -80.29), (2482, -24), Deal, Economy, 149, ("LATAM", 0, "LATAM"), 60, 500),
     s("CUN", "Cancún", "MX", false, (21.04, -86.88), (2053, -15), Deal, Economy, 160, ("Copa", 1, "Copa"), 180, 720),
@@ -140,6 +156,8 @@ const SAMPLES: [Sample; 16] = [
     s("DXB", "Dubai", "AE", false, (25.20, 55.27), (5980, -3), Watching, Economy, 98, ("Emirates", 0, "Emirates"), 720, 885),
     s("TYO", "Tokyo", "JP", true, (35.68, 139.69), (7640, 2), Watching, Economy, 105, ("Emirates", 1, "Emirates"), 1440, 1500),
     s("REC", "Recife", "BR", false, (-8.05, -34.88), (1180, 3), Watching, Economy, 31, ("Azul", 0, "Azul"), 480, 190),
+    // Watched in cash; a deal in miles only (0083).
+    s("LIS", "Lisbon", "PT", false, (38.72, -9.14), (15240, -3), Watching, Business, 35, ("LATAM", 0, "LATAM"), 180, 580),
 ];
 
 /// A small deterministic generator (the mockups' own LCG).
@@ -177,6 +195,8 @@ struct FakeState {
     checking: Vec<CurrentCheck>,
     /// Minutes taken off a destination's last check (`check_route`).
     rechecked: HashMap<String, i64>,
+    /// Award budgets set in the settings (0083).
+    site_limits: HashMap<String, SiteLimits>,
     snapshots: u32,
 }
 
@@ -227,6 +247,8 @@ impl FakeBackend {
         let destinations = SAMPLES
             .iter()
             .enumerate()
+            // One place per destination; LIS has two cabins.
+            .filter(|(i, s)| SAMPLES[..*i].iter().all(|o| o.code != s.code))
             .map(|(i, s)| {
                 place(
                     10 + i as i64,
@@ -250,25 +272,30 @@ impl FakeBackend {
                 active: true,
             })
             .collect();
+        let program = |program: &str, name: &str, login| MilesRow {
+            program: program.into(),
+            name: name.into(),
+            login,
+            last_checked: None,
+            session_until: None,
+            settings: ProgramSettings {
+                active: true,
+                ..ProgramSettings::default()
+            },
+            has_reader: tm_domain::has_award_reader(program),
+            unit: MilesUnit::of(program),
+            usual_rate: None,
+            rate_checks: 0,
+        };
         let miles = vec![
+            program("smiles", "Smiles", Login::LoggedIn),
             MilesRow {
-                program: "smiles".into(),
-                name: "Smiles".into(),
-                login: Login::LoggedIn,
-                last_checked: None,
+                // The fixture's rate, over two weeks of checks.
+                usual_rate: Some(28.80),
+                rate_checks: 14,
+                ..program("latam_pass", "LATAM Pass", Login::LoggedIn)
             },
-            MilesRow {
-                program: "latam_pass".into(),
-                name: "LATAM Pass".into(),
-                login: Login::Expired,
-                last_checked: None,
-            },
-            MilesRow {
-                program: "azul_fidelidade".into(),
-                name: "Azul Fidelidade".into(),
-                login: Login::LoggedOut,
-                last_checked: None,
-            },
+            program("azul_fidelidade", "Azul Fidelidade", Login::LoggedOut),
         ];
         Self {
             state: Mutex::new(FakeState {
@@ -285,6 +312,7 @@ impl FakeBackend {
                 landed: Vec::new(),
                 checking: vec![sample_check()],
                 rechecked: HashMap::new(),
+                site_limits: HashMap::new(),
                 snapshots: 0,
             }),
             now: None,
@@ -358,6 +386,17 @@ impl FakeBackend {
             .find(|s| s.code == code)
             .map_or(0, |s| s.checked_min);
         self.lock().rechecked.insert(code.to_owned(), minutes);
+        self.changes.notify();
+    }
+
+    /// A program's session state, as the daemon would record it.
+    #[cfg(test)]
+    pub fn set_login(&self, program: &str, login: Login) {
+        if let Some(m) =
+            self.lock().miles.iter_mut().find(|m| m.program == program)
+        {
+            m.login = login;
+        }
         self.changes.notify();
     }
 
@@ -568,6 +607,278 @@ fn trip_of(s: &Sample, today: NaiveDate, f: f64) -> Trip {
     }
 }
 
+/// LATAM Pass awards of one sample row: the latest cells of its
+/// outbound family, the other cabins of the same loads, the outbound's
+/// history and an open deal.
+#[derive(Default)]
+struct FakeAwards {
+    outbound: Vec<Observation>,
+    others: Vec<(Cabin, Observation)>,
+    history: Vec<Observation>,
+    deal: Option<tm_domain::Deal>,
+}
+
+/// One brand of one itinerary, as the LATAM Pass reader would record
+/// it: miles, taxes and the fare before taxes in centavos.
+#[allow(clippy::too_many_arguments, reason = "one fixture brand per call")]
+fn brand(
+    family: i64,
+    query: i64,
+    at: DateTime<Utc>,
+    departure: NaiveDate,
+    (miles, fare, taxes): (i64, i64, i64),
+    brand: &str,
+    (flights, stops): (&[(&str, &str)], u8),
+    seats: u8,
+) -> Observation {
+    let key = flights
+        .iter()
+        .map(|(flight, time)| format!("{flight}@{departure}T{time}"))
+        .collect::<Vec<_>>()
+        .join("/");
+    Observation {
+        id: None,
+        query: QueryId(query),
+        family: FamilyId(family),
+        observed_at: at,
+        departure,
+        return_date: None,
+        price: Some(Money::new(taxes, Currency::brl())),
+        miles: Some(miles),
+        carrier: Some("LATAM".into()),
+        stops: Some(stops),
+        duration_minutes: Some(580),
+        seller: None,
+        flights: Some(key),
+        award: Some(AwardDetail {
+            fare: Some(Money::new(fare, Currency::brl())),
+            brand: Some(brand.into()),
+            fare_basis: None,
+            seats: Some(Seats {
+                count: seats,
+                low: false,
+            }),
+        }),
+    }
+}
+
+const LA8146: (&[(&str, &str)], u8) = (&[("LA8146", "17:40")], 0);
+const LA8148: (&[(&str, &str)], u8) = (&[("LA8148", "22:40")], 0);
+const LA8070: (&[(&str, &str)], u8) =
+    (&[("LA8070", "23:10"), ("LH1172", "20:40")], 1);
+const LA3360: (&[(&str, &str)], u8) =
+    (&[("LA3360", "17:25"), ("LA8150", "06:55")], 1);
+
+/// The fixture's economy and business brands for GRU → LIS on `dep`.
+fn lis_economy(at: DateTime<Utc>, dep: NaiveDate) -> Vec<Observation> {
+    vec![
+        brand(501, 1, at, dep, (63_848, 183_882, 6861), "LIGHT", LA8146, 9),
+        brand(
+            501,
+            1,
+            at,
+            dep,
+            (71_786, 206_743, 6861),
+            "STANDARD",
+            LA8146,
+            9,
+        ),
+        brand(501, 1, at, dep, (81_449, 234_574, 6861), "FULL", LA8146, 9),
+        brand(501, 1, at, dep, (63_848, 183_882, 6861), "LIGHT", LA8148, 9),
+        brand(
+            501,
+            1,
+            at,
+            dep,
+            (79_896, 230_101, 28_722),
+            "LIGHT",
+            LA8070,
+            9,
+        ),
+    ]
+}
+
+fn lis_business(at: DateTime<Utc>, dep: NaiveDate) -> Vec<Observation> {
+    vec![
+        brand(
+            502,
+            1,
+            at,
+            dep,
+            (263_848, 759_882, 6861),
+            "PREMIUM BUSINESS STANDARD",
+            LA8148,
+            2,
+        ),
+        brand(
+            502,
+            1,
+            at,
+            dep,
+            (263_848, 759_882, 14_749),
+            "PREMIUM BUSINESS STANDARD",
+            LA3360,
+            1,
+        ),
+        brand(
+            502,
+            1,
+            at,
+            dep,
+            (274_374, 790_198, 6861),
+            "PREMIUM BUSINESS STANDARD",
+            LA8146,
+            4,
+        ),
+        brand(
+            502,
+            1,
+            at,
+            dep,
+            (315_617, 908_976, 6861),
+            "PREMIUM BUSINESS FULL",
+            LA8148,
+            2,
+        ),
+    ]
+}
+
+/// The designs' awards: LIS economy as the fixture priced it (one
+/// check, the return not checked), LIS business with five weeks of
+/// history and a miles deal (illustrative), and MIA economy at R$41 per
+/// 1,000 miles, well above LATAM Pass's usual rate (illustrative).
+fn awards_of(
+    s: &Sample,
+    today: NaiveDate,
+    now: DateTime<Utc>,
+) -> Option<FakeAwards> {
+    let dep = today + Duration::days(s.offset);
+    let seen = now - Duration::minutes(105);
+    match (s.code, s.cabin) {
+        ("LIS", Cabin::Economy) => {
+            let mut outbound = lis_economy(seen, dep);
+            // Two more departures priced, for the calendar's marks.
+            for (off, miles) in [(2, 63_848), (14, 71_786)] {
+                outbound.push(brand(
+                    501,
+                    1,
+                    seen,
+                    dep + Duration::days(off),
+                    (miles, miles * 2880 / 1000, 6861),
+                    "LIGHT",
+                    LA8146,
+                    9,
+                ));
+            }
+            Some(FakeAwards {
+                history: outbound.clone(),
+                others: lis_business(seen, dep)
+                    .into_iter()
+                    .map(|o| (Cabin::Business, o))
+                    .collect(),
+                outbound,
+                deal: None,
+            })
+        }
+        ("LIS", Cabin::Business) => {
+            let outbound = lis_business(seen, dep);
+            let mut history: Vec<Observation> = (1..=35)
+                .map(|day| {
+                    let miles = 338_000 + (day % 5) * 1500;
+                    brand(
+                        502,
+                        100 + day,
+                        seen - Duration::days(day),
+                        dep,
+                        (miles, miles * 2880 / 1000, 6861),
+                        "PREMIUM BUSINESS STANDARD",
+                        LA8148,
+                        4,
+                    )
+                })
+                .collect();
+            history.extend(outbound.iter().cloned());
+            history.sort_by_key(|o| o.observed_at);
+            Some(FakeAwards {
+                others: lis_economy(seen, dep)
+                    .into_iter()
+                    .map(|o| (Cabin::Economy, o))
+                    .collect(),
+                history,
+                deal: Some(tm_domain::Deal {
+                    id: Some(DealId(300)),
+                    route: RouteId(0),
+                    cabin: Cabin::Business,
+                    pos: PosId(1),
+                    series: Series::Award {
+                        program: "latam_pass".into(),
+                    },
+                    leg: Some(Leg::Outbound),
+                    departure: dep,
+                    return_date: None,
+                    price: Money::new(6861, Currency::brl()),
+                    effective_brl: Money::new(6861, Currency::brl()),
+                    baseline: None,
+                    miles: Some(263_848),
+                    baseline_miles: Some(338_000),
+                    brand: Some("PREMIUM BUSINESS STANDARD".into()),
+                    seats: Some(Seats {
+                        count: 2,
+                        low: false,
+                    }),
+                    cash: Some(brl(7_667)),
+                    reason: DealReason::BelowMedian,
+                    change: Some(-0.22),
+                    estimated: false,
+                    status: DealStatus::Confirmed,
+                    found_at: seen,
+                    confirmed_at: Some(seen),
+                    seen: true,
+                    carrier: Some("LA8148 nonstop".into()),
+                    seller: None,
+                    sellers: Vec::new(),
+                    url: None,
+                }),
+                outbound,
+            })
+        }
+        ("MIA", Cabin::Economy) => {
+            let mia = (&[("LA8190", "23:55")][..], 0);
+            let outbound = vec![brand(
+                503,
+                2,
+                seen,
+                dep,
+                (58_200, 238_620, 24_000),
+                "LIGHT",
+                mia,
+                9,
+            )];
+            Some(FakeAwards {
+                history: outbound.clone(),
+                outbound,
+                ..FakeAwards::default()
+            })
+        }
+        _ => None,
+    }
+}
+
+/// The cash fares the fixture saw next to its awards: LA8146 LIGHT,
+/// R$1,907.43 one way GRU → LIS on Nov 10 (so its miles are worth
+/// R$28.80 per 1,000 against cash, as measured).
+fn with_fixture_cash(
+    s: &Sample,
+    today: NaiveDate,
+    mut legs: LegPrices,
+) -> LegPrices {
+    if s.code == "LIS" && s.cabin == Cabin::Economy {
+        legs.outbound
+            .insert(today + Duration::days(s.offset), 190_743);
+    }
+    legs
+}
+
 /// The running MIA business check of the sample log.
 fn sample_check() -> CurrentCheck {
     CurrentCheck {
@@ -577,6 +888,7 @@ fn sample_check() -> CurrentCheck {
         kind: "outbound".into(),
         pos: "BR".into(),
         site: None,
+        award: false,
         reason: "Scheduled · score 0.38".into(),
         // Moved to the snapshot's time.
         started_at: DateTime::<Utc>::MIN_UTC,
@@ -864,12 +1176,39 @@ impl Backend for FakeBackend {
             .enumerate()
             .filter(|(_, p)| !state.removed.contains(&p.id))
             .collect();
-        let sample_of =
-            |p: &Place| SAMPLES.iter().position(|s| s.code == p.code);
+        let settings = state.settings.clone();
+        let latam = state
+            .miles
+            .iter()
+            .find(|m| m.program == "latam_pass" && m.active());
+        // The awards of a sample row, and what they say (0083).
+        let award_of = |s: &Sample, best: Option<&Trip>, cash: &LegPrices| {
+            let program = latam?;
+            let a = awards_of(s, today, now)?;
+            let inputs = AwardInputs {
+                program,
+                cabin: s.cabin,
+                outbound: &a.outbound,
+                inbound: &[],
+                round_trip: &[],
+                other_cabins: &a.others,
+                history: &a.history,
+                deal: a.deal.as_ref(),
+                checked_at: Some(now - Duration::minutes(105)),
+            };
+            summary(&inputs, cash, best, &settings, now)
+        };
+        let samples_of = |p: &Place| -> Vec<usize> {
+            (0..SAMPLES.len())
+                .filter(|&i| SAMPLES[i].code == p.code)
+                .collect()
+        };
+        let horizon = i64::from(settings.horizon_days);
         let mut rows = Vec::new();
         for (di, dest) in &live {
             let route = route_of(&origin, dest, origin_index + 1, *di as i64);
-            let Some(si) = sample_of(dest) else {
+            let samples = samples_of(dest);
+            if samples.is_empty() {
                 // A destination added in the settings: watched, no data yet.
                 rows.push(RouteRow {
                     route,
@@ -882,42 +1221,79 @@ impl Backend for FakeBackend {
                     last_checked: None,
                     deal: None,
                     found_at: None,
+                    award: None,
                 });
                 continue;
-            };
-            let s = &SAMPLES[si];
-            rows.push(RouteRow {
-                route,
-                cabin: s.cabin,
-                status: s.status,
-                best: Some(trip_of(s, today, f)),
-                baseline: Some(brl(scaled(usual(s), f))),
-                change: Some(s.drop as f64 / 100.0),
-                history: history(s, f),
-                last_checked: Some(
-                    now - Duration::minutes(s.checked_min)
-                        + Duration::minutes(
-                            state.rechecked.get(s.code).copied().unwrap_or(0),
-                        ),
-                ),
-                deal: s.status.is_deal().then_some(DealId(100 + si as i64)),
-                found_at: s
-                    .status
-                    .is_deal()
-                    .then(|| now - Duration::minutes(s.checked_min)),
-            });
+            }
+            for si in samples {
+                let s = &SAMPLES[si];
+                let best = trip_of(s, today, f);
+                let cash = with_fixture_cash(
+                    s,
+                    today,
+                    trip_inputs(s, today, horizon, f).legs,
+                );
+                let mut award = award_of(s, Some(&best), &cash);
+                if let Some(a) = award.as_mut().filter(|a| a.deal.is_some()) {
+                    a.deal = Some(DealId(300 + si as i64));
+                }
+                rows.push(RouteRow {
+                    route: route.clone(),
+                    cabin: s.cabin,
+                    status: s.status,
+                    best: Some(best),
+                    baseline: Some(brl(scaled(usual(s), f))),
+                    change: Some(s.drop as f64 / 100.0),
+                    history: history(s, f),
+                    last_checked: Some(
+                        now - Duration::minutes(s.checked_min)
+                            + Duration::minutes(
+                                state
+                                    .rechecked
+                                    .get(s.code)
+                                    .copied()
+                                    .unwrap_or(0),
+                            ),
+                    ),
+                    deal: s.status.is_deal().then_some(DealId(100 + si as i64)),
+                    found_at: s
+                        .status
+                        .is_deal()
+                        .then(|| now - Duration::minutes(s.checked_min)),
+                    award,
+                });
+            }
         }
-        let settings = state.settings.clone();
         let detail = query.selected.and_then(|key| {
             let row = rows.iter().find(|r| r.key() == key)?;
-            let si = sample_of(&row.route.destination)?;
-            let s = &SAMPLES[si];
+            let s = SAMPLES
+                .iter()
+                .find(|s| s.code == row.route.destination.code && s.cabin == key.cabin)?;
             let days = query.calendar_days.unwrap_or(settings.trips.round_trip_days);
             let airline = s.carrier.to_owned();
+            let trips = trip_inputs(s, today, horizon, f);
+            let fake_awards = awards_of(s, today, now);
+            let award_inputs = latam.zip(fake_awards.as_ref()).map(|(program, a)| AwardInputs {
+                program,
+                cabin: s.cabin,
+                outbound: &a.outbound,
+                inbound: &[],
+                round_trip: &[],
+                other_cabins: &a.others,
+                history: &a.history,
+                deal: a.deal.as_ref(),
+                checked_at: Some(now - Duration::minutes(105)),
+            });
+            let departure = query.departure.or(row.best.as_ref().map(|t| t.departure));
             let inputs = DetailInputs {
+                awards: award_inputs.as_ref().map(|a| {
+                    let cash = with_fixture_cash(s, today, trips.legs.clone());
+                    route_awards(a, &cash, departure, days, &settings, now)
+                }),
+                award_marks: award_inputs.as_ref().map(AwardMarks::of),
                 trip: row.best.clone(),
                 deal: row.status == RowStatus::Deal,
-                trips: trip_inputs(s, today, i64::from(settings.horizon_days), f),
+                trips,
                 baselines: baselines(s, f, today, i64::from(settings.horizon_days)),
                 sellers: sellers(s, f, &settings),
                 airline_direct: Some((airline, brl(scaled(scaled(s.price, f), 1.048)))),
@@ -1004,9 +1380,24 @@ impl Backend for FakeBackend {
                         budget: Some(300),
                         max_budget: Some(1000),
                     },
+                    {
+                        let limits = state
+                            .site_limits
+                            .get("miles:latam_pass")
+                            .copied()
+                            .unwrap_or(SiteLimits::MILES);
+                        SiteRow {
+                            site: "miles:latam_pass".into(),
+                            label: "LATAM Pass".into(),
+                            state: "idle".into(),
+                            loads_today: 3,
+                            budget: Some(limits.start),
+                            max_budget: Some(limits.max),
+                        }
+                    },
                 ],
-                loads_today: 252,
-                budget: state.settings.daily_budget + 300,
+                loads_today: 255,
+                budget: state.settings.daily_budget + 300 + 40,
                 blocks_today: 0,
             },
             activity: {
@@ -1150,6 +1541,30 @@ impl Backend for FakeBackend {
         p.active = active;
         Ok(())
     }
+
+    async fn save_program(
+        &self,
+        program: String,
+        settings: ProgramSettings,
+    ) -> anyhow::Result<()> {
+        let mut state = self.lock();
+        let m = state
+            .miles
+            .iter_mut()
+            .find(|m| m.program == program)
+            .ok_or_else(|| anyhow!("no miles program {program}"))?;
+        m.settings = settings;
+        Ok(())
+    }
+
+    async fn set_site_limits(
+        &self,
+        site: String,
+        limits: SiteLimits,
+    ) -> anyhow::Result<()> {
+        self.lock().site_limits.insert(site, limits.normalized());
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -1187,7 +1602,7 @@ mod tests {
     fn has_the_designs_rows() {
         let b = FakeBackend::at(now());
         let s = run(snap(&b, SnapshotQuery::default()));
-        assert_eq!(s.rows.len(), 16);
+        assert_eq!(s.rows.len(), 17);
         assert_eq!(s.rows.iter().filter(|r| r.status.is_deal()).count(), 6);
         let lis = s.rows.iter().find(|r| r.code() == "LIS").expect("LIS");
         let trip = lis.best.as_ref().expect("trip");
@@ -1202,16 +1617,16 @@ mod tests {
 
     #[test]
     fn price_per_km_ranks_far_cheap_trips_first() {
-        use crate::ui::{Sort, sort_rows};
+        use crate::ui::{PayWith, Sort, sort_rows};
         let b = FakeBackend::at(now());
         let s = run(snap(&b, SnapshotQuery::default()));
         let position = |rows: &[&RouteRow], code: &str| {
             rows.iter().position(|r| r.code() == code).expect("row")
         };
         let mut by_price: Vec<&RouteRow> = s.rows.iter().collect();
-        sort_rows(&mut by_price, Sort::LowestPrice);
+        sort_rows(&mut by_price, Sort::LowestPrice, PayWith::Cash);
         let mut by_km: Vec<&RouteRow> = s.rows.iter().collect();
-        sort_rows(&mut by_km, Sort::LowestPricePerKm);
+        sort_rows(&mut by_km, Sort::LowestPricePerKm, PayWith::Cash);
         // Salvador is cheaper, but Lisbon goes over five times as far.
         assert!(position(&by_price, "SSA") < position(&by_price, "LIS"));
         assert!(position(&by_km, "LIS") < position(&by_km, "SSA"));
@@ -1268,6 +1683,7 @@ mod tests {
             .id;
         run(b.remove_place(Role::Destination, lis)).expect("remove");
         let s = run(snap(&b, SnapshotQuery::default()));
+        // LIS has two cabins.
         assert_eq!(s.rows.len(), 15);
         run(b.add_place(
             Role::Destination,
@@ -1282,7 +1698,7 @@ mod tests {
         ))
         .expect("add back");
         let s = run(snap(&b, SnapshotQuery::default()));
-        assert_eq!(s.rows.len(), 16);
+        assert_eq!(s.rows.len(), 17);
         let mut settings = s.settings.clone();
         settings.trips.min_days = 20;
         assert!(run(b.save_settings(settings)).is_err());

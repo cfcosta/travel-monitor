@@ -10,6 +10,7 @@
 //! store watches SQLite's `data_version`, the fake is told by tests. The
 //! window refreshes on those notices, not on a fixed timer.
 
+pub mod awards;
 pub mod detail;
 pub mod fake;
 pub mod history;
@@ -20,19 +21,25 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use chrono::{DateTime, NaiveDate, Utc};
 use tm_domain::{
+    AwardPrice,
     Cabin,
     CountryCode,
     Currency,
     DealId,
+    Leg,
+    MilesUnit,
     Money,
     Place,
     PlaceId,
     PlaceKind,
     PointOfSale,
     PosId,
+    ProgramSettings,
     Route,
     RouteId,
+    Seats,
     Settings,
+    SiteLimits,
 };
 use tokio::sync::watch;
 
@@ -100,6 +107,165 @@ impl Trip {
     }
 }
 
+/// How the list and the card pay (0083): cash, miles, or both, each
+/// series with its own "% vs usual" (0023).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum PayWith {
+    #[default]
+    Both,
+    Cash,
+    Miles,
+}
+
+impl PayWith {
+    pub const ALL: [PayWith; 3] =
+        [PayWith::Both, PayWith::Cash, PayWith::Miles];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            PayWith::Both => "Both",
+            PayWith::Cash => "Cash",
+            PayWith::Miles => "Miles",
+        }
+    }
+}
+
+/// One award as a program priced it (0083): one brand of one
+/// itinerary, one way or a round trip.
+#[derive(Debug, Clone, PartialEq)]
+pub struct AwardQuote {
+    pub program: String,
+    pub unit: MilesUnit,
+    pub price: AwardPrice,
+    /// The program's own fare before taxes, BRL.
+    pub fare: Option<Money>,
+    /// `LIGHT`, `PREMIUM BUSINESS STANDARD`.
+    pub brand: Option<String>,
+    pub cabin: Cabin,
+    /// The itinerary key (`LA8146@2026-11-10T17:40`).
+    pub flights: Option<String>,
+    pub stops: Option<u8>,
+    pub seats: Option<Seats>,
+    pub departure: NaiveDate,
+    /// Set for a round-trip award.
+    pub return_date: Option<NaiveDate>,
+    /// The leg of a one-way award.
+    pub leg: Option<Leg>,
+    pub observed_at: DateTime<Utc>,
+}
+
+impl AwardQuote {
+    /// The implied value of a mile: fare before taxes ÷ miles × 1,000.
+    pub fn rate(&self) -> Option<f64> {
+        tm_scheduler::awards::implied_rate(
+            self.price.miles,
+            self.fare.as_ref()?,
+        )
+    }
+
+    /// `LA8146 17:40`, `LA4776/LA8150 00:05`.
+    pub fn flight_label(&self) -> Option<String> {
+        self.flights.as_deref().map(tm_domain::itinerary_label)
+    }
+
+    /// `LA8146 nonstop`, `LA8070, 1 stop`: flights and stops.
+    pub fn route_label(&self) -> Option<String> {
+        let label = self.flight_label()?;
+        let flights = label.split(' ').next().unwrap_or(&label).to_owned();
+        Some(match self.stops {
+            Some(0) => format!("{flights} nonstop"),
+            Some(n) => format!("{flights}, {}", crate::format::stops(n)),
+            None => flights,
+        })
+    }
+}
+
+/// A cash trip's dates in awards: both legs one way, each from its
+/// latest check, and the round-trip award when one was searched.
+#[derive(Debug, Clone, PartialEq)]
+pub struct AwardTrip {
+    pub departure: NaiveDate,
+    pub return_date: NaiveDate,
+    pub outbound: Option<AwardQuote>,
+    pub inbound: Option<AwardQuote>,
+    pub round_trip: Option<AwardQuote>,
+}
+
+impl AwardTrip {
+    /// Both ways known: the round trip, or both legs.
+    pub fn complete(&self) -> bool {
+        self.round_trip.is_some()
+            || (self.outbound.is_some() && self.inbound.is_some())
+    }
+
+    /// What the whole trip costs in miles: the round-trip award, else
+    /// the cheaper of it and the two legs; `None` until both ways are
+    /// known.
+    pub fn price(&self) -> Option<AwardPrice> {
+        let legs = match (&self.outbound, &self.inbound) {
+            (Some(o), Some(i)) => o.price.plus(&i.price),
+            _ => None,
+        };
+        let rt = self.round_trip.as_ref().map(|q| q.price.clone());
+        match (rt, legs) {
+            (Some(a), Some(b)) => Some(if b.miles < a.miles { b } else { a }),
+            (a, b) => a.or(b),
+        }
+    }
+
+    pub fn any(&self) -> bool {
+        self.outbound.is_some()
+            || self.inbound.is_some()
+            || self.round_trip.is_some()
+    }
+}
+
+/// What a row knows about its leading program's awards (0083).
+#[derive(Debug, Clone, PartialEq)]
+pub struct AwardSummary {
+    pub program: String,
+    /// `LATAM Pass`.
+    pub name: String,
+    /// The cheapest award on sale for the route and cabin: the
+    /// outbound leg's, else the return's.
+    pub best: AwardQuote,
+    /// The row's own cash trip dates, in awards.
+    pub trip: Option<AwardTrip>,
+    /// The award series' bucket median for `best`, in miles.
+    pub baseline_miles: Option<i64>,
+    /// `best` against it: the miles' own "% vs usual".
+    pub change: Option<f64>,
+    /// A miles deal, of the award series alone (0023).
+    pub status: RowStatus,
+    pub deal: Option<DealId>,
+    pub found_at: Option<DateTime<Utc>>,
+    /// The cheapest award each day, in miles, oldest first.
+    pub history: Vec<f64>,
+    /// Days of award checks behind `history`.
+    pub history_days: usize,
+    /// `best`'s implied value of a mile, BRL per 1,000.
+    pub rate: Option<f64>,
+    /// The program's usual rate: the median of its recent checks.
+    pub usual_rate: Option<f64>,
+    /// `rate` is far from the usual one: a discount, or a dearer class.
+    pub unusual: bool,
+    /// The cheapest cash fare of `best`'s leg and date (Google Flights,
+    /// any airline), for scale.
+    pub cash: Option<Money>,
+    pub value_per_1000: Option<Money>,
+    pub buy_per_1000: Option<Money>,
+}
+
+impl AwardSummary {
+    /// `best`'s rate against `cash`: what its miles save per 1,000.
+    pub fn rate_against_cash(&self) -> Option<f64> {
+        tm_scheduler::awards::rate_against_cash(
+            &self.best.price,
+            self.cash.as_ref()?,
+        )
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct RouteRow {
     pub route: Route,
@@ -116,9 +282,50 @@ pub struct RouteRow {
     pub last_checked: Option<DateTime<Utc>>,
     pub deal: Option<DealId>,
     pub found_at: Option<DateTime<Utc>>,
+    /// The leading miles program's awards, when it priced this route
+    /// and cabin (0083).
+    pub award: Option<AwardSummary>,
 }
 
 impl RouteRow {
+    /// Listed under "Deals" when paying `pay`: a cash deal, a miles
+    /// deal, or either.
+    pub fn is_deal(&self, pay: PayWith) -> bool {
+        let miles = self.award.as_ref().is_some_and(|a| a.status.is_deal());
+        match pay {
+            PayWith::Both => self.status.is_deal() || miles,
+            PayWith::Cash => self.status.is_deal(),
+            PayWith::Miles => miles,
+        }
+    }
+
+    /// The award leads the row: paying in miles, or a miles deal where
+    /// cash has none.
+    pub fn award_leads(&self, pay: PayWith) -> bool {
+        let Some(award) = &self.award else {
+            return false;
+        };
+        match pay {
+            PayWith::Miles => true,
+            PayWith::Cash => false,
+            PayWith::Both => award.status.is_deal() && !self.status.is_deal(),
+        }
+    }
+
+    /// The award, shown when paying `pay` allows it.
+    pub fn award_for(&self, pay: PayWith) -> Option<&AwardSummary> {
+        self.award.as_ref().filter(|_| pay != PayWith::Cash)
+    }
+
+    /// The leading series' change against its own usual.
+    pub fn lead_change(&self, pay: PayWith) -> Option<f64> {
+        if self.award_leads(pay) {
+            self.award.as_ref().and_then(|a| a.change)
+        } else {
+            self.change
+        }
+    }
+
     /// The great-circle distance from origin to destination, one way.
     pub fn distance_km(&self) -> f64 {
         let (o, d) = (&self.route.origin, &self.route.destination);
@@ -283,6 +490,9 @@ pub struct CurrentCheck {
     pub pos: String,
     /// Another site than Google Flights, by its label: `TAP`.
     pub site: Option<String>,
+    /// An award check (0083): one load reads every cabin, so the chip
+    /// names the program instead of the cabin and point of sale.
+    pub award: bool,
     /// `Scheduled · score 0.41`.
     pub reason: String,
     pub started_at: DateTime<Utc>,
@@ -379,13 +589,43 @@ pub enum Login {
     Expired,
 }
 
-/// A miles program and its session in the daemon's profile (0023, 0024).
+/// A miles program and its session in the daemon's profile (0023,
+/// 0024), with what the user set for it (0083).
 #[derive(Debug, Clone, PartialEq)]
 pub struct MilesRow {
     pub program: String,
     pub name: String,
     pub login: Login,
     pub last_checked: Option<DateTime<Utc>>,
+    /// When the session ends, as the profile's cookies say.
+    pub session_until: Option<DateTime<Utc>>,
+    pub settings: ProgramSettings,
+    /// The daemon reads this program's awards (0050).
+    pub has_reader: bool,
+    pub unit: MilesUnit,
+    /// The measured value of a mile: the median of the last 30 days'
+    /// checks, BRL per 1,000, and how many checks it rests on.
+    pub usual_rate: Option<f64>,
+    pub rate_checks: usize,
+}
+
+impl MilesRow {
+    pub fn active(&self) -> bool {
+        self.settings.active
+    }
+
+    /// Active, but the session is gone: award checks wait for a login.
+    pub fn needs_login(&self) -> bool {
+        self.active() && self.has_reader && self.login != Login::LoggedIn
+    }
+
+    /// `miles:latam_pass`.
+    pub fn site(&self) -> String {
+        tm_domain::Source::Miles {
+            program: self.program.clone(),
+        }
+        .site()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -415,6 +655,58 @@ pub struct RouteDetail {
     pub change_rate: Option<f64>,
     pub recent_checks: Vec<ActivityRow>,
     pub next_check: Option<DateTime<Utc>>,
+    /// The leading miles program's awards for this route (0083).
+    pub awards: Option<RouteAwards>,
+}
+
+/// One program's awards in the route detail (0083): its tiles and the
+/// brands of the selected dates, one series per leg and the round trip,
+/// never merged with cash.
+#[derive(Debug, Clone, PartialEq)]
+pub struct RouteAwards {
+    pub program: String,
+    pub name: String,
+    pub unit: MilesUnit,
+    pub login: Login,
+    /// The cheapest award on sale.
+    pub cheapest: Option<AwardQuote>,
+    /// The fewest miles ever seen in the outbound series, and the day.
+    pub lowest_ever: Option<(i64, NaiveDate)>,
+    /// The award series' median for `cheapest`, and its bucket.
+    pub usual: Option<(i64, String)>,
+    pub checks: usize,
+    pub checked_at: Option<DateTime<Utc>>,
+    /// Departures with an award on either leg, out of the horizon.
+    pub dates_known: usize,
+    pub dates_total: usize,
+    /// The selected departure's outbound brands, its return's, and the
+    /// round trip's, fewest miles first.
+    pub outbound: Vec<AwardQuote>,
+    pub inbound: Vec<AwardQuote>,
+    pub round_trip: Vec<AwardQuote>,
+    /// Other cabins' brands from the outbound's load.
+    pub same_load: Vec<AwardQuote>,
+    /// The program's usual value of a mile, BRL per 1,000.
+    pub usual_rate: Option<tm_scheduler::awards::UsualRate>,
+    pub unusual_threshold: f64,
+    /// The cheapest cash fare of the selected outbound leg and date.
+    pub cash_outbound: Option<Money>,
+    pub value_per_1000: Option<Money>,
+    pub buy_per_1000: Option<Money>,
+}
+
+impl RouteAwards {
+    /// Whether `quote`'s rate is far from the program's usual one.
+    pub fn unusual(&self, quote: &AwardQuote) -> bool {
+        match (quote.rate(), &self.usual_rate) {
+            (Some(rate), Some(usual)) => tm_scheduler::awards::is_unusual(
+                rate,
+                usual,
+                self.unusual_threshold,
+            ),
+            _ => false,
+        }
+    }
 }
 
 /// Everything a frame needs.
@@ -467,6 +759,13 @@ pub struct SnapshotQuery {
 pub enum Request {
     CheckRoute(RouteId),
     ConfirmDeal(DealId),
+    /// Price a trip's legs in miles on the logged-in programs (0083).
+    CheckAward {
+        route: RouteId,
+        cabin: Cabin,
+        departure: NaiveDate,
+        return_date: Option<NaiveDate>,
+    },
     /// Pause the program's site for a login window (0024, 0062).
     OpenLogin(String),
     /// The program's login window closed.
@@ -579,6 +878,19 @@ pub trait Backend: Send + Sync + 'static {
         &self,
         pos: PosId,
         active: bool,
+    ) -> anyhow::Result<()>;
+    /// What the user set for a miles program (0083).
+    async fn save_program(
+        &self,
+        program: String,
+        settings: ProgramSettings,
+    ) -> anyhow::Result<()>;
+    /// A site's daily budget and its most (0060), such as a program's
+    /// award loads.
+    async fn set_site_limits(
+        &self,
+        site: String,
+        limits: SiteLimits,
     ) -> anyhow::Result<()>;
 }
 

@@ -22,6 +22,7 @@ use tm_domain::{Cabin, Currency, Money};
 use super::{
     ListTab,
     Menu,
+    PayWith,
     Screen,
     Sort,
     TravelMonitor,
@@ -29,10 +30,10 @@ use super::{
     widgets::{self, mono},
 };
 use crate::{
-    data::{RouteDetail, RouteRow},
+    data::{AwardSummary, Login, RouteDetail, RouteRow, Trip},
     format,
     geo::Region,
-    grid::{CalendarDay, Tone as CalendarTone},
+    grid::{AwardMark, CalendarDay, Tone as CalendarTone},
     live::Fresh,
     theme::{self, Fonts, color},
 };
@@ -68,7 +69,13 @@ impl TravelMonitor {
         let Some(s) = &self.snapshot else {
             return div();
         };
-        let deal_count = s.rows.iter().filter(|r| r.status.is_deal()).count();
+        let pay = self.pay;
+        let deal_count = s.rows.iter().filter(|r| r.is_deal(pay)).count();
+        let all_count = s
+            .rows
+            .iter()
+            .filter(|r| pay != PayWith::Miles || r.award.is_some())
+            .count();
         let tab = |id: &'static str,
                    label: &'static str,
                    count: usize,
@@ -92,7 +99,21 @@ impl TravelMonitor {
             .p(px(4.))
             .rounded(px(10.))
             .child(tab("tab-deals", "Deals", deal_count, ListTab::Deals))
-            .child(tab("tab-all", "All routes", s.rows.len(), ListTab::All));
+            .child(tab("tab-all", "All routes", all_count, ListTab::All));
+        // Pay with (0083): drives the list, the map and the card.
+        let pay_with = widgets::segments().children(PayWith::ALL.map(|p| {
+            widgets::segment(
+                SharedString::from(format!("pay-{}", p.label().to_lowercase())),
+                p.label(),
+                pay == p,
+            )
+            .flex_1()
+            .py(px(4.))
+            .on_click(cx.listener(move |this, _, _, cx| {
+                this.pay = p;
+                cx.notify();
+            }))
+        }));
         let cabin_menu = self.dropdown(
             Menu::Cabin,
             "cabin",
@@ -110,10 +131,10 @@ impl TravelMonitor {
         let sort_menu = self.dropdown(
             Menu::Sort,
             "sort",
-            self.sort.label().into(),
+            self.sort.label(pay).into(),
             Sort::ALL
                 .iter()
-                .map(|s| (s.label().into(), *s == self.sort))
+                .map(|s| (s.label(pay).into(), *s == self.sort))
                 .collect(),
             |this, i, cx| {
                 this.sort = Sort::ALL[i];
@@ -133,13 +154,30 @@ impl TravelMonitor {
                 .child(control)
         };
         let rows = self.visible_rows();
+        let logged_in = s
+            .miles
+            .iter()
+            .any(|m| m.active() && m.has_reader && m.login == Login::LoggedIn);
         let empty = rows.is_empty().then(|| {
             div()
                 .p(px(24.))
                 .text_color(color(theme::TEXT_FAINT))
-                .child(match self.list_tab {
-                    ListTab::Deals => "No deals right now. Every watched route is listed under All routes.",
-                    ListTab::All => "No routes match. Add destinations in Settings.",
+                .child(match (pay, self.list_tab) {
+                    (PayWith::Miles, _) if !logged_in => {
+                        "No miles program is logged in. Log in under Settings.".to_owned()
+                    }
+                    (PayWith::Miles, ListTab::All) => {
+                        let budget = s
+                            .daemon
+                            .sites
+                            .iter()
+                            .find(|r| r.site.starts_with("miles:"))
+                            .and_then(|r| r.budget)
+                            .unwrap_or(tm_domain::SiteLimits::MILES.start);
+                        format!("No award prices yet: the program checks about {budget} dates a day.")
+                    }
+                    (_, ListTab::Deals) => "No deals right now. Every watched route is listed under All routes.".to_owned(),
+                    (_, ListTab::All) => "No routes match. Add destinations in Settings.".to_owned(),
                 })
         });
         let items: Vec<_> = rows
@@ -166,6 +204,7 @@ impl TravelMonitor {
                     .border_b_1()
                     .border_color(color(theme::BORDER))
                     .child(tabs)
+                    .child(field("Pay with", pay_with))
                     .child(
                         div()
                             .flex()
@@ -195,17 +234,128 @@ impl TravelMonitor {
     ) -> impl IntoElement {
         let key = row.key();
         let selected = self.selected == Some(key);
-        let deal = row.status.is_deal();
+        let pay = self.pay;
+        let award = row.award_for(pay);
+        let leads = row.award_leads(pay);
+        let deal = if leads {
+            award.is_some_and(|a| a.status.is_deal())
+        } else {
+            row.status.is_deal()
+        };
         let dates = row
             .best
             .as_ref()
             .map(|t| format::date_range(t.departure, t.return_date))
             .unwrap_or_else(|| "no prices yet".to_owned());
-        let price = row
-            .best
-            .as_ref()
-            .map(|t| format::money(&t.price))
-            .unwrap_or_else(|| "–".to_owned());
+        let sub = match (award.filter(|_| leads), row.price_per_km()) {
+            (Some(a), _) => {
+                let mut parts = vec![
+                    row.cabin.label().to_owned(),
+                    a.name.clone(),
+                    award_dates(a),
+                ];
+                parts.extend(a.best.route_label());
+                let km = row.distance_km();
+                if self.sort == Sort::LowestPricePerKm && km >= 1.0 {
+                    parts.push(format::miles_per_km(
+                        a.best.price.miles as f64 / km,
+                        a.best.unit,
+                    ));
+                }
+                div()
+                    .flex()
+                    .items_center()
+                    .gap(px(6.))
+                    .child(widgets::miles_tag(fonts))
+                    .child(div().truncate().child(parts.join(" · ")))
+            }
+            (None, Some(per_km)) if self.sort == Sort::LowestPricePerKm => {
+                div().child(format!(
+                    "{} · {dates} · {}",
+                    row.cabin.label(),
+                    format::per_km(per_km)
+                ))
+            }
+            _ => div().child(format!("{} · {dates}", row.cabin.label())),
+        };
+        // The third line: under a miles-led row the cash price for scale;
+        // under a cash row the award, when the program priced one.
+        let third = award.map(|a| {
+            let line = div()
+                .flex()
+                .items_center()
+                .gap(px(6.))
+                .text_size(px(12.))
+                .text_color(color(theme::TEXT_SOFT));
+            if leads {
+                let mut parts = Vec::new();
+                // The cash fare of the award's own leg, else the row's trip.
+                let cash =
+                    a.cash.as_ref().or(row.best.as_ref().map(|t| &t.price));
+                parts
+                    .extend(cash.map(|c| format!("cash {}", format::money(c))));
+                parts.extend(format::seats(a.best.seats));
+                line.child(parts.join(" · "))
+            } else {
+                line.child(widgets::miles_tag(fonts))
+                    .child(award_line(fonts, a))
+                    .children(
+                        a.unusual
+                            .then(|| {
+                                a.rate.map(|r| widgets::rate_chip(fonts, r))
+                            })
+                            .flatten(),
+                    )
+                    .children(
+                        a.status.is_deal().then(|| {
+                            widgets::change_chip(fonts, a.change, true)
+                        }),
+                    )
+            }
+        });
+        let price: AnyElement = match award.filter(|_| leads) {
+            Some(a) => div()
+                .flex()
+                .flex_col()
+                .items_end()
+                .gap(px(2.))
+                .child(
+                    widgets::miles_text(fonts, a.best.price.miles, a.best.unit)
+                        .font_weight(FontWeight::BOLD)
+                        .text_size(px(15.)),
+                )
+                .child(
+                    mono(
+                        fonts,
+                        format!("+{}", format::money(&a.best.price.taxes)),
+                    )
+                    .text_size(px(12.))
+                    .text_color(color(theme::TEXT_FAINT)),
+                )
+                .into_any_element(),
+            None => mono(
+                fonts,
+                row.best
+                    .as_ref()
+                    .map(|t| format::money(&t.price))
+                    .unwrap_or_else(|| "–".to_owned()),
+            )
+            .font_weight(FontWeight::BOLD)
+            .text_size(px(15.))
+            .into_any_element(),
+        };
+        let change = row.lead_change(pay);
+        let chip = if leads
+            && award.is_some_and(|a| a.history_days < 28 && !a.status.is_deal())
+        {
+            no_history_chip(fonts)
+        } else {
+            widgets::change_chip(fonts, change, deal)
+        };
+        let history = match award.filter(|_| leads) {
+            Some(a) => a.history.clone(),
+            None => row.history.clone(),
+        };
         let item = div()
             .id(SharedString::from(format!(
                 "row-{}-{}",
@@ -216,7 +366,8 @@ impl TravelMonitor {
                 format!("row-{}-{}", key.route, key.cabin.code())
             })
             .flex()
-            .items_center()
+            .when(third.is_some(), |d| d.items_start())
+            .when(third.is_none(), |d| d.items_center())
             .gap(px(12.))
             .px(px(18.))
             .py(px(12.))
@@ -249,43 +400,35 @@ impl TravelMonitor {
                             ),
                     )
                     .child(
-                        div()
-                            .text_size(px(12.))
-                            .text_color(color(theme::TEXT_FAINT))
-                            .child(match row.price_per_km() {
-                                Some(per_km)
-                                    if self.sort == Sort::LowestPricePerKm =>
-                                {
-                                    format!(
-                                        "{} · {dates} · {}",
-                                        row.cabin.label(),
-                                        format::per_km(per_km)
-                                    )
-                                }
-                                _ => format!("{} · {dates}", row.cabin.label()),
-                            }),
-                    ),
+                        sub.text_size(px(12.))
+                            .text_color(color(theme::TEXT_FAINT)),
+                    )
+                    .children(third.map(|t| {
+                        t.debug_selector(move || {
+                            format!(
+                                "award-line-{}-{}",
+                                key.route,
+                                key.cabin.code()
+                            )
+                        })
+                    })),
             )
             .child(widgets::sparkline(
-                row.history.clone(),
-                88.,
+                history,
+                80.,
                 26.,
                 if deal { theme::YELLOW } else { theme::SPARK },
             ))
             .child(
                 div()
-                    .w(px(96.))
+                    .w(px(118.))
                     .flex_none()
                     .flex()
                     .flex_col()
                     .items_end()
                     .gap(px(4.))
-                    .child(
-                        mono(fonts, price)
-                            .font_weight(FontWeight::BOLD)
-                            .text_size(px(15.)),
-                    )
-                    .child(widgets::change_chip(fonts, row.change, deal)),
+                    .child(price)
+                    .child(chip),
             )
             .on_click(cx.listener(move |this, _, _, cx| this.select(key, cx)))
             .relative()
@@ -316,7 +459,8 @@ impl TravelMonitor {
             lon: p.lon as f32,
             lat: p.lat as f32,
         });
-        // One dot per destination: a deal in any cabin makes it yellow.
+        // One dot per destination: a deal in any cabin makes it yellow,
+        // in the series Pay with shows (0083).
         let mut dests: Vec<MapDest> = Vec::new();
         let mut keys = Vec::new();
         for row in &s.rows {
@@ -325,7 +469,7 @@ impl TravelMonitor {
             if let Some(i) =
                 dests.iter().position(|m| m.place.code.as_ref() == d.code)
             {
-                dests[i].deal |= row.status.is_deal();
+                dests[i].deal |= row.is_deal(self.pay);
                 if selected {
                     dests[i].selected = true;
                     keys[i] = row.key();
@@ -339,7 +483,7 @@ impl TravelMonitor {
                     lat: d.lat as f32,
                 },
                 region: Region::of(&d.country.0, home),
-                deal: row.status.is_deal(),
+                deal: row.is_deal(self.pay),
                 selected,
             });
             keys.push(row.key());
@@ -391,7 +535,14 @@ impl TravelMonitor {
         let key = self.selected?;
         let row = s.row(key)?;
         let detail = s.detail.as_ref().filter(|d| d.key == key);
-        let deal = row.status.is_deal();
+        let pay = self.pay;
+        let award = row.award_for(pay);
+        let leads = row.award_leads(pay);
+        let deal = if leads {
+            award.is_some_and(|a| a.status.is_deal())
+        } else {
+            row.status.is_deal()
+        };
         let trip = detail.and_then(|d| d.trip.as_ref()).or(row.best.as_ref());
         let origin = &row.route.origin.code;
         let usual = detail
@@ -430,17 +581,26 @@ impl TravelMonitor {
                             .font_weight(FontWeight::BOLD)
                             .child(format!("{origin} → {}", row.code())),
                     )
-                    .child(widgets::status_chip(row.status)),
+                    .child(widgets::series_chip(
+                        row.status,
+                        award.map(|a| a.status),
+                    )),
             )
             .child(
                 div().text_color(color(theme::TEXT_MUTED)).child(
                     [
                         Some(row.city().to_owned()),
                         Some(row.cabin.label().to_owned()),
-                        Some(match trip.and_then(|t| t.carrier_label()) {
-                            Some(c) => c,
-                            None => "round trip".to_owned(),
-                        }),
+                        Some(
+                            match (
+                                award.filter(|_| leads),
+                                trip.and_then(|t| t.carrier_label()),
+                            ) {
+                                (Some(a), _) => a.name.clone(),
+                                (None, Some(c)) => c,
+                                (None, None) => "round trip".to_owned(),
+                            },
+                        ),
                     ]
                     .into_iter()
                     .flatten()
@@ -457,51 +617,58 @@ impl TravelMonitor {
             (Some(c), None) => Some(format!("{} vs usual", format::change(c))),
             _ => None,
         };
-        let when = trip.map(|t| {
-            let range = format::date_range(t.departure, t.return_date);
-            match cheapest {
-                Some(min) if t.price.minor <= min && dated > 1 => {
-                    format!("{range} · cheapest of {dated} dates")
+        let when = match award.filter(|_| leads) {
+            Some(a) => Some(award_leg_text(a)),
+            None => trip.map(|t| {
+                let range = format::date_range(t.departure, t.return_date);
+                match cheapest {
+                    Some(min) if t.price.minor <= min && dated > 1 => {
+                        format!("{range} · cheapest of {dated} dates")
+                    }
+                    _ => range,
                 }
-                _ => range,
-            }
-        });
+            }),
+        };
         let route = route.children(
             when.map(|w| div().text_color(color(theme::TEXT_SOFT)).child(w)),
         );
-        let price = div()
-            .flex()
-            .flex_col()
-            .items_end()
-            .gap(px(4.))
-            .ml_auto()
-            .flex_none()
-            .child(
-                mono(
-                    fonts,
-                    trip.map_or_else(
-                        || "–".to_owned(),
-                        |t| format::money(&t.price),
-                    ),
-                )
-                .text_size(px(30.))
-                .font_weight(FontWeight::BOLD)
-                .text_color(color(if deal {
-                    theme::PRICE_DEAL
-                } else {
-                    theme::TEXT
-                })),
-            )
-            .children(vs.map(|v| {
-                div()
-                    .font_weight(FontWeight::MEDIUM)
+        let price = match award.filter(|_| leads) {
+            Some(a) => award_price_block(fonts, a, trip),
+            None => div()
+                .flex()
+                .flex_col()
+                .items_end()
+                .gap(px(4.))
+                .ml_auto()
+                .flex_none()
+                .child(
+                    mono(
+                        fonts,
+                        trip.map_or_else(
+                            || "–".to_owned(),
+                            |t| format::money(&t.price),
+                        ),
+                    )
+                    .text_size(px(30.))
+                    .font_weight(FontWeight::BOLD)
                     .text_color(color(if deal {
-                        theme::YELLOW
+                        theme::PRICE_DEAL
                     } else {
-                        theme::DROP
-                    }))
-                    .child(v)
-            }));
+                        theme::TEXT
+                    })),
+                )
+                .children(vs.map(|v| {
+                    div()
+                        .font_weight(FontWeight::MEDIUM)
+                        .text_color(color(if deal {
+                            theme::YELLOW
+                        } else {
+                            theme::DROP
+                        }))
+                        .child(v)
+                })),
+        };
+        let can_award = self.can_check_award();
         let actions = div()
             .flex()
             .flex_wrap()
@@ -522,7 +689,15 @@ impl TravelMonitor {
                 cx.listener(|this, _, window, cx| {
                     this.navigate(Screen::Detail, window, cx)
                 }),
-            ));
+            ))
+            .when(can_award && pay != PayWith::Cash, |a| {
+                a.child(
+                    widgets::ghost_button("check-award", "Check award")
+                        .on_click(
+                            cx.listener(|this, _, _, cx| this.check_award(cx)),
+                        ),
+                )
+            });
         let header = div()
             .flex()
             .items_start()
@@ -572,6 +747,7 @@ impl TravelMonitor {
                 &priced,
                 trip.map(|t| t.departure),
                 usual.as_ref().map(|u| u.minor),
+                award.is_some(),
                 cx,
             )
             .into_any_element(),
@@ -612,6 +788,12 @@ impl TravelMonitor {
             }
             None => {}
         }
+        if let Some(a) = award {
+            notes.push(format!(
+                "award seen {}",
+                format::clock(a.best.observed_at)
+            ));
+        }
         let footer = div()
             .flex()
             .items_center()
@@ -632,7 +814,16 @@ impl TravelMonitor {
                             .child(legend_item(theme::YELLOW, "this trip"))
                             .child(legend_item(STRIP_BELOW, "below usual"))
                             .child(legend_item(STRIP_TYPICAL, "near usual"))
-                            .child(legend_item(STRIP_ABOVE, "above usual")),
+                            .child(legend_item(STRIP_ABOVE, "above usual"))
+                            .when(award.is_some(), |l| {
+                                l.child(award_legend(
+                                    AwardMark::BothLegs,
+                                    "award, both legs",
+                                ))
+                                .child(
+                                    award_legend(AwardMark::OneLeg, "one leg"),
+                                )
+                            }),
                     )
                     .child(notes.join(" · ")),
             )
@@ -656,6 +847,11 @@ impl TravelMonitor {
                 .debug_selector(|| "detail-card".into())
                 .relative()
                 .child(header)
+                .children(
+                    award
+                        .filter(|_| !leads)
+                        .map(|a| card_award_block(fonts, a)),
+                )
                 .child(
                     div()
                         .flex()
@@ -690,6 +886,7 @@ fn price_strip(
     days: &[&CalendarDay],
     selected: Option<NaiveDate>,
     usual: Option<i64>,
+    marks: bool,
     cx: &mut Context<TravelMonitor>,
 ) -> Div {
     let prices: Vec<i64> = days
@@ -827,6 +1024,22 @@ fn price_strip(
                         }))
                 }))
         }));
+    // Award marks under the bars (0083): filled for both legs, hollow
+    // for one.
+    let mark_row = marks.then(|| {
+        div()
+            .flex()
+            .h(px(8.))
+            .debug_selector(|| "award-marks".into())
+            .children(days.iter().map(|d| {
+                div()
+                    .flex_1()
+                    .min_w_0()
+                    .flex()
+                    .justify_center()
+                    .children(award_dot(d.award, 5.))
+            }))
+    });
     div()
         .flex()
         .flex_col()
@@ -845,7 +1058,257 @@ fn price_strip(
                 )
                 .children(usual_line),
         )
+        .children(mark_row)
         .child(month_row)
+}
+
+/// A lavender dot for a trip with an award: filled for both legs,
+/// hollow for one.
+pub(super) fn award_dot(mark: AwardMark, size: f32) -> Option<Div> {
+    let dot = div().size(px(size)).flex_none().rounded_full();
+    match mark {
+        AwardMark::None => None,
+        AwardMark::BothLegs => Some(dot.bg(color(theme::MILES))),
+        AwardMark::OneLeg => {
+            Some(dot.border_1().border_color(color(theme::MILES)))
+        }
+    }
+}
+
+fn award_legend(mark: AwardMark, text: &'static str) -> Div {
+    div()
+        .flex()
+        .items_center()
+        .gap(px(6.))
+        .children(award_dot(mark, 8.))
+        .child(text)
+}
+
+/// `Out Nov 10, LA8148 nonstop · PREMIUM BUSINESS STANDARD`.
+fn award_leg_text(a: &AwardSummary) -> String {
+    let q = &a.best;
+    let when = match (q.leg, q.return_date) {
+        (_, Some(r)) => format::date_range(q.departure, r),
+        (Some(tm_domain::Leg::Return), None) => {
+            format!("Return {}", format::short_date(q.departure))
+        }
+        _ => format!("Out {}", format::short_date(q.departure)),
+    };
+    let mut parts = vec![match q.route_label() {
+        Some(r) => format!("{when}, {r}"),
+        None => when,
+    }];
+    parts.extend(q.brand.clone());
+    parts.join(" · ")
+}
+
+/// A miles-led card's price: the award big, its taxes, its change
+/// against the award series' usual, and the cash fare for scale.
+fn award_price_block(
+    fonts: &Fonts,
+    a: &AwardSummary,
+    trip: Option<&Trip>,
+) -> Div {
+    let deal = a.status.is_deal();
+    let unit = a.best.unit;
+    let vs = match (a.change, a.baseline_miles) {
+        (Some(c), Some(b)) => Some(format!(
+            "{} vs usual {} {}",
+            format::change(c),
+            format::miles(b),
+            unit.label()
+        )),
+        _ if a.history_days < 28 => Some("no history yet".to_owned()),
+        _ => None,
+    };
+    let mut scale = Vec::new();
+    scale.extend(
+        a.cash
+            .as_ref()
+            .or(trip.map(|t| &t.price))
+            .map(|c| format!("cash {}", format::money(c))),
+    );
+    scale.extend(format::seats(a.best.seats));
+    div()
+        .flex()
+        .flex_col()
+        .items_end()
+        .gap(px(4.))
+        .ml_auto()
+        .flex_none()
+        .child(
+            widgets::miles_text(fonts, a.best.price.miles, unit)
+                .text_size(px(30.))
+                .font_weight(FontWeight::BOLD)
+                .text_color(color(if deal {
+                    theme::PRICE_DEAL
+                } else {
+                    theme::TEXT
+                })),
+        )
+        .child(
+            mono(
+                fonts,
+                format!("+ {} taxes", format::money(&a.best.price.taxes)),
+            )
+            .text_color(color(theme::TEXT_MUTED)),
+        )
+        .children(vs.map(|v| {
+            div()
+                .font_weight(FontWeight::MEDIUM)
+                .text_color(color(if deal {
+                    theme::YELLOW
+                } else {
+                    theme::TEXT_FAINT
+                }))
+                .child(v)
+        }))
+        .children((!scale.is_empty()).then(|| {
+            div()
+                .text_size(px(12.))
+                .text_color(color(theme::TEXT_FAINT))
+                .child(scale.join(" · "))
+        }))
+}
+
+/// The value line of an award (0083): its measured value of a mile
+/// against the cheapest cash fare of its leg and date, the user's
+/// valuation, and the cost with bought miles. Display only: miles and
+/// cash never share a baseline (0023).
+pub(super) fn value_line(a: &AwardSummary) -> Vec<String> {
+    let q = &a.best;
+    let mut parts = Vec::new();
+    match (a.rate_against_cash(), &a.cash, a.rate) {
+        (Some(r), Some(cash), _) => parts.push(format!(
+            "{} vs cash {}",
+            format::mile_value(r),
+            format::money(cash)
+        )),
+        (_, _, Some(r)) => parts
+            .push(format!("{} against its own fare", format::mile_value(r))),
+        _ => {}
+    }
+    if let Some(u) = a.usual_rate.filter(|_| a.unusual) {
+        parts.push(format!("usual {}", format::mile_value(u)));
+    }
+    if let Some(v) = &a.value_per_1000
+        && let Some(text) = format::valued(&q.price, v)
+    {
+        parts.push(text.replacen(" at ", " at your ", 1));
+    }
+    if let Some(buy) = &a.buy_per_1000
+        && let Some(b) =
+            tm_scheduler::awards::buy_miles(&q.price, buy, a.cash.as_ref())
+    {
+        let saving = match &b.saving {
+            Some(s) if s.minor >= 0 => {
+                format!(", {} under cash", format::money(s))
+            }
+            Some(s) => format!(
+                ", {} over cash",
+                format::money(&tm_domain::Money::new(
+                    -s.minor,
+                    s.currency.clone()
+                ))
+            ),
+            None => String::new(),
+        };
+        parts.push(format!(
+            "with miles bought at {}: {}{saving}",
+            format::mile_value(buy.as_f64()),
+            format::money(&b.cost)
+        ));
+    }
+    parts
+}
+
+/// The card's award block under the cash price (0083): miles and taxes,
+/// the program, leg, flight and brand, then the value line.
+fn card_award_block(fonts: &Fonts, a: &AwardSummary) -> Div {
+    let unit = a.best.unit;
+    let (price, what) = match &a.trip {
+        Some(t) if t.complete() => (
+            t.price().unwrap_or_else(|| a.best.price.clone()),
+            format!(
+                "{} · {}",
+                a.name,
+                format::date_range(t.departure, t.return_date)
+            ),
+        ),
+        Some(t) if t.outbound.is_some() || t.inbound.is_some() => {
+            let (q, missing) = match (&t.outbound, &t.inbound) {
+                (Some(o), _) => (o, "return not checked"),
+                (None, Some(i)) => (i, "out not checked"),
+                _ => (&a.best, ""),
+            };
+            let leg = if q.leg == Some(tm_domain::Leg::Return) {
+                "return"
+            } else {
+                "out"
+            };
+            let mut parts = vec![a.name.clone()];
+            parts.push(
+                [
+                    Some(format!("{leg} {}", format::short_date(q.departure))),
+                    q.route_label(),
+                    q.brand.clone(),
+                ]
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>()
+                .join(", "),
+            );
+            parts.push(missing.to_owned());
+            (q.price.clone(), parts.join(" · "))
+        }
+        _ => (
+            a.best.price.clone(),
+            format!("{} · {}", a.name, award_leg_text(a)),
+        ),
+    };
+    let value = value_line(a);
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(3.))
+        .pl(px(12.))
+        .border_l_2()
+        .border_color(color(theme::MILES_BORDER))
+        .debug_selector(|| "card-award".into())
+        .child(
+            div()
+                .flex()
+                .items_center()
+                .gap(px(8.))
+                .child(widgets::miles_tag(fonts))
+                .child(
+                    widgets::award_text(fonts, &price, unit)
+                        .text_size(px(18.))
+                        .font_weight(FontWeight::BOLD),
+                )
+                .children(
+                    a.status
+                        .is_deal()
+                        .then(|| widgets::change_chip(fonts, a.change, true)),
+                )
+                .children(
+                    a.unusual
+                        .then(|| a.rate.map(|r| widgets::rate_chip(fonts, r)))
+                        .flatten(),
+                ),
+        )
+        .child(
+            div()
+                .text_size(px(12.))
+                .text_color(color(theme::TEXT_MUTED))
+                .child(what),
+        )
+        .children((!value.is_empty()).then(|| {
+            div()
+                .text_size(px(12.))
+                .text_color(color(theme::TEXT_SOFT))
+                .child(value.join(" · "))
+        }))
 }
 
 /// Sellers per point of sale, the cheapest in yellow, then the
@@ -932,6 +1395,86 @@ pub(super) fn sellers_table(
             .text_color(color(theme::TEXT_FAINT))
             .child("Sellers are read when a deal is confirmed.")
     });
+    // The program as a seller (0083): its award in the price column,
+    // the valued ≈R$ in the quoted one. Never the cheapest seller: it is
+    // not a price in reais.
+    let award = d.awards.as_ref().filter(|_| quoted).and_then(|a| {
+        let out = a.outbound.first();
+        let rt = a.round_trip.first();
+        let back = a.inbound.first();
+        let (price, what) = match (rt, out, back) {
+            (Some(q), _, _) => (q.price.clone(), "round trip"),
+            (None, Some(o), Some(b)) => (o.price.plus(&b.price)?, "both legs"),
+            (None, Some(o), None) => {
+                (o.price.clone(), "out only · return not checked")
+            }
+            (None, None, Some(b)) => {
+                (b.price.clone(), "return only · out not checked")
+            }
+            (None, None, None) => return None,
+        };
+        let valued = a
+            .value_per_1000
+            .as_ref()
+            .and_then(|v| tm_scheduler::awards::cost_at(&price, v))
+            .map(|m| format!("≈{}", format::money(&m)));
+        Some(
+            line()
+                .debug_selector(|| "award-seller".into())
+                .child(
+                    mono(fonts, "BR")
+                        .w(px(36.))
+                        .flex_none()
+                        .text_color(color(theme::TEXT_MUTED)),
+                )
+                .child(
+                    div()
+                        .flex_1()
+                        .min_w_0()
+                        .flex()
+                        .flex_col()
+                        .child(
+                            div()
+                                .flex()
+                                .items_center()
+                                .gap(px(6.))
+                                .text_color(color(theme::TEXT_SOFT))
+                                .child(widgets::miles_tag(fonts))
+                                .child(a.name.clone()),
+                        )
+                        .child(
+                            div()
+                                .text_size(px(11.))
+                                .text_color(color(theme::TEXT_FAINT))
+                                .child(what),
+                        ),
+                )
+                .child(
+                    mono(fonts, valued.unwrap_or_default())
+                        .w(px(84.))
+                        .flex_none()
+                        .text_right()
+                        .text_color(color(theme::TEXT_FAINT)),
+                )
+                .child(
+                    div()
+                        .w(px(96.))
+                        .flex_none()
+                        .flex()
+                        .flex_col()
+                        .items_end()
+                        .child(widgets::miles_text(fonts, price.miles, a.unit))
+                        .child(
+                            mono(
+                                fonts,
+                                format!("+{}", format::money(&price.taxes)),
+                            )
+                            .text_size(px(11.))
+                            .text_color(color(theme::TEXT_FAINT)),
+                        ),
+                ),
+        )
+    });
     div()
         .flex()
         .flex_col()
@@ -939,4 +1482,62 @@ pub(super) fn sellers_table(
         .children(empty)
         .children(rows)
         .children(direct)
+        .children(award)
+}
+
+/// `Nov 10 one way`, `Nov 17 return`, `Nov 10 – 17`: what an award
+/// prices.
+fn award_dates(a: &AwardSummary) -> String {
+    let q = &a.best;
+    match (q.return_date, q.leg) {
+        (Some(r), _) => format::date_range(q.departure, r),
+        (None, Some(tm_domain::Leg::Return)) => {
+            format!("{} return", format::short_date(q.departure))
+        }
+        (None, _) => format!("{} one way", format::short_date(q.departure)),
+    }
+}
+
+/// A cash row's award line: the row's own dates when known (`63,848 mi
+/// + R$69 out · return not checked`, or both ways), else the cheapest
+/// award on sale (`63,848 mi + R$69 · Nov 12 one way`).
+pub(super) fn award_line(fonts: &Fonts, a: &AwardSummary) -> Div {
+    let unit = a.best.unit;
+    let line = div().flex().items_baseline().gap(px(4.)).min_w_0();
+    match &a.trip {
+        Some(t) if t.complete() => match t.price() {
+            Some(p) => line.child(widgets::award_text(fonts, &p, unit)).child(
+                div().truncate().child(format!(
+                    "· {}",
+                    format::date_range(t.departure, t.return_date)
+                )),
+            ),
+            None => line,
+        },
+        Some(t) => {
+            let (quote, text) = match (&t.outbound, &t.inbound) {
+                (Some(o), _) => (o, "out · return not checked"),
+                (None, Some(i)) => (i, "return · out not checked"),
+                _ => (&a.best, ""),
+            };
+            line.child(widgets::award_text(fonts, &quote.price, unit))
+                .child(div().truncate().child(text))
+        }
+        None => line
+            .child(widgets::award_text(fonts, &a.best.price, unit))
+            .child(div().truncate().child(format!("· {}", award_dates(a)))),
+    }
+}
+
+/// `no history`: an award series under four weeks old cannot be a deal
+/// yet (0030).
+fn no_history_chip(fonts: &Fonts) -> Div {
+    mono(fonts, "no history")
+        .px(px(8.))
+        .py(px(2.))
+        .rounded(px(10.))
+        .text_size(px(11.))
+        .font_weight(FontWeight::BOLD)
+        .bg(color(theme::FLAT_BG))
+        .text_color(color(theme::TEXT_LABEL))
 }

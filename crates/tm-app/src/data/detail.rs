@@ -7,7 +7,15 @@ use chrono::{DateTime, NaiveDate, Utc};
 use tm_domain::{Money, Settings};
 use tm_scheduler::DtdBucket;
 
-use super::{ActivityRow, RouteDetail, RowKey, SellerRow, Trip};
+use super::{
+    ActivityRow,
+    RouteAwards,
+    RouteDetail,
+    RowKey,
+    SellerRow,
+    Trip,
+    awards::AwardMarks,
+};
 use crate::grid::{TripInputs, build_calendar, build_grid};
 
 /// `21–45 days`, `180+ days`: a days-to-departure bucket (0030), as
@@ -48,6 +56,9 @@ pub struct DetailInputs {
     pub change_rate: Option<f64>,
     pub recent_checks: Vec<ActivityRow>,
     pub next_check: Option<DateTime<Utc>>,
+    /// The leading program's awards, and which dates have one (0083).
+    pub awards: Option<RouteAwards>,
+    pub award_marks: Option<AwardMarks>,
 }
 
 /// Weeks the calendar covers: the horizon, from the week of today.
@@ -98,6 +109,13 @@ pub fn assemble(
             }
         }
     }
+    if let Some(marks) = &inputs.award_marks {
+        for day in calendar.weeks.iter_mut().flat_map(|w| &mut w.days) {
+            if day.tone != crate::grid::Tone::Past {
+                day.award = marks.mark(day.date, calendar_days);
+            }
+        }
+    }
     let usual = inputs.trip.as_ref().and_then(|trip| {
         let bucket = DtdBucket::of((trip.departure - today).num_days())?;
         let minor = inputs.baselines.at(trip.departure)?;
@@ -119,6 +137,7 @@ pub fn assemble(
         change_rate: inputs.change_rate,
         recent_checks: inputs.recent_checks,
         next_check: inputs.next_check,
+        awards: inputs.awards,
     }
 }
 

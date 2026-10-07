@@ -370,7 +370,7 @@ impl TravelMonitor {
                 RoutesFilter::International => !r.route.is_domestic(),
             })
             .collect();
-        sort_rows(&mut rows, Sort::BiggestDrop);
+        sort_rows(&mut rows, Sort::BiggestDrop, super::PayWith::Cash);
         let filters = widgets::segments().children(
             RoutesFilter::ALL.into_iter().map(|f| {
                 widgets::segment(
