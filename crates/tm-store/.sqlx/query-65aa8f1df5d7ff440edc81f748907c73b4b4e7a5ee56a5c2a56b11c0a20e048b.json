@@ -1,0 +1,386 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, route_id, cabin, pos_id, program, leg,\n                      departure AS \"departure: NaiveDate\",\n                      return_date AS \"return_date: NaiveDate\",\n                      price_minor, currency, effective_minor,\n                      effective_currency, baseline_minor, baseline_currency,\n                      miles, baseline_miles, brand, seats,\n                      low_availability AS \"low_availability: bool\",\n                      cash_minor, cash_currency,\n                      reason, change, estimated AS \"estimated: bool\", status,\n                      found_at AS \"found_at: DateTime<Utc>\",\n                      confirmed_at AS \"confirmed_at: DateTime<Utc>\",\n                      seen AS \"seen: bool\", carrier, seller, url\n               FROM deals\n               WHERE (?1 IS NULL OR status = ?1) AND (?2 = 0 OR seen = 0)\n               ORDER BY found_at DESC, id DESC\n               LIMIT ?3",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "route_id",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "route_id"
+          }
+        }
+      },
+      {
+        "name": "cabin",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "cabin"
+          }
+        }
+      },
+      {
+        "name": "pos_id",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "pos_id"
+          }
+        }
+      },
+      {
+        "name": "program",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "program"
+          }
+        }
+      },
+      {
+        "name": "leg",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "leg"
+          }
+        }
+      },
+      {
+        "name": "departure: NaiveDate",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "departure"
+          }
+        }
+      },
+      {
+        "name": "return_date: NaiveDate",
+        "ordinal": 7,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "return_date"
+          }
+        }
+      },
+      {
+        "name": "price_minor",
+        "ordinal": 8,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "price_minor"
+          }
+        }
+      },
+      {
+        "name": "currency",
+        "ordinal": 9,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "currency"
+          }
+        }
+      },
+      {
+        "name": "effective_minor",
+        "ordinal": 10,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "effective_minor"
+          }
+        }
+      },
+      {
+        "name": "effective_currency",
+        "ordinal": 11,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "effective_currency"
+          }
+        }
+      },
+      {
+        "name": "baseline_minor",
+        "ordinal": 12,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "baseline_minor"
+          }
+        }
+      },
+      {
+        "name": "baseline_currency",
+        "ordinal": 13,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "baseline_currency"
+          }
+        }
+      },
+      {
+        "name": "miles",
+        "ordinal": 14,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "miles"
+          }
+        }
+      },
+      {
+        "name": "baseline_miles",
+        "ordinal": 15,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "baseline_miles"
+          }
+        }
+      },
+      {
+        "name": "brand",
+        "ordinal": 16,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "brand"
+          }
+        }
+      },
+      {
+        "name": "seats",
+        "ordinal": 17,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "seats"
+          }
+        }
+      },
+      {
+        "name": "low_availability: bool",
+        "ordinal": 18,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "low_availability"
+          }
+        }
+      },
+      {
+        "name": "cash_minor",
+        "ordinal": 19,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "cash_minor"
+          }
+        }
+      },
+      {
+        "name": "cash_currency",
+        "ordinal": 20,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "cash_currency"
+          }
+        }
+      },
+      {
+        "name": "reason",
+        "ordinal": 21,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "reason"
+          }
+        }
+      },
+      {
+        "name": "change",
+        "ordinal": 22,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "change"
+          }
+        }
+      },
+      {
+        "name": "estimated: bool",
+        "ordinal": 23,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "estimated"
+          }
+        }
+      },
+      {
+        "name": "status",
+        "ordinal": 24,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "name": "found_at: DateTime<Utc>",
+        "ordinal": 25,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "found_at"
+          }
+        }
+      },
+      {
+        "name": "confirmed_at: DateTime<Utc>",
+        "ordinal": 26,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "confirmed_at"
+          }
+        }
+      },
+      {
+        "name": "seen: bool",
+        "ordinal": 27,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "seen"
+          }
+        }
+      },
+      {
+        "name": "carrier",
+        "ordinal": 28,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "carrier"
+          }
+        }
+      },
+      {
+        "name": "seller",
+        "ordinal": 29,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "seller"
+          }
+        }
+      },
+      {
+        "name": "url",
+        "ordinal": 30,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deals",
+            "name": "url"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "65aa8f1df5d7ff440edc81f748907c73b4b4e7a5ee56a5c2a56b11c0a20e048b"
+}

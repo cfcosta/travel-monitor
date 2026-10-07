@@ -85,6 +85,8 @@ pub fn cell(
         stops: Some(0),
         duration_minutes: Some(600),
         seller: None,
+        flights: None,
+        award: None,
     }
 }
 

@@ -6,6 +6,7 @@
 
 use chrono::{DateTime, NaiveDate, Utc};
 use tm_domain::{
+    AwardDetail,
     Cabin,
     CountryCode,
     Currency,
@@ -30,10 +31,12 @@ use tm_domain::{
     QueryOutcome,
     Route,
     RouteId,
+    Seats,
     SellerQuote,
+    Series,
     Settings,
     Source,
-    settings::{Passengers, TripRange},
+    settings::{AwardDates, Passengers, TripRange},
 };
 
 use crate::{
@@ -213,6 +216,84 @@ pub(crate) fn money_parts(
 }
 
 // ---------------------------------------------------------------------
+// Awards (0083)
+// ---------------------------------------------------------------------
+
+/// The `seats` and `low_availability` columns.
+pub(crate) fn seats_parts(seats: Option<Seats>) -> (Option<i64>, Option<bool>) {
+    match seats {
+        Some(s) => (Some(i64::from(s.count)), Some(s.low)),
+        None => (None, None),
+    }
+}
+
+pub(crate) fn parse_seats(
+    count: Option<i64>,
+    low: Option<bool>,
+) -> Result<Option<Seats>> {
+    count
+        .map(|c| {
+            Ok(Seats {
+                count: self::count("seats", c)?,
+                low: low.unwrap_or(false),
+            })
+        })
+        .transpose()
+}
+
+/// An award's columns on an observation: fare, its currency, brand,
+/// seats and the low-availability flag.
+pub(crate) struct AwardColumns<'a> {
+    pub fare_minor: Option<i64>,
+    pub fare_currency: Option<&'a str>,
+    pub brand: Option<&'a str>,
+    pub fare_basis: Option<&'a str>,
+    pub seats: Option<i64>,
+    pub low_availability: Option<bool>,
+}
+
+pub(crate) fn award_columns(award: Option<&AwardDetail>) -> AwardColumns<'_> {
+    let (fare_minor, fare_currency) =
+        money_parts(award.and_then(|a| a.fare.as_ref()));
+    let (seats, low_availability) = seats_parts(award.and_then(|a| a.seats));
+    AwardColumns {
+        fare_minor,
+        fare_currency,
+        brand: award.and_then(|a| a.brand.as_deref()),
+        fare_basis: award.and_then(|a| a.fare_basis.as_deref()),
+        seats,
+        low_availability,
+    }
+}
+
+/// The `program` column of a deal: NULL for cash.
+pub(crate) fn series_program(series: &Series) -> Option<&str> {
+    series.program()
+}
+
+pub(crate) fn parse_series(program: Option<String>) -> Series {
+    match program {
+        Some(program) => Series::Award { program },
+        None => Series::Cash,
+    }
+}
+
+pub(crate) fn award_dates_name(dates: AwardDates) -> &'static str {
+    match dates {
+        AwardDates::CheapTripsAndWeekly => "cheap_trips_and_weekly",
+        AwardDates::CheapTrips => "cheap_trips",
+        AwardDates::Every => "every",
+    }
+}
+
+pub(crate) fn parse_award_dates(value: &str) -> Result<AwardDates> {
+    AwardDates::ALL
+        .into_iter()
+        .find(|d| award_dates_name(*d) == value)
+        .ok_or_else(|| corrupt("award dates", value))
+}
+
+// ---------------------------------------------------------------------
 // Places and routes
 // ---------------------------------------------------------------------
 
@@ -361,6 +442,7 @@ pub(crate) struct SettingsRow {
     pub min_history_weeks: i64,
     pub additive_checks_to_stop: i64,
     pub language: String,
+    pub unusual_rate: f64,
 }
 
 impl TryFrom<SettingsRow> for Settings {
@@ -394,6 +476,7 @@ impl TryFrom<SettingsRow> for Settings {
             )?,
             random_share: row.random_share,
             deal_threshold: row.deal_threshold,
+            unusual_rate: row.unusual_rate,
             min_history_weeks: count(
                 "min_history_weeks",
                 row.min_history_weeks,
@@ -667,12 +750,31 @@ pub(crate) struct ObservationRow {
     pub stops: Option<i64>,
     pub duration_minutes: Option<i64>,
     pub seller: Option<String>,
+    pub fare_minor: Option<i64>,
+    pub fare_currency: Option<String>,
+    pub brand: Option<String>,
+    pub fare_basis: Option<String>,
+    pub seats: Option<i64>,
+    pub low_availability: Option<bool>,
+    pub flights: Option<String>,
 }
 
 impl TryFrom<ObservationRow> for Observation {
     type Error = StoreError;
 
     fn try_from(row: ObservationRow) -> Result<Self> {
+        let fare = opt_money("award fare", row.fare_minor, row.fare_currency)?;
+        let seats = parse_seats(row.seats, row.low_availability)?;
+        let award = (fare.is_some()
+            || row.brand.is_some()
+            || row.fare_basis.is_some()
+            || seats.is_some())
+        .then_some(AwardDetail {
+            fare,
+            brand: row.brand,
+            fare_basis: row.fare_basis,
+            seats,
+        });
         Ok(Observation {
             id: Some(ObservationId(row.id)),
             query: QueryId(row.query_id),
@@ -693,6 +795,8 @@ impl TryFrom<ObservationRow> for Observation {
                 row.duration_minutes,
             )?,
             seller: row.seller,
+            flights: row.flights,
+            award,
         })
     }
 }
@@ -748,14 +852,23 @@ pub(crate) struct DealRow {
     pub route_id: i64,
     pub cabin: String,
     pub pos_id: i64,
+    pub program: Option<String>,
+    pub leg: Option<String>,
     pub departure: NaiveDate,
-    pub return_date: NaiveDate,
+    pub return_date: Option<NaiveDate>,
     pub price_minor: i64,
     pub currency: String,
     pub effective_minor: i64,
     pub effective_currency: String,
     pub baseline_minor: Option<i64>,
     pub baseline_currency: Option<String>,
+    pub miles: Option<i64>,
+    pub baseline_miles: Option<i64>,
+    pub brand: Option<String>,
+    pub seats: Option<i64>,
+    pub low_availability: Option<bool>,
+    pub cash_minor: Option<i64>,
+    pub cash_currency: Option<String>,
     pub reason: String,
     pub change: Option<f64>,
     pub estimated: bool,
@@ -775,6 +888,8 @@ impl DealRow {
             route: RouteId(self.route_id),
             cabin: parse_cabin(&self.cabin)?,
             pos: PosId(self.pos_id),
+            series: parse_series(self.program),
+            leg: self.leg.as_deref().map(parse_leg).transpose()?,
             departure: self.departure,
             return_date: self.return_date,
             price: money(self.price_minor, self.currency),
@@ -784,6 +899,11 @@ impl DealRow {
                 self.baseline_minor,
                 self.baseline_currency,
             )?,
+            miles: self.miles,
+            baseline_miles: self.baseline_miles,
+            brand: self.brand,
+            seats: parse_seats(self.seats, self.low_availability)?,
+            cash: opt_money("deal cash", self.cash_minor, self.cash_currency)?,
             reason: parse_deal_reason(&self.reason)?,
             change: self.change,
             estimated: self.estimated,
@@ -897,6 +1017,13 @@ mod tests {
         for reason in [DealReason::BelowMedian, DealReason::AllTimeLow] {
             assert_eq!(deal_reason_name(reason), serde_name(&reason));
         }
+        for dates in AwardDates::ALL {
+            assert_eq!(award_dates_name(dates), serde_name(&dates));
+            assert_eq!(
+                parse_award_dates(award_dates_name(dates)).ok(),
+                Some(dates)
+            );
+        }
         for state in [
             LoginState::LoggedIn,
             LoginState::LoggedOut,
@@ -931,6 +1058,12 @@ mod tests {
                 family: FamilyId(1),
             },
             RequestKind::ConfirmDeal { deal: DealId(1) },
+            RequestKind::CheckAward {
+                route: RouteId(1),
+                cabin: Cabin::Economy,
+                departure: chrono::NaiveDate::MIN,
+                return_date: None,
+            },
             RequestKind::OpenLogin {
                 program: "smiles".into(),
             },

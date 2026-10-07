@@ -116,6 +116,37 @@ pub struct MilesProgram {
     /// When the login state was last checked.
     pub last_checked: Option<DateTime<Utc>>,
     pub active: bool,
+    /// The user's value of 1,000 miles and the program's price for
+    /// 1,000, in BRL; unset by default (0083).
+    pub value_per_1000: Option<tm_domain::Money>,
+    pub buy_per_1000: Option<tm_domain::Money>,
+    pub dates: tm_domain::AwardDates,
+    /// When the login session in the program's profile ends, if known
+    /// (LATAM Pass: about five days, renewed by every load).
+    pub session_until: Option<DateTime<Utc>>,
+}
+
+impl MilesProgram {
+    /// What the user sets for this program.
+    pub fn settings(&self) -> tm_domain::ProgramSettings {
+        tm_domain::ProgramSettings {
+            active: self.active,
+            value_per_1000: self.value_per_1000.clone(),
+            buy_per_1000: self.buy_per_1000.clone(),
+            dates: self.dates,
+        }
+    }
+}
+
+/// One award check's implied value of a mile (DECISIONS.md 0083).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct AwardRate {
+    pub observed_at: DateTime<Utc>,
+    /// The mean over the check's awards of fare before taxes ÷ miles ×
+    /// 1,000, in BRL.
+    pub brl_per_1000: f64,
+    /// Awards the mean is over.
+    pub awards: u32,
 }
 
 /// What a family sync did.
@@ -273,6 +304,16 @@ pub enum RequestKind {
     ConfirmDeal {
         deal: DealId,
     },
+    /// Price a trip's legs on every active, logged-in miles program
+    /// (0083): the outbound on `departure` and, when given, the return
+    /// on `return_date`. One page load per leg reads every cabin.
+    CheckAward {
+        route: RouteId,
+        cabin: tm_domain::Cabin,
+        departure: NaiveDate,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        return_date: Option<NaiveDate>,
+    },
     /// Pause the program's site so the app can open that site's
     /// profile for a miles login (0024, 0062). Every other site keeps
     /// running.
@@ -296,6 +337,7 @@ impl RequestKind {
             RequestKind::CheckRoute { .. } => "check_route",
             RequestKind::CheckFamily { .. } => "check_family",
             RequestKind::ConfirmDeal { .. } => "confirm_deal",
+            RequestKind::CheckAward { .. } => "check_award",
             RequestKind::OpenLogin { .. } => "open_login",
             RequestKind::CloseLogin { .. } => "close_login",
             RequestKind::ReloadConfig => "reload_config",

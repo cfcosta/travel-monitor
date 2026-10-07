@@ -1,8 +1,11 @@
 //! Global settings, edited in the app and stored in the database
-//! (DECISIONS.md 0035, 0036, 0038, 0039, 0043).
+//! (DECISIONS.md 0035, 0036, 0038, 0039, 0043), and each miles
+//! program's own (0083).
 
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+
+use crate::Money;
 
 /// Who travels: one global setting (0036). Changing it starts new
 /// series.
@@ -88,6 +91,10 @@ pub struct Settings {
     /// A deal is at least this far under the bucket median, before the
     /// robust-spread test (0030).
     pub deal_threshold: f64,
+    /// An award's implied value of a mile this far from its program's
+    /// usual rate is flagged as unusual (0083: 15%). Award deals use
+    /// `deal_threshold` like cash ones.
+    pub unusual_rate: f64,
     /// Weeks of observations a bucket needs before it flags deals.
     pub min_history_weeks: u16,
     /// Checks in a row where the round trip matched its legs before
@@ -113,6 +120,7 @@ impl Default for Settings {
             min_interval_hours: 6,
             random_share: 0.10,
             deal_threshold: 0.20,
+            unusual_rate: 0.15,
             min_history_weeks: 4,
             additive_checks_to_stop: 5,
             language: "en".to_owned(),
@@ -145,10 +153,13 @@ impl Settings {
     }
 
     /// The budget limits `site` starts from: Google Flights' from these
-    /// settings, every other site's [`crate::SiteLimits::OTHER`] (0060).
+    /// settings, a miles program's [`crate::SiteLimits::MILES`] (0083),
+    /// every other site's [`crate::SiteLimits::OTHER`] (0060).
     pub fn default_limits(&self, site: &str) -> crate::SiteLimits {
         if site == crate::GOOGLE_FLIGHTS {
             self.google_flights_limits()
+        } else if site.starts_with("miles:") {
+            crate::SiteLimits::MILES
         } else {
             crate::SiteLimits::OTHER
         }
@@ -172,6 +183,7 @@ impl Settings {
             ("card_spread", self.card_spread),
             ("random_share", self.random_share),
             ("deal_threshold", self.deal_threshold),
+            ("unusual_rate", self.unusual_rate),
         ] {
             if !(0.0..=1.0).contains(&value) {
                 return Err(SettingsError::Fraction(name));
@@ -182,6 +194,58 @@ impl Settings {
         }
         Ok(())
     }
+}
+
+/// Which departures a miles program is asked for (0083). There is no
+/// award calendar: every date is a page load under the user's own
+/// account.
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize,
+)]
+#[serde(rename_all = "snake_case")]
+pub enum AwardDates {
+    /// Both legs of the cheapest cash trips, plus one date a week per
+    /// route so the award series has a baseline (about 2 loads a trip).
+    #[default]
+    CheapTripsAndWeekly,
+    /// Both legs of the cheapest cash trips only.
+    CheapTrips,
+    /// Every departure in range, oldest first.
+    Every,
+}
+
+impl AwardDates {
+    pub const ALL: [AwardDates; 3] = [
+        AwardDates::CheapTripsAndWeekly,
+        AwardDates::CheapTrips,
+        AwardDates::Every,
+    ];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            AwardDates::CheapTripsAndWeekly => {
+                "Cheapest cash trips, both legs, plus one date a week per route"
+            }
+            AwardDates::CheapTrips => "Cheapest cash trips only",
+            AwardDates::Every => "Every departure in range, oldest first",
+        }
+    }
+}
+
+/// What the user sets for one miles program (0083).
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+pub struct ProgramSettings {
+    /// Checked and asked to log in at all.
+    pub active: bool,
+    /// What 1,000 miles are worth to the user, in BRL. Unset by
+    /// default: the app then shows the measured rate and no "≈ R$"
+    /// figure.
+    pub value_per_1000: Option<Money>,
+    /// What the program sells 1,000 miles for, in BRL, when the user
+    /// knows. With it the app says what an award costs paid with bought
+    /// miles, and how that compares with cash.
+    pub buy_per_1000: Option<Money>,
+    pub dates: AwardDates,
 }
 
 #[cfg(test)]

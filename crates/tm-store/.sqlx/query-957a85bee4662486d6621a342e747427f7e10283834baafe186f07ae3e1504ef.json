@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE miles_programs SET active = ?2\n             WHERE program = ?1 AND active != ?2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "957a85bee4662486d6621a342e747427f7e10283834baafe186f07ae3e1504ef"
+}

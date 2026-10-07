@@ -57,7 +57,8 @@ pub(crate) struct FamilyInputs<'a> {
 ///     active airline that serves the destination, and each active miles
 ///     program, under the home point of sale only;
 ///   - kinds: both legs, plus the round trip of
-///     `settings.trips.round_trip_days` unless the route is additive;
+///     `settings.trips.round_trip_days` unless the route is additive
+///     (miles programs always have their round trip, 0083);
 /// - for every active origin's sweep pseudo-route: Explore in economy
 ///   and business under every active point of sale (0025).
 pub(crate) fn desired_families(inputs: &FamilyInputs<'_>) -> Vec<FamilyKey> {
@@ -93,7 +94,13 @@ pub(crate) fn desired_families(inputs: &FamilyInputs<'_>) -> Vec<FamilyKey> {
         }
         for &cabin in route.cabins() {
             for (source, pos) in &sources {
-                for &kind in &kinds {
+                // A miles program's round trip is its own price even
+                // where cash round trips are the sum of their legs: LATAM
+                // Pass prices one well below its two one-ways (0083).
+                let award_rt = matches!(source, Source::Miles { .. })
+                    && !kinds.contains(&round_trip);
+                for &kind in kinds.iter().chain(award_rt.then_some(&round_trip))
+                {
                     keys.push(FamilyKey {
                         route: route.id,
                         cabin,
@@ -380,6 +387,10 @@ mod tests {
             login_state: crate::LoginState::LoggedOut,
             last_checked: None,
             active: true,
+            value_per_1000: None,
+            buy_per_1000: None,
+            dates: tm_domain::AwardDates::default(),
+            session_until: None,
         }];
         let settings = Settings::default();
         let mut additive = HashSet::new();
@@ -394,9 +405,13 @@ mod tests {
             miles: &miles,
             settings: &settings,
         });
-        // SSA: domestic (1 cabin) × (2 GF + smiles) × 2 legs (additive).
+        // SSA: domestic (1 cabin) × (2 GF + smiles) × 2 legs (additive),
+        // plus Smiles' own round trip (0083).
         let ssa_n = keys.iter().filter(|k| k.route == RouteId(10)).count();
-        assert_eq!(ssa_n, 3 * 2);
+        assert_eq!(ssa_n, 3 * 2 + 1);
+        assert!(keys.iter().any(|k| k.route == RouteId(10)
+            && matches!(k.source, Source::Miles { .. })
+            && matches!(k.kind, FamilyKind::RoundTrip { .. })));
         // LIS: 3 cabins × (2 GF + TAP + smiles) × 3 kinds.
         let lis_n = keys.iter().filter(|k| k.route == RouteId(11)).count();
         assert_eq!(lis_n, 3 * 4 * 3);

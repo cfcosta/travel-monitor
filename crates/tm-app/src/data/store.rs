@@ -561,9 +561,12 @@ async fn snapshot(
                     settings.horizon_days,
                 ),
             };
-            // The newest live deal of this row: confirmed, or waiting.
+            // The newest live cash deal of this row: confirmed, or
+            // waiting. Award deals are their own series (0023).
             let deal = deals.iter().find(|d| {
-                d.route == route.id
+                d.series == tm_domain::Series::Cash
+                    && d.return_date.is_some()
+                    && d.route == route.id
                     && d.cabin == cabin
                     && d.departure >= today
                     && matches!(
@@ -577,10 +580,10 @@ async fn snapshot(
                     .flat_map(|(_, obs)| obs.iter())
                     .find(|o| o.departure == dep && o.carrier.is_some())
             };
-            let best = match deal {
-                Some(d) => Some(Trip {
+            let best = match deal.and_then(|d| Some((d, d.return_date?))) {
+                Some((d, return_date)) => Some(Trip {
                     departure: d.departure,
-                    return_date: d.return_date,
+                    return_date,
                     price: d.effective_brl.clone(),
                     carrier: d.carrier.clone(),
                     stops: carrier_of(d.departure).and_then(|o| o.stops),
@@ -1296,6 +1299,8 @@ mod tests {
                     stops: Some(0),
                     duration_minutes: Some(500),
                     seller: None,
+                    flights: None,
+                    award: None,
                 })
                 .collect();
             store.insert_observations(&obs).await.expect("observations");
@@ -1327,11 +1332,18 @@ mod tests {
             route: lis,
             cabin: Cabin::Economy,
             pos: home.id,
+            series: tm_domain::Series::Cash,
+            leg: None,
             departure,
-            return_date: departure + Duration::days(7),
+            return_date: Some(departure + Duration::days(7)),
             price: Money::brl_whole(3932),
             effective_brl: Money::brl_whole(3932),
             baseline: Some(Money::brl_whole(4854)),
+            miles: None,
+            baseline_miles: None,
+            brand: None,
+            seats: None,
+            cash: None,
             reason: tm_domain::DealReason::BelowMedian,
             change: Some(-0.19),
             estimated: false,

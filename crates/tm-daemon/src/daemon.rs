@@ -663,6 +663,12 @@ impl<S: Sources + 'static> Daemon<S> {
                     .collect();
                 self.queue_manual(id, &world, ids).await?;
             }
+            // No miles program has a reader in the daemon yet (0083).
+            RequestKind::CheckAward { .. } => {
+                self.store
+                    .complete(id, false, Some("no award reader yet"))
+                    .await?;
+            }
             RequestKind::ConfirmDeal { deal } => match self
                 .store
                 .deal(deal)

@@ -384,6 +384,8 @@ async fn past_check(
             stops: None,
             duration_minutes: None,
             seller: None,
+            flights: None,
+            award: None,
         })
         .collect();
     store.insert_observations(&obs).await.expect("inserts");

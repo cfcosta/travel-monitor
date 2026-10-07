@@ -20,10 +20,12 @@
 //! | [`fanout`] | 0028 | Families related to one that dropped |
 //! | [`baseline`] | 0030 | Days-to-departure buckets, seasons, median and MAD |
 //! | [`deals`] | 0018, 0030 | The deal rule |
+//! | [`awards`] | 0023, 0083 | Award series, the value of a mile, buying miles |
 //! | [`trips`] | 0042, 0043 | Legs → trips, the learned round-trip discount |
 //! | [`budget`] | 0039 | The daily page-load budget and per-site backoff |
 //! | [`effective`] | 0033, 0038 | Effective BRL cost with an FX table |
 
+pub mod awards;
 pub mod baseline;
 pub mod budget;
 pub mod deals;

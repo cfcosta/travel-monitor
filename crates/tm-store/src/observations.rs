@@ -16,8 +16,15 @@ use tm_domain::{
 };
 
 use crate::{
+    AwardRate,
     Store,
-    convert::{HintRow, ObservationRow, cabin_name, money_parts},
+    convert::{
+        HintRow,
+        ObservationRow,
+        award_columns,
+        cabin_name,
+        money_parts,
+    },
     error::{Result, StoreError},
 };
 
@@ -33,12 +40,15 @@ impl Store {
         let mut ids = Vec::with_capacity(observations.len());
         for o in observations {
             let (price_minor, currency) = money_parts(o.price.as_ref());
+            let award = award_columns(o.award.as_ref());
             let done = sqlx::query!(
                 "INSERT INTO observations (query_id, family_id, observed_at,
                      departure, return_date, price_minor, currency, miles,
-                     carrier, stops, duration_minutes, seller, passengers)
+                     carrier, stops, duration_minutes, seller, passengers,
+                     fare_minor, fare_currency, brand, seats,
+                     low_availability, flights, fare_basis)
                  SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12,
-                        q.passengers
+                        q.passengers, ?13, ?14, ?15, ?16, ?17, ?18, ?19
                  FROM queries q WHERE q.id = ?1 AND q.family_id = ?2",
                 o.query.0,
                 o.family.0,
@@ -52,6 +62,13 @@ impl Store {
                 o.stops,
                 o.duration_minutes,
                 o.seller,
+                award.fare_minor,
+                award.fare_currency,
+                award.brand,
+                award.seats,
+                award.low_availability,
+                o.flights,
+                award.fare_basis,
             )
             .execute(&mut *tx)
             .await?;
@@ -81,7 +98,9 @@ impl Store {
                       departure AS "departure: NaiveDate",
                       return_date AS "return_date: NaiveDate",
                       price_minor, currency, miles, carrier, stops,
-                      duration_minutes, seller
+                      duration_minutes, seller, fare_minor, fare_currency,
+                      brand, fare_basis, seats,
+                      low_availability AS "low_availability: bool", flights
                FROM observations
                WHERE query_id = (
                    SELECT q.id FROM queries q
@@ -114,7 +133,9 @@ impl Store {
                       departure AS "departure: NaiveDate",
                       return_date AS "return_date: NaiveDate",
                       price_minor, currency, miles, carrier, stops,
-                      duration_minutes, seller
+                      duration_minutes, seller, fare_minor, fare_currency,
+                      brand, fare_basis, seats,
+                      low_availability AS "low_availability: bool", flights
                FROM observations
                WHERE family_id = ?1 AND observed_at >= ?2
                  AND passengers = ?3
@@ -145,7 +166,10 @@ impl Store {
                       o.departure AS "departure: NaiveDate",
                       o.return_date AS "return_date: NaiveDate",
                       o.price_minor, o.currency, o.miles, o.carrier, o.stops,
-                      o.duration_minutes, o.seller
+                      o.duration_minutes, o.seller, o.fare_minor,
+                      o.fare_currency, o.brand, o.fare_basis, o.seats,
+                      o.low_availability AS "low_availability: bool",
+                      o.flights
                FROM observations o JOIN families f ON f.id = o.family_id
                WHERE f.route_id = ?1 AND f.cabin = ?2 AND o.observed_at >= ?3
                  AND o.passengers = ?4
@@ -158,6 +182,44 @@ impl Store {
         .fetch_all(&self.pool)
         .await?;
         rows.into_iter().map(Observation::try_from).collect()
+    }
+
+    /// A miles program's implied value of a mile since `since`, one
+    /// point per award check, oldest first (0083): the mean over the
+    /// check's awards of the fare before taxes over the miles, in BRL
+    /// per 1,000 miles. Awards without a BRL fare are left out.
+    pub async fn award_rates(
+        &self,
+        program: &str,
+        since: DateTime<Utc>,
+    ) -> Result<Vec<AwardRate>> {
+        let passengers = self.settings().await?.passengers.key();
+        let rows = sqlx::query!(
+            r#"SELECT MAX(o.observed_at) AS "observed_at!: DateTime<Utc>",
+                      AVG(o.fare_minor * 10.0 / o.miles) AS "rate!: f64",
+                      COUNT(*) AS "awards!: i64"
+               FROM observations o JOIN families f ON f.id = o.family_id
+               WHERE f.source = 'miles' AND f.source_code = ?1
+                 AND o.observed_at >= ?2 AND o.passengers = ?3
+                 AND o.miles > 0 AND o.fare_minor > 0
+                 AND o.fare_currency = 'BRL'
+               GROUP BY o.query_id
+               ORDER BY 1"#,
+            program,
+            since,
+            passengers
+        )
+        .fetch_all(&self.pool)
+        .await?;
+        rows.into_iter()
+            .map(|r| {
+                Ok(AwardRate {
+                    observed_at: r.observed_at,
+                    brl_per_1000: r.rate,
+                    awards: crate::convert::count("awards", r.awards)?,
+                })
+            })
+            .collect()
     }
 
     /// Inserts Explore hints in one transaction. Each must name a logged

@@ -82,7 +82,7 @@ impl fmt::Display for Money {
     }
 }
 
-fn group_thousands(n: u64) -> String {
+pub(crate) fn group_thousands(n: u64) -> String {
     let raw = n.to_string();
     let mut out = String::with_capacity(raw.len() + raw.len() / 3);
     for (i, c) in raw.chars().enumerate() {

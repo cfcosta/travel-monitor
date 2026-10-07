@@ -37,6 +37,7 @@ use std::{path::Path, str::FromStr, time::Duration};
 pub use error::{Result, StoreError};
 pub use records::{
     AirlineSource,
+    AwardRate,
     BlockRecord,
     CheckInProgress,
     DealFilter,

@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, route_id, cabin, pos_id,\n                      departure AS \"departure: NaiveDate\",\n                      return_date AS \"return_date: NaiveDate\",\n                      price_minor, currency, effective_minor,\n                      effective_currency, baseline_minor, baseline_currency,\n                      reason, change, estimated AS \"estimated: bool\", status,\n                      found_at AS \"found_at: DateTime<Utc>\",\n                      confirmed_at AS \"confirmed_at: DateTime<Utc>\",\n                      seen AS \"seen: bool\", carrier, seller, url\n               FROM deals WHERE id = ?1",
+  "query": "SELECT o.id, o.query_id, o.family_id,\n                      o.observed_at AS \"observed_at: DateTime<Utc>\",\n                      o.departure AS \"departure: NaiveDate\",\n                      o.return_date AS \"return_date: NaiveDate\",\n                      o.price_minor, o.currency, o.miles, o.carrier, o.stops,\n                      o.duration_minutes, o.seller, o.fare_minor,\n                      o.fare_currency, o.brand, o.fare_basis, o.seats,\n                      o.low_availability AS \"low_availability: bool\",\n                      o.flights\n               FROM observations o JOIN families f ON f.id = o.family_id\n               WHERE f.route_id = ?1 AND f.cabin = ?2 AND o.observed_at >= ?3\n                 AND o.passengers = ?4\n               ORDER BY o.observed_at, o.id",
   "describe": {
     "columns": [
       {
@@ -9,41 +9,41 @@
         "type_info": "Integer",
         "origin": {
           "Table": {
-            "table": "deals",
+            "table": "observations",
             "name": "id"
           }
         }
       },
       {
-        "name": "route_id",
+        "name": "query_id",
         "ordinal": 1,
         "type_info": "Integer",
         "origin": {
           "Table": {
-            "table": "deals",
-            "name": "route_id"
+            "table": "observations",
+            "name": "query_id"
           }
         }
       },
       {
-        "name": "cabin",
+        "name": "family_id",
         "ordinal": 2,
-        "type_info": "Text",
-        "origin": {
-          "Table": {
-            "table": "deals",
-            "name": "cabin"
-          }
-        }
-      },
-      {
-        "name": "pos_id",
-        "ordinal": 3,
         "type_info": "Integer",
         "origin": {
           "Table": {
-            "table": "deals",
-            "name": "pos_id"
+            "table": "observations",
+            "name": "family_id"
+          }
+        }
+      },
+      {
+        "name": "observed_at: DateTime<Utc>",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "observed_at"
           }
         }
       },
@@ -53,7 +53,7 @@
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "deals",
+            "table": "observations",
             "name": "departure"
           }
         }
@@ -64,7 +64,7 @@
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "deals",
+            "table": "observations",
             "name": "return_date"
           }
         }
@@ -75,7 +75,7 @@
         "type_info": "Integer",
         "origin": {
           "Table": {
-            "table": "deals",
+            "table": "observations",
             "name": "price_minor"
           }
         }
@@ -86,168 +86,146 @@
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "deals",
+            "table": "observations",
             "name": "currency"
           }
         }
       },
       {
-        "name": "effective_minor",
+        "name": "miles",
         "ordinal": 8,
         "type_info": "Integer",
         "origin": {
           "Table": {
-            "table": "deals",
-            "name": "effective_minor"
-          }
-        }
-      },
-      {
-        "name": "effective_currency",
-        "ordinal": 9,
-        "type_info": "Text",
-        "origin": {
-          "Table": {
-            "table": "deals",
-            "name": "effective_currency"
-          }
-        }
-      },
-      {
-        "name": "baseline_minor",
-        "ordinal": 10,
-        "type_info": "Integer",
-        "origin": {
-          "Table": {
-            "table": "deals",
-            "name": "baseline_minor"
-          }
-        }
-      },
-      {
-        "name": "baseline_currency",
-        "ordinal": 11,
-        "type_info": "Text",
-        "origin": {
-          "Table": {
-            "table": "deals",
-            "name": "baseline_currency"
-          }
-        }
-      },
-      {
-        "name": "reason",
-        "ordinal": 12,
-        "type_info": "Text",
-        "origin": {
-          "Table": {
-            "table": "deals",
-            "name": "reason"
-          }
-        }
-      },
-      {
-        "name": "change",
-        "ordinal": 13,
-        "type_info": "Float",
-        "origin": {
-          "Table": {
-            "table": "deals",
-            "name": "change"
-          }
-        }
-      },
-      {
-        "name": "estimated: bool",
-        "ordinal": 14,
-        "type_info": "Integer",
-        "origin": {
-          "Table": {
-            "table": "deals",
-            "name": "estimated"
-          }
-        }
-      },
-      {
-        "name": "status",
-        "ordinal": 15,
-        "type_info": "Text",
-        "origin": {
-          "Table": {
-            "table": "deals",
-            "name": "status"
-          }
-        }
-      },
-      {
-        "name": "found_at: DateTime<Utc>",
-        "ordinal": 16,
-        "type_info": "Text",
-        "origin": {
-          "Table": {
-            "table": "deals",
-            "name": "found_at"
-          }
-        }
-      },
-      {
-        "name": "confirmed_at: DateTime<Utc>",
-        "ordinal": 17,
-        "type_info": "Text",
-        "origin": {
-          "Table": {
-            "table": "deals",
-            "name": "confirmed_at"
-          }
-        }
-      },
-      {
-        "name": "seen: bool",
-        "ordinal": 18,
-        "type_info": "Integer",
-        "origin": {
-          "Table": {
-            "table": "deals",
-            "name": "seen"
+            "table": "observations",
+            "name": "miles"
           }
         }
       },
       {
         "name": "carrier",
-        "ordinal": 19,
+        "ordinal": 9,
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "deals",
+            "table": "observations",
             "name": "carrier"
           }
         }
       },
       {
+        "name": "stops",
+        "ordinal": 10,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "stops"
+          }
+        }
+      },
+      {
+        "name": "duration_minutes",
+        "ordinal": 11,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "duration_minutes"
+          }
+        }
+      },
+      {
         "name": "seller",
-        "ordinal": 20,
+        "ordinal": 12,
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "deals",
+            "table": "observations",
             "name": "seller"
           }
         }
       },
       {
-        "name": "url",
-        "ordinal": 21,
+        "name": "fare_minor",
+        "ordinal": 13,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "fare_minor"
+          }
+        }
+      },
+      {
+        "name": "fare_currency",
+        "ordinal": 14,
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "deals",
-            "name": "url"
+            "table": "observations",
+            "name": "fare_currency"
+          }
+        }
+      },
+      {
+        "name": "brand",
+        "ordinal": 15,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "brand"
+          }
+        }
+      },
+      {
+        "name": "fare_basis",
+        "ordinal": 16,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "fare_basis"
+          }
+        }
+      },
+      {
+        "name": "seats",
+        "ordinal": 17,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "seats"
+          }
+        }
+      },
+      {
+        "name": "low_availability: bool",
+        "ordinal": 18,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "low_availability"
+          }
+        }
+      },
+      {
+        "name": "flights",
+        "ordinal": 19,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "flights"
           }
         }
       }
     ],
     "parameters": {
-      "Right": 1
+      "Right": 4
     },
     "nullable": [
       false,
@@ -255,24 +233,22 @@
       false,
       false,
       false,
-      false,
-      false,
-      false,
-      false,
-      false,
       true,
       true,
-      false,
       true,
-      false,
-      false,
-      false,
       true,
-      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
       true,
       true,
       true
     ]
   },
-  "hash": "f8292bf0384a5721ce5c1170028eddbe196f76e870cc1bc345d78abfd9bd6012"
+  "hash": "5f2cdc9683a097b8ad7a4e839bac87a78cb830b333f68023894bd34dc572ab1a"
 }

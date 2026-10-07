@@ -192,6 +192,8 @@ mod tests {
             stops: None,
             duration_minutes: None,
             seller: None,
+            flights: None,
+            award: None,
         }
     }
 

@@ -112,6 +112,10 @@ impl SiteLimits {
         max: 1000,
     };
 
+    /// A miles program: every award is a page load under the user's own
+    /// account, so 40 a day, at most 80 (0083).
+    pub const MILES: SiteLimits = SiteLimits { start: 40, max: 80 };
+
     /// At least one load a day, and a maximum no lower than the start.
     pub fn normalized(self) -> Self {
         let start = self.start.max(1);
@@ -223,5 +227,6 @@ mod tests {
             }
         );
         assert_eq!(s.default_limits("airline:TP"), SiteLimits::OTHER);
+        assert_eq!(s.default_limits("miles:latam_pass"), SiteLimits::MILES);
     }
 }

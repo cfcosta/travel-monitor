@@ -22,8 +22,10 @@ use crate::{
         PosRow,
         RouteRow,
         SettingsRow,
+        award_dates_name,
         count,
         login_state_name,
+        parse_award_dates,
         parse_login_state,
         place_kind_parts,
     },
@@ -200,9 +202,9 @@ pub(crate) async fn set_settings_in(
              iof, card_spread, daily_budget, max_daily_budget,
              max_interval_hours, min_interval_hours, random_share,
              deal_threshold, min_history_weeks, additive_checks_to_stop,
-             language)
+             language, unusual_rate)
          VALUES (1, ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13,
-                 ?14, ?15, ?16, ?17, ?18, ?19)
+                 ?14, ?15, ?16, ?17, ?18, ?19, ?20)
          ON CONFLICT (id) DO UPDATE SET
              adults = excluded.adults,
              children = excluded.children,
@@ -222,7 +224,8 @@ pub(crate) async fn set_settings_in(
              deal_threshold = excluded.deal_threshold,
              min_history_weeks = excluded.min_history_weeks,
              additive_checks_to_stop = excluded.additive_checks_to_stop,
-             language = excluded.language",
+             language = excluded.language,
+             unusual_rate = excluded.unusual_rate",
         p.adults,
         p.children,
         p.infants_in_seat,
@@ -242,6 +245,7 @@ pub(crate) async fn set_settings_in(
         s.min_history_weeks,
         s.additive_checks_to_stop,
         s.language,
+        s.unusual_rate,
     )
     .execute(&mut *conn)
     .await?;
@@ -258,7 +262,7 @@ pub(crate) async fn settings_in(
                 iof, card_spread, daily_budget, max_daily_budget,
                 max_interval_hours, min_interval_hours, random_share,
                 deal_threshold, min_history_weeks, additive_checks_to_stop,
-                language
+                language, unusual_rate
          FROM settings WHERE id = 1"
     )
     .fetch_optional(&mut *conn)
@@ -841,11 +845,15 @@ impl Store {
         let rows = sqlx::query!(
             r#"SELECT program, name, login_state,
                       last_checked AS "last_checked: DateTime<Utc>",
-                      active AS "active: bool"
+                      active AS "active: bool", value_minor, buy_minor, dates,
+                      session_until AS "session_until: DateTime<Utc>"
                FROM miles_programs ORDER BY program"#
         )
         .fetch_all(&self.pool)
         .await?;
+        let brl = |minor: Option<i64>| {
+            minor.map(|m| tm_domain::Money::new(m, tm_domain::Currency::brl()))
+        };
         rows.into_iter()
             .map(|r| {
                 Ok(MilesProgram {
@@ -854,9 +862,82 @@ impl Store {
                     name: r.name,
                     last_checked: r.last_checked,
                     active: r.active,
+                    value_per_1000: brl(r.value_minor),
+                    buy_per_1000: brl(r.buy_minor),
+                    dates: parse_award_dates(&r.dates)?,
+                    session_until: r.session_until,
                 })
             })
             .collect()
+    }
+
+    /// Records when the program's login session ends, as read from its
+    /// profile's cookies; `None` when unknown (0083).
+    pub async fn set_miles_session_until(
+        &self,
+        program: &str,
+        until: Option<DateTime<Utc>>,
+    ) -> Result<()> {
+        let done = sqlx::query!(
+            "UPDATE miles_programs SET session_until = ?2 WHERE program = ?1",
+            program,
+            until
+        )
+        .execute(&self.pool)
+        .await?;
+        if done.rows_affected() == 0 {
+            return Err(StoreError::not_found("miles program", program));
+        }
+        Ok(())
+    }
+
+    /// Saves what the user set for a miles program (0083): whether it is
+    /// active, the value of 1,000 miles, the price the program sells
+    /// 1,000 at (BRL, positive; `None` unsets) and which dates it is
+    /// asked for. Only a change of `active` bumps the configuration
+    /// version, since only it changes the families.
+    pub async fn save_miles_settings(
+        &self,
+        program: &str,
+        settings: &tm_domain::ProgramSettings,
+    ) -> Result<()> {
+        let per_1000 = |m: &Option<tm_domain::Money>, what: &str| match m {
+            Some(m) if m.currency.as_str() != "BRL" || m.minor <= 0 => {
+                Err(StoreError::Invalid(format!(
+                    "{what} must be a positive amount in BRL"
+                )))
+            }
+            Some(m) => Ok(Some(m.minor)),
+            None => Ok(None),
+        };
+        let value = per_1000(&settings.value_per_1000, "the value of a mile")?;
+        let buy = per_1000(&settings.buy_per_1000, "the price of miles")?;
+        let dates = award_dates_name(settings.dates);
+        let mut tx = self.write().await?;
+        let done = sqlx::query!(
+            "UPDATE miles_programs SET value_minor = ?2, buy_minor = ?3,
+                 dates = ?4
+             WHERE program = ?1",
+            program,
+            value,
+            buy,
+            dates
+        )
+        .execute(&mut *tx)
+        .await?;
+        if done.rows_affected() == 0 {
+            return Err(StoreError::not_found("miles program", program));
+        }
+        sqlx::query!(
+            "UPDATE miles_programs SET active = ?2
+             WHERE program = ?1 AND active != ?2",
+            program,
+            settings.active
+        )
+        .execute(&mut *tx)
+        .await?;
+        tx.commit().await?;
+        Ok(())
     }
 
     // -----------------------------------------------------------------

@@ -1691,6 +1691,8 @@ impl<S: Sources + 'static> Worker<S> {
                 stops: c.stops,
                 duration_minutes: c.duration_minutes,
                 seller: c.seller,
+                flights: None,
+                award: None,
             })
             .collect();
         if !observations.is_empty() {
@@ -2078,6 +2080,12 @@ impl<S: Sources + 'static> Worker<S> {
         deal: &Deal,
         legs_sum: Option<i64>,
     ) -> anyhow::Result<()> {
+        // Award deals (0083) are not confirmed on Google Flights.
+        let (tm_domain::Series::Cash, Some(return_date)) =
+            (&deal.series, deal.return_date)
+        else {
+            return Ok(());
+        };
         if !self.is_google()
             || self.budget.is_cooling(Utc::now())
             || !self.ensure_browser().await
@@ -2097,7 +2105,7 @@ impl<S: Sources + 'static> Worker<S> {
             &route,
             deal.cabin,
             deal.departure,
-            deal.return_date,
+            return_date,
             &settings,
         ) else {
             return Ok(());
@@ -2219,7 +2227,7 @@ impl<S: Sources + 'static> Worker<S> {
                 .save_route_trip_state(route.id, &from_discount(&discount))
                 .await?;
         }
-        let length = (deal.return_date - deal.departure).num_days();
+        let length = (return_date - deal.departure).num_days();
         if rt_family == Some(log_family) && length == i64::from(days) {
             store
                 .insert_observations(&[Observation {
@@ -2228,13 +2236,15 @@ impl<S: Sources + 'static> Worker<S> {
                     family: log_family,
                     observed_at: finished,
                     departure: deal.departure,
-                    return_date: Some(deal.return_date),
+                    return_date: Some(return_date),
                     price: Some(Money::brl_whole(verdict.price.whole())),
                     miles: None,
                     carrier: confirmation.carrier.clone(),
                     stops: None,
                     duration_minutes: None,
                     seller: verdict.seller.clone(),
+                    flights: None,
+                    award: None,
                 }])
                 .await?;
         }

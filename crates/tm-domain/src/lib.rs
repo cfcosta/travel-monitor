@@ -5,6 +5,7 @@
 //! I/O; the store, the scheduler, the daemon and the app all speak in
 //! these types.
 
+pub mod award;
 pub mod family;
 pub mod money;
 pub mod observation;
@@ -12,6 +13,19 @@ pub mod place;
 pub mod query;
 pub mod settings;
 
+pub use award::{
+    AwardDetail,
+    AwardPrice,
+    MilesUnit,
+    Seats,
+    Series,
+    format_mile_value,
+    format_miles,
+    format_miles_short,
+    has_award_reader,
+    itinerary_label,
+    program_name,
+};
 pub use family::{
     FamilyKey,
     FamilyKind,
@@ -33,7 +47,13 @@ pub use observation::{
 };
 pub use place::{Cabin, CountryCode, Place, PlaceKind, PointOfSale, Route};
 pub use query::{QueryOutcome, QueryReason};
-pub use settings::{Passengers, Settings, TripRange};
+pub use settings::{
+    AwardDates,
+    Passengers,
+    ProgramSettings,
+    Settings,
+    TripRange,
+};
 
 /// Identifiers are SQLite row ids. Each kind gets its own type so they
 /// cannot be mixed up.

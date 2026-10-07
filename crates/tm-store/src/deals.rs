@@ -15,7 +15,10 @@ use crate::{
         cabin_name,
         deal_reason_name,
         deal_status_name,
+        leg_name,
         money_parts,
+        seats_parts,
+        series_program,
     },
     error::{Result, StoreError},
     records::DealFilter,
@@ -59,14 +62,21 @@ impl Store {
         let effective_currency = deal.effective_brl.currency.as_str();
         let (baseline_minor, baseline_currency) =
             money_parts(deal.baseline.as_ref());
+        let program = series_program(&deal.series);
+        let leg = deal.leg.map(leg_name);
+        let (seats, low_availability) = seats_parts(deal.seats);
+        let (cash_minor, cash_currency) = money_parts(deal.cash.as_ref());
         let mut tx = self.write().await?;
         let done = sqlx::query!(
             "INSERT INTO deals (route_id, cabin, pos_id, departure, return_date,
                  price_minor, currency, effective_minor, effective_currency,
                  baseline_minor, baseline_currency, reason, change, estimated,
-                 status, found_at, confirmed_at, seen, carrier, seller, url)
+                 status, found_at, confirmed_at, seen, carrier, seller, url,
+                 program, leg, miles, baseline_miles, brand, seats,
+                 low_availability, cash_minor, cash_currency)
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13,
-                     ?14, ?15, ?16, ?17, 0, ?18, ?19, ?20)",
+                     ?14, ?15, ?16, ?17, 0, ?18, ?19, ?20, ?21, ?22, ?23, ?24,
+                     ?25, ?26, ?27, ?28, ?29)",
             deal.route.0,
             cabin,
             deal.pos.0,
@@ -87,6 +97,15 @@ impl Store {
             deal.carrier,
             deal.seller,
             deal.url,
+            program,
+            leg,
+            deal.miles,
+            deal.baseline_miles,
+            deal.brand,
+            seats,
+            low_availability,
+            cash_minor,
+            cash_currency,
         )
         .execute(&mut *tx)
         .await?;
@@ -192,11 +211,14 @@ impl Store {
     pub async fn deal(&self, id: DealId) -> Result<Option<Deal>> {
         let row = sqlx::query_as!(
             DealRow,
-            r#"SELECT id, route_id, cabin, pos_id,
+            r#"SELECT id, route_id, cabin, pos_id, program, leg,
                       departure AS "departure: NaiveDate",
                       return_date AS "return_date: NaiveDate",
                       price_minor, currency, effective_minor,
                       effective_currency, baseline_minor, baseline_currency,
+                      miles, baseline_miles, brand, seats,
+                      low_availability AS "low_availability: bool",
+                      cash_minor, cash_currency,
                       reason, change, estimated AS "estimated: bool", status,
                       found_at AS "found_at: DateTime<Utc>",
                       confirmed_at AS "confirmed_at: DateTime<Utc>",
@@ -218,11 +240,14 @@ impl Store {
         let limit = filter.limit.map_or(-1, i64::from);
         let rows = sqlx::query_as!(
             DealRow,
-            r#"SELECT id, route_id, cabin, pos_id,
+            r#"SELECT id, route_id, cabin, pos_id, program, leg,
                       departure AS "departure: NaiveDate",
                       return_date AS "return_date: NaiveDate",
                       price_minor, currency, effective_minor,
                       effective_currency, baseline_minor, baseline_currency,
+                      miles, baseline_miles, brand, seats,
+                      low_availability AS "low_availability: bool",
+                      cash_minor, cash_currency,
                       reason, change, estimated AS "estimated: bool", status,
                       found_at AS "found_at: DateTime<Utc>",
                       confirmed_at AS "confirmed_at: DateTime<Utc>",

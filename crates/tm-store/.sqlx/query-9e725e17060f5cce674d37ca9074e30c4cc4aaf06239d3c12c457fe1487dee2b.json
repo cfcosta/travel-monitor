@@ -1,0 +1,122 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT program, name, login_state,\n                      last_checked AS \"last_checked: DateTime<Utc>\",\n                      active AS \"active: bool\", value_minor, buy_minor, dates,\n                      session_until AS \"session_until: DateTime<Utc>\"\n               FROM miles_programs ORDER BY program",
+  "describe": {
+    "columns": [
+      {
+        "name": "program",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "miles_programs",
+            "name": "program"
+          }
+        }
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "miles_programs",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "name": "login_state",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "miles_programs",
+            "name": "login_state"
+          }
+        }
+      },
+      {
+        "name": "last_checked: DateTime<Utc>",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "miles_programs",
+            "name": "last_checked"
+          }
+        }
+      },
+      {
+        "name": "active: bool",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "miles_programs",
+            "name": "active"
+          }
+        }
+      },
+      {
+        "name": "value_minor",
+        "ordinal": 5,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "miles_programs",
+            "name": "value_minor"
+          }
+        }
+      },
+      {
+        "name": "buy_minor",
+        "ordinal": 6,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "miles_programs",
+            "name": "buy_minor"
+          }
+        }
+      },
+      {
+        "name": "dates",
+        "ordinal": 7,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "miles_programs",
+            "name": "dates"
+          }
+        }
+      },
+      {
+        "name": "session_until: DateTime<Utc>",
+        "ordinal": 8,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "miles_programs",
+            "name": "session_until"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "9e725e17060f5cce674d37ca9074e30c4cc4aaf06239d3c12c457fe1487dee2b"
+}

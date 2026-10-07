@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE miles_programs SET value_minor = ?2, buy_minor = ?3,\n                 dates = ?4\n             WHERE program = ?1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "24ae72b3198a3527de9054234b0e25358dcbd8d63f299dc24de9bbbfee5345bc"
+}

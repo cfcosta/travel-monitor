@@ -7,6 +7,11 @@
 //! observations without the query being judged; the best few become
 //! candidates; a confirmation's results and booking page decide whether
 //! a candidate holds and what it costs in effective BRL.
+//!
+//! Award series (0083) have their own half at the end: one program's
+//! cheapest award per date (a leg) or date pair (its round trip), in
+//! miles, against that series' own baselines, never against cash
+//! (0023).
 
 use std::collections::{BTreeMap, HashSet};
 
@@ -18,13 +23,16 @@ use tm_domain::{
     DealReason,
     DealStatus,
     FamilyId,
+    Leg,
     Money,
     Observation,
     PointOfSale,
     QueryId,
     RouteId,
     SellerQuote,
+    Series,
     TripRange,
+    itinerary_label,
 };
 use tm_scheduler::{
     BaselineKey,
@@ -32,6 +40,7 @@ use tm_scheduler::{
     Params,
     PricePoint,
     Trip,
+    awards::AwardDates,
     baseline::compute_by_key,
     effective::effective,
     evaluate,
@@ -114,8 +123,8 @@ pub struct Group {
     pub round_trip: Option<(FamilyId, u16)>,
 }
 
-/// A series: trips of one length, estimated from legs or real.
-pub type Series = (u16, bool);
+/// A cash series: trips of one length, estimated from legs or real.
+pub type TripSeries = (u16, bool);
 
 /// Past trip prices per series, rebuilt from `history` (the route's
 /// observations) without the queries in `exclude` (the ones being
@@ -128,10 +137,10 @@ pub fn history_points(
     range: TripRange,
     discount: f64,
     exclude: &HashSet<QueryId>,
-) -> BTreeMap<Series, Vec<PricePoint>> {
+) -> BTreeMap<TripSeries, Vec<PricePoint>> {
     type Day = BTreeMap<NaiveDate, (DateTime<Utc>, i64)>;
     let mut days: BTreeMap<NaiveDate, (Day, Day)> = BTreeMap::new();
-    let mut out: BTreeMap<Series, Vec<PricePoint>> = BTreeMap::new();
+    let mut out: BTreeMap<TripSeries, Vec<PricePoint>> = BTreeMap::new();
     for o in history {
         if exclude.contains(&o.query) {
             continue;
@@ -220,7 +229,7 @@ pub struct Found {
 /// `first..=last` are ignored.
 pub fn find(
     trips: &[(Trip, bool)],
-    points: &BTreeMap<Series, Vec<PricePoint>>,
+    points: &BTreeMap<TripSeries, Vec<PricePoint>>,
     now: DateTime<Utc>,
     params: &Params,
     first: NaiveDate,
@@ -266,9 +275,10 @@ pub fn find(
     out
 }
 
-/// Whether a departure already has a deal: an open one, or one
+/// Whether a departure already has a cash deal: an open one, or one
 /// rejected recently. One deal per departure: the app shows the
-/// departure × return grid around it (0043).
+/// departure × return grid around it (0043). Award deals are their own
+/// series and never stand in for a cash one (0023).
 pub fn known(
     deals: &[Deal],
     (route, cabin, pos): (RouteId, Cabin, tm_domain::PosId),
@@ -276,19 +286,24 @@ pub fn known(
     now: DateTime<Utc>,
 ) -> bool {
     deals.iter().any(|d| {
-        d.route == route
+        d.series == Series::Cash
+            && d.route == route
             && d.cabin == cabin
             && d.pos == pos
             && d.departure == departure
-            && match d.status {
-                DealStatus::Candidate | DealStatus::Confirmed => true,
-                DealStatus::Rejected => {
-                    now - d.found_at
-                        < chrono::TimeDelta::hours(REJECT_MEMORY_HOURS)
-                }
-                DealStatus::Expired => false,
-            }
+            && still_open(d, now)
     })
+}
+
+/// Open, or rejected too recently to try again.
+fn still_open(deal: &Deal, now: DateTime<Utc>) -> bool {
+    match deal.status {
+        DealStatus::Candidate | DealStatus::Confirmed => true,
+        DealStatus::Rejected => {
+            now - deal.found_at < chrono::TimeDelta::hours(REJECT_MEMORY_HOURS)
+        }
+        DealStatus::Expired => false,
+    }
 }
 
 /// The new candidates worth confirming: not already known, one per
@@ -340,11 +355,18 @@ pub fn candidate(
         route,
         cabin,
         pos: pos.id,
+        series: Series::Cash,
+        leg: None,
         departure: found.trip.departure,
-        return_date: found.trip.return_date,
+        return_date: Some(found.trip.return_date),
         effective_brl: estimated_effective(&price, pos, params),
         price,
         baseline: Some(Money::new(found.baseline_minor, Currency::brl())),
+        miles: None,
+        baseline_miles: None,
+        brand: None,
+        seats: None,
+        cash: None,
         reason: found.reason,
         change: Some(found.change),
         estimated: found.estimated,
@@ -455,6 +477,8 @@ pub fn derived_rates(quotes: &[SellerQuote]) -> Vec<(Currency, f64)> {
 
 /// Whether a confirmed deal is gone: departed, or its dates now cost
 /// [`EXPIRE_RISE`] times more (estimated or real, whichever matches).
+/// `current` holds cash prices: an award deal only expires here once
+/// departed ([`award_expired`] weighs its miles).
 pub fn expired(
     deal: &Deal,
     current: &BTreeMap<(NaiveDate, NaiveDate), i64>,
@@ -463,9 +487,216 @@ pub fn expired(
     if deal.departure < today {
         return true;
     }
+    let (Series::Cash, Some(return_date)) = (&deal.series, deal.return_date)
+    else {
+        return false;
+    };
+    current
+        .get(&(deal.departure, return_date))
+        .is_some_and(|&p| p as f64 > deal.price.minor as f64 * EXPIRE_RISE)
+}
+
+// ---------------------------------------------------------------------
+// Award series (0083)
+// ---------------------------------------------------------------------
+
+/// The award families of one route × cabin × program, each a series of
+/// its own: both legs one way, and the round trip.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AwardGroup {
+    pub outbound: FamilyId,
+    pub ret: FamilyId,
+    pub round_trip: Option<FamilyId>,
+}
+
+impl AwardGroup {
+    /// The leg a family prices, `None` for the round trip (or another
+    /// family).
+    pub fn leg_of(&self, family: FamilyId) -> Option<Leg> {
+        if family == self.outbound {
+            Some(Leg::Outbound)
+        } else if family == self.ret {
+            Some(Leg::Return)
+        } else {
+            None
+        }
+    }
+}
+
+/// An award that beats its series' baseline.
+#[derive(Debug, Clone, PartialEq)]
+pub struct FoundAward {
+    /// The cheapest award of its date (or date pair) in the check.
+    pub award: Observation,
+    pub reason: DealReason,
+    /// Its miles against the bucket median, `−0.22` for 22% under.
+    pub change: f64,
+    /// The bucket median, in miles.
+    pub baseline_miles: i64,
+}
+
+/// Every current award that is a deal against the baseline of its own
+/// series (`points`, from [`tm_scheduler::awards::award_points`] over
+/// the same family, without the check being judged), best first. Awards
+/// departing outside `first..=last` are ignored.
+pub fn find_awards(
+    current: &BTreeMap<AwardDates, &Observation>,
+    points: &[PricePoint],
+    now: DateTime<Utc>,
+    params: &Params,
+    first: NaiveDate,
+    last: NaiveDate,
+) -> Vec<FoundAward> {
+    let baselines = compute_by_key(points, now, params.baseline_window);
+    let mut out: Vec<FoundAward> = current
+        .values()
+        .filter(|o| o.departure >= first && o.departure <= last)
+        .filter_map(|o| {
+            let miles = o.miles?;
+            let key = BaselineKey::of(now, o.departure)?;
+            let baseline = baselines.get(&key)?;
+            let (reason, change) = evaluate(miles, baseline, params)?;
+            Some(FoundAward {
+                award: (*o).clone(),
+                reason,
+                change,
+                baseline_miles: baseline.median.round() as i64,
+            })
+        })
+        .collect();
+    out.sort_by(|a, b| {
+        a.change
+            .total_cmp(&b.change)
+            .then(a.award.departure.cmp(&b.award.departure))
+    });
+    out
+}
+
+/// Whether an award series already has a deal for these dates: open,
+/// or rejected recently.
+pub fn known_award(
+    deals: &[Deal],
+    series: &Series,
+    (route, cabin, leg): (RouteId, Cabin, Option<Leg>),
+    (departure, return_date): AwardDates,
+    now: DateTime<Utc>,
+) -> bool {
+    deals.iter().any(|d| {
+        &d.series == series
+            && d.route == route
+            && d.cabin == cabin
+            && d.leg == leg
+            && d.departure == departure
+            && d.return_date == return_date
+            && still_open(d, now)
+    })
+}
+
+/// The new award deals worth recording for one series: not already
+/// known, at most `max`.
+pub fn select_awards(
+    found: Vec<FoundAward>,
+    deals: &[Deal],
+    series: &Series,
+    group: (RouteId, Cabin, Option<Leg>),
+    now: DateTime<Utc>,
+    max: usize,
+) -> Vec<FoundAward> {
+    found
+        .into_iter()
+        .filter(|f| {
+            let dates = (f.award.departure, f.award.return_date);
+            !known_award(deals, series, group, dates, now)
+        })
+        .take(max)
+        .collect()
+}
+
+/// An award's flights for a deal or a notice: `LA8148 nonstop`,
+/// `LA4776/LA8150, 1 stop`.
+pub fn award_flights(award: &Observation) -> Option<String> {
+    let label = itinerary_label(award.flights.as_deref()?);
+    // The label's time is the departure's; a notice names the flights.
+    let flights = label.split(' ').next().unwrap_or(&label).to_owned();
+    Some(match award.stops {
+        Some(0) => format!("{flights} nonstop"),
+        Some(1) => format!("{flights}, 1 stop"),
+        Some(n) => format!("{flights}, {n} stops"),
+        None => flights,
+    })
+}
+
+/// The deal for a found award of `program` (0083): its leg, or `None`
+/// for the round trip; its taxes as the price; `cash` is the cash fare
+/// of the same leg (or trip) and dates, for scale.
+#[allow(clippy::too_many_arguments, reason = "one deal's identity")]
+pub fn award_candidate(
+    found: &FoundAward,
+    program: &str,
+    leg: Option<Leg>,
+    route: RouteId,
+    cabin: Cabin,
+    pos: &PointOfSale,
+    cash: Option<Money>,
+    now: DateTime<Utc>,
+) -> Deal {
+    let a = &found.award;
+    let taxes = a
+        .price
+        .clone()
+        .unwrap_or_else(|| Money::new(0, Currency::brl()));
+    let detail = a.award.as_ref();
+    Deal {
+        id: None,
+        route,
+        cabin,
+        pos: pos.id,
+        series: Series::Award {
+            program: program.to_owned(),
+        },
+        leg,
+        departure: a.departure,
+        return_date: if leg.is_some() { None } else { a.return_date },
+        price: taxes.clone(),
+        effective_brl: taxes,
+        baseline: None,
+        miles: a.miles,
+        baseline_miles: Some(found.baseline_miles),
+        brand: detail.and_then(|d| d.brand.clone()),
+        seats: detail.and_then(|d| d.seats),
+        cash,
+        reason: found.reason,
+        change: Some(found.change),
+        estimated: false,
+        status: DealStatus::Candidate,
+        found_at: now,
+        confirmed_at: None,
+        seen: false,
+        carrier: award_flights(a),
+        seller: None,
+        sellers: Vec::new(),
+        url: None,
+    }
+}
+
+/// Whether a confirmed award deal is gone: departed, or its dates now
+/// cost [`EXPIRE_RISE`] times more miles in its own series (`current`,
+/// the latest check's cheapest award per date).
+pub fn award_expired(
+    deal: &Deal,
+    current: &BTreeMap<AwardDates, &Observation>,
+    today: NaiveDate,
+) -> bool {
+    if deal.departure < today {
+        return true;
+    }
+    let Some(miles) = deal.miles else {
+        return false;
+    };
     current
         .get(&(deal.departure, deal.return_date))
-        .is_some_and(|&p| p as f64 > deal.price.minor as f64 * EXPIRE_RISE)
+        .and_then(|o| o.miles)
+        .is_some_and(|m| m as f64 > miles as f64 * EXPIRE_RISE)
 }
 
 #[cfg(test)]
@@ -507,6 +738,8 @@ mod tests {
             stops: None,
             duration_minutes: None,
             seller: None,
+            flights: None,
+            award: None,
         }
     }
 
@@ -760,11 +993,20 @@ mod tests {
         deal.status = DealStatus::Confirmed;
         let mut now = BTreeMap::new();
         assert!(!expired(&deal, &now, date(10, 6)));
+        // An award deal on the same dates is not judged by cash prices.
+        let award = Deal {
+            series: Series::Award {
+                program: "latam_pass".into(),
+            },
+            ..deal.clone()
+        };
         assert!(expired(&deal, &now, date(12, 2)));
         now.insert((date(12, 1), date(12, 8)), 105_000);
         assert!(!expired(&deal, &now, date(10, 6)));
         now.insert((date(12, 1), date(12, 8)), 115_000);
         assert!(expired(&deal, &now, date(10, 6)));
+        assert!(!expired(&award, &now, date(10, 6)));
+        assert!(expired(&award, &now, date(12, 2)));
     }
 
     #[test]
@@ -786,5 +1028,165 @@ mod tests {
         let trips = real_trips(&rt);
         assert_eq!(trips.len(), 1);
         assert_eq!(trips[0].days, 7);
+    }
+
+    fn award(
+        query: i64,
+        family: i64,
+        observed: DateTime<Utc>,
+        dep: NaiveDate,
+        ret: Option<NaiveDate>,
+        miles: i64,
+    ) -> Observation {
+        Observation {
+            miles: Some(miles),
+            price: Some(Money::new(6861, Currency::brl())),
+            stops: Some(0),
+            flights: Some("LA8148@2026-12-01T22:40".into()),
+            award: Some(tm_domain::AwardDetail {
+                fare: None,
+                brand: Some("LIGHT".into()),
+                fare_basis: None,
+                seats: Some(tm_domain::Seats {
+                    count: 2,
+                    low: false,
+                }),
+            }),
+            ..obs(query, family, observed, dep, ret, 0)
+        }
+    }
+
+    /// Five weeks of LATAM Pass awards around 64,000 miles one way, then
+    /// a check at 45,000: a miles deal in its own series, never set
+    /// against cash (0023, 0083).
+    #[test]
+    fn awards_are_deals_against_their_own_series() {
+        use tm_scheduler::awards::{award_points, cheapest_by_dates};
+        let dep = date(12, 1);
+        let mut history = Vec::new();
+        for day in 0..36_i64 {
+            let observed = at(1, 12) - chrono::TimeDelta::days(36 - day);
+            // A dearer brand of the same check never sets the price.
+            history.push(award(
+                day,
+                1,
+                observed,
+                dep,
+                None,
+                63_848 + day % 3 * 100,
+            ));
+            history.push(award(day, 1, observed, dep, None, 81_449));
+            // The round-trip series is a series of its own.
+            history.push(award(
+                day + 500,
+                3,
+                observed,
+                dep,
+                Some(date(12, 8)),
+                110_000,
+            ));
+        }
+        let now = at(6, 12);
+        let current = vec![
+            award(999, 1, now, dep, None, 45_000),
+            award(999, 1, now, dep, None, 71_786),
+        ];
+        let exclude: HashSet<QueryId> = [QueryId(999)].into();
+        let points = award_points(&history, FamilyId(1), &exclude);
+        assert_eq!(points.len(), 36);
+        assert!(points.iter().all(|p| p.price_minor < 64_100));
+        let cheapest = cheapest_by_dates(&current);
+        let params = Params::default();
+        let found = find_awards(
+            &cheapest,
+            &points,
+            now,
+            &params,
+            date(10, 7),
+            date(12, 31),
+        );
+        assert_eq!(found.len(), 1);
+        assert_eq!(found[0].award.miles, Some(45_000));
+        assert_eq!(found[0].reason, DealReason::AllTimeLow);
+        assert!(found[0].change < -0.29, "{:?}", found[0]);
+
+        let series = Series::Award {
+            program: "latam_pass".into(),
+        };
+        let group = (RouteId(1), Cabin::Economy, Some(Leg::Outbound));
+        let picked = select_awards(found.clone(), &[], &series, group, now, 2);
+        let deal = award_candidate(
+            &picked[0],
+            "latam_pass",
+            Some(Leg::Outbound),
+            RouteId(1),
+            Cabin::Economy,
+            &pos(true),
+            Some(Money::brl_whole(1_907)),
+            now,
+        );
+        assert_eq!(deal.series, series);
+        assert_eq!(deal.return_date, None);
+        assert_eq!(deal.miles, Some(45_000));
+        assert_eq!(deal.price, Money::new(6861, Currency::brl()));
+        assert_eq!(deal.baseline, None);
+        assert!(
+            deal.baseline_miles
+                .is_some_and(|b| (63_800..64_100).contains(&b))
+        );
+        assert_eq!(deal.carrier.as_deref(), Some("LA8148 nonstop"));
+        assert_eq!(deal.brand.as_deref(), Some("LIGHT"));
+        assert_eq!(deal.cash, Some(Money::brl_whole(1_907)));
+        // Known now: not picked again; a cash deal on the same date is
+        // still free to be found, and the other leg too.
+        let again = select_awards(
+            found.clone(),
+            std::slice::from_ref(&deal),
+            &series,
+            group,
+            now,
+            2,
+        );
+        assert!(again.is_empty());
+        assert!(!known(
+            std::slice::from_ref(&deal),
+            (RouteId(1), Cabin::Economy, PosId(1)),
+            dep,
+            now
+        ));
+        let other_leg = (RouteId(1), Cabin::Economy, Some(Leg::Return));
+        assert_eq!(
+            select_awards(
+                found,
+                std::slice::from_ref(&deal),
+                &series,
+                other_leg,
+                now,
+                2
+            )
+            .len(),
+            1
+        );
+
+        // It expires when its miles rise 10%, or once departed.
+        let mut latest = BTreeMap::new();
+        let dearer = award(1000, 1, now, dep, None, 50_000);
+        latest.insert((dep, None), &dearer);
+        assert!(award_expired(&deal, &latest, date(10, 6)));
+        let held = award(1000, 1, now, dep, None, 46_000);
+        latest.insert((dep, None), &held);
+        assert!(!award_expired(&deal, &latest, date(10, 6)));
+        assert!(award_expired(&deal, &latest, date(12, 2)));
+    }
+
+    #[test]
+    fn award_flights_read_as_a_label() {
+        let mut a = award(1, 1, at(6, 0), date(12, 1), None, 1);
+        a.flights =
+            Some("LA4776@2026-11-10T00:05/LA8150@2026-11-10T05:55".into());
+        a.stops = Some(1);
+        assert_eq!(award_flights(&a).as_deref(), Some("LA4776/LA8150, 1 stop"));
+        a.flights = None;
+        assert_eq!(award_flights(&a), None);
     }
 }

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE miles_programs SET session_until = ?2 WHERE program = ?1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "943754fee91b7ca725a3d7f823a46cba9fe8e6435e4513a9c4cbc178b9642486"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO deals (route_id, cabin, pos_id, departure, return_date,\n                 price_minor, currency, effective_minor, effective_currency,\n                 baseline_minor, baseline_currency, reason, change, estimated,\n                 status, found_at, confirmed_at, seen, carrier, seller, url,\n                 program, leg, miles, baseline_miles, brand, seats,\n                 low_availability, cash_minor, cash_currency)\n             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13,\n                     ?14, ?15, ?16, ?17, 0, ?18, ?19, ?20, ?21, ?22, ?23, ?24,\n                     ?25, ?26, ?27, ?28, ?29)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 29
+    },
+    "nullable": []
+  },
+  "hash": "ac72d8a5814effca04275fe273afaa2b3f6e9f5058ac71a15ab227139b7b4d32"
+}

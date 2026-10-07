@@ -301,7 +301,8 @@ async fn families_deactivate_and_come_back() {
         );
     }
 
-    // An additive route loses its round-trip families.
+    // An additive route loses its round-trip families, except the miles
+    // programs' own (0083).
     let mut trip = store
         .route_trip_state(lis_route)
         .await
@@ -322,12 +323,11 @@ async fn families_deactivate_and_come_back() {
         .into_iter()
         .filter(|f| f.key.route == lis_route)
         .collect();
-    assert_eq!(lis_active.len(), 3 * 12 * 2);
-    assert!(
-        lis_active
-            .iter()
-            .all(|f| !matches!(f.key.kind, FamilyKind::RoundTrip { .. }))
-    );
+    assert_eq!(lis_active.len(), 3 * 12 * 2 + 3 * 3);
+    assert!(lis_active.iter().all(|f| {
+        !matches!(f.key.kind, FamilyKind::RoundTrip { .. })
+            || matches!(f.key.source, tm_domain::Source::Miles { .. })
+    }));
     assert!(lis_active.iter().all(|f| f.state.additive));
     assert!(lis_active.iter().all(|f| f.state.additive_streak == 5));
 

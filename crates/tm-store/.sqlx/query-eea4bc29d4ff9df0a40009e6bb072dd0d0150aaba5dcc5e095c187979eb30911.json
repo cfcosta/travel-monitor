@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT adults, children, infants_in_seat, infants_on_lap,\n                trip_min_days, trip_max_days, round_trip_days, horizon_days,\n                iof, card_spread, daily_budget, max_daily_budget,\n                max_interval_hours, min_interval_hours, random_share,\n                deal_threshold, min_history_weeks, additive_checks_to_stop,\n                language\n         FROM settings WHERE id = 1",
+  "query": "SELECT adults, children, infants_in_seat, infants_on_lap,\n                trip_min_days, trip_max_days, round_trip_days, horizon_days,\n                iof, card_spread, daily_budget, max_daily_budget,\n                max_interval_hours, min_interval_hours, random_share,\n                deal_threshold, min_history_weeks, additive_checks_to_stop,\n                language, unusual_rate\n         FROM settings WHERE id = 1",
   "describe": {
     "columns": [
       {
@@ -211,6 +211,17 @@
             "name": "language"
           }
         }
+      },
+      {
+        "name": "unusual_rate",
+        "ordinal": 19,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "unusual_rate"
+          }
+        }
       }
     ],
     "parameters": {
@@ -235,8 +246,9 @@
       false,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "48576669da97a5ffda9d12152f1e9c27f42892d846258e49f6bb218f75ae0719"
+  "hash": "eea4bc29d4ff9df0a40009e6bb072dd0d0150aaba5dcc5e095c187979eb30911"
 }

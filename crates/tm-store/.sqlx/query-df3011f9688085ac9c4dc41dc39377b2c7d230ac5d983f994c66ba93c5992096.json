@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, query_id, family_id,\n                      observed_at AS \"observed_at: DateTime<Utc>\",\n                      departure AS \"departure: NaiveDate\",\n                      return_date AS \"return_date: NaiveDate\",\n                      price_minor, currency, miles, carrier, stops,\n                      duration_minutes, seller\n               FROM observations\n               WHERE family_id = ?1 AND observed_at >= ?2\n                 AND passengers = ?3\n               ORDER BY observed_at, id",
+  "query": "SELECT id, query_id, family_id,\n                      observed_at AS \"observed_at: DateTime<Utc>\",\n                      departure AS \"departure: NaiveDate\",\n                      return_date AS \"return_date: NaiveDate\",\n                      price_minor, currency, miles, carrier, stops,\n                      duration_minutes, seller, fare_minor, fare_currency,\n                      brand, fare_basis, seats,\n                      low_availability AS \"low_availability: bool\", flights\n               FROM observations\n               WHERE query_id = (\n                   SELECT q.id FROM queries q\n                   WHERE q.family_id = ?1 AND q.outcome = 'ok'\n                     AND q.passengers = ?2\n                     AND EXISTS (SELECT 1 FROM observations x\n                                 WHERE x.query_id = q.id)\n                   ORDER BY q.finished_at DESC, q.id DESC\n                   LIMIT 1)\n               ORDER BY departure, return_date",
   "describe": {
     "columns": [
       {
@@ -145,10 +145,87 @@
             "name": "seller"
           }
         }
+      },
+      {
+        "name": "fare_minor",
+        "ordinal": 13,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "fare_minor"
+          }
+        }
+      },
+      {
+        "name": "fare_currency",
+        "ordinal": 14,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "fare_currency"
+          }
+        }
+      },
+      {
+        "name": "brand",
+        "ordinal": 15,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "brand"
+          }
+        }
+      },
+      {
+        "name": "fare_basis",
+        "ordinal": 16,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "fare_basis"
+          }
+        }
+      },
+      {
+        "name": "seats",
+        "ordinal": 17,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "seats"
+          }
+        }
+      },
+      {
+        "name": "low_availability: bool",
+        "ordinal": 18,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "low_availability"
+          }
+        }
+      },
+      {
+        "name": "flights",
+        "ordinal": 19,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "flights"
+          }
+        }
       }
     ],
     "parameters": {
-      "Right": 3
+      "Right": 2
     },
     "nullable": [
       false,
@@ -163,8 +240,15 @@
       true,
       true,
       true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
       true
     ]
   },
-  "hash": "69aa11aa5c3a8f37675eab84270d7278eb2b87679bd8ef6b2b4fc4c12e23de16"
+  "hash": "df3011f9688085ac9c4dc41dc39377b2c7d230ac5d983f994c66ba93c5992096"
 }
