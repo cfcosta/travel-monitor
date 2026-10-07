@@ -2002,6 +2002,9 @@ impl<S: Sources + 'static> Worker<S> {
                         .carrier
                         .clone()
                         .or_else(|| d.carrier_code.clone()),
+                    destination_name: d.name.clone(),
+                    destination_country: d.country.clone(),
+                    destination_coordinates: d.coordinates,
                 })
             })
             .collect();

@@ -232,13 +232,16 @@ impl Store {
         for h in hints {
             let cabin = cabin_name(h.cabin);
             let currency = h.price.currency.as_str();
+            let (lat, lon) = h.destination_coordinates.unzip();
             let done = sqlx::query!(
                 "INSERT INTO explore_hints (query_id, origin_id, cabin, pos_id,
                      observed_at, destination_freebase_id, destination_airport,
                      price_minor, currency, departure, return_date, stops,
-                     duration_minutes, carrier, passengers)
+                     duration_minutes, carrier, destination_name,
+                     destination_country, destination_lat, destination_lon,
+                     passengers)
                  SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13,
-                        ?14, q.passengers
+                        ?14, ?15, ?16, ?17, ?18, q.passengers
                  FROM queries q WHERE q.id = ?1",
                 h.query.0,
                 h.origin.0,
@@ -254,6 +257,10 @@ impl Store {
                 h.stops,
                 h.duration_minutes,
                 h.carrier,
+                h.destination_name,
+                h.destination_country,
+                lat,
+                lon,
             )
             .execute(&mut *tx)
             .await?;
@@ -280,7 +287,8 @@ impl Store {
                       price_minor, currency,
                       departure AS "departure: NaiveDate",
                       return_date AS "return_date: NaiveDate",
-                      stops, duration_minutes, carrier
+                      stops, duration_minutes, carrier, destination_name,
+                      destination_country, destination_lat, destination_lon
                FROM explore_hints
                WHERE observed_at >= ?1 AND passengers = ?2
                ORDER BY observed_at, id"#,

@@ -97,6 +97,12 @@ pub struct ExploreHint {
     pub stops: Option<u8>,
     pub duration_minutes: Option<u32>,
     pub carrier: Option<String>,
+    /// Explore's name for the destination (`"Lisbon"`), its country in
+    /// words (`"Portugal"`) and its coordinates (latitude, longitude),
+    /// when the response carried them (DECISIONS.md 0087).
+    pub destination_name: Option<String>,
+    pub destination_country: Option<String>,
+    pub destination_coordinates: Option<(f64, f64)>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]

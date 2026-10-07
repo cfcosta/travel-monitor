@@ -816,6 +816,10 @@ pub(crate) struct HintRow {
     pub stops: Option<i64>,
     pub duration_minutes: Option<i64>,
     pub carrier: Option<String>,
+    pub destination_name: Option<String>,
+    pub destination_country: Option<String>,
+    pub destination_lat: Option<f64>,
+    pub destination_lon: Option<f64>,
 }
 
 impl TryFrom<HintRow> for ExploreHint {
@@ -839,6 +843,11 @@ impl TryFrom<HintRow> for ExploreHint {
                 row.duration_minutes,
             )?,
             carrier: row.carrier,
+            destination_name: row.destination_name,
+            destination_country: row.destination_country,
+            destination_coordinates: row
+                .destination_lat
+                .zip(row.destination_lon),
         })
     }
 }

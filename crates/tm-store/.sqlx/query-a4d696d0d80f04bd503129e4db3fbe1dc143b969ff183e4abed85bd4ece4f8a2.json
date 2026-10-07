@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE explore_drops SET notified_at = ?2 WHERE id = ?1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "a4d696d0d80f04bd503129e4db3fbe1dc143b969ff183e4abed85bd4ece4f8a2"
+}

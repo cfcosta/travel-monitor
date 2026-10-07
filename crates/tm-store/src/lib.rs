@@ -25,6 +25,7 @@ mod daemon;
 mod deals;
 mod error;
 mod families;
+mod finds;
 mod observations;
 mod queries;
 mod records;
@@ -35,6 +36,7 @@ mod watch;
 use std::{path::Path, str::FromStr, time::Duration};
 
 pub use error::{Result, StoreError};
+pub use finds::ExploreDrop;
 pub use records::{
     AirlineSource,
     AwardRate,

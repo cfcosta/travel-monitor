@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO explore_hints (query_id, origin_id, cabin, pos_id,\n                     observed_at, destination_freebase_id, destination_airport,\n                     price_minor, currency, departure, return_date, stops,\n                     duration_minutes, carrier, destination_name,\n                     destination_country, destination_lat, destination_lon,\n                     passengers)\n                 SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13,\n                        ?14, ?15, ?16, ?17, ?18, q.passengers\n                 FROM queries q WHERE q.id = ?1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 18
+    },
+    "nullable": []
+  },
+  "hash": "156d864d801408534b2e128ae945fd677942d237cc6e4b2a9a41f127f271e9bc"
+}

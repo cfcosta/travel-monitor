@@ -1,16 +1,16 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT query_id, origin_id, cabin, pos_id,\n                      observed_at AS \"observed_at: DateTime<Utc>\",\n                      destination_freebase_id, destination_airport,\n                      price_minor, currency,\n                      departure AS \"departure: NaiveDate\",\n                      return_date AS \"return_date: NaiveDate\",\n                      stops, duration_minutes, carrier\n               FROM explore_hints\n               WHERE observed_at >= ?1 AND passengers = ?2\n               ORDER BY observed_at, id",
+  "query": "SELECT id, origin_id, cabin, destination_freebase_id,\n                      destination_airport, destination_name, price_minor,\n                      median_minor, currency,\n                      departure AS \"departure: NaiveDate\",\n                      return_date AS \"return_date: NaiveDate\",\n                      carrier, stops,\n                      found_at AS \"found_at: DateTime<Utc>\",\n                      notified_at AS \"notified_at: DateTime<Utc>\"\n               FROM explore_drops\n               WHERE ended_at IS NULL AND notified_at IS NULL\n               ORDER BY found_at, id",
   "describe": {
     "columns": [
       {
-        "name": "query_id",
+        "name": "id",
         "ordinal": 0,
         "type_info": "Integer",
         "origin": {
           "Table": {
-            "table": "explore_hints",
-            "name": "query_id"
+            "table": "explore_drops",
+            "name": "id"
           }
         }
       },
@@ -20,7 +20,7 @@
         "type_info": "Integer",
         "origin": {
           "Table": {
-            "table": "explore_hints",
+            "table": "explore_drops",
             "name": "origin_id"
           }
         }
@@ -31,63 +31,63 @@
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "explore_hints",
+            "table": "explore_drops",
             "name": "cabin"
           }
         }
       },
       {
-        "name": "pos_id",
-        "ordinal": 3,
-        "type_info": "Integer",
-        "origin": {
-          "Table": {
-            "table": "explore_hints",
-            "name": "pos_id"
-          }
-        }
-      },
-      {
-        "name": "observed_at: DateTime<Utc>",
-        "ordinal": 4,
-        "type_info": "Text",
-        "origin": {
-          "Table": {
-            "table": "explore_hints",
-            "name": "observed_at"
-          }
-        }
-      },
-      {
         "name": "destination_freebase_id",
-        "ordinal": 5,
+        "ordinal": 3,
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "explore_hints",
+            "table": "explore_drops",
             "name": "destination_freebase_id"
           }
         }
       },
       {
         "name": "destination_airport",
-        "ordinal": 6,
+        "ordinal": 4,
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "explore_hints",
+            "table": "explore_drops",
             "name": "destination_airport"
           }
         }
       },
       {
+        "name": "destination_name",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "destination_name"
+          }
+        }
+      },
+      {
         "name": "price_minor",
+        "ordinal": 6,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "price_minor"
+          }
+        }
+      },
+      {
+        "name": "median_minor",
         "ordinal": 7,
         "type_info": "Integer",
         "origin": {
           "Table": {
-            "table": "explore_hints",
-            "name": "price_minor"
+            "table": "explore_drops",
+            "name": "median_minor"
           }
         }
       },
@@ -97,7 +97,7 @@
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "explore_hints",
+            "table": "explore_drops",
             "name": "currency"
           }
         }
@@ -108,7 +108,7 @@
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "explore_hints",
+            "table": "explore_drops",
             "name": "departure"
           }
         }
@@ -119,47 +119,58 @@
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "explore_hints",
+            "table": "explore_drops",
             "name": "return_date"
           }
         }
       },
       {
-        "name": "stops",
+        "name": "carrier",
         "ordinal": 11,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "carrier"
+          }
+        }
+      },
+      {
+        "name": "stops",
+        "ordinal": 12,
         "type_info": "Integer",
         "origin": {
           "Table": {
-            "table": "explore_hints",
+            "table": "explore_drops",
             "name": "stops"
           }
         }
       },
       {
-        "name": "duration_minutes",
-        "ordinal": 12,
-        "type_info": "Integer",
-        "origin": {
-          "Table": {
-            "table": "explore_hints",
-            "name": "duration_minutes"
-          }
-        }
-      },
-      {
-        "name": "carrier",
+        "name": "found_at: DateTime<Utc>",
         "ordinal": 13,
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "explore_hints",
-            "name": "carrier"
+            "table": "explore_drops",
+            "name": "found_at"
+          }
+        }
+      },
+      {
+        "name": "notified_at: DateTime<Utc>",
+        "ordinal": 14,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "notified_at"
           }
         }
       }
     ],
     "parameters": {
-      "Right": 2
+      "Right": 0
     },
     "nullable": [
       false,
@@ -167,7 +178,7 @@
       false,
       false,
       false,
-      false,
+      true,
       false,
       false,
       false,
@@ -175,8 +186,9 @@
       true,
       true,
       true,
+      false,
       true
     ]
   },
-  "hash": "267945a24483f226c1685eb886bce780f896ccb751b8e38c7f1c20060dd2be32"
+  "hash": "df431ad4f0e4628c737077909396b936637d3f783d642a385a39cf2810a2de29"
 }

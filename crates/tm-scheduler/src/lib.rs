@@ -17,6 +17,7 @@
 //! | [`rates`] | 0028 | Change-rate estimators from changed/unchanged bits |
 //! | [`update`] | 0028 | Posterior updates after a check |
 //! | [`hints`] | 0028, 0041 | Explore hints → families |
+//! | [`finds`] | 0087 | Unwatched destinations Explore priced, and their drops |
 //! | [`fanout`] | 0028 | Families related to one that dropped |
 //! | [`baseline`] | 0030 | Days-to-departure buckets, seasons, median and MAD |
 //! | [`deals`] | 0018, 0030 | The deal rule |
@@ -31,6 +32,7 @@ pub mod budget;
 pub mod deals;
 pub mod effective;
 pub mod fanout;
+pub mod finds;
 pub mod hints;
 pub mod params;
 pub mod plan;

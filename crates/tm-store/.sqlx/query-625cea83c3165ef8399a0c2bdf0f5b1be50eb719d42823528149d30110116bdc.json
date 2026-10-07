@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO explore_drops (origin_id, cabin,\n                   destination_freebase_id, destination_airport,\n                   destination_name, price_minor, median_minor, currency,\n                   departure, return_date, carrier, stops, found_at)\n               VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)\n               ON CONFLICT (origin_id, cabin, destination_freebase_id)\n               WHERE ended_at IS NULL DO NOTHING\n               RETURNING id AS \"id!: i64\"",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!: i64",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 13
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "625cea83c3165ef8399a0c2bdf0f5b1be50eb719d42823528149d30110116bdc"
+}

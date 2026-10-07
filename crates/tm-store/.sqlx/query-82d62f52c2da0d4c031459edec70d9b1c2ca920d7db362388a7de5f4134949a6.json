@@ -1,0 +1,194 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, origin_id, cabin, destination_freebase_id,\n                      destination_airport, destination_name, price_minor,\n                      median_minor, currency,\n                      departure AS \"departure: NaiveDate\",\n                      return_date AS \"return_date: NaiveDate\",\n                      carrier, stops,\n                      found_at AS \"found_at: DateTime<Utc>\",\n                      notified_at AS \"notified_at: DateTime<Utc>\"\n               FROM explore_drops\n               WHERE origin_id = ?1 AND ended_at IS NULL\n               ORDER BY found_at, id",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "origin_id",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "origin_id"
+          }
+        }
+      },
+      {
+        "name": "cabin",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "cabin"
+          }
+        }
+      },
+      {
+        "name": "destination_freebase_id",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "destination_freebase_id"
+          }
+        }
+      },
+      {
+        "name": "destination_airport",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "destination_airport"
+          }
+        }
+      },
+      {
+        "name": "destination_name",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "destination_name"
+          }
+        }
+      },
+      {
+        "name": "price_minor",
+        "ordinal": 6,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "price_minor"
+          }
+        }
+      },
+      {
+        "name": "median_minor",
+        "ordinal": 7,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "median_minor"
+          }
+        }
+      },
+      {
+        "name": "currency",
+        "ordinal": 8,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "currency"
+          }
+        }
+      },
+      {
+        "name": "departure: NaiveDate",
+        "ordinal": 9,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "departure"
+          }
+        }
+      },
+      {
+        "name": "return_date: NaiveDate",
+        "ordinal": 10,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "return_date"
+          }
+        }
+      },
+      {
+        "name": "carrier",
+        "ordinal": 11,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "carrier"
+          }
+        }
+      },
+      {
+        "name": "stops",
+        "ordinal": 12,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "stops"
+          }
+        }
+      },
+      {
+        "name": "found_at: DateTime<Utc>",
+        "ordinal": 13,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "found_at"
+          }
+        }
+      },
+      {
+        "name": "notified_at: DateTime<Utc>",
+        "ordinal": 14,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_drops",
+            "name": "notified_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "82d62f52c2da0d4c031459edec70d9b1c2ca920d7db362388a7de5f4134949a6"
+}

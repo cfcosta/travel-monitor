@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE explore_drops SET ended_at = ?2\n             WHERE id = ?1 AND ended_at IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "1bd3d1940ff93489cf51168cad7f97dfcdcb26bd91e2e95d2418da82f2b1a02c"
+}

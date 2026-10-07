@@ -1,0 +1,230 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT query_id, origin_id, cabin, pos_id,\n                      observed_at AS \"observed_at: DateTime<Utc>\",\n                      destination_freebase_id, destination_airport,\n                      price_minor, currency,\n                      departure AS \"departure: NaiveDate\",\n                      return_date AS \"return_date: NaiveDate\",\n                      stops, duration_minutes, carrier, destination_name,\n                      destination_country, destination_lat, destination_lon\n               FROM explore_hints\n               WHERE observed_at >= ?1 AND passengers = ?2\n               ORDER BY observed_at, id",
+  "describe": {
+    "columns": [
+      {
+        "name": "query_id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "explore_hints",
+            "name": "query_id"
+          }
+        }
+      },
+      {
+        "name": "origin_id",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "explore_hints",
+            "name": "origin_id"
+          }
+        }
+      },
+      {
+        "name": "cabin",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_hints",
+            "name": "cabin"
+          }
+        }
+      },
+      {
+        "name": "pos_id",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "explore_hints",
+            "name": "pos_id"
+          }
+        }
+      },
+      {
+        "name": "observed_at: DateTime<Utc>",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_hints",
+            "name": "observed_at"
+          }
+        }
+      },
+      {
+        "name": "destination_freebase_id",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_hints",
+            "name": "destination_freebase_id"
+          }
+        }
+      },
+      {
+        "name": "destination_airport",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_hints",
+            "name": "destination_airport"
+          }
+        }
+      },
+      {
+        "name": "price_minor",
+        "ordinal": 7,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "explore_hints",
+            "name": "price_minor"
+          }
+        }
+      },
+      {
+        "name": "currency",
+        "ordinal": 8,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_hints",
+            "name": "currency"
+          }
+        }
+      },
+      {
+        "name": "departure: NaiveDate",
+        "ordinal": 9,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_hints",
+            "name": "departure"
+          }
+        }
+      },
+      {
+        "name": "return_date: NaiveDate",
+        "ordinal": 10,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_hints",
+            "name": "return_date"
+          }
+        }
+      },
+      {
+        "name": "stops",
+        "ordinal": 11,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "explore_hints",
+            "name": "stops"
+          }
+        }
+      },
+      {
+        "name": "duration_minutes",
+        "ordinal": 12,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "explore_hints",
+            "name": "duration_minutes"
+          }
+        }
+      },
+      {
+        "name": "carrier",
+        "ordinal": 13,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_hints",
+            "name": "carrier"
+          }
+        }
+      },
+      {
+        "name": "destination_name",
+        "ordinal": 14,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_hints",
+            "name": "destination_name"
+          }
+        }
+      },
+      {
+        "name": "destination_country",
+        "ordinal": 15,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "explore_hints",
+            "name": "destination_country"
+          }
+        }
+      },
+      {
+        "name": "destination_lat",
+        "ordinal": 16,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "explore_hints",
+            "name": "destination_lat"
+          }
+        }
+      },
+      {
+        "name": "destination_lon",
+        "ordinal": 17,
+        "type_info": "Float",
+        "origin": {
+          "Table": {
+            "table": "explore_hints",
+            "name": "destination_lon"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "60a441f072f9139dd849f2a42a4ff47e506730f129df794051f0e122cb0c4a91"
+}

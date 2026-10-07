@@ -136,6 +136,9 @@ mod tests {
             stops: None,
             duration_minutes: None,
             carrier: None,
+            destination_name: None,
+            destination_country: None,
+            destination_coordinates: None,
         }
     }
 

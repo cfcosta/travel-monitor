@@ -305,6 +305,9 @@ async fn explore_hints_round_trip() {
         stops: Some(1),
         duration_minutes: Some(720),
         carrier: Some("TP".into()),
+        destination_name: Some("Lisbon".into()),
+        destination_country: Some("Portugal".into()),
+        destination_coordinates: Some((38.72, -9.13)),
     };
     let mut bare = hint.clone();
     bare.departure = None;
@@ -312,6 +315,9 @@ async fn explore_hints_round_trip() {
     bare.stops = None;
     bare.duration_minutes = None;
     bare.carrier = None;
+    bare.destination_name = None;
+    bare.destination_country = None;
+    bare.destination_coordinates = None;
     bare.observed_at = at(5, 6);
     store
         .insert_explore_hints(&[hint.clone(), bare.clone()])

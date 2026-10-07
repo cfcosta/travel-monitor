@@ -6,6 +6,7 @@
 //! these types.
 
 pub mod award;
+pub mod country;
 pub mod family;
 pub mod money;
 pub mod observation;
@@ -26,6 +27,7 @@ pub use award::{
     itinerary_label,
     program_name,
 };
+pub use country::{country_code, metro_code};
 pub use family::{
     FamilyKey,
     FamilyKind,
