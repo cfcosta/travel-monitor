@@ -1,0 +1,111 @@
+{
+  "_note": "Public logged-out buy-miles page https://latampass.com/facilidades/compra-milhas/ (redirects to /lp?pt=pp), loaded in the user Chrome 2026-10-07 20:51 UTC. The page POSTs GraphQL to https://latampass.com/facilitiesbff. Request shape read from the page bundle main.266feaae.js; the request body itself was not captured. No promotion was running (the 2026-09-29..10-02 campaign had ended): promotions is empty and only the perennial segment discounts show.",
+  "request": {
+    "method": "POST",
+    "url": "https://latampass.com/facilitiesbff",
+    "operationName": "FreeQuotation",
+    "variables": {
+      "quotation": {
+        "points": "1000",
+        "productType": "PointsPurchase",
+        "ffn": ""
+      }
+    },
+    "logged_in_variant": "query Quotation(...) with the same variables plus ffn; query UserQuery { user(productType: \"PointsPurchase\") { quota { quote quoteUsed freeQuote endsAt promotionalQuota { quote quoteUsed startsAt endsAt freeQuote } } } }"
+  },
+  "response": {
+    "data": {
+      "freeQuotation": {
+        "__typename": "QuotationResponse",
+        "points": 1000,
+        "grossAmount": 7000,
+        "netAmount": 7000,
+        "discountAmount": 0,
+        "valuePerThousand": 7000,
+        "valuePerThousandWithoutDiscount": 7000,
+        "promotions": [],
+        "otherOption": null,
+        "othersOptionsPromotions": [
+          {
+            "__typename": "OthersOptionsPromotions",
+            "segments": "SE_ATIVOS_COBRANDED_LATAM_MPLUS,SE_SOCIOS_ATIVOS_CLUBE_MPLUS",
+            "points": 1000,
+            "grossAmount": 7000,
+            "netAmount": 4550,
+            "discountAmount": 2450,
+            "valuePerThousand": 4550,
+            "valuePerThousandWithoutDiscount": 7000,
+            "otherOption": null,
+            "promotions": [
+              {
+                "__typename": "Promotion",
+                "name": "COMPRA DE MILHAS 35% - LATAM PASS ITAU + CLUBE",
+                "discount": 0.35,
+                "description": "COMPRA DE MILHAS COM 35% DE DESCONTO (PERENE) PARA CLIENTES TITULARES DO CARTÃO LATAM PASS ITAUCARD e  do CLUBE. O DESCONTO FICARÁ VÁLIDO ATÉ 31/12/3000.",
+                "additionalFields": null,
+                "endsAt": "3001-01-01T02:59:59Z",
+                "regulation": {
+                  "__typename": "Regulation",
+                  "version": "1.0",
+                  "url": "https://d3rwujusajfqlr.cloudfront.net/uploads/81b3b1e4-7209-49b7-9491-83a4fab15fa3.pdf"
+                }
+              }
+            ]
+          },
+          {
+            "__typename": "OthersOptionsPromotions",
+            "segments": "SE_SOCIOS_ATIVOS_CLUBE_MPLUS",
+            "points": 1000,
+            "grossAmount": 7000,
+            "netAmount": 4900,
+            "discountAmount": 2100,
+            "valuePerThousand": 4900,
+            "valuePerThousandWithoutDiscount": 7000,
+            "otherOption": null,
+            "promotions": [
+              {
+                "__typename": "Promotion",
+                "name": "COMPRA DE MILHAS 30% - CLUBE LATAM PASS",
+                "discount": 0.3,
+                "description": "COMPRA DE MILHAS COM 30% DE DESCONTO (PERENE) PARA CLIENTES ASSINANTES DO CLUBE LATAM PASS. O DESCONTO FICARÁ VÁLIDO INDEFINIDAMENTE",
+                "additionalFields": null,
+                "endsAt": "3001-01-01T02:59:59Z",
+                "regulation": {
+                  "__typename": "Regulation",
+                  "version": "1.0",
+                  "url": "https://d3rwujusajfqlr.cloudfront.net/uploads/81b3b1e4-7209-49b7-9491-83a4fab15fa3.pdf"
+                }
+              }
+            ]
+          },
+          {
+            "__typename": "OthersOptionsPromotions",
+            "segments": "SE_ATIVOS_COBRANDED_LATAM_MPLUS",
+            "points": 1000,
+            "grossAmount": 7000,
+            "netAmount": 4900,
+            "discountAmount": 2100,
+            "valuePerThousand": 4900,
+            "valuePerThousandWithoutDiscount": 7000,
+            "otherOption": null,
+            "promotions": [
+              {
+                "__typename": "Promotion",
+                "name": "COMPRA DE MILHAS 30% - LATAM PASS ITAUCARD",
+                "discount": 0.3,
+                "description": "COMPRA DE MILHAS COM 30% DE DESCONTO (PERENE) PARA CLIENTES TITULARES DO CARTÃO LATAM PASS ITAUCARD. O DESCONTO FICARÁ VÁLIDO ATÉ 31/12/3000.",
+                "additionalFields": null,
+                "endsAt": "3001-01-01T02:59:59Z",
+                "regulation": {
+                  "__typename": "Regulation",
+                  "version": "1.0",
+                  "url": "https://d3rwujusajfqlr.cloudfront.net/uploads/81b3b1e4-7209-49b7-9491-83a4fab15fa3.pdf"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

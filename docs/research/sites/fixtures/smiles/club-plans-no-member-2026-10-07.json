@@ -1,0 +1,1042 @@
+{
+  "_note": "GET https://apigw.smiles.com.br/cs/plan/plans/available/no-member?promotionChannel=CS_novabaupromo, called by the buy-miles campaign page (logged out), 2026-10-07 20:52 UTC. Public Clube Smiles plans and their sign-up bonuses.",
+  "availableChannel": "CS_novabaupromo",
+  "isPromotional": true,
+  "allowPromotional": true,
+  "planList": [
+    {
+      "id": "1-2YQQGPWI",
+      "milesQuantity": 1000,
+      "monthlyCost": "46.00",
+      "name": "Clube Smiles 1.000",
+      "dueDayList": [
+        "05",
+        "15",
+        "25"
+      ],
+      "partnerAlias": "G3V",
+      "benefitList": [
+        {
+          "description": "1000",
+          "name": "MilhasAdesao"
+        },
+        {
+          "description": "1000",
+          "name": "MilhasPromocao"
+        },
+        {
+          "description": "2000",
+          "name": "MilhasTotal"
+        },
+        {
+          "description": "100",
+          "name": "MilhasQual"
+        },
+        {
+          "description": "False",
+          "name": "DiamanteGratuito"
+        },
+        {
+          "description": "46",
+          "name": "CustoBaseMensal"
+        }
+      ],
+      "recurrenceBonus": [
+        {
+          "recurrenceNumber": 1,
+          "type": "miles",
+          "value": "1000"
+        },
+        {
+          "recurrenceNumber": 3,
+          "type": "miles",
+          "value": "1000"
+        },
+        {
+          "recurrenceNumber": 5,
+          "type": "miles",
+          "value": "1000"
+        },
+        {
+          "recurrenceNumber": 7,
+          "type": "miles",
+          "value": "1000"
+        },
+        {
+          "recurrenceNumber": 9,
+          "type": "miles",
+          "value": "1000"
+        },
+        {
+          "recurrenceNumber": 11,
+          "type": "miles",
+          "value": "1000"
+        }
+      ],
+      "type": "MONTHLY",
+      "automaticRenewal": false,
+      "forecastDates": {
+        "firstRecurrenceDate": "2026-11-05"
+      }
+    },
+    {
+      "id": "1-2YQQGPWQ",
+      "milesQuantity": 1000,
+      "monthlyCost": "46.00",
+      "name": "Clube Smiles 1.000 Anual AV",
+      "dueDayList": [
+        "05",
+        "15",
+        "25"
+      ],
+      "partnerAlias": "G3V",
+      "diamanteGratuito": false,
+      "benefitList": [
+        {
+          "description": "1000",
+          "name": "MilhasAdesao"
+        },
+        {
+          "description": "9000",
+          "name": "MilhasPromocao"
+        },
+        {
+          "description": "10000",
+          "name": "MilhasTotal"
+        },
+        {
+          "description": "100",
+          "name": "MilhasQual"
+        },
+        {
+          "description": "False",
+          "name": "DiamanteGratuito"
+        },
+        {
+          "description": "46",
+          "name": "CustoBaseMensal"
+        }
+      ],
+      "recurrenceBonus": [
+        {
+          "recurrenceNumber": 1,
+          "type": "miles",
+          "value": "9000"
+        }
+      ],
+      "type": "ANNUAL - IN CASH",
+      "annualCost": "496.80",
+      "validity": 12,
+      "gracePeriod": 6,
+      "automaticRenewal": true,
+      "forecastDates": {
+        "firstRecurrenceDate": "2026-11-05",
+        "validityEndDate": "2027-10-05",
+        "gracePeriodEndDate": "2027-04-05"
+      }
+    },
+    {
+      "id": "1-2YQQGPWT",
+      "milesQuantity": 1000,
+      "monthlyCost": "46.00",
+      "name": "Clube Smiles 1.000 Anual PC",
+      "dueDayList": [
+        "05",
+        "15",
+        "25"
+      ],
+      "partnerAlias": "G3V",
+      "benefitList": [
+        {
+          "description": "1000",
+          "name": "MilhasAdesao"
+        },
+        {
+          "description": "9000",
+          "name": "MilhasPromocao"
+        },
+        {
+          "description": "10000",
+          "name": "MilhasTotal"
+        },
+        {
+          "description": "100",
+          "name": "MilhasQual"
+        },
+        {
+          "description": "False",
+          "name": "DiamanteGratuito"
+        },
+        {
+          "description": "46",
+          "name": "CustoBaseMensal"
+        }
+      ],
+      "recurrenceBonus": [
+        {
+          "recurrenceNumber": 1,
+          "type": "miles",
+          "value": "9000"
+        }
+      ],
+      "type": "ANNUAL - PARCELLED",
+      "annualCost": "524.40",
+      "installmentOptionList": [
+        {
+          "quantity": "2"
+        },
+        {
+          "quantity": "3"
+        },
+        {
+          "quantity": "4"
+        },
+        {
+          "quantity": "5"
+        },
+        {
+          "quantity": "6"
+        },
+        {
+          "quantity": "7"
+        },
+        {
+          "quantity": "8"
+        },
+        {
+          "quantity": "9"
+        },
+        {
+          "quantity": "10"
+        },
+        {
+          "quantity": "11"
+        },
+        {
+          "quantity": "12"
+        }
+      ],
+      "validity": 12,
+      "gracePeriod": 6,
+      "automaticRenewal": true,
+      "forecastDates": {
+        "firstRecurrenceDate": "2026-11-05",
+        "validityEndDate": "2027-10-05",
+        "gracePeriodEndDate": "2027-04-05"
+      }
+    },
+    {
+      "id": "1-2YQQGPW4",
+      "milesQuantity": 2000,
+      "monthlyCost": "82.00",
+      "name": "Clube Smiles 2.000 Anual AV",
+      "dueDayList": [
+        "05",
+        "15",
+        "25"
+      ],
+      "partnerAlias": "G3V",
+      "benefitList": [
+        {
+          "description": "2000",
+          "name": "MilhasAdesao"
+        },
+        {
+          "description": "13000",
+          "name": "MilhasPromocao"
+        },
+        {
+          "description": "15000",
+          "name": "MilhasTotal"
+        },
+        {
+          "description": "200",
+          "name": "MilhasQual"
+        },
+        {
+          "description": "False",
+          "name": "DiamanteGratuito"
+        },
+        {
+          "description": "82",
+          "name": "CustoBaseMensal"
+        }
+      ],
+      "recurrenceBonus": [
+        {
+          "recurrenceNumber": 1,
+          "type": "miles",
+          "value": "13000"
+        }
+      ],
+      "type": "ANNUAL - IN CASH",
+      "annualCost": "885.60",
+      "validity": 12,
+      "gracePeriod": 6,
+      "automaticRenewal": true,
+      "forecastDates": {
+        "firstRecurrenceDate": "2026-11-05",
+        "validityEndDate": "2027-10-05",
+        "gracePeriodEndDate": "2027-04-05"
+      }
+    },
+    {
+      "id": "1-2YQQGPW7",
+      "milesQuantity": 2000,
+      "monthlyCost": "82.00",
+      "name": "Clube Smiles 2.000 Anual PC",
+      "dueDayList": [
+        "05",
+        "15",
+        "25"
+      ],
+      "partnerAlias": "G3V",
+      "benefitList": [
+        {
+          "description": "2000",
+          "name": "MilhasAdesao"
+        },
+        {
+          "description": "13000",
+          "name": "MilhasPromocao"
+        },
+        {
+          "description": "15000",
+          "name": "MilhasTotal"
+        },
+        {
+          "description": "200",
+          "name": "Texto"
+        },
+        {
+          "description": "200",
+          "name": "MilhasQual"
+        },
+        {
+          "description": "False",
+          "name": "DiamanteGratuito"
+        },
+        {
+          "description": "82",
+          "name": "CustoBaseMensal"
+        }
+      ],
+      "recurrenceBonus": [
+        {
+          "recurrenceNumber": 1,
+          "type": "miles",
+          "value": "13000"
+        }
+      ],
+      "type": "ANNUAL - PARCELLED",
+      "annualCost": "934.80",
+      "installmentOptionList": [
+        {
+          "quantity": "2"
+        },
+        {
+          "quantity": "3"
+        },
+        {
+          "quantity": "4"
+        },
+        {
+          "quantity": "5"
+        },
+        {
+          "quantity": "6"
+        },
+        {
+          "quantity": "7"
+        },
+        {
+          "quantity": "8"
+        },
+        {
+          "quantity": "9"
+        },
+        {
+          "quantity": "10"
+        },
+        {
+          "quantity": "11"
+        },
+        {
+          "quantity": "12"
+        }
+      ],
+      "validity": 12,
+      "gracePeriod": 6,
+      "automaticRenewal": true,
+      "forecastDates": {
+        "firstRecurrenceDate": "2026-11-05",
+        "validityEndDate": "2027-10-05",
+        "gracePeriodEndDate": "2027-04-05"
+      }
+    },
+    {
+      "id": "1-2YQQGPWA",
+      "milesQuantity": 2000,
+      "monthlyCost": "82.00",
+      "name": "Clube Smiles 2.000",
+      "dueDayList": [
+        "05",
+        "15",
+        "25"
+      ],
+      "partnerAlias": "G3V",
+      "benefitList": [
+        {
+          "description": "2000",
+          "name": "MilhasAdesao"
+        },
+        {
+          "description": "1500",
+          "name": "MilhasPromocao"
+        },
+        {
+          "description": "3500",
+          "name": "MilhasTotal"
+        },
+        {
+          "description": "200",
+          "name": "MilhasQual"
+        },
+        {
+          "description": "False",
+          "name": "DiamanteGratuito"
+        },
+        {
+          "description": "82",
+          "name": "CustoBaseMensal"
+        }
+      ],
+      "recurrenceBonus": [
+        {
+          "recurrenceNumber": 1,
+          "type": "miles",
+          "value": "1500"
+        },
+        {
+          "recurrenceNumber": 3,
+          "type": "miles",
+          "value": "1500"
+        },
+        {
+          "recurrenceNumber": 5,
+          "type": "miles",
+          "value": "1500"
+        },
+        {
+          "recurrenceNumber": 7,
+          "type": "miles",
+          "value": "1500"
+        },
+        {
+          "recurrenceNumber": 9,
+          "type": "miles",
+          "value": "1500"
+        },
+        {
+          "recurrenceNumber": 11,
+          "type": "miles",
+          "value": "1500"
+        }
+      ],
+      "type": "MONTHLY",
+      "automaticRenewal": false,
+      "forecastDates": {
+        "firstRecurrenceDate": "2026-11-05"
+      }
+    },
+    {
+      "id": "1-2YQQGPVQ",
+      "milesQuantity": 5000,
+      "monthlyCost": "184.00",
+      "name": "Clube Smiles 5.000 Anual PC",
+      "dueDayList": [
+        "05",
+        "15",
+        "25"
+      ],
+      "partnerAlias": "G3V",
+      "benefitList": [
+        {
+          "description": "5000",
+          "name": "MilhasAdesao"
+        },
+        {
+          "description": "15000",
+          "name": "MilhasPromocao"
+        },
+        {
+          "description": "20000",
+          "name": "MilhasTotal"
+        },
+        {
+          "description": "500",
+          "name": "MilhasQual"
+        },
+        {
+          "description": "False",
+          "name": "DiamanteGratuito"
+        },
+        {
+          "description": "184",
+          "name": "CustoBaseMensal"
+        }
+      ],
+      "recurrenceBonus": [
+        {
+          "recurrenceNumber": 1,
+          "type": "miles",
+          "value": "15000"
+        }
+      ],
+      "type": "ANNUAL - PARCELLED",
+      "annualCost": "2097.60",
+      "installmentOptionList": [
+        {
+          "quantity": "2"
+        },
+        {
+          "quantity": "3"
+        },
+        {
+          "quantity": "4"
+        },
+        {
+          "quantity": "5"
+        },
+        {
+          "quantity": "6"
+        },
+        {
+          "quantity": "7"
+        },
+        {
+          "quantity": "8"
+        },
+        {
+          "quantity": "9"
+        },
+        {
+          "quantity": "10"
+        },
+        {
+          "quantity": "11"
+        },
+        {
+          "quantity": "12"
+        }
+      ],
+      "validity": 12,
+      "gracePeriod": 6,
+      "automaticRenewal": true,
+      "forecastDates": {
+        "firstRecurrenceDate": "2026-11-05",
+        "validityEndDate": "2027-10-05",
+        "gracePeriodEndDate": "2027-04-05"
+      }
+    },
+    {
+      "id": "1-2YQQGPVT",
+      "milesQuantity": 5000,
+      "monthlyCost": "184.00",
+      "name": "Clube Smiles 5.000",
+      "dueDayList": [
+        "05",
+        "15",
+        "25"
+      ],
+      "partnerAlias": "G3V",
+      "benefitList": [
+        {
+          "description": "5000",
+          "name": "MilhasAdesao"
+        },
+        {
+          "description": "2500",
+          "name": "MilhasPromocao"
+        },
+        {
+          "description": "7500",
+          "name": "MilhasTotal"
+        },
+        {
+          "description": "500",
+          "name": "MilhasQual"
+        },
+        {
+          "description": "False",
+          "name": "DiamanteGratuito"
+        },
+        {
+          "description": "184",
+          "name": "CustoBaseMensal"
+        }
+      ],
+      "recurrenceBonus": [
+        {
+          "recurrenceNumber": 1,
+          "type": "miles",
+          "value": "2500"
+        },
+        {
+          "recurrenceNumber": 3,
+          "type": "miles",
+          "value": "2500"
+        },
+        {
+          "recurrenceNumber": 5,
+          "type": "miles",
+          "value": "2500"
+        },
+        {
+          "recurrenceNumber": 7,
+          "type": "miles",
+          "value": "2500"
+        },
+        {
+          "recurrenceNumber": 9,
+          "type": "miles",
+          "value": "2500"
+        },
+        {
+          "recurrenceNumber": 11,
+          "type": "miles",
+          "value": "2500"
+        }
+      ],
+      "type": "MONTHLY",
+      "automaticRenewal": false,
+      "forecastDates": {
+        "firstRecurrenceDate": "2026-11-05"
+      }
+    },
+    {
+      "id": "1-2YQQGPW1",
+      "milesQuantity": 5000,
+      "monthlyCost": "184.00",
+      "name": "Clube Smiles 5.000 Anual AV",
+      "dueDayList": [
+        "05",
+        "15",
+        "25"
+      ],
+      "partnerAlias": "G3V",
+      "benefitList": [
+        {
+          "description": "5000",
+          "name": "MilhasAdesao"
+        },
+        {
+          "description": "15000",
+          "name": "MilhasPromocao"
+        },
+        {
+          "description": "20000",
+          "name": "MilhasTotal"
+        },
+        {
+          "description": "500",
+          "name": "MilhasQual"
+        },
+        {
+          "description": "False",
+          "name": "DiamanteGratuito"
+        },
+        {
+          "description": "500",
+          "name": "CustoBaseMensal"
+        }
+      ],
+      "recurrenceBonus": [
+        {
+          "recurrenceNumber": 1,
+          "type": "miles",
+          "value": "15000"
+        }
+      ],
+      "type": "ANNUAL - IN CASH",
+      "annualCost": "1987.20",
+      "validity": 12,
+      "gracePeriod": 6,
+      "automaticRenewal": true,
+      "forecastDates": {
+        "firstRecurrenceDate": "2026-11-05",
+        "validityEndDate": "2027-10-05",
+        "gracePeriodEndDate": "2027-04-05"
+      }
+    },
+    {
+      "id": "1-2YQQGPVC",
+      "milesQuantity": 10000,
+      "monthlyCost": "340.00",
+      "name": "Clube Smiles 10.000 Anual AV",
+      "dueDayList": [
+        "05",
+        "15",
+        "25"
+      ],
+      "partnerAlias": "G3V",
+      "benefitList": [
+        {
+          "description": "10000",
+          "name": "MilhasAdesao"
+        },
+        {
+          "description": "20000",
+          "name": "MilhasPromocao"
+        },
+        {
+          "description": "30000",
+          "name": "MilhasTotal"
+        },
+        {
+          "description": "1000",
+          "name": "MilhasQual"
+        },
+        {
+          "description": "False",
+          "name": "DiamanteGratuito"
+        },
+        {
+          "description": "340",
+          "name": "CustoBaseMensal"
+        }
+      ],
+      "recurrenceBonus": [
+        {
+          "recurrenceNumber": 1,
+          "type": "miles",
+          "value": "20000"
+        }
+      ],
+      "type": "ANNUAL - IN CASH",
+      "annualCost": "3672.00",
+      "validity": 12,
+      "gracePeriod": 6,
+      "automaticRenewal": true,
+      "forecastDates": {
+        "firstRecurrenceDate": "2026-11-05",
+        "validityEndDate": "2027-10-05",
+        "gracePeriodEndDate": "2027-04-05"
+      }
+    },
+    {
+      "id": "1-2YQQGPVF",
+      "milesQuantity": 10000,
+      "monthlyCost": "340.00",
+      "name": "Clube Smiles 10.000 Anual PC",
+      "dueDayList": [
+        "05",
+        "15",
+        "25"
+      ],
+      "partnerAlias": "G3V",
+      "benefitList": [
+        {
+          "description": "10000",
+          "name": "MilhasAdesao"
+        },
+        {
+          "description": "20000",
+          "name": "MilhasPromocao"
+        },
+        {
+          "description": "30000",
+          "name": "MilhasTotal"
+        },
+        {
+          "description": "1000",
+          "name": "MilhasQual"
+        },
+        {
+          "description": "False",
+          "name": "DiamanteGratuito"
+        },
+        {
+          "description": "340",
+          "name": "CustoBaseMensal"
+        }
+      ],
+      "recurrenceBonus": [
+        {
+          "recurrenceNumber": 1,
+          "type": "miles",
+          "value": "20000"
+        }
+      ],
+      "type": "ANNUAL - PARCELLED",
+      "annualCost": "3876.00",
+      "installmentOptionList": [
+        {
+          "quantity": "2"
+        },
+        {
+          "quantity": "3"
+        },
+        {
+          "quantity": "4"
+        },
+        {
+          "quantity": "5"
+        },
+        {
+          "quantity": "6"
+        },
+        {
+          "quantity": "7"
+        },
+        {
+          "quantity": "8"
+        },
+        {
+          "quantity": "9"
+        },
+        {
+          "quantity": "10"
+        },
+        {
+          "quantity": "11"
+        },
+        {
+          "quantity": "12"
+        }
+      ],
+      "validity": 12,
+      "gracePeriod": 6,
+      "automaticRenewal": true,
+      "forecastDates": {
+        "firstRecurrenceDate": "2026-11-05",
+        "validityEndDate": "2027-10-05",
+        "gracePeriodEndDate": "2027-04-05"
+      }
+    },
+    {
+      "id": "1-2YQQGPVI",
+      "milesQuantity": 10000,
+      "monthlyCost": "340.00",
+      "name": "Clube Smiles 10.000",
+      "dueDayList": [
+        "05",
+        "15",
+        "25"
+      ],
+      "partnerAlias": "G3V",
+      "benefitList": [
+        {
+          "description": "10000",
+          "name": "MilhasAdesao"
+        },
+        {
+          "description": "3500",
+          "name": "MilhasPromocao"
+        },
+        {
+          "description": "13500",
+          "name": "MilhasTotal"
+        },
+        {
+          "description": "1000",
+          "name": "MilhasQual"
+        },
+        {
+          "description": "False",
+          "name": "DiamanteGratuito"
+        },
+        {
+          "description": "340",
+          "name": "CustoBaseMensal"
+        }
+      ],
+      "recurrenceBonus": [
+        {
+          "recurrenceNumber": 1,
+          "type": "miles",
+          "value": "3500"
+        },
+        {
+          "recurrenceNumber": 3,
+          "type": "miles",
+          "value": "3500"
+        },
+        {
+          "recurrenceNumber": 5,
+          "type": "miles",
+          "value": "3500"
+        },
+        {
+          "recurrenceNumber": 7,
+          "type": "miles",
+          "value": "3500"
+        },
+        {
+          "recurrenceNumber": 9,
+          "type": "miles",
+          "value": "3500"
+        },
+        {
+          "recurrenceNumber": 11,
+          "type": "miles",
+          "value": "3500"
+        }
+      ],
+      "type": "MONTHLY",
+      "automaticRenewal": false,
+      "forecastDates": {
+        "firstRecurrenceDate": "2026-11-05"
+      }
+    },
+    {
+      "id": "1-2YQQGPV3",
+      "milesQuantity": 20000,
+      "monthlyCost": "819.00",
+      "name": "Clube Smiles 20.000 Anual PC",
+      "dueDayList": [
+        "05",
+        "15",
+        "25"
+      ],
+      "partnerAlias": "G3V",
+      "diamanteGratuito": true,
+      "benefitList": [
+        {
+          "description": "20000",
+          "name": "MilhasAdesao"
+        },
+        {
+          "description": "30000",
+          "name": "MilhasPromocao"
+        },
+        {
+          "description": "50000",
+          "name": "MilhasTotal"
+        },
+        {
+          "description": "2000",
+          "name": "MilhasQual"
+        },
+        {
+          "description": "True",
+          "name": "DiamanteGratuito"
+        },
+        {
+          "description": "819",
+          "name": "CustoBaseMensal"
+        }
+      ],
+      "recurrenceBonus": [
+        {
+          "recurrenceNumber": 1,
+          "type": "miles",
+          "value": "30000"
+        }
+      ],
+      "type": "ANNUAL - PARCELLED",
+      "annualCost": "9828.00",
+      "installmentOptionList": [
+        {
+          "quantity": "2"
+        },
+        {
+          "quantity": "3"
+        },
+        {
+          "quantity": "4"
+        },
+        {
+          "quantity": "5"
+        },
+        {
+          "quantity": "6"
+        },
+        {
+          "quantity": "7"
+        },
+        {
+          "quantity": "8"
+        },
+        {
+          "quantity": "9"
+        },
+        {
+          "quantity": "10"
+        },
+        {
+          "quantity": "11"
+        },
+        {
+          "quantity": "12"
+        }
+      ],
+      "validity": 12,
+      "gracePeriod": 10,
+      "automaticRenewal": true,
+      "forecastDates": {
+        "firstRecurrenceDate": "2026-11-05",
+        "validityEndDate": "2027-10-05",
+        "gracePeriodEndDate": "2027-08-05"
+      }
+    },
+    {
+      "id": "1-2YQQGPV9",
+      "milesQuantity": 20000,
+      "monthlyCost": "819.00",
+      "name": "Clube Smiles 20.000 Anual AV",
+      "dueDayList": [
+        "05",
+        "15",
+        "25"
+      ],
+      "partnerAlias": "G3V",
+      "diamanteGratuito": true,
+      "benefitList": [
+        {
+          "description": "20000",
+          "name": "MilhasAdesao"
+        },
+        {
+          "description": "30000",
+          "name": "MilhasPromocao"
+        },
+        {
+          "description": "50000",
+          "name": "MilhasTotal"
+        },
+        {
+          "description": "2000",
+          "name": "MilhasQual"
+        },
+        {
+          "description": "True",
+          "name": "DiamanteGratuito"
+        },
+        {
+          "description": "819",
+          "name": "CustoBaseMensal"
+        }
+      ],
+      "recurrenceBonus": [
+        {
+          "recurrenceNumber": 1,
+          "type": "miles",
+          "value": "30000"
+        }
+      ],
+      "type": "ANNUAL - IN CASH",
+      "annualCost": "9336.60",
+      "validity": 12,
+      "gracePeriod": 10,
+      "automaticRenewal": true,
+      "forecastDates": {
+        "firstRecurrenceDate": "2026-11-05",
+        "validityEndDate": "2027-10-05",
+        "gracePeriodEndDate": "2027-08-05"
+      }
+    }
+  ],
+  "isMilesBackActive": false,
+  "isMilesBackRenewActive": false
+}

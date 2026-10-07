@@ -1,0 +1,1139 @@
+{
+  "_note": "Passageiro de Primeira, WordPress REST API, category clube-de-pontos (id 3906), every post from the category start (2026-03-13) to 2026-10-07. GET https://passageirodeprimeira.com/wp-json/wp/v2/posts?categories=3906&per_page=100&page=N&_fields=id,date,link,title; date is the site local time (America/Sao_Paulo). Fetched 2026-10-07 with plain HTTP.",
+  "posts": [
+    {
+      "id": 571271,
+      "date": "2026-10-06T10:30:44",
+      "title": "Assine o Clube Smiles 2.000 anual e ganhe 13 mil milhas na hora",
+      "link": "https://passageirodeprimeira.com/assine-o-clube-smiles-2-000-e-receba-ate-37-mil-milhas-em-1-ano/"
+    },
+    {
+      "id": 571230,
+      "date": "2026-10-01T10:40:31",
+      "title": "Assine o Clube Azul e receba até 300% de bônus em três meses – CPM a partir de R$ 10,85",
+      "link": "https://passageirodeprimeira.com/assine-o-clube-azul-e-receba-ate-300-de-bonus-em-tres-meses-cpm-a-partir-de-r-1085/"
+    },
+    {
+      "id": 570889,
+      "date": "2026-09-30T15:22:59",
+      "title": "Acumule até 158 mil milhas em 12 meses com o Club TAP Miles&Go",
+      "link": "https://passageirodeprimeira.com/acumule-ate-158-mil-milhas-em-12-meses-com-o-club-tap-milesgo/"
+    },
+    {
+      "id": 570466,
+      "date": "2026-09-30T08:00:58",
+      "title": "Só hoje! Assine o Clube Livelo Classic com desconto e receba 23.000 pontos ao longo de 1 ano – Milheiro a partir de R$ 20,81",
+      "link": "https://passageirodeprimeira.com/assine-o-clube-livelo-classic-e-receba-23-000-pontos-ao-longo-de-1-ano-milheiro-a-partir-de-r-2020-2/"
+    },
+    {
+      "id": 570280,
+      "date": "2026-09-28T15:20:04",
+      "title": "Apenas hoje! Assine o Clube Livelo Top e receba até 378 mil pontos",
+      "link": "https://passageirodeprimeira.com/apenas-hoje-assine-o-clube-livelo-top-e-receba-ate-378-mil-pontos/"
+    },
+    {
+      "id": 569999,
+      "date": "2026-09-25T18:40:33",
+      "title": "Assine o Clube Livelo Classic e receba 24.000 pontos ao longo de 1 ano – Milheiro a partir de R$ 20,20",
+      "link": "https://passageirodeprimeira.com/assine-o-clube-livelo-classic-e-receba-24-000-pontos-ao-longo-de-1-ano-milheiro-a-partir-de-r-2020/"
+    },
+    {
+      "id": 569795,
+      "date": "2026-09-25T14:20:35",
+      "title": "Últimas horas para assinar o Clube Livelo e turbinar seu acúmulo de pontos no Festival de Pontos",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-assinar-clube-livelo-turbinar-acumulo-pontos-festival-pontos/"
+    },
+    {
+      "id": 569683,
+      "date": "2026-09-25T08:31:14",
+      "title": "Prorrogado! Receba até 157 mil pontos ao assinar o Clube Livelo – Milheiro a partir de R$ 19,39",
+      "link": "https://passageirodeprimeira.com/prorrogado-receba-ate-157-mil-pontos-ao-assinar-o-clube-livelo-milheiro-a-partir-de-r-1939/"
+    },
+    {
+      "id": 569038,
+      "date": "2026-09-24T16:30:43",
+      "title": "Últimas horas para receber até 157 mil pontos ao assinar o Clube Livelo – Milheiro a partir de R$ 19,39",
+      "link": "https://passageirodeprimeira.com/assine-o-clube-livelo-e-receba-ate-157-mil-pontos-em-1-ano-milheiro-a-partir-de-r-1939/"
+    },
+    {
+      "id": 568623,
+      "date": "2026-09-22T12:30:11",
+      "title": "Último dia! Cupom de até 25% de desconto para assinar o ALL Signature",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-cupom-de-ate-25-de-desconto-para-assinar-o-all-signature/"
+    },
+    {
+      "id": 568164,
+      "date": "2026-09-21T09:18:00",
+      "title": "Ganhe até 60.000 pontos bônus em 12 meses na adesão ou upgrade do Clube Esfera – Milheiro a partir de R$ 28,79",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-60-000-pontos-bonus-em-12-meses-na-adesao-ou-upgrade-do-clube-esfera-milheiro-a-partir-de-r-2879-4/"
+    },
+    {
+      "id": 568083,
+      "date": "2026-09-20T16:00:38",
+      "title": "Último dia para ganhar até 100.000 pontos bônus em 12 meses na adesão ou upgrade do Clube Esfera",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-para-ganhar-ate-100-000-pontos-bonus-em-12-meses-na-adesao-ou-upgrade-do-clube-esfera/"
+    },
+    {
+      "id": 567470,
+      "date": "2026-09-17T17:30:52",
+      "title": "Voltou! Ganhe até 264 mil milhas em 1 ano com o Clube Smiles",
+      "link": "https://passageirodeprimeira.com/voltou-ganhe-ate-264-mil-milhas-em-1-ano-com-o-clube-smiles/"
+    },
+    {
+      "id": 567271,
+      "date": "2026-09-16T19:30:03",
+      "title": "Até as 23h59! Receba até 50.000 pontos ao assinar o Clube Livelo Special",
+      "link": "https://passageirodeprimeira.com/ate-as-23h59-receba-ate-50-000-pontos-ao-assinar-o-clube-livelo-special-2/"
+    },
+    {
+      "id": 567067,
+      "date": "2026-09-16T14:00:09",
+      "title": "Até amanhã! Ganhe 18 mil milhas na hora assinando o Clube Smiles 1.000",
+      "link": "https://passageirodeprimeira.com/ate-amanha-ganhe-18-mil-milhas-na-hora-assinando-o-clube-smiles-1-000/"
+    },
+    {
+      "id": 566297,
+      "date": "2026-09-16T08:40:31",
+      "title": "Vale a pena assinar o ALL Signature com até 25% de desconto?",
+      "link": "https://passageirodeprimeira.com/vale-a-pena-assinar-o-all-signature-com-ate-25-de-desconto/"
+    },
+    {
+      "id": 566616,
+      "date": "2026-09-15T12:25:03",
+      "title": "Só hoje! Assine o Clube Livelo Top e receba até 383 mil pontos em 1 ano",
+      "link": "https://passageirodeprimeira.com/so-hoje-assine-o-clube-livelo-top-e-receba-ate-383-mil-pontos-em-1-ano/"
+    },
+    {
+      "id": 566202,
+      "date": "2026-09-15T09:50:19",
+      "title": "Azul Fidelidade oferece 50% de desconto ou 100% de bônus em novas contratações do Clube",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-50-de-desconto-ou-100-de-bonus-em-novas-contratacoes-do-clube/"
+    },
+    {
+      "id": 566273,
+      "date": "2026-09-14T15:11:10",
+      "title": "Ganhe até 264 mil milhas em 1 ano com o Clube Smiles",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-264-mil-milhas-em-1-ano-com-o-clube-smiles/"
+    },
+    {
+      "id": 565867,
+      "date": "2026-09-14T10:22:11",
+      "title": "Muito bom! Cupom de até 25% de desconto para o ALL Signature – inclusive para ex-assinantes",
+      "link": "https://passageirodeprimeira.com/muito-bom-cupom-de-ate-25-de-desconto-para-o-all-signature-inclusive-para-ex-assinantes/"
+    },
+    {
+      "id": 566163,
+      "date": "2026-09-14T09:50:41",
+      "title": "Ganhe até 100.000 pontos bônus em 12 meses na adesão ou upgrade do Clube Esfera – Milheiro a partir de R$ 25,40",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-100-000-pontos-bonus-em-12-meses-na-adesao-ou-upgrade-do-clube-esfera-milheiro-a-partir-de-r-2540-4/"
+    },
+    {
+      "id": 565912,
+      "date": "2026-09-13T12:00:59",
+      "title": "Prorrogado! Assine o Clube Livelo e ganhe até 25 mil pontos ou desconto – clientes Elo recebem bônus extra",
+      "link": "https://passageirodeprimeira.com/prorrogado-assine-o-clube-livelo-e-ganhe-ate-25-mil-pontos-ou-desconto-clientes-elo-recebem-bonus-extra/"
+    },
+    {
+      "id": 565772,
+      "date": "2026-09-13T11:00:25",
+      "title": "Últimas horas: ganhe até 37 mil milhas em 1 ano com o Clube Smiles 2.000",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-ganhe-ate-37-mil-milhas-em-1-ano-com-o-clube-smiles-2-000/"
+    },
+    {
+      "id": 565397,
+      "date": "2026-09-10T10:00:05",
+      "title": "Segue valendo: Smiles oferece até 37 mil milhas em 1 ano com o Clube 2.000",
+      "link": "https://passageirodeprimeira.com/segue-valendo-smiles-oferece-ate-37-mil-milhas-em-1-ano-com-o-clube-2-000/"
+    },
+    {
+      "id": 565034,
+      "date": "2026-09-09T16:30:09",
+      "title": "105.000 pontos extras em 1 ano ao realizar o upgrade para o Clube Livelo Top – milheiro a partir de R$ 23,68",
+      "link": "https://passageirodeprimeira.com/ganhe-105-000-pontos-extras-em-12-meses-ao-realizar-o-upgrade-para-o-clube-livelo-top-milheiro-a-partir-de-r-2368/"
+    },
+    {
+      "id": 565059,
+      "date": "2026-09-09T13:50:01",
+      "title": "Oferta relâmpago! Assine o Clube Azul e receba até 199% de pontos bônus em 4 meses – milheiro a partir de R$ 11,13",
+      "link": "https://passageirodeprimeira.com/oferta-relampago-assine-o-clube-azul-e-receba-ate-199-de-pontos-bonus-em-quatro-meses-milheiro-a-partir-de-r-1113/"
+    },
+    {
+      "id": 564986,
+      "date": "2026-09-09T11:10:15",
+      "title": "Só hoje! Assine o Clube Livelo Top e receba até 385 mil pontos",
+      "link": "https://passageirodeprimeira.com/so-hoje-assine-o-clube-livelo-top-e-receba-ate-385-mil-pontos/"
+    },
+    {
+      "id": 564677,
+      "date": "2026-09-08T17:46:10",
+      "title": "Esfera oferece até 60 mil pontos bônus em 1 ano na assinatura ou upgrade do Clube",
+      "link": "https://passageirodeprimeira.com/esfera-oferece-ate-60-mil-pontos-bonus-em-1-ano-na-assinatura-ou-upgrade-do-clube/"
+    },
+    {
+      "id": 564306,
+      "date": "2026-09-07T09:00:27",
+      "title": "Segue valendo! Smiles oferece até 37 mil milhas em 1 ano com a assinatura do Clube 2.000",
+      "link": "https://passageirodeprimeira.com/segue-valendo-smiles-oferece-ate-37-mil-milhas-em-1-ano-com-a-assinatura-do-clube-2-000/"
+    },
+    {
+      "id": 564207,
+      "date": "2026-09-03T18:19:52",
+      "title": "Até 23h59! Receba até 73 mil pontos em 1 ano com Clube Livelo Plus – milheiro a partir de R$ 19,21",
+      "link": "https://passageirodeprimeira.com/so-ate-as-23h59-receba-ate-73-mil-pontos-em-1-ano-ao-fazer-adesao-ou-upgrade-para-o-clube-livelo-plus-milheiro-a-partir-de-r-1921/"
+    },
+    {
+      "id": 564006,
+      "date": "2026-09-03T14:00:51",
+      "title": "Ganhe até 37 mil milhas em 1 ano com o Clube Smiles 2.000",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-37-mil-milhas-em-1-ano-com-o-clube-smiles-2-000-milheiro-a-partir-de-r-2393/"
+    },
+    {
+      "id": 563344,
+      "date": "2026-09-01T16:40:22",
+      "title": "Assine o Clube Livelo e ganhe até 25 mil pontos ou desconto – clientes Elo recebem bônus extra",
+      "link": "https://passageirodeprimeira.com/assine-o-clube-livelo-e-ganhe-ate-25-mil-pontos-ou-desconto-clientes-elo-recebem-bonus-extra/"
+    },
+    {
+      "id": 563352,
+      "date": "2026-09-01T13:50:39",
+      "title": "Voltou! Ganhe até 60.000 pontos bônus em 12 meses na adesão ou upgrade do Clube Esfera – Milheiro a partir de R$ 28,79",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-60-000-pontos-bonus-em-12-meses-na-adesao-ou-upgrade-do-clube-esfera/"
+    },
+    {
+      "id": 563225,
+      "date": "2026-09-01T12:30:08",
+      "title": "Assine o Clube Azul e receba até 260% de bônus em três meses – CPM a partir de R$ 10,23",
+      "link": "https://passageirodeprimeira.com/assine-clube-azul-receba-ate-260-bonus-tres-meses/"
+    },
+    {
+      "id": 562943,
+      "date": "2026-08-31T11:10:11",
+      "title": "Oferta relâmpago! Assine o Clube Azul e receba até 350 mil pontos até o fim do ano",
+      "link": "https://passageirodeprimeira.com/oferta-relampago-assine-o-clube-azul-e-receba-ate-350-mil-pontos-ate-o-fim-do-ano/"
+    },
+    {
+      "id": 562660,
+      "date": "2026-08-30T17:00:21",
+      "title": "Últimas horas para receber 22.000 pontos ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 22",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-receber-22-000-pontos-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-22/"
+    },
+    {
+      "id": 562551,
+      "date": "2026-08-28T12:35:02",
+      "title": "Receba 22.000 pontos ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 22",
+      "link": "https://passageirodeprimeira.com/receba-22-000-pontos-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-22/"
+    },
+    {
+      "id": 561648,
+      "date": "2026-08-26T16:24:34",
+      "title": "Últimas horas para assinar o Clube Livelo e turbinar seu acúmulo de pontos no Festival de Pontos",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-assinar-o-clube-livelo-e-turbinar-seu-acumulo-de-pontos-no-festival-de-pontos-5/"
+    },
+    {
+      "id": 560889,
+      "date": "2026-08-26T11:05:55",
+      "title": "Prorrogado! Receba 377.000 pontos ao assinar o Clube Livelo Top – milheiro a partir de R$ 22,91",
+      "link": "https://passageirodeprimeira.com/receba-377-000-pontos-ao-assinar-o-clube-livelo-top-milheiro-a-partir-de-r-2291/"
+    },
+    {
+      "id": 560885,
+      "date": "2026-08-24T12:50:00",
+      "title": "Ganhe até 60 mil pontos bônus em um ano ao fazer upgrade do Clube Esfera",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-60-mil-pontos-bonus-em-um-ano-ao-fazer-upgrade-do-clube-esfera/"
+    },
+    {
+      "id": 559312,
+      "date": "2026-08-19T10:00:55",
+      "title": "Último dia para receber até 25.000 pontos ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 19,40",
+      "link": "https://passageirodeprimeira.com/receba-ate-25-000-pontos-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-1940-4/"
+    },
+    {
+      "id": 559658,
+      "date": "2026-08-18T12:20:10",
+      "title": "Assine o Clube Esfera com até 60 mil pontos bônus em 12 meses",
+      "link": "https://passageirodeprimeira.com/assine-o-clube-esfera-com-ate-60-mil-pontos-bonus-em-12-meses/"
+    },
+    {
+      "id": 559600,
+      "date": "2026-08-18T11:20:04",
+      "title": "Assine o Clube Azul e receba até 290 mil pontos até o fim do ano – CPM a partir de R$ 12,70",
+      "link": "https://passageirodeprimeira.com/assine-clube-azul-receba-ate-290-mil-pontos-fim-do-ano-cpm-r-12-70/"
+    },
+    {
+      "id": 559273,
+      "date": "2026-08-17T15:40:35",
+      "title": "Ganhe até 600 mil pontos no ano ao fazer upgrade do Clube Azul",
+      "link": "https://passageirodeprimeira.com/ganhe-600-mil-pontos-ano-upgrade-clube-azul/"
+    },
+    {
+      "id": 559267,
+      "date": "2026-08-17T09:50:44",
+      "title": "Oferta relâmpago! Assine o Clube Azul e receba até 300 mil pontos até o fim do ano – CPM a partir de R$ 11,10",
+      "link": "https://passageirodeprimeira.com/oferta-relampago-assine-o-clube-azul-e-receba-ate-300-mil-pontos-ate-o-fim-do-ano-cpm-a-partir-de-r-1110/"
+    },
+    {
+      "id": 559163,
+      "date": "2026-08-16T17:30:04",
+      "title": "Últimas horas para receber até 25.000 pontos ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 19,40",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-receber-ate-25-000-pontos-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-1940-2/"
+    },
+    {
+      "id": 557589,
+      "date": "2026-08-13T09:40:35",
+      "title": "Prorrogado! Receba 25.000 pontos ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 19,40",
+      "link": "https://passageirodeprimeira.com/receba-25-000-pontos-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-1940-14/"
+    },
+    {
+      "id": 557689,
+      "date": "2026-08-12T15:46:00",
+      "title": "Últimas horas para receber 25.000 pontos ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 19,40",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-receber-25-000-pontos-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-1940-6/"
+    },
+    {
+      "id": 557498,
+      "date": "2026-08-10T17:00:09",
+      "title": "Ganhe até 275 mil pontos em 5 meses assinando o Clube Azul – milheiro a partir de R$ 13,40",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-275-mil-pontos-em-5-meses-assinando-o-clube-azul-milheiro-a-partir-de-r-1340/"
+    },
+    {
+      "id": 557668,
+      "date": "2026-08-10T15:32:06",
+      "title": "Ganhe 42 mil milhas em 1 ano com o Clube Smiles 1.000 – milheiro a partir de R$ 11,82",
+      "link": "https://passageirodeprimeira.com/ganhe-42-mil-milhas-clube-smiles/"
+    },
+    {
+      "id": 557643,
+      "date": "2026-08-10T13:30:47",
+      "title": "Esfera oferece 60.000 pontos bônus em 12 meses na adesão ou upgrade do Clube – Milheiro a partir de R$ 28,79",
+      "link": "https://passageirodeprimeira.com/esfera-oferece-60-000-pontos-bonus-em-12-meses-na-adesao-ou-upgrade-do-clube-milheiro-a-partir-de-r-2879/"
+    },
+    {
+      "id": 557351,
+      "date": "2026-08-08T09:30:23",
+      "title": "Só hoje! Assine o Clube Livelo Top e receba até 379 mil pontos",
+      "link": "https://passageirodeprimeira.com/so-hoje-assine-o-clube-livelo-top-e-receba-ate-379-mil-pontos/"
+    },
+    {
+      "id": 557135,
+      "date": "2026-08-07T12:00:46",
+      "title": "Oferta relâmpago! Assine o Clube Azul e receba até 350 mil pontos até o fim do ano – CPM a partir de R$ 10,53",
+      "link": "https://passageirodeprimeira.com/oferta-relampago-assine-o-clube-azul-e-receba-ate-350-mil-pontos-ate-o-fim-do-ano-cpm-a-partir-de-r-1053/"
+    },
+    {
+      "id": 556711,
+      "date": "2026-08-06T18:50:09",
+      "title": "Gere o milheiro Smiles a partir de R$ 13,80 assinando o Clube Smiles 1.000",
+      "link": "https://passageirodeprimeira.com/gere-o-milheiro-smiles-a-partir-de-r-1380-assinando-o-clube-smiles-1-000/"
+    },
+    {
+      "id": 556784,
+      "date": "2026-08-06T14:50:36",
+      "title": "Só hoje! Assine o Clube Azul com até 350 mil pontos até o fim do ano – CPM a partir de R$ 10,50",
+      "link": "https://passageirodeprimeira.com/so-hoje-assine-o-clube-azul-com-ate-350-mil-pontos-ate-o-fim-do-ano-cpm-a-partir-de-r-1050/"
+    },
+    {
+      "id": 555829,
+      "date": "2026-08-05T08:40:54",
+      "title": "Assine o Clube Azul com até 175% de pontos bônus até o fim do ano",
+      "link": "https://passageirodeprimeira.com/assine-o-clube-azul-com-ate-175-de-pontos-bonus-ate-o-fim-do-ano/"
+    },
+    {
+      "id": 556393,
+      "date": "2026-08-05T06:00:43",
+      "title": "Ganhe 40 mil pontos bônus na assinatura ou atualização do Clube Esfera",
+      "link": "https://passageirodeprimeira.com/ganhe-40-mil-pontos-bonus-na-assinatura-ou-atualizacao-do-clube-esfera-2/"
+    },
+    {
+      "id": 555984,
+      "date": "2026-08-04T09:00:26",
+      "title": "Ganhe 13 mil milhas na hora assinando o Clube Smiles 1.000 – Milheiro a partir de R$ 13,80",
+      "link": "https://passageirodeprimeira.com/ganhe-13-mil-milhas-na-hora-assinando-o-clube-smiles-1-000-milheiro-a-partir-de-r-1380/"
+    },
+    {
+      "id": 556014,
+      "date": "2026-08-04T09:00:13",
+      "title": "Receba até 69.000 pontos ao assinar o Clube Livelo – Milheiro a partir de R$ 20",
+      "link": "https://passageirodeprimeira.com/receba-ate-69-000-pontos-ao-assinar-o-clube-livelo-milheiro-a-partir-de-r-20/"
+    },
+    {
+      "id": 554715,
+      "date": "2026-07-31T08:20:22",
+      "title": "Último dia para receber até 24.000 pontos ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 20,20",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-para-receber-ate-24-000-pontos-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-2020/"
+    },
+    {
+      "id": 554624,
+      "date": "2026-07-29T11:00:22",
+      "title": "Receba até 24.000 pontos ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 20,20",
+      "link": "https://passageirodeprimeira.com/receba-ate-24-000-pontos-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-2020-2/"
+    },
+    {
+      "id": 554141,
+      "date": "2026-07-28T16:40:00",
+      "title": "PP 15 anos! Assine o Clube Smiles + com desconto e ganhe 15.500 milhas na hora",
+      "link": "https://passageirodeprimeira.com/pp-15-anos-assine-o-clube-smiles-com-desconto-e-ganhe-15-500-milhas-na-hora/"
+    },
+    {
+      "id": 554003,
+      "date": "2026-07-27T16:10:05",
+      "title": "Últimas horas para receber 238.800 pontos ao assinar o Clube Livelo Mega",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-receber-238-800-pontos-ao-assinar-o-clube-livelo-mega/"
+    },
+    {
+      "id": 553883,
+      "date": "2026-07-27T15:40:58",
+      "title": "PP 15 anos! Assine o Clube Smiles 1.000 e ganhe 42 mil milhas em 1 ano – milheiro a partir de R$ 11,82",
+      "link": "https://passageirodeprimeira.com/pp-15-anos-assine-o-clube-smiles-1-000-e-ganhe-42-mil-milhas-em-1-ano-milheiro-a-partir-de-r-1182/"
+    },
+    {
+      "id": 553928,
+      "date": "2026-07-27T13:10:31",
+      "title": "Ganhe 40 mil pontos bônus na assinatura ou atualização do Clube Esfera",
+      "link": "https://passageirodeprimeira.com/ganhe-40-mil-pontos-bonus-na-assinatura-ou-atualizacao-do-clube-esfera/"
+    },
+    {
+      "id": 553560,
+      "date": "2026-07-24T15:38:51",
+      "title": "Receba 238.800 pontos ao assinar o Clube Livelo Mega",
+      "link": "https://passageirodeprimeira.com/receba-238-800-pontos-ao-assinar-o-clube-livelo-mega/"
+    },
+    {
+      "id": 553143,
+      "date": "2026-07-23T16:57:04",
+      "title": "Últimas horas para receber 24.000 pontos ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 20",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-receber-24-000-pontos-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-20/"
+    },
+    {
+      "id": 552714,
+      "date": "2026-07-22T08:20:07",
+      "title": "Prorrogado! Receba até 157.000 pontos ao assinar o Clube Livelo – Milheiro a partir de R$ 20",
+      "link": "https://passageirodeprimeira.com/prorrogado-receba-ate-157-000-pontos-ao-assinar-o-clube-livelo-milheiro-a-partir-de-r-20/"
+    },
+    {
+      "id": 552645,
+      "date": "2026-07-21T17:20:52",
+      "title": "Últimas horas para receber até 157.000 pontos ao assinar o Clube Livelo – Milheiro a partir de R$ 20",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-receber-ate-157-000-pontos-ao-assinar-o-clube-livelo-milheiro-a-partir-de-r-20/"
+    },
+    {
+      "id": 552179,
+      "date": "2026-07-20T16:40:01",
+      "title": "PP 15 anos! Ganhe 40 mil pontos bônus na assinatura ou atualização do Clube Esfera",
+      "link": "https://passageirodeprimeira.com/pp-15-anos-ganhe-40-mil-pontos-bonus-na-assinatura-ou-atualizacao-do-clube-esfera/"
+    },
+    {
+      "id": 552055,
+      "date": "2026-07-20T11:00:11",
+      "title": "Receba até 157.000 pontos ao assinar o Clube Livelo – Milheiro a partir de R$ 20",
+      "link": "https://passageirodeprimeira.com/receba-ate-157-000-pontos-ao-assinar-o-clube-livelo-milheiro-a-partir-de-r-20-2/"
+    },
+    {
+      "id": 551666,
+      "date": "2026-07-18T09:00:22",
+      "title": "Ganhe até 330 mil pontos ao assinar o Clube Livelo com nosso cupom exclusivo",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-330-mil-pontos-ao-assinar-o-clube-livelo-com-nosso-cupom-exclusivo-10/"
+    },
+    {
+      "id": 550966,
+      "date": "2026-07-16T19:00:24",
+      "title": "Últimas horas! Assine o Clube Azul e ganhe até 260% de bônus nos 3 primeiros meses",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-assine-o-clube-azul-e-ganhe-ate-260-de-bonus-nos-3-primeiros-meses/"
+    },
+    {
+      "id": 491100,
+      "date": "2026-07-16T10:19:03",
+      "title": "Compre milhas do AAdvantage com até 100% de bônus",
+      "link": "https://passageirodeprimeira.com/compre-milhas-do-aadvantage-com-ate-100-de-bonus/"
+    },
+    {
+      "id": 550881,
+      "date": "2026-07-16T09:18:30",
+      "title": "PP 15 anos! Assine o Clube Azul e ganhe até 260% de bônus – milheiro a partir de R$ 10,23",
+      "link": "https://passageirodeprimeira.com/pp-15-anos-bonus-clube-azul/"
+    },
+    {
+      "id": 550284,
+      "date": "2026-07-14T08:20:04",
+      "title": "Receba 11.000 pontos no 1º mês ao assinar o Clube Livelo Classic anual",
+      "link": "https://passageirodeprimeira.com/receba-11-000-pontos-no-1o-mes-ao-assinar-o-clube-livelo-classic-anual-3/"
+    },
+    {
+      "id": 550222,
+      "date": "2026-07-13T19:30:14",
+      "title": "Multiplique seus pontos em até 15x com o Turbo Livelo – milheiro a partir de R$ 30,74",
+      "link": "https://passageirodeprimeira.com/multiplique-seus-pontos-em-ate-15x-com-o-turbo-livelo-milheiro-a-partir-de-r-3074/"
+    },
+    {
+      "id": 550085,
+      "date": "2026-07-13T15:34:49",
+      "title": "Ganhe até 60.000 pontos bônus em 12 meses na adesão ou upgrade do Clube Esfera – Milheiro a partir de R$ 28,79",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-60-000-pontos-bonus-em-12-meses-na-adesao-ou-upgrade-do-clube-esfera-milheiro-a-partir-de-r-2879-3/"
+    },
+    {
+      "id": 549292,
+      "date": "2026-07-09T14:30:37",
+      "title": "Últimas horas para assinar o Clube Smiles 2.000 e ganhar 16 mil milhas na hora",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-assinar-o-clube-smiles-2-000-e-ganhar-16-mil-milhas-na-hora/"
+    },
+    {
+      "id": 549276,
+      "date": "2026-07-08T11:30:57",
+      "title": "Ainda dá tempo de assinar o Clube Smiles 2.000 e ganhar 16 mil milhas na hora",
+      "link": "https://passageirodeprimeira.com/ainda-da-tempo-de-assinar-o-clube-smiles-2-000-e-ganhar-16-mil-milhas-na-hora/"
+    },
+    {
+      "id": 548759,
+      "date": "2026-07-07T10:38:49",
+      "title": "Só hoje! Assine o Clube Livelo Top e receba até 378 mil pontos",
+      "link": "https://passageirodeprimeira.com/so-hoje-assine-o-clube-livelo-top-e-receba-ate-378-mil-pontos-2/"
+    },
+    {
+      "id": 548353,
+      "date": "2026-07-07T08:10:26",
+      "title": "PP 15 anos! Ganhe até 80% de pontos bônus ao realizar upgrade do Clube Azul",
+      "link": "https://passageirodeprimeira.com/pp-15-anos-ganhe-ate-80-de-pontos-bonus-ao-realizar-upgrade-do-clube-azul/"
+    },
+    {
+      "id": 548155,
+      "date": "2026-07-06T16:45:25",
+      "title": "PP 15 anos! Assine o Clube Azul para receber até 50% OFF e até 30 mil pontos bônus",
+      "link": "https://passageirodeprimeira.com/pp-15-anos-assine-o-clube-azul-para-receber-ate-50-off-e-ate-30-mil-pontos-bonus/"
+    },
+    {
+      "id": 548262,
+      "date": "2026-07-06T11:02:19",
+      "title": "PP 15 anos! Receba até 26.000 pontos ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 18,65",
+      "link": "https://passageirodeprimeira.com/pp-15-anos-receba-ate-26-000-pontos-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-1865/"
+    },
+    {
+      "id": 547839,
+      "date": "2026-07-05T12:50:16",
+      "title": "Ganhe até 330 mil pontos ao assinar o Clube Livelo com nosso cupom exclusivo",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-330-mil-pontos-ao-assinar-o-clube-livelo-com-nosso-cupom-exclusivo-9/"
+    },
+    {
+      "id": 546567,
+      "date": "2026-07-05T10:17:48",
+      "title": "Últimos dia para assinar o Clube Smiles 2.000 e ganhar 16 mil milhas na hora",
+      "link": "https://passageirodeprimeira.com/ultimos-dia-para-assinar-o-clube-smiles-2-000-e-ganhar-16-mil-milhas-na-hora/"
+    },
+    {
+      "id": 547036,
+      "date": "2026-07-02T13:10:53",
+      "title": "Receba 25.000 pontos ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 19,40",
+      "link": "https://passageirodeprimeira.com/receba-25-000-pontos-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-1940-13/"
+    },
+    {
+      "id": 546604,
+      "date": "2026-07-01T11:15:04",
+      "title": "Assine o Clube Smiles e ganhe milhas na hora para emitir um trecho para Salvador",
+      "link": "https://passageirodeprimeira.com/assine-o-clube-smiles-e-ganhe-milhas-na-hora-para-emitir-um-trecho-para-salvador/"
+    },
+    {
+      "id": 546356,
+      "date": "2026-06-30T15:00:37",
+      "title": "Segue valendo! Assine o Clube Smiles 2.000 e ganhe 14 mil milhas bônus",
+      "link": "https://passageirodeprimeira.com/segue-valendo-assine-o-clube-smiles-2-000-e-ganhe-14-mil-milhas-bonus-2/"
+    },
+    {
+      "id": 545691,
+      "date": "2026-06-28T10:10:49",
+      "title": "Últimas horas para receber até 25.000 pontos ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 19,40",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-receber-ate-25-000-pontos-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-1940/"
+    },
+    {
+      "id": 545405,
+      "date": "2026-06-26T15:30:46",
+      "title": "Receba até 25.000 pontos ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 19,40",
+      "link": "https://passageirodeprimeira.com/receba-ate-25-000-pontos-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-1940-2/"
+    },
+    {
+      "id": 545294,
+      "date": "2026-06-25T16:40:16",
+      "title": "Só hoje! Receba até 382.000 pontos ao assinar o Clube Livelo Top",
+      "link": "https://passageirodeprimeira.com/so-hoje-receba-ate-382-000-pontos-ao-assinar-o-clube-livelo-top/"
+    },
+    {
+      "id": 545177,
+      "date": "2026-06-25T15:42:51",
+      "title": "Prorrogado! Assine o Clube Smiles 2.000 e ganhe 14 mil milhas bônus",
+      "link": "https://passageirodeprimeira.com/prorrogado-assine-o-clube-smiles-2-000-e-ganhe-14-mil-milhas-bonus-2/"
+    },
+    {
+      "id": 543747,
+      "date": "2026-06-22T12:20:57",
+      "title": "Segue valendo! Ganhe 16.000 milhas na hora com o Plano 2.000 do Clube Smiles",
+      "link": "https://passageirodeprimeira.com/segue-valendo-ganhe-16-000-milhas-na-hora-com-o-plano-2-000-do-clube-smiles-2/"
+    },
+    {
+      "id": 543560,
+      "date": "2026-06-20T10:31:14",
+      "title": "Segue valendo! Receba até 142 mil pontos ao assinar o Clube Livelo Super 10",
+      "link": "https://passageirodeprimeira.com/segue-valendo-receba-ate-142-mil-pontos-ao-assinar-o-clube-livelo-super-10/"
+    },
+    {
+      "id": 542344,
+      "date": "2026-06-19T08:19:49",
+      "title": "Até 17h! Ganhe 12.000 pontos bônus ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 20,20",
+      "link": "https://passageirodeprimeira.com/ate-17h-ganhe-12-000-pontos-bonus-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-2020/"
+    },
+    {
+      "id": 542552,
+      "date": "2026-06-18T09:00:49",
+      "title": "Ainda dá tempo: ganhe 16.000 milhas na hora com o Plano 2.000 do Clube Smiles",
+      "link": "https://passageirodeprimeira.com/ainda-da-tempo-ganhe-16-000-milhas-na-hora-com-o-plano-2-000-do-clube-smiles/"
+    },
+    {
+      "id": 541816,
+      "date": "2026-06-17T10:57:44",
+      "title": "Receba até 142 mil pontos ao assinar o Clube Livelo Super 10",
+      "link": "https://passageirodeprimeira.com/receba-ate-142-mil-pontos-ao-assinar-o-clube-livelo-super-10/"
+    },
+    {
+      "id": 542081,
+      "date": "2026-06-16T19:20:21",
+      "title": "Últimas horas! Assine o Clube Smiles e ganhe 80% de bônus nas transferências de pontos Livelo",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-assine-o-clube-smiles-e-ganhe-80-de-bonus-nas-transferencias-de-pontos-livelo/"
+    },
+    {
+      "id": 542070,
+      "date": "2026-06-16T12:20:20",
+      "title": "Ganhe 12.000 pontos bônus ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 20,20",
+      "link": "https://passageirodeprimeira.com/ganhe-12-000-pontos-bonus-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-2020/"
+    },
+    {
+      "id": 541972,
+      "date": "2026-06-16T10:20:34",
+      "title": "Segue valendo! Assine o Clube Smiles 2.000 e ganhe 14 mil milhas bônus",
+      "link": "https://passageirodeprimeira.com/segue-valendo-assine-o-clube-smiles-2-000-e-ganhe-14-mil-milhas-bonus/"
+    },
+    {
+      "id": 541620,
+      "date": "2026-06-15T18:15:49",
+      "title": "Ganhe até 408.000 pontos no ano ao assinar ou fazer upgrade do Clube Azul",
+      "link": "https://passageirodeprimeira.com/70-de-bonus-ganhe-ate-408-000-pontos-no-ano-ao-assinar-ou-fazer-upgrade-do-clube-azul-2/"
+    },
+    {
+      "id": 541708,
+      "date": "2026-06-15T14:09:34",
+      "title": "Prorrogado! Assine o Clube Smiles 2.000 e ganhe 14 mil milhas bônus",
+      "link": "https://passageirodeprimeira.com/prorrogado-assine-o-clube-smiles-2-000-e-ganhe-14-mil-milhas-bonus/"
+    },
+    {
+      "id": 541681,
+      "date": "2026-06-15T13:00:47",
+      "title": "Ganhe até 80.000 pontos bônus em 12 meses na adesão ou upgrade do Clube Esfera – milheiro a partir de R$ 26,99",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-80-000-pontos-bonus-em-12-meses-na-adesao-ou-upgrade-do-clube-esfera-milheiro-a-partir-de-r-2699-2/"
+    },
+    {
+      "id": 541242,
+      "date": "2026-06-12T19:20:45",
+      "title": "Últimas horas para receber 380.000 pontos ao assinar o Clube Livelo Top – milheiro a partir de R$ 22,73",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-receber-380-000-pontos-ao-assinar-o-clube-livelo-top-milheiro-a-partir-de-r-2273/"
+    },
+    {
+      "id": 540962,
+      "date": "2026-06-12T12:20:18",
+      "title": "Segue valendo! Ganhe 16.000 milhas na hora com o Plano 2.000 do Clube Smiles",
+      "link": "https://passageirodeprimeira.com/segue-valendo-ganhe-16-000-milhas-na-hora-com-o-plano-2-000-do-clube-smiles/"
+    },
+    {
+      "id": 540839,
+      "date": "2026-06-11T11:20:06",
+      "title": "Receba 380.000 pontos ao assinar o Clube Livelo Top – milheiro a partir de R$ 22,73",
+      "link": "https://passageirodeprimeira.com/receba-380-000-pontos-ao-assinar-o-clube-livelo-top/"
+    },
+    {
+      "id": 540333,
+      "date": "2026-06-10T12:45:41",
+      "title": "Só hoje! Receba 47.000 pontos ao assinar o Clube Livelo Special – Milheiro a partir de R$ 20,20",
+      "link": "https://passageirodeprimeira.com/so-hoje-receba-47-000-pontos-ao-assinar-o-clube-livelo-special-milheiro-a-partir-de-r-2020/"
+    },
+    {
+      "id": 540337,
+      "date": "2026-06-10T11:45:35",
+      "title": "Ganhe 16.000 milhas na hora com o Plano 2.000 do Clube Smiles",
+      "link": "https://passageirodeprimeira.com/ganhe-16-000-milhas-na-hora-com-o-plano-2-000-do-clube-smiles/"
+    },
+    {
+      "id": 539176,
+      "date": "2026-06-07T15:04:29",
+      "title": "Últimas horas para receber até 382.000 pontos ao assinar o Clube Livelo Top",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-receber-ate-382-000-pontos-ao-assinar-o-clube-livelo-top/"
+    },
+    {
+      "id": 539173,
+      "date": "2026-06-04T10:30:46",
+      "title": "Receba até 382.000 pontos ao assinar o Clube Livelo Top",
+      "link": "https://passageirodeprimeira.com/receba-ate-382-000-pontos-ao-assinar-o-clube-livelo-top/"
+    },
+    {
+      "id": 538832,
+      "date": "2026-06-03T18:20:43",
+      "title": "Últimas horas para receber 25.000 pontos ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 19,40",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-receber-25-000-pontos-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-1940-5/"
+    },
+    {
+      "id": 538652,
+      "date": "2026-06-03T13:20:22",
+      "title": "Assine o Clube Azul com até 50% de desconto – Milheiro a partir de R$ 16",
+      "link": "https://passageirodeprimeira.com/assine-o-clube-azul-com-ate-50-de-desconto-milheiro-a-partir-de-r-16/"
+    },
+    {
+      "id": 538261,
+      "date": "2026-06-03T08:49:38",
+      "title": "Ganhe até 40.000 pontos bônus em 12 meses na assinatura ou atualização do Clube Esfera",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-40-000-pontos-bonus-em-12-meses-na-assinatura-ou-atualizacao-do-clube-esfera-5/"
+    },
+    {
+      "id": 537308,
+      "date": "2026-05-30T15:17:20",
+      "title": "Últimas horas para aproveitar a oferta! Ganhe 22.000 milhas na hora com o Plano 2.000 do Clube Smiles",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-aproveitar-a-oferta-ganhe-22-000-milhas-na-hora-com-o-plano-2-000-do-clube-smiles/"
+    },
+    {
+      "id": 537117,
+      "date": "2026-05-29T19:10:14",
+      "title": "O prazo está acabando! Ganhe 22.000 milhas na hora com o Plano 2.000 do Clube Smiles",
+      "link": "https://passageirodeprimeira.com/o-prazo-esta-acabando-ganhe-22-000-milhas-na-hora-com-o-plano-2-000-do-clube-smiles/"
+    },
+    {
+      "id": 537015,
+      "date": "2026-05-28T18:03:35",
+      "title": "Pink Hour! Receba 378.000 pontos ao assinar o Clube Livelo Top anual – milheiro a partir de R$ 22,85",
+      "link": "https://passageirodeprimeira.com/pink-hour-receba-378-000-pontos-ao-assinar-o-clube-livelo-top-anual-milheiro-a-partir-de-r-2285/"
+    },
+    {
+      "id": 536623,
+      "date": "2026-05-28T15:39:45",
+      "title": "Continua valendo! Gere o milheiro a partir de R$ 13,83 assinando o Plano 2.000 do Clube Smiles",
+      "link": "https://passageirodeprimeira.com/continua-valendo-gere-o-milheiro-a-partir-de-r-1383-assinando-o-plano-2-000-do-clube-smiles/"
+    },
+    {
+      "id": 535776,
+      "date": "2026-05-27T19:00:44",
+      "title": "Últimas horas! Receba 11.000 pontos no 1º mês ao assinar o Clube Livelo Classic anual",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-receba-11-000-pontos-no-1o-mes-ao-assinar-o-clube-livelo-classic-anual/"
+    },
+    {
+      "id": 536344,
+      "date": "2026-05-27T16:30:51",
+      "title": "Aproveite! Assine o Clube Smiles e ganhe milhas na hora para emitir um trecho para Maceió",
+      "link": "https://passageirodeprimeira.com/aproveite-assine-o-clube-smiles-e-ganhe-milhas-na-hora-para-emitir-um-trecho-para-maceio/"
+    },
+    {
+      "id": 535742,
+      "date": "2026-05-26T11:23:42",
+      "title": "Ainda está no ar! Ganhe 22.000 milhas na hora com o Plano 2.000 do Clube Smiles",
+      "link": "https://passageirodeprimeira.com/ainda-esta-no-ar-ganhe-22-000-milhas-na-hora-com-o-plano-2-000-do-clube-smiles/"
+    },
+    {
+      "id": 535542,
+      "date": "2026-05-25T19:41:20",
+      "title": "Ganhe até 60.000 pontos bônus em 12 meses na adesão ou upgrade do Clube Esfera – Milheiro a partir de R$ 28,79",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-60-000-pontos-bonus-em-12-meses-na-adesao-ou-upgrade-do-clube-esfera-milheiro-a-partir-de-r-2879-2/"
+    },
+    {
+      "id": 535513,
+      "date": "2026-05-25T14:20:35",
+      "title": "Receba 11.000 pontos no 1º mês ao assinar o Clube Livelo Classic anual",
+      "link": "https://passageirodeprimeira.com/receba-11-000-pontos-no-1o-mes-ao-assinar-o-clube-livelo-classic-anual-2/"
+    },
+    {
+      "id": 534934,
+      "date": "2026-05-24T13:00:20",
+      "title": "Continua valendo! Ganhe 22.000 milhas na hora com o Plano 2.000 do Clube Smiles",
+      "link": "https://passageirodeprimeira.com/continua-valendo-ganhe-22-000-milhas-na-hora-com-o-plano-2-000-do-clube-smiles/"
+    },
+    {
+      "id": 534760,
+      "date": "2026-05-23T08:06:46",
+      "title": "Ganhe até 330 mil pontos ao assinar o Clube Livelo com nosso cupom exclusivo",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-330-mil-pontos-ao-assinar-o-clube-livelo-com-nosso-cupom-exclusivo-8/"
+    },
+    {
+      "id": 534910,
+      "date": "2026-05-22T14:02:41",
+      "title": "Ainda dá tempo! Gere o milheiro a partir de R$ 13,83 com o Plano 2.000 do Clube Smiles",
+      "link": "https://passageirodeprimeira.com/ainda-da-tempo-gere-o-milheiro-a-partir-de-r-1383-com-o-plano-2-000-do-clube-smiles/"
+    },
+    {
+      "id": 531936,
+      "date": "2026-05-19T13:51:45",
+      "title": "Segue valendo! Ganhe 22.000 milhas na hora com o Plano 2.000 do Clube Smiles",
+      "link": "https://passageirodeprimeira.com/segue-valendo-ganhe-22-000-milhas-na-hora-com-o-plano-2-000-do-clube-smiles/"
+    },
+    {
+      "id": 531808,
+      "date": "2026-05-19T10:18:09",
+      "title": "Último dia! Assine o ALL Signature com até 20% de desconto – inclusive para ex-assinantes",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-assine-o-all-signature-com-ate-20-de-desconto-inclusive-para-ex-assinantes/"
+    },
+    {
+      "id": 531500,
+      "date": "2026-05-18T13:00:20",
+      "title": "Ganhe 22.000 milhas na hora com o Plano 2.000 do Clube Smiles",
+      "link": "https://passageirodeprimeira.com/ganhe-22-000-milhas-na-hora-com-o-plano-2-000-do-clube-smiles-2/"
+    },
+    {
+      "id": 531552,
+      "date": "2026-05-18T12:00:30",
+      "title": "Receba até 157.000 pontos ao assinar o Clube Livelo – Milheiro a partir de R$ 20",
+      "link": "https://passageirodeprimeira.com/receba-ate-157-000-pontos-ao-assinar-o-clube-livelo-milheiro-a-partir-de-r-20/"
+    },
+    {
+      "id": 531091,
+      "date": "2026-05-17T11:30:47",
+      "title": "Últimas horas! Livelo oferece 22% de desconto no Clube Livelo Classic por 3 meses",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-livelo-oferece-22-de-desconto-no-clube-livelo-classic-por-3-meses/"
+    },
+    {
+      "id": 531212,
+      "date": "2026-05-17T08:30:44",
+      "title": "Últimos dias! Assine o ALL Signature com até 20% de desconto",
+      "link": "https://passageirodeprimeira.com/ultimos-dias-assine-o-all-signature-com-ate-20-de-desconto/"
+    },
+    {
+      "id": 531043,
+      "date": "2026-05-15T13:40:57",
+      "title": "Livelo oferece 22% de desconto no Clube Livelo Classic por 3 meses",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-22-de-desconto-no-clube-livelo-classic-por-3-meses/"
+    },
+    {
+      "id": 530350,
+      "date": "2026-05-15T10:45:17",
+      "title": "Assine o ALL Signature com até 20% de desconto – inclusive para ex-assinantes",
+      "link": "https://passageirodeprimeira.com/assine-o-all-signature-com-ate-20-de-desconto-inclusive-para-ex-assinantes/"
+    },
+    {
+      "id": 530781,
+      "date": "2026-05-15T09:13:59",
+      "title": "Assine o Clube Smiles e ganhe 20.000 milhas na hora + 70% de bônus ao enviar pontos Esfera",
+      "link": "https://passageirodeprimeira.com/assine-o-clube-smiles-e-ganhe-20-000-milhas-na-hora-70-de-bonus-ao-enviar-pontos-esfera/"
+    },
+    {
+      "id": 529829,
+      "date": "2026-05-13T08:44:14",
+      "title": "Ganhe até 40.000 pontos bônus em 12 meses na assinatura ou atualização do Clube Esfera",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-40-000-pontos-bonus-em-12-meses-na-assinatura-ou-atualizacao-do-clube-esfera-4/"
+    },
+    {
+      "id": 529926,
+      "date": "2026-05-12T17:50:23",
+      "title": "Vale a pena assinar o ALL Signature com até 20% de desconto?",
+      "link": "https://passageirodeprimeira.com/vale-a-pena-assinar-o-all-signature-com-ate-20-de-desconto/"
+    },
+    {
+      "id": 529786,
+      "date": "2026-05-12T17:10:10",
+      "title": "Ganhe 20.000 milhas na hora com o Plano 2.000 do Clube Smiles",
+      "link": "https://passageirodeprimeira.com/ganhe-20-000-milhas-na-hora-com-o-plano-2-000-do-clube-smiles-3/"
+    },
+    {
+      "id": 529612,
+      "date": "2026-05-11T18:10:39",
+      "title": "Receba até 340.000 pontos ao assinar o Clube Livelo + 3 meses de Uber One grátis",
+      "link": "https://passageirodeprimeira.com/receba-ate-340-000-pontos-ao-assinar-o-clube-livelo-3-meses-de-uber-one-gratis/"
+    },
+    {
+      "id": 529491,
+      "date": "2026-05-11T17:10:11",
+      "title": "70% de bônus! Ganhe até 480.000 pontos no ano ao assinar ou fazer upgrade do Clube Azul",
+      "link": "https://passageirodeprimeira.com/70-de-bonus-ganhe-ate-480-000-pontos-no-ano-ao-assinar-ou-fazer-upgrade-do-clube-azul/"
+    },
+    {
+      "id": 528990,
+      "date": "2026-05-10T08:40:36",
+      "title": "Ganhe até 330 mil pontos ao assinar o Clube Livelo com nosso cupom exclusivo",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-330-mil-pontos-ao-assinar-o-clube-livelo-com-nosso-cupom-exclusivo-7/"
+    },
+    {
+      "id": 528716,
+      "date": "2026-05-08T18:40:24",
+      "title": "Últimas horas para receber 25.000 pontos ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 19,40",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-receber-25-000-pontos-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-1940-4/"
+    },
+    {
+      "id": 528708,
+      "date": "2026-05-07T13:50:43",
+      "title": "Receba 25.000 pontos ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 19,40",
+      "link": "https://passageirodeprimeira.com/receba-25-000-pontos-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-1940-11/"
+    },
+    {
+      "id": 527864,
+      "date": "2026-05-05T08:47:40",
+      "title": "Só hoje! Assine o Clube Livelo Top e receba até 378 mil pontos",
+      "link": "https://passageirodeprimeira.com/so-hoje-assine-o-clube-livelo-top-e-receba-ate-378-mil-pontos/"
+    },
+    {
+      "id": 527841,
+      "date": "2026-05-05T07:49:22",
+      "title": "Só hoje! Assine o ALL Signature e garanta até 15% de bônus ao transferir pontos para o ALL Accor",
+      "link": "https://passageirodeprimeira.com/so-hoje-assine-o-all-signature-e-garanta-ate-15-de-bonus-ao-transferir-pontos-para-o-all-accor/"
+    },
+    {
+      "id": 527126,
+      "date": "2026-04-30T10:17:59",
+      "title": "Receba 11.000 pontos no 1º mês ao assinar o Clube Livelo Classic anual",
+      "link": "https://passageirodeprimeira.com/receba-11-000-pontos-no-1o-mes-ao-assinar-o-clube-livelo-classic-anual/"
+    },
+    {
+      "id": 526893,
+      "date": "2026-04-29T15:17:52",
+      "title": "Receba 10.000 pontos no primeiro mês ao assinar o Clube Livelo Classic anual",
+      "link": "https://passageirodeprimeira.com/receba-10-000-pontos-no-primeiro-mes-ao-assinar-o-clube-livelo-classic-anual/"
+    },
+    {
+      "id": 526467,
+      "date": "2026-04-28T12:02:51",
+      "title": "Receba até 376.000 pontos ao assinar o Clube Livelo Top",
+      "link": "https://passageirodeprimeira.com/receba-ate-376-000-pontos-ao-assinar-o-clube-livelo-top/"
+    },
+    {
+      "id": 526117,
+      "date": "2026-04-27T16:31:48",
+      "title": "Ganhe até 40.000 pontos bônus em 12 meses na assinatura ou atualização do Clube Esfera",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-40-000-pontos-bonus-em-12-meses-na-assinatura-ou-atualizacao-do-clube-esfera-3/"
+    },
+    {
+      "id": 526095,
+      "date": "2026-04-27T10:40:24",
+      "title": "Somente hoje! Livelo oferece 20% de desconto no Clube Livelo Classic",
+      "link": "https://passageirodeprimeira.com/somente-hoje-livelo-oferece-20-de-desconto-no-clube-livelo-classic/"
+    },
+    {
+      "id": 525908,
+      "date": "2026-04-26T08:14:28",
+      "title": "Último dia! Receba até 25.000 pontos ao assinar o Clube Livelo Classic",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-receba-ate-25-000-pontos-ao-assinar-o-clube-livelo-classic/"
+    },
+    {
+      "id": 525706,
+      "date": "2026-04-24T16:30:45",
+      "title": "Receba até 25.000 pontos ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 19,40",
+      "link": "https://passageirodeprimeira.com/receba-ate-25-000-pontos-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-1940/"
+    },
+    {
+      "id": 525343,
+      "date": "2026-04-23T11:19:42",
+      "title": "Milheiro a partir de R$ 20,20! Receba 24.000 pontos ao assinar o Clube Livelo Classic",
+      "link": "https://passageirodeprimeira.com/milheiro-a-partir-de-r-2020-receba-24-000-pontos-ao-assinar-o-clube-livelo-classic/"
+    },
+    {
+      "id": 525294,
+      "date": "2026-04-22T18:15:22",
+      "title": "Até as 23h59! Receba até 50.000 pontos ao assinar o Clube Livelo Special",
+      "link": "https://passageirodeprimeira.com/ate-as-23h59-receba-ate-50-000-pontos-ao-assinar-o-clube-livelo-special/"
+    },
+    {
+      "id": 523980,
+      "date": "2026-04-19T10:21:40",
+      "title": "Ganhe até 330 mil pontos ao assinar o Clube Livelo com nosso cupom exclusivo",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-330-mil-pontos-ao-assinar-o-clube-livelo-com-nosso-cupom-exclusivo-6/"
+    },
+    {
+      "id": 524510,
+      "date": "2026-04-17T15:15:01",
+      "title": "Vale a pena assinar o ALL Signature com até 15% de desconto?",
+      "link": "https://passageirodeprimeira.com/vale-a-pena-assinar-o-all-signature-com-ate-15-de-desconto/"
+    },
+    {
+      "id": 523982,
+      "date": "2026-04-17T09:13:46",
+      "title": "Ganhe até 300% de bônus ao assinar o Clube Livelo",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-300-de-bonus-ao-assinar-o-clube-livelo-3/"
+    },
+    {
+      "id": 523693,
+      "date": "2026-04-15T12:32:10",
+      "title": "Só hoje! Receba até 67.000 pontos ao assinar o Clube Livelo Plus",
+      "link": "https://passageirodeprimeira.com/so-hoje-receba-ate-67-000-pontos-ao-assinar-o-clube-livelo-plus/"
+    },
+    {
+      "id": 522996,
+      "date": "2026-04-14T19:28:15",
+      "title": "Últimas horas para receber até 378.000 pontos ao assinar o Clube Livelo Top – milheiro a partir de R$ 22,85",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-receber-ate-378-000-pontos-ao-assinar-o-clube-livelo-top-milheiro-a-partir-de-r-2285/"
+    },
+    {
+      "id": 523046,
+      "date": "2026-04-13T15:50:54",
+      "title": "Ganhe até 90.000 pontos bônus em 12 meses na adesão ou upgrade do Clube Esfera",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-90-000-pontos-bonus-em-12-meses-na-adesao-ou-upgrade-do-clube-esfera/"
+    },
+    {
+      "id": 522968,
+      "date": "2026-04-13T15:03:19",
+      "title": "Ganhe 70% de pontos bônus ao realizar upgrade do Clube Azul – CPM a partir de R$ 18,21",
+      "link": "https://passageirodeprimeira.com/ganhe-70-de-pontos-bonus-ao-realizar-upgrade-do-clube-azul-cpm-a-partir-de-r-1821/"
+    },
+    {
+      "id": 522974,
+      "date": "2026-04-13T13:04:18",
+      "title": "Receba até 378.000 pontos ao assinar o Clube Livelo Top – milheiro a partir de R$ 22,85",
+      "link": "https://passageirodeprimeira.com/receba-ate-378-000-pontos-ao-assinar-o-clube-livelo-top-milheiro-a-partir-de-r-2285/"
+    },
+    {
+      "id": 522998,
+      "date": "2026-04-13T12:24:02",
+      "title": "Ganhe 22.000 milhas na hora com o Plano 2.000 do Clube Smiles",
+      "link": "https://passageirodeprimeira.com/ganhe-22-000-milhas-na-hora-com-o-plano-2-000-do-clube-smiles/"
+    },
+    {
+      "id": 522735,
+      "date": "2026-04-13T08:04:31",
+      "title": "TAP oferece 10% de desconto em voos para assinantes do Club Platinum",
+      "link": "https://passageirodeprimeira.com/tap-oferece-10-de-desconto-em-voos-para-assinantes-do-club-platinum/"
+    },
+    {
+      "id": 522509,
+      "date": "2026-04-11T08:29:37",
+      "title": "Ganhe até 300% de bônus ao assinar o Clube Livelo",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-300-de-bonus-ao-assinar-o-clube-livelo-2/"
+    },
+    {
+      "id": 522732,
+      "date": "2026-04-10T17:45:36",
+      "title": "Prorrogado! Ganhe 20.000 milhas na hora com o Plano 2.000 do Clube Smiles",
+      "link": "https://passageirodeprimeira.com/prorrogado-ganhe-20-000-milhas-na-hora-com-o-plano-2-000-do-clube-smiles-2/"
+    },
+    {
+      "id": 521950,
+      "date": "2026-04-08T18:00:54",
+      "title": "Receba 50 mil pontos em um ano no upgrade do Clube Livelo Special – milheiro a partir de R$ 18,98",
+      "link": "https://passageirodeprimeira.com/receba-50-mil-pontos-em-um-ano-no-upgrade-do-clube-livelo-special-milheiro-a-partir-de-r-1898/"
+    },
+    {
+      "id": 521553,
+      "date": "2026-04-07T17:31:09",
+      "title": "Receba 25.000 pontos ao assinar o Clube Livelo Classic – Milheiro a partir de R$ 19,40",
+      "link": "https://passageirodeprimeira.com/receba-25-000-pontos-ao-assinar-o-clube-livelo-classic-milheiro-a-partir-de-r-1940-10/"
+    },
+    {
+      "id": 521526,
+      "date": "2026-04-07T14:31:47",
+      "title": "Prorrogado! Ganhe 20.000 milhas na hora com o Plano 2.000 do Clube Smiles",
+      "link": "https://passageirodeprimeira.com/prorrogado-ganhe-20-000-milhas-na-hora-com-o-plano-2-000-do-clube-smiles/"
+    },
+    {
+      "id": 520649,
+      "date": "2026-04-05T11:10:16",
+      "title": "Últimas horas para receber 11.000 pontos no primeiro mês ao assinar o Clube Livelo Classic anual",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-receber-11-000-pontos-no-primeiro-mes-ao-assinar-o-clube-livelo-classic-anual/"
+    },
+    {
+      "id": 520490,
+      "date": "2026-04-04T09:31:26",
+      "title": "Ganhe até 330 mil pontos ao assinar o Clube Livelo com nosso cupom exclusivo",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-330-mil-pontos-ao-assinar-o-clube-livelo-com-nosso-cupom-exclusivo-5/"
+    },
+    {
+      "id": 520655,
+      "date": "2026-04-03T14:31:10",
+      "title": "Upgrade para o Clube Livelo Mega oferta 236.800 pontos ao longo de 12 meses",
+      "link": "https://passageirodeprimeira.com/upgrade-para-o-clube-livelo-mega-oferta-236-800-pontos-ao-longo-de-12-meses/"
+    },
+    {
+      "id": 520626,
+      "date": "2026-04-02T10:05:44",
+      "title": "Receba 11.000 pontos no primeiro mês ao assinar o Clube Livelo Classic anual",
+      "link": "https://passageirodeprimeira.com/receba-11-000-pontos-no-primeiro-mes-ao-assinar-o-clube-livelo-classic-anual-2/"
+    },
+    {
+      "id": 520297,
+      "date": "2026-04-01T18:30:56",
+      "title": "Ganhe 20.000 milhas na hora com o Plano 2.000 do Clube Smiles",
+      "link": "https://passageirodeprimeira.com/ganhe-20-000-milhas-na-hora-com-o-plano-2-000-do-clube-smiles-2/"
+    },
+    {
+      "id": 519638,
+      "date": "2026-03-30T12:41:20",
+      "title": "Até as 23h59! Receba 23.000 pontos no primeiro mês ao assinar o Clube Livelo Plus",
+      "link": "https://passageirodeprimeira.com/ate-as-23h59-receba-23-000-pontos-no-primeiro-mes-ao-assinar-o-clube-livelo-plus/"
+    },
+    {
+      "id": 518840,
+      "date": "2026-03-28T10:25:04",
+      "title": "Ganhe até 330 mil pontos ao assinar o Clube Livelo com nosso cupom exclusivo",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-330-mil-pontos-ao-assinar-o-clube-livelo-com-nosso-cupom-exclusivo-4/"
+    },
+    {
+      "id": 519152,
+      "date": "2026-03-27T19:00:37",
+      "title": "Ganhe até 40.000 pontos bônus em 12 meses na assinatura ou atualização do Clube Esfera",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-40-000-pontos-bonus-em-12-meses-na-assinatura-ou-atualizacao-do-clube-esfera-2/"
+    },
+    {
+      "id": 518472,
+      "date": "2026-03-25T10:00:24",
+      "title": "Só hoje! Receba 382.000 pontos ao assinar o Clube Livelo Top – milheiro a partir de R$ 22,61",
+      "link": "https://passageirodeprimeira.com/so-hoje-receba-382-000-pontos-ao-assinar-o-clube-livelo-top-milheiro-a-partir-de-r-2261/"
+    },
+    {
+      "id": 518132,
+      "date": "2026-03-24T15:40:18",
+      "title": "Iberia Club e Rappi lançam parceria para acúmulo de Avios em pedidos",
+      "link": "https://passageirodeprimeira.com/iberia-club-rappi-acumulo-avios-pedidos/"
+    },
+    {
+      "id": 517890,
+      "date": "2026-03-23T12:45:07",
+      "title": "Apenas hoje! Receba 24.000 pontos ao assinar o Clube Livelo Classic mensal",
+      "link": "https://passageirodeprimeira.com/apenas-hoje-receba-24-000-pontos-ao-assinar-o-clube-livelo-classic-mensal/"
+    },
+    {
+      "id": 517365,
+      "date": "2026-03-19T18:17:04",
+      "title": "Até as 23h59! Receba até 382.000 pontos ao assinar o Clube Livelo Top",
+      "link": "https://passageirodeprimeira.com/ate-as-23h59-receba-ate-382-000-pontos-ao-assinar-o-clube-livelo-top/"
+    },
+    {
+      "id": 517076,
+      "date": "2026-03-18T18:40:45",
+      "title": "Até 23h59! Receba 238.800 pontos ao assinar o Clube Livelo Mega",
+      "link": "https://passageirodeprimeira.com/ate-23h59-receba-238-800-pontos-ao-assinar-o-clube-livelo-mega/"
+    },
+    {
+      "id": 516762,
+      "date": "2026-03-17T19:02:40",
+      "title": "Até as 23h59! Receba 145.000 pontos na assinatura do Clube Livelo Super",
+      "link": "https://passageirodeprimeira.com/ate-as-23h59-receba-145-000-pontos-na-assinatura-do-clube-livelo-super/"
+    },
+    {
+      "id": 516167,
+      "date": "2026-03-17T16:30:52",
+      "title": "Ganhe até 330 mil pontos ao assinar o Clube Livelo com nosso cupom exclusivo",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-330-mil-pontos-ao-assinar-o-clube-livelo-com-nosso-cupom-exclusivo-3/"
+    },
+    {
+      "id": 515881,
+      "date": "2026-03-15T16:30:16",
+      "title": "Termina hoje! Azul Fidelidade oferece até 50% de desconto ou até 100% de bônus em novas contratações do Clube",
+      "link": "https://passageirodeprimeira.com/termina-hoje-azul-fidelidade-oferece-ate-50-de-desconto-ou-ate-100-de-bonus-em-novas-contratacoes-do-clube/"
+    },
+    {
+      "id": 515214,
+      "date": "2026-03-14T12:00:47",
+      "title": "Assine o ALL Signature com até R$ 778 de desconto e gere euros a partir de R$ 4,67 para gastar em hotéis Accor no mundo",
+      "link": "https://passageirodeprimeira.com/assine-o-all-signature-com-ate-r-778-de-desconto-e-gere-euros-a-partir-de-r-467-para-gastar-em-hoteis-accor-no-mundo/"
+    },
+    {
+      "id": 515641,
+      "date": "2026-03-14T08:00:12",
+      "title": "Milheiro a partir de R$ 10,80 assinando o Plano 1.000 do Clube Smiles",
+      "link": "https://passageirodeprimeira.com/milheiro-a-partir-de-r-1080-assinando-o-plano-1-000-do-clube-smiles/"
+    },
+    {
+      "id": 515637,
+      "date": "2026-03-13T13:10:19",
+      "title": "Voltou! Ganhe 18 mil milhas na hora assinando o Plano 1.000 do Clube Smiles",
+      "link": "https://passageirodeprimeira.com/voltou-ganhe-18-mil-milhas-na-hora-assinando-o-plano-1-000-do-clube-smiles/"
+    },
+    {
+      "id": 515619,
+      "date": "2026-03-13T12:10:11",
+      "title": "Receba 17.000 pontos na hora ao assinar o Clube Livelo Special anual – Milheiro a partir de R$ 23,15",
+      "link": "https://passageirodeprimeira.com/receba-17-000-pontos-na-hora-ao-assinar-o-clube-livelo-special-anual-milheiro-a-partir-de-r-2315/"
+    }
+  ]
+}

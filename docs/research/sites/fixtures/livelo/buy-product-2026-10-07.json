@@ -1,0 +1,30 @@
+{
+  "_note": "GET https://apis.pontoslivelo.com.br/bff-liv-points-purchase/v1/products/LIVCompraDePontos, called by https://www.livelo.com.br/compra-de-pontos/produto/LIVCompraDePontos (logged out), 2026-10-07 20:53 UTC. Prices are BRL per point. Club discounts are applied as coupons in the cart, after login, and do not show here.",
+  "id": "LIVCompraDePontos",
+  "displayName": "Compra de Pontos",
+  "productType": "type_points_purchase",
+  "skus": [
+    {
+      "skuId": "LIVSKUCompraDePontos",
+      "displayName": "Compra de Pontos",
+      "listPrice": 0.07,
+      "salePrice": 0.07,
+      "maximumQuantity": 2000000,
+      "minimumQuantity": 1000,
+      "bucketSize": 1000,
+      "isGift": false
+    },
+    {
+      "skuId": "LIVSKUPontosDePresente",
+      "displayName": "Compra de Pontos para Amigo",
+      "listPrice": 0.07,
+      "salePrice": 0.07,
+      "maximumQuantity": 300000,
+      "minimumQuantity": 1000,
+      "bucketSize": 1000,
+      "isGift": true
+    }
+  ],
+  "categoryId": "PRODUTOSPF",
+  "active": true
+}

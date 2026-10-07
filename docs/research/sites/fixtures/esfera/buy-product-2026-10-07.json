@@ -1,0 +1,113 @@
+{
+  "_note": "Product data server-rendered in https://www.esfera.com.vc/p/compra-de-pontos/e000100033 (Oracle Commerce, commerceData.product), logged out, 2026-10-07 20:54 UTC. Price and limit fields only; images and copy removed. Prices are BRL per point; discounts are coupons applied after login.",
+  "listPrices": {
+    "vangoghEsferaPTS": 0.07,
+    "defaultEsferaPTS": 0.07,
+    "cashbackReais": null,
+    "defaultEsferaReais": 0.07
+  },
+  "type": "pointsPurchaseProductType",
+  "esf_isComboSKU": false,
+  "id": "e000100033",
+  "active": true,
+  "esf_isProductTypeService": false,
+  "displayName": "Compra de Pontos",
+  "esf_sendProductToAbandonedCartEmail": true,
+  "esf_isLoggedUserRequired": false,
+  "saleVolumePrices": {
+    "vangoghEsferaPTS": null,
+    "defaultEsferaPTS": null,
+    "cashbackReais": null,
+    "defaultEsferaReais": null
+  },
+  "salePrice": 0.07,
+  "esf_pointsPurchaseMultiQuantity": 1000,
+  "esf_pointsPurchaseMaxQuantity": 200000,
+  "derivedListPriceFrom": "defaultEsferaPTS",
+  "listPrice": 0.07,
+  "esf_searchOrderRelevance": "0",
+  "esf_isExclusiveProductForClubUsers": false,
+  "esf_pointsPurchaseMaxQuantityClub": 2000000,
+  "esf_productOrderRelevance": 100,
+  "listVolumePrices": {
+    "vangoghEsferaPTS": null,
+    "defaultEsferaPTS": null,
+    "cashbackReais": null,
+    "defaultEsferaReais": null
+  },
+  "derivedSalePriceFrom": "defaultEsferaPTS",
+  "esf_sendProductToUniqueCart": true,
+  "salePrices": {
+    "vangoghEsferaPTS": 0.07,
+    "defaultEsferaPTS": 0.07,
+    "cashbackReais": null,
+    "defaultEsferaReais": 0.07
+  },
+  "esf_isExclusiveAmex": false,
+  "esf_pointsPurchaseExpirationDate": "24 meses",
+  "esf_afterAddToCartModalEnable": false,
+  "esf_pointsPurchaseMinQuantity": 1000,
+  "productPrices": {
+    "productSalePrice": 0.07,
+    "productListPrice": 0.07,
+    "minPoints": null
+  },
+  "childSKUs": [
+    {
+      "listPrices": {
+        "vangoghEsferaPTS": 0.07,
+        "defaultEsferaPTS": 0.07,
+        "cashbackReais": null,
+        "defaultEsferaReais": 0.07
+      },
+      "listVolumePrices": {
+        "vangoghEsferaPTS": null,
+        "defaultEsferaPTS": null,
+        "cashbackReais": null,
+        "defaultEsferaReais": null
+      },
+      "derivedSalePriceFrom": "defaultEsferaPTS",
+      "displayName": "Compra de Pontos",
+      "salePrices": {
+        "vangoghEsferaPTS": 0.07,
+        "defaultEsferaPTS": 0.07,
+        "cashbackReais": null,
+        "defaultEsferaReais": 0.07
+      },
+      "saleVolumePrices": {
+        "vangoghEsferaPTS": null,
+        "defaultEsferaPTS": null,
+        "cashbackReais": null,
+        "defaultEsferaReais": null
+      },
+      "salePrice": 0.07,
+      "repositoryId": "desfpop9001",
+      "derivedListPriceFrom": "defaultEsferaPTS",
+      "listPrice": 0.07,
+      "prices": {
+        "listPrices": {
+          "vangoghEsferaPTS": 0.07,
+          "defaultEsferaPTS": 0.07,
+          "cashbackReais": null,
+          "defaultEsferaReais": 0.07
+        },
+        "salePrices": {
+          "vangoghEsferaPTS": 0.07,
+          "defaultEsferaPTS": 0.07,
+          "cashbackReais": null,
+          "defaultEsferaReais": 0.07
+        },
+        "shippingSurcharges": {
+          "vangoghEsferaPTS": null,
+          "defaultEsferaPTS": null,
+          "cashbackReais": null,
+          "defaultEsferaReais": null
+        },
+        "listPrice": 0.07,
+        "salePrice": 0.07,
+        "shippingSurcharge": null
+      },
+      "priceActive": 0.07
+    }
+  ]
+}

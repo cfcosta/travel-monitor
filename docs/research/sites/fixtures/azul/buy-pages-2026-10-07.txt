@@ -1,0 +1,100 @@
+# Azul public pages, loaded logged out in the user's Chrome, 2026-10-07 (no IP block this time; on 2026-10-06 the same browser got a 403 IP block on /br/pt/home, see azul.md).
+
+## Load 3, 20:53 UTC: GET https://compradepontos.voeazul.com.br/
+Title 'Tudo Azul | Login'. The legacy TudoAzul buy/renew/transfer shop shows only a login form (Login = CPF or Azul number, Senha). No price is shown logged out. Akamai Bot Manager cookies: bm_so, bm_sz, bm_lso, _abck; sensor POSTs to an obfuscated path. Nothing was typed.
+
+## Load 6, 20:57 UTC: GET https://www.voeazul.com.br/br/pt/ofertas/facilidades
+Title 'Transfira ou Renove seus pontos com até 312% de bônus'. The page (Adobe AEM SPA) fetches its content as JSON: GET https://www.voeazul.com.br/br/pt/ofertas/facilidades.model.json (165 KB, public). The campaign terms are in :items.root.:items.responsivegrid.:items.landing_page_contain_*.:items.capsule.:items.accordion_text_copy.text (HTML). No buy-points campaign was running; the text (tags stripped):
+
+Regulamento:
+1. TRANSFERÊNCIA DE PONTOS — Transfira pontos com 312% de bônus Vigência: 05/10/2026 a 12/10/2026 
+Termos e Condições da Campanha: 
+1. A Campanha é válida no período de 05/10/2026 às 00:00 até 12/10/2026 às 23:59, horário de 
+Brasília, ou enquanto durarem as condições promocionais, e é destinada aos clientes do Programa de 
+Fidelidade da Azul que realizarem a transferência de Pontos Azul Fidelidade entre contas Azul 
+durante o período desta ação. 
+2. Durante a vigência da campanha, o cliente que transferir pontos entre contas Azul terá bônus de 
+312% na conta de destino. 
+3. O limite máximo de Pontos Azul Fidelidade transferidos por meio desta Campanha é de 100.000 (cem 
+mil) Pontos por CPF durante a vigência. Atingido esse limite, eventuais transferências adicionais 
+ocorrerão sem o bônus promocional.  
+4. A transferência de Pontos Azul Fidelidade ocorre entre contas de titulares distintos do Programa 
+de Fidelidade da Azul, observadas as regras vigentes do Programa quanto a valores, limites e prazos 
+de processamento. 
+4.1. Os Pontos Azul Fidelidade transferidos serão creditados na conta de destino conforme os prazos 
+e regras vigentes do Programa de Fidelidade da Azul. 
+5. Os Pontos Azul Fidelidade recebidos por meio de transferência não são classificados como Pontos 
+Qualificáveis e, portanto, não são válidos para manutenção ou mudança de categoria no Programa Azul 
+Fidelidade. 
+6. A validade dos Pontos Azul Fidelidade transferidos seguirá as regras do Programa de Fidelidade 
+da Azul, considerando a conta de destino.  
+6.1. Caso o titular da conta de destino seja assinante do Plano 10.000 ou 20.000 do Clube Azul, os 
+pontos transferidos não expirarão enquanto o plano estiver ativo. 
+7. Os Pontos bônus terão validade de 24 meses. 
+8. Clientes portadores dos Cartões Azul Itaú receberão 10% de desconto na transferência de pontos 
+ao realizar o pagamento com o Cartão Azul Itaú. 
+9. Caso identifique algum problema operacional no processamento da transferência, deverá em até 10 
+dias corridos sinalizar junto ao Programa de Fidelidade da Azul, que terá até 10 dias úteis para 
+retorno. 
+10. A Azul se reserva o direito de alterar, suspender ou cancelar a promoção a qualquer tempo, sem 
+aviso prévio, sendo garantidas as condições às transferências já efetivadas. 
+11. A Azul poderá, a seu exclusivo critério, cancelar créditos e desclassificar participantes em 
+caso de fraude, uso de dados de terceiros sem autorização ou qualquer prática em desacordo com o 
+regulamento do Programa de Fidelidade da Azul. 
+12. Os clientes aptos para esta promoção devem estar em conformidade com o regulamento do Programa 
+de Fidelidade da Azul. 
+13. Consulte o regulamento completo em: 
+https://www.voeazul.com.br/br/pt/programa-fidelidade/regulamento.html    
+2. RENOVAÇÃO DE PONTOS — Renove pontos com 212% de bônus Vigência: 05/10/2026 a 12/10/2026
+Termos e Condições da Campanha: 
+1. A Campanha é válida no período de 05/10/2026 às 00:00 até 12/10/2026 às 23:59, horário de 
+Brasília, ou enquanto durarem as condições promocionais, e é destinada aos clientes do Programa de 
+Fidelidade da Azul que realizarem a renovação de Pontos Azul Fidelidade no site do Programa durante 
+o período desta ação. 
+2. Durante a vigência da campanha, o cliente que renovar pontos na conta Azul terá 212% pontos 
+bônus. 
+3. A Campanha é válida exclusivamente para a renovação de Pontos Azul Fidelidade já expirados. 
+Pontos ainda válidos (não expirados) não são elegíveis à renovação por meio desta Campanha. 
+4. Os Pontos Azul Fidelidade renovados serão recreditados na conta do cliente conforme os prazos e 
+regras vigentes do Programa de Fidelidade da Azul. 
+5. Os Pontos Azul Fidelidade renovados por meio desta Campanha não são classificados como Pontos 
+Qualificáveis e, portanto, não são válidos para manutenção ou mudança de categoria no Programa Azul 
+Fidelidade. 
+6. A validade dos Pontos Azul Fidelidade renovados seguirá as regras do Programa de Fidelidade da 
+Azul, considerando a conta de destino.  
+6.1. Caso o titular da conta seja assinante do Plano 10.000 ou 20.000 do Clube Azul, os pontos 
+renovados não expirarão enquanto o plano estiver ativo. 
+7. Os Pontos bônus terão validade de 24 meses. 
+8. Clientes portadores dos Cartões Azul Itaú receberão 10% de desconto na renovação de pontos ao 
+realizar o pagamento com um Cartão Azul Itaú. 
+9. Caso identifique algum problema operacional no processamento da renovação, deverá em até 10 dias 
+corridos sinalizar junto ao Programa de Fidelidade da Azul, que terá até 10 dias úteis para 
+retorno. 
+10. A Azul se reserva o direito de alterar, suspender ou cancelar a promoção a qualquer tempo, sem 
+aviso prévio, sendo garantidas as condições às renovações já efetivadas. 
+11. A Azul poderá, a seu exclusivo critério, cancelar créditos e desclassificar participantes em 
+caso de fraude, uso de dados de terceiros sem autorização ou qualquer prática em desacordo com o 
+regulamento do Programa de Fidelidade da Azul. 
+12. Os clientes aptos para esta promoção devem estar em conformidade com o regulamento do Programa 
+de Fidelidade da Azul. 
+13. Consulte o regulamento completo em: 
+https://www.voeazul.com.br/br/pt/programa-fidelidade/regulamento.html
+Leia as regras da promoção na íntegra
+Leia as regras da promoção na íntegra
+Leia as regras da promoção na íntegra
+Leia as regras da promoção na íntegra
+all
+azul/components/content/accordion-text
+
+## Load 7, 21:01 UTC: GET https://www.voeazul.com.br/br/pt/programa-fidelidade/comprar-pontos
+Public explainer, content from comprar-pontos.model.json (209 KB). The FAQ (visible text):
+
+Quantos pontos posso comprar por ano?
+Como Cliente cadastrado no programa Azul Fidelidade, você pode adquirir até 100.000 pontos dentro de um período de 12 meses.
+Qual é o custo para adquirir novos pontos?
+O valor unitário é de R$ 0,07 (sete centavos) por ponto adquirido. O valor total da sua transação será calculado e exibido no momento da solicitação.
+Quais são as formas de pagamento aceitas?
+A compra de pontos Azul deve ser realizada exclusivamente com cartões de crédito emitidos no Brasil. Para sua segurança, é obrigatório que o titular do cartão tenha o mesmo CPF do cliente que solicita ou recebe os pontos.
+Qual é a validade dos pontos que eu comprar?
+A validade dos pontos seguirá as regras do seu nível atual no programa Azul Fidelidade.
+Para mais informações importantes sobre Compra de Pontos Azul, acesse o nosso documento de Termos e Condições no link abaixo:

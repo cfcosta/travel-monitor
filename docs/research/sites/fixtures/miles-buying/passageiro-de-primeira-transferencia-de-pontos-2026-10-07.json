@@ -1,0 +1,1487 @@
+{
+  "_note": "Passageiro de Primeira, WordPress REST API, category transferencia-de-pontos (id 3904), every post from the category start (2026-03-13) to 2026-10-07. GET https://passageirodeprimeira.com/wp-json/wp/v2/posts?categories=3904&per_page=100&page=N&_fields=id,date,link,title; date is the site local time (America/Sao_Paulo). Fetched 2026-10-07 with plain HTTP.",
+  "posts": [
+    {
+      "id": 572632,
+      "date": "2026-10-06T17:10:29",
+      "title": "Etihad Guest oferece até 40% de bônus nas transferências de pontos da Revolut",
+      "link": "https://passageirodeprimeira.com/etihad-guest-oferece-ate-40-de-bonus-nas-transferencias-de-pontos-da-revolut/"
+    },
+    {
+      "id": 572513,
+      "date": "2026-10-06T13:20:49",
+      "title": "Azul oferece até 100% de bônus nas transferências de pontos do C6 Bank",
+      "link": "https://passageirodeprimeira.com/azul-oferece-ate-100-de-bonus-nas-transferencias-de-pontos-do-c6-bank/"
+    },
+    {
+      "id": 572093,
+      "date": "2026-10-05T12:00:14",
+      "title": "Transfira pontos Livelo + dinheiro para a Azul – milheiro a partir de R$ 13,30",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-livelo-dinheiro-para-a-azul-milheiro-a-partir-de-r-1330/"
+    },
+    {
+      "id": 572038,
+      "date": "2026-10-05T10:48:14",
+      "title": "Azul Fidelidade oferece até 100% de bônus nas transferências de pontos Livelo",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-100-de-bonus-nas-transferencias-de-pontos-livelo/"
+    },
+    {
+      "id": 572023,
+      "date": "2026-10-05T10:07:11",
+      "title": "LATAM Pass oferece 25% de bônus nas transferências de pontos Itaú e Credicard",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-25-de-bonus-nas-transferencias-de-pontos-itau-e-credicard/"
+    },
+    {
+      "id": 571672,
+      "date": "2026-10-02T16:30:42",
+      "title": "Livelo oferece 20% de bônus nas transferências de pontos para Flying Blue",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-20-de-bonus-nas-transferencias-de-pontos-para-flying-blue-2/"
+    },
+    {
+      "id": 571461,
+      "date": "2026-10-02T09:20:26",
+      "title": "Livelo oferece até 40% de bônus nas transferências de pontos para o Etihad Guest",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-ate-40-de-bonus-nas-transferencias-de-pontos-para-o-etihad-guest-3/"
+    },
+    {
+      "id": 571197,
+      "date": "2026-10-01T18:30:17",
+      "title": "Azul Fidelidade oferece até 100% de bônus nas transferências de pontos do Inter Loop",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-100-bonus-transferencias-pontos-inter-loop/"
+    },
+    {
+      "id": 571285,
+      "date": "2026-10-01T17:00:04",
+      "title": "LATAM Pass oferece 25% de bônus nas transferências de pontos do Banestes",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-25-de-bonus-nas-transferencias-de-pontos-do-banestes/"
+    },
+    {
+      "id": 571270,
+      "date": "2026-10-01T13:20:53",
+      "title": "Livelo oferece 50% de bônus nas transferências para o ConnectMiles",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-50-bonus-transferencias-para-connectmiles/"
+    },
+    {
+      "id": 570684,
+      "date": "2026-09-29T17:40:50",
+      "title": "LATAM Pass oferece 25% de bônus para clientes Nubank Ultravioleta na primeira transferência realizada com a ativação do Modo LATAM Pass",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-25-de-bonus-nas-transferencias-de-pontos-do-nubank-ultravioleta/"
+    },
+    {
+      "id": 570492,
+      "date": "2026-09-29T09:40:22",
+      "title": "Apenas hoje! Azul oferece até 110% de bônus nas transferências de pontos do UAU Caixa",
+      "link": "https://passageirodeprimeira.com/azul-oferece-ate-110-bonus-transferencias-pontos-uau-caixa-2/"
+    },
+    {
+      "id": 570220,
+      "date": "2026-09-28T11:42:08",
+      "title": "LATAM Pass oferece 25% de bônus nas transferências de pontos do Sicredi",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-25-de-bonus-nas-transferencias-de-pontos-do-sicredi-2/"
+    },
+    {
+      "id": 570168,
+      "date": "2026-09-28T10:20:04",
+      "title": "Apenas hoje! Azul Fidelidade oferece até 110% de bônus na transferência de pontos do Porto Bank",
+      "link": "https://passageirodeprimeira.com/apenas-hoje-azul-fidelidade-oferece-ate-110-de-bonus-na-transferencia-de-pontos-do-porto-bank/"
+    },
+    {
+      "id": 569724,
+      "date": "2026-09-27T09:00:24",
+      "title": "Último dia! Azul Fidelidade oferece até 110% de bônus nas transferências de pontos de vários parceiros – incluindo Livelo e Esfera",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-azul-fidelidade-oferece-ate-110-de-bonus-nas-transferencias-de-pontos-de-varios-parceiros-incluindo-livelo-e-esfera/"
+    },
+    {
+      "id": 568997,
+      "date": "2026-09-25T10:30:12",
+      "title": "Último dia! LATAM Pass oferece 25% de bônus na transferência de pontos da Esfera",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-25-de-bonus-na-transferencia-de-pontos-da-esfera-2/"
+    },
+    {
+      "id": 568941,
+      "date": "2026-09-23T11:30:02",
+      "title": "Transfira pontos Esfera + dinheiro para Azul – milheiro a partir de R$ 13,01",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-esfera-dinheiro-para-azul-milheiro-a-partir-de-r-1193/"
+    },
+    {
+      "id": 568938,
+      "date": "2026-09-23T10:45:07",
+      "title": "Transfira pontos Livelo + dinheiro para a Azul – milheiro a partir de R$ 12,76",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-livelo-dinheiro-para-a-azul-milheiro-a-partir-de-r-1276/"
+    },
+    {
+      "id": 568928,
+      "date": "2026-09-23T09:35:58",
+      "title": "Azul Fidelidade oferece até 110% de bônus nas transferências de pontos de vários parceiros – incluindo Livelo e Esfera",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-110-de-bonus-nas-transferencias-de-pontos-de-varios-parceiros-incluindo-livelo-e-esfera/"
+    },
+    {
+      "id": 568774,
+      "date": "2026-09-23T09:19:00",
+      "title": "LATAM Pass oferece 25% de bônus na transferência de pontos do Banrisul",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-25-de-bonus-na-transferencia-de-pontos-do-banrisul-2/"
+    },
+    {
+      "id": 568151,
+      "date": "2026-09-22T17:41:37",
+      "title": "Últimas horas! LATAM Pass oferece 25% de bônus na transferência de pontos Livelo.",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-25-de-bonus-na-transferencia-de-pontos-livelo/"
+    },
+    {
+      "id": 568311,
+      "date": "2026-09-21T15:20:50",
+      "title": "Smiles oferece até 80% de bônus nas transferências de pontos do BB Empresas",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-80-de-bonus-nas-transferencias-de-pontos-do-bb-empresas/"
+    },
+    {
+      "id": 568240,
+      "date": "2026-09-21T11:36:57",
+      "title": "Milheiro LATAM a partir de R$ 23,58! Transfira pontos Livelo para o LATAM Pass usando pontos + dinheiro",
+      "link": "https://passageirodeprimeira.com/milheiro-latam-a-partir-r-2358-transfira-pontos-livelo-latam-pass-usando-pontos-dinheiro/"
+    },
+    {
+      "id": 568161,
+      "date": "2026-09-21T10:22:36",
+      "title": "Esfera oferece 25% de bônus em transferências para o Iberia Club",
+      "link": "https://passageirodeprimeira.com/esfera-oferece-25-de-bonus-em-transferencias-para-o-iberia-club-2/"
+    },
+    {
+      "id": 566235,
+      "date": "2026-09-18T11:30:51",
+      "title": "Último dia: LATAM Pass oferece 25% de bônus nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-25-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito-3/"
+    },
+    {
+      "id": 567728,
+      "date": "2026-09-18T07:50:38",
+      "title": "Prorrogado! Smiles oferece até 80% de bônus nas transferências de pontos da Livelo",
+      "link": "https://passageirodeprimeira.com/prorrogado-smiles-oferece-ate-80-de-bonus-nas-transferencias-de-pontos-da-livelo-2/"
+    },
+    {
+      "id": 567461,
+      "date": "2026-09-17T13:00:08",
+      "title": "Gere o milheiro Smiles a partir de R$ 15,54 transferindo pontos Livelo + dinheiro",
+      "link": "https://passageirodeprimeira.com/gere-o-milheiro-smiles-a-partir-de-r-1548-transferindo-pontos-livelo-dinheiro/"
+    },
+    {
+      "id": 567425,
+      "date": "2026-09-17T11:30:50",
+      "title": "Transfira pontos Esfera + dinheiro para Azul – milheiro a partir de R$ 11,43",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-esfera-dinheiro-para-azul-milheiro-a-partir-de-r-1143/"
+    },
+    {
+      "id": 567408,
+      "date": "2026-09-17T10:30:50",
+      "title": "Smiles oferece até 80% de bônus nas transferências de pontos da Livelo",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-80-de-bonus-nas-transferencias-de-pontos-da-livelo-2/"
+    },
+    {
+      "id": 567343,
+      "date": "2026-09-17T09:50:40",
+      "title": "Azul Fidelidade oferece até 110% de bônus nas transferências da Esfera",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-110-de-bonus-nas-transferencias-da-esfera/"
+    },
+    {
+      "id": 567037,
+      "date": "2026-09-16T12:00:56",
+      "title": "Esfera oferece 55% de bônus nas transferências para o ConnectMiles",
+      "link": "https://passageirodeprimeira.com/esfera-oferece-55-de-bonus-nas-transferencias-para-o-connectmiles/"
+    },
+    {
+      "id": 566203,
+      "date": "2026-09-15T20:00:22",
+      "title": "Últimas horas! Smiles oferece até 80% de bônus nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-80-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito-8/"
+    },
+    {
+      "id": 566413,
+      "date": "2026-09-15T17:30:40",
+      "title": "Assine o Clube Smiles e transfira pontos Premmia com até 120% de bônus – CPM a partir de R$ 14,63",
+      "link": "https://passageirodeprimeira.com/assine-o-clube-smiles-e-transfira-pontos-premmia-com-ate-120-de-bonus-cpm-a-partir-de-r-1463/"
+    },
+    {
+      "id": 566823,
+      "date": "2026-09-15T16:50:23",
+      "title": "Azul Fidelidade oferece até 110% de bônus nas transferências de pontos do Itaú",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-110-de-bonus-nas-transferencias-de-pontos-do-itau-2/"
+    },
+    {
+      "id": 566521,
+      "date": "2026-09-15T10:20:51",
+      "title": "Esfera reduz paridade para o TAP Miles&amp;Go por tempo limitado",
+      "link": "https://passageirodeprimeira.com/esfera-reduz-paridade-para-o-tap-milesgo-por-tempo-limitado/"
+    },
+    {
+      "id": 566269,
+      "date": "2026-09-14T12:40:26",
+      "title": "Gere o milheiro Smiles a partir de R$ 15,97 transferindo pontos Livelo + dinheiro",
+      "link": "https://passageirodeprimeira.com/gere-o-milheiro-smiles-a-partir-de-r-1597-transferindo-pontos-livelo-dinheiro/"
+    },
+    {
+      "id": 566176,
+      "date": "2026-09-14T11:58:57",
+      "title": "Azul oferece até 110% de bônus nas transferências de pontos do C6 Bank",
+      "link": "https://passageirodeprimeira.com/azul-oferece-ate-110-de-bonus-nas-transferencias-de-pontos-do-c6-bank-2/"
+    },
+    {
+      "id": 565719,
+      "date": "2026-09-11T11:10:38",
+      "title": "Azul Fidelidade oferece até 110% de bônus nas transferências de pontos de vários parceiros",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-110-bonus-transferencias-pontos-varios-parceiros/"
+    },
+    {
+      "id": 564590,
+      "date": "2026-09-10T17:50:08",
+      "title": "Últimas horas! Ganhe até 120% de bônus nas transferências de pontos da Livelo para o Azul Fidelidade",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-120-de-bonus-nas-transferencias-de-pontos-da-livelo-para-o-azul-fidelidade-3/"
+    },
+    {
+      "id": 565444,
+      "date": "2026-09-10T10:36:20",
+      "title": "LATAM Pass oferece 25% de bônus nas transferências de pontos do C6 Bank",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-25-de-bonus-nas-transferencias-de-pontos-do-c6-bank-3/"
+    },
+    {
+      "id": 564801,
+      "date": "2026-09-08T19:00:43",
+      "title": "Converta o cashback do PicPay em milhas no LATAM Pass",
+      "link": "https://passageirodeprimeira.com/converta-o-cashback-do-picpay-em-milhas-no-latam-pass/"
+    },
+    {
+      "id": 564604,
+      "date": "2026-09-08T15:00:02",
+      "title": "Converta pontos ALL Accor para o KrisFlyer com 50% de bônus",
+      "link": "https://passageirodeprimeira.com/converta-pontos-all-accor-para-o-krisflyer-com-50-de-bonus-2/"
+    },
+    {
+      "id": 564667,
+      "date": "2026-09-08T12:30:14",
+      "title": "Transfira pontos Livelo + dinheiro para a Azul – milheiro a partir de R$ 11,85",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-livelo-dinheiro-para-a-azul-milheiro-a-partir-de-r-1171/"
+    },
+    {
+      "id": 563260,
+      "date": "2026-09-04T14:40:12",
+      "title": "Últimas horas: receba 25% de bônus nas transferências de pontos do Itaú e Credicard para o LATAM Pass",
+      "link": "https://passageirodeprimeira.com/receba-25-de-bonus-nas-transferencias-de-pontos-do-itau-e-credicard-para-o-latam-pass/"
+    },
+    {
+      "id": 558110,
+      "date": "2026-09-04T08:00:53",
+      "title": "Radisson Rewards lança parceria com Finnair Plus para transferência de pontos e status match",
+      "link": "https://passageirodeprimeira.com/radisson-rewards-lanca-parceria-finnair-plus-pontos-status/"
+    },
+    {
+      "id": 564021,
+      "date": "2026-09-03T18:00:11",
+      "title": "Smiles oferece até 80% de bônus nas transferências de pontos do Coopera",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-80-de-bonus-nas-transferencias-de-pontos-do-coopera/"
+    },
+    {
+      "id": 564123,
+      "date": "2026-09-03T15:59:41",
+      "title": "ALL Accor e Esfera: crédito imediato dos pontos + até 30% de bônus",
+      "link": "https://passageirodeprimeira.com/all-accor-e-esfera-credito-imediato-dos-pontos-ate-30-de-bonus/"
+    },
+    {
+      "id": 563880,
+      "date": "2026-09-03T14:40:31",
+      "title": "Azul oferece até 110% de bônus nas transferências de pontos do UAU Caixa",
+      "link": "https://passageirodeprimeira.com/azul-oferece-ate-110-bonus-transferencias-pontos-uau-caixa/"
+    },
+    {
+      "id": 563222,
+      "date": "2026-09-01T18:40:27",
+      "title": "Azul Fidelidade oferece até 110% de bônus nas transferências de pontos do Inter Loop e BRB",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-110-de-bonus-nas-transferencias-de-pontos-do-inter-loop-e-brb/"
+    },
+    {
+      "id": 563001,
+      "date": "2026-08-31T14:30:59",
+      "title": "LATAM Pass oferece 25% de bônus nas transferências de pontos do Nubank",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-25-de-bonus-nas-transferencias-de-pontos-do-nubank/"
+    },
+    {
+      "id": 562174,
+      "date": "2026-08-28T08:00:10",
+      "title": "Prorrogado! Smiles oferece até 80% de bônus nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/so-hoje-smiles-oferece-ate-80-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito-5/"
+    },
+    {
+      "id": 562267,
+      "date": "2026-08-27T14:00:11",
+      "title": "LATAM Pass oferece 25% de bônus nas transferências de pontos do C6 Bank",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-25-bonus-transferencias-pontos-c6-bank/"
+    },
+    {
+      "id": 562239,
+      "date": "2026-08-27T12:00:43",
+      "title": "Gere o milheiro Smiles a partir de R$ 15,81 transferindo pontos Livelo + dinheiro",
+      "link": "https://passageirodeprimeira.com/gere-o-milheiro-smiles-a-partir-de-r-1581-transferindo-pontos-livelo-dinheiro/"
+    },
+    {
+      "id": 561735,
+      "date": "2026-08-26T17:00:19",
+      "title": "Azul Fidelidade oferece até 120% de bônus nas transferências de pontos do Inter Loop",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-120-de-bonus-nas-transferencias-de-pontos-do-inter-loop/"
+    },
+    {
+      "id": 561226,
+      "date": "2026-08-25T11:40:26",
+      "title": "Só hoje! Transfira pontos Sicredi para a Smiles com até 70% de bônus",
+      "link": "https://passageirodeprimeira.com/so-hoje-transfira-pontos-sicredi-para-a-smiles-com-ate-70-de-bonus/"
+    },
+    {
+      "id": 560861,
+      "date": "2026-08-24T19:10:00",
+      "title": "Receba até 120% de bônus nas transferências do C6 Bank para o Azul Fidelidade",
+      "link": "https://passageirodeprimeira.com/receba-ate-120-de-bonus-nas-transferencias-do-c6-bank-para-o-azul-fidelidade/"
+    },
+    {
+      "id": 560926,
+      "date": "2026-08-24T11:09:27",
+      "title": "Smiles oferece até 70% de bônus nas transferências de pontos do Uau CAIXA",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-70-de-bonus-nas-transferencias-de-pontos-do-uau-caixa-2/"
+    },
+    {
+      "id": 559334,
+      "date": "2026-08-21T10:37:12",
+      "title": "Último dia! Ganhe 25% de bônus na transferência de pontos de vários bancos para o LATAM Pass",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-25-bonus-diversos-bancos/"
+    },
+    {
+      "id": 560277,
+      "date": "2026-08-20T11:14:21",
+      "title": "Transfira pontos Livelo + dinheiro para a Azul – milheiro a partir de R$ 11,80",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-livelo-dinheiro-para-a-azul-milheiro-a-partir-de-r-1180/"
+    },
+    {
+      "id": 560163,
+      "date": "2026-08-20T08:26:03",
+      "title": "Ganhe até 120% de bônus nas transferências de pontos da Livelo para o Azul Fidelidade",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-120-de-bonus-nas-transferencias-de-pontos-da-livelo-para-o-azul-fidelidade-2/"
+    },
+    {
+      "id": 560069,
+      "date": "2026-08-19T17:40:20",
+      "title": "Ganhe até 35% de cashback na Temu, Beleza na Web, C&A e mais pelo Inter Shop",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-35-de-cashback-na-temu-beleza-na-web-ca-e-mais-pelo-inter-shop/"
+    },
+    {
+      "id": 559694,
+      "date": "2026-08-18T14:53:15",
+      "title": "Transfira pontos Inter Loop para a Smiles e receba até 70% de bônus",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-inter-loop-para-smiles-receba-ate-70-bonus/"
+    },
+    {
+      "id": 559500,
+      "date": "2026-08-17T16:21:21",
+      "title": "Ótimo! Transfira pontos Livelo + dinheiro para o Flying Blue – milheiro a partir de R$ 67,85",
+      "link": "https://passageirodeprimeira.com/otimo-transfira-pontos-livelo-dinheiro-para-o-flying-blue-milheiro-a-partir-de-r-6785/"
+    },
+    {
+      "id": 559327,
+      "date": "2026-08-17T13:40:04",
+      "title": "Livelo oferece 30% de bônus nas transferências de pontos para Flying Blue",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-30-bonus-transferencias-pontos-flying-blue/"
+    },
+    {
+      "id": 559270,
+      "date": "2026-08-17T11:50:34",
+      "title": "Azul Fidelidade oferece até 120% de bônus nas transferências de pontos do Itaú e Porto Bank",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-120-de-bonus-nas-transferencias-de-pontos-do-itau-e-porto-bank/"
+    },
+    {
+      "id": 558569,
+      "date": "2026-08-16T11:00:41",
+      "title": "Últimas horas! Azul Fidelidade oferece até 120% de bônus nas transferências de pontos de vários parceiros – incluindo Esfera",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-120-bonus-transferencia-pontos/"
+    },
+    {
+      "id": 558788,
+      "date": "2026-08-13T15:11:31",
+      "title": "Milheiro Azul a partir de R$ 11,82! Transfira pontos Inter Loop + dinheiro",
+      "link": "https://passageirodeprimeira.com/milheiro-azul-r-11-81-compre-pontos-inter-loop-transferencia-azul-fidelidade/"
+    },
+    {
+      "id": 558548,
+      "date": "2026-08-13T10:40:32",
+      "title": "Smiles oferece até 80% de bônus nas transferências de pontos do Itaú",
+      "link": "https://passageirodeprimeira.com/smiles-80-bonus-transferencias-pontos-10-off-voos-gol/"
+    },
+    {
+      "id": 557475,
+      "date": "2026-08-12T17:45:01",
+      "title": "Está acabando! Ganhe até 120% de bônus nas transferências de pontos da Livelo para o Azul Fidelidade",
+      "link": "https://passageirodeprimeira.com/ganhe-ate-120-de-bonus-nas-transferencias-de-pontos-da-livelo-para-o-azul-fidelidade/"
+    },
+    {
+      "id": 557883,
+      "date": "2026-08-11T09:19:17",
+      "title": "Milheiro Azul a partir de R$ 11,32 para Clube Top ao enviar pontos Livelo + dinheiro",
+      "link": "https://passageirodeprimeira.com/milheiro-azul-a-partir-de-r-1132-para-clube-top-ao-enviar-pontos-livelo-dinheiro/"
+    },
+    {
+      "id": 557619,
+      "date": "2026-08-10T11:25:22",
+      "title": "Milheiro Smiles a partir de R$ 15,70 transferindo pontos Livelo + dinheiro",
+      "link": "https://passageirodeprimeira.com/milheiro-smiles-transferindo-pontos-livelo-dinheiro/"
+    },
+    {
+      "id": 557578,
+      "date": "2026-08-10T10:43:59",
+      "title": "Smiles oferece até 80% de bônus nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-80-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito-7/"
+    },
+    {
+      "id": 557568,
+      "date": "2026-08-10T10:26:02",
+      "title": "LATAM Pass oferece 25% de bônus nas transferências de pontos do Itaú e Credicard",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-25-de-bonus-nas-transferencias-de-pontos-do-itau-e-credicard-3/"
+    },
+    {
+      "id": 557492,
+      "date": "2026-08-10T10:01:07",
+      "title": "Transfira pontos Livelo + dinheiro para a Azul – milheiro a partir de R$ 12,14",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-livelo-dinheiro-para-a-azul-milheiro-a-partir-de-r-1214/"
+    },
+    {
+      "id": 556972,
+      "date": "2026-08-07T07:30:31",
+      "title": "Último dia para ganhar até 120% de bônus nas transferências de pontos do Sicredi para o Azul Fidelidade",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-para-ganhar-ate-120-de-bonus-nas-transferencias-de-pontos-do-sicredi-para-o-azul-fidelidade/"
+    },
+    {
+      "id": 556751,
+      "date": "2026-08-06T12:10:19",
+      "title": "Milheiro Azul a partir de R$ 13,13! Compre pontos Inter Loop na transferência para o Azul Fidelidade",
+      "link": "https://passageirodeprimeira.com/milheiro-azul-a-partir-de-r-1313-compre-pontos-inter-loop-na-transferencia-para-o-azul-fidelidade/"
+    },
+    {
+      "id": 556470,
+      "date": "2026-08-05T17:20:58",
+      "title": "Azul Fidelidade oferece até 120% de bônus nas transferências de pontos do Sicredi",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-120-de-bonus-nas-transferencias-de-pontos-do-sicredi/"
+    },
+    {
+      "id": 556087,
+      "date": "2026-08-04T13:00:51",
+      "title": "Azul Fidelidade oferece até 120% de bônus nas transferências de pontos do Inter e Caixa",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-120-de-bonus-nas-transferencias-de-pontos-do-inter-e-caixa/"
+    },
+    {
+      "id": 553917,
+      "date": "2026-07-27T11:40:08",
+      "title": "LATAM Pass oferece 20% de bônus nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-20-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito/"
+    },
+    {
+      "id": 553671,
+      "date": "2026-07-25T10:20:30",
+      "title": "Transfira pontos Premmia para a Smiles com até 110% de bônus – CPM a partir de R$ 14,04",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-premmia-para-a-smiles-com-ate-110-de-bonus-cpm-a-partir-de-r-1404/"
+    },
+    {
+      "id": 552814,
+      "date": "2026-07-22T13:16:12",
+      "title": "Transfira pontos Esfera + dinheiro para Azul – milheiro a partir de R$ 11,68",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-esfera-dinheiro-para-azul-milheiro-a-partir-de-r-1168/"
+    },
+    {
+      "id": 552772,
+      "date": "2026-07-22T11:49:56",
+      "title": "PP 15 anos! Smiles oferece até 80% de bônus nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/pp-15-anos-smiles-oferece-ate-80-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito/"
+    },
+    {
+      "id": 552755,
+      "date": "2026-07-22T09:15:08",
+      "title": "Azul Fidelidade oferece até 115% de bônus nas transferências da Esfera",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-115-de-bonus-nas-transferencias-da-esfera/"
+    },
+    {
+      "id": 551916,
+      "date": "2026-07-20T18:50:46",
+      "title": "Último dia! Esfera oferece até 55% de bônus nas transferências para o ConnectMiles",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-esfera-oferece-ate-55-de-bonus-nas-transferencias-para-o-connectmiles-2/"
+    },
+    {
+      "id": 552074,
+      "date": "2026-07-20T13:40:55",
+      "title": "Azul oferece até 110% nas transferências de pontos do UAU Caixa",
+      "link": "https://passageirodeprimeira.com/azul-oferece-ate-110-nas-transferencias-de-pontos-do-uau-caixa-2/"
+    },
+    {
+      "id": 552110,
+      "date": "2026-07-20T13:10:57",
+      "title": "Smiles oferece até 80% de bônus nas transferências de pontos dos cartões Itaú",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-80-de-bonus-nas-transferencias-de-pontos-dos-cartoes-itau-3/"
+    },
+    {
+      "id": 552058,
+      "date": "2026-07-20T11:50:04",
+      "title": "Azul oferece até 115% de bônus nas transferências de pontos do C6 Bank",
+      "link": "https://passageirodeprimeira.com/azul-oferece-ate-115-de-bonus-nas-transferencias-de-pontos-do-c6-bank/"
+    },
+    {
+      "id": 551680,
+      "date": "2026-07-17T12:40:41",
+      "title": "Esfera oferece até 55% de bônus nas transferências para o ConnectMiles",
+      "link": "https://passageirodeprimeira.com/esfera-oferece-ate-55-de-bonus-nas-transferencias-para-o-connectmiles-2/"
+    },
+    {
+      "id": 550940,
+      "date": "2026-07-15T15:40:59",
+      "title": "Smiles oferece até 80% de bônus nas transferências do Inter",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-80-de-bonus-nas-transferencias-do-inter-2/"
+    },
+    {
+      "id": 550815,
+      "date": "2026-07-15T12:10:26",
+      "title": "Último dia! Azul Fidelidade oferece até 115% de bônus nas transferências de pontos do Itaú",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-azul-fidelidade-oferece-ate-115-de-bonus-nas-transferencias-de-pontos-do-itau/"
+    },
+    {
+      "id": 550539,
+      "date": "2026-07-14T12:53:37",
+      "title": "Transfira pontos Esfera para o ALL Accor e receba 20% de volta + até 10% de bônus",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-esfera-para-o-all-accor-e-receba-20-de-volta-ate-10-de-bonus/"
+    },
+    {
+      "id": 550061,
+      "date": "2026-07-13T13:20:27",
+      "title": "Smiles oferece até 70% de bônus nas transferências de pontos do Sicredi",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-70-de-bonus-nas-transferencias-de-pontos-do-sicredi-12/"
+    },
+    {
+      "id": 550028,
+      "date": "2026-07-13T11:03:27",
+      "title": "Azul Fidelidade oferece até 115% de bônus nas transferências de pontos do Itaú",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-115-de-bonus-nas-transferencias-de-pontos-do-itau/"
+    },
+    {
+      "id": 549329,
+      "date": "2026-07-12T09:00:15",
+      "title": "Último dia! Livelo oferece 40% de bônus nas transferências para o ConnectMiles",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-livelo-oferece-40-de-bonus-nas-transferencias-para-o-connectmiles/"
+    },
+    {
+      "id": 548407,
+      "date": "2026-07-11T11:00:04",
+      "title": "Livelo oferece 50% de bônus nas transferências de pontos para o Hilton Honors",
+      "link": "https://passageirodeprimeira.com/livelo-inicia-parceria-com-hilton-honors-e-oferece-50-de-bonus-nas-transferencias-de-pontos/"
+    },
+    {
+      "id": 549714,
+      "date": "2026-07-10T11:40:52",
+      "title": "Último dia! Smiles oferece até 70% de bônus nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-smiles-oferece-ate-70-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito/"
+    },
+    {
+      "id": 548898,
+      "date": "2026-07-09T09:00:53",
+      "title": "Azul Fidelidade oferece até 115% de bônus nas transferências de pontos do Inter Loop",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-115-de-bonus-nas-transferencias-de-pontos-do-inter-loop/"
+    },
+    {
+      "id": 549333,
+      "date": "2026-07-08T19:00:37",
+      "title": "Prorrogado! Smiles oferece até 70% de bônus nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-smiles-oferece-ate-70-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito/"
+    },
+    {
+      "id": 548816,
+      "date": "2026-07-08T09:59:34",
+      "title": "LATAM Pass oferece 20% de bônus nas transferências de pontos do BB Empresas",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-20-de-bonus-nas-transferencias-de-pontos-do-bb-empresas-2/"
+    },
+    {
+      "id": 548877,
+      "date": "2026-07-07T14:10:07",
+      "title": "Transfira pontos Livelo para a Smiles usando pontos + dinheiro – milheiro a partir de R$ 15,40",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-livelo-para-a-smiles-usando-pontos-dinheiro-milheiro-a-partir-de-r-1540/"
+    },
+    {
+      "id": 548779,
+      "date": "2026-07-07T11:09:22",
+      "title": "Transfira pontos Esfera para a Smiles usando pontos + dinheiro – milheiro Smiles a partir de R$ 15,63",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-esfera-para-a-smiles-usando-pontos-dinheiro-milheiro-smiles-a-partir-de-r-1563/"
+    },
+    {
+      "id": 548746,
+      "date": "2026-07-07T10:00:04",
+      "title": "Smiles oferece até 70% de bônus nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-70-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito-4/"
+    },
+    {
+      "id": 548304,
+      "date": "2026-07-06T12:30:25",
+      "title": "LATAM Pass oferece 20% de bônus nas transferências de pontos do C6 Bank",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-20-de-bonus-nas-transferencias-de-pontos-do-c6-bank-3/"
+    },
+    {
+      "id": 548309,
+      "date": "2026-07-06T11:58:36",
+      "title": "PP 15 anos! Transfira pontos Esfera + dinheiro para Azul – milheiro a partir de R$ 12,22",
+      "link": "https://passageirodeprimeira.com/pp-15-anos-transfira-pontos-esfera-dinheiro-para-azul-milheiro-a-partir-de-r-1222/"
+    },
+    {
+      "id": 548074,
+      "date": "2026-07-06T08:50:38",
+      "title": "PP 15 anos! Azul Fidelidade oferece até 115% de bônus nas transferências de pontos – incluindo Livelo e Esfera",
+      "link": "https://passageirodeprimeira.com/pp-15-anos-azul-fidelidade-oferece-ate-115-de-bonus-nas-transferencias-de-pontos-incluindo-livelo-e-esfera/"
+    },
+    {
+      "id": 548144,
+      "date": "2026-07-06T07:40:02",
+      "title": "Prorrogado! Livelo oferece 40% de bônus nas transferências para o ConnectMiles",
+      "link": "https://passageirodeprimeira.com/prorrogado-livelo-oferece-40-de-bonus-nas-transferencias-para-o-connectmiles/"
+    },
+    {
+      "id": 547763,
+      "date": "2026-07-05T17:00:40",
+      "title": "Últimas horas! Azul Fidelidade com até 115% de bônus nas transferências de pontos da Livelo",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-azul-fidelidade-com-ate-115-de-bonus-nas-transferencias-de-pontos-da-livelo/"
+    },
+    {
+      "id": 547762,
+      "date": "2026-07-05T13:40:51",
+      "title": "Último dia! LATAM Pass oferece 20% de bônus nas transferências de pontos do Itaú e Credicard",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-20-bonus-transferencias-pontos-itau-credicard-3/"
+    },
+    {
+      "id": 547710,
+      "date": "2026-07-03T13:00:57",
+      "title": "PP 15 anos! Último dia para ganhar até 30% de bônus ao transferir pontos Azul para ALL Accor",
+      "link": "https://passageirodeprimeira.com/pp-15-anos-ultimo-dia-para-ganhar-ate-30-de-bonus-ao-transferir-pontos-azul-para-all-accor/"
+    },
+    {
+      "id": 546883,
+      "date": "2026-07-02T11:10:31",
+      "title": "Transfira pontos Livelo + dinheiro para a Azul – milheiro a partir de R$ 12,15",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-livelo-para-o-azul-fidelidade-usando-pontos-dinheiro-milheiro-a-partir-de-r-1233/"
+    },
+    {
+      "id": 546676,
+      "date": "2026-07-02T08:42:24",
+      "title": "Azul Fidelidade oferece até 115% de bônus nas transferências de pontos da Livelo",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-115-de-bonus-nas-transferencias-de-pontos-da-livelo/"
+    },
+    {
+      "id": 546612,
+      "date": "2026-07-01T10:15:16",
+      "title": "LATAM Pass oferece 20% de bônus nas transferências de pontos do Itaú e Credicard",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-20-de-bonus-nas-transferencias-de-pontos-do-itau-e-credicard-2/"
+    },
+    {
+      "id": 546507,
+      "date": "2026-07-01T07:40:23",
+      "title": "PP 15 anos! Ganhe até 30% de bônus ao transferir pontos Azul para ALL Accor",
+      "link": "https://passageirodeprimeira.com/pp-15-anos-ganhe-bonus-ao-transferir-pontos-azul-para-all-accor/"
+    },
+    {
+      "id": 546251,
+      "date": "2026-06-30T11:00:49",
+      "title": "Milheiro LATAM a partir de R$ 23,50! Transfira pontos Livelo para o LATAM Pass usando pontos + dinheiro",
+      "link": "https://passageirodeprimeira.com/milheiro-latam-a-partir-de-r-2350-transfira-pontos-livelo-para-o-latam-pass-usando-pontos-dinheiro/"
+    },
+    {
+      "id": 546194,
+      "date": "2026-06-30T10:01:49",
+      "title": "Só hoje! LATAM Pass oferece 25% de bônus na transferência de pontos Livelo",
+      "link": "https://passageirodeprimeira.com/so-hoje-latam-pass-oferece-25-de-bonus-na-transferencia-de-pontos-livelo-4/"
+    },
+    {
+      "id": 545707,
+      "date": "2026-06-26T17:30:04",
+      "title": "Confira 4 promoções para transferência de pontos com bônus vigentes hoje",
+      "link": "https://passageirodeprimeira.com/confira-4-promocoes-para-transferencia-de-pontos-com-bonus-vigentes-hoje/"
+    },
+    {
+      "id": 545495,
+      "date": "2026-06-26T10:59:09",
+      "title": "Livelo oferece 40% de bônus nas transferências para o ConnectMiles",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-40-de-bonus-nas-transferencias-para-o-connectmiles/"
+    },
+    {
+      "id": 544743,
+      "date": "2026-06-26T10:29:55",
+      "title": "Último dia! Azul Fidelidade com até 120% de bônus nas transferências de pontos – incluindo Livelo e Esfera",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-azul-fidelidade-com-120-bonus-transferencias-pontos-incluindo-livelo-esfera/"
+    },
+    {
+      "id": 545253,
+      "date": "2026-06-25T17:10:14",
+      "title": "Transfira pontos Livelo para a Smiles usando pontos + dinheiro – milheiro a partir de R$ 15,16",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-livelo-para-a-smiles-usando-pontos-dinheiro-milheiro-a-partir-de-r-1485/"
+    },
+    {
+      "id": 545060,
+      "date": "2026-06-25T12:40:52",
+      "title": "Último dia! Esfera oferece até 55% de bônus nas transferências para o ConnectMiles",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-esfera-oferece-ate-55-de-bonus-nas-transferencias-para-o-connectmiles/"
+    },
+    {
+      "id": 545065,
+      "date": "2026-06-25T10:30:44",
+      "title": "Só hoje! Smiles oferece até 80% de bônus nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/so-hoje-smiles-oferece-ate-80-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito-4/"
+    },
+    {
+      "id": 544840,
+      "date": "2026-06-24T18:00:56",
+      "title": "Segue valendo! Ganhe até 120% nas transferências de pontos para o Azul Fidelidade",
+      "link": "https://passageirodeprimeira.com/segue-valendo-ganhe-ate-120-nas-transferencias-de-pontos-para-o-azul-fidelidade/"
+    },
+    {
+      "id": 544182,
+      "date": "2026-06-23T11:12:37",
+      "title": "LATAM Pass oferece 20% de bônus nas transferências de pontos do Itaú e Credicard",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-20-de-bonus-nas-transferencias-de-pontos-do-itau-e-credicard/"
+    },
+    {
+      "id": 544059,
+      "date": "2026-06-22T20:00:34",
+      "title": "Últimas horas! LATAM Pass oferece 25% de bônus na transferência de pontos Livelo",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-latam-pass-oferece-25-de-bonus-na-transferencia-de-pontos-livelo/"
+    },
+    {
+      "id": 543885,
+      "date": "2026-06-22T15:30:03",
+      "title": "Smiles oferece até 70% de bônus nas transferências de pontos do BB Empresas",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-70-de-bonus-nas-transferencias-de-pontos-do-bb-empresas-3/"
+    },
+    {
+      "id": 543846,
+      "date": "2026-06-22T13:00:59",
+      "title": "Esfera oferece até 55% de bônus nas transferências para o ConnectMiles",
+      "link": "https://passageirodeprimeira.com/esfera-oferece-ate-55-de-bonus-nas-transferencias-para-o-connectmiles/"
+    },
+    {
+      "id": 543791,
+      "date": "2026-06-22T10:42:32",
+      "title": "Transfira pontos Esfera para o Azul Fidelidade usando pontos + dinheiro – milheiro Azul a partir de R$ 12,08",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-esfera-para-o-azul-fidelidade-usando-pontos-dinheiro-milheiro-azul-a-partir-de-r-1208-2/"
+    },
+    {
+      "id": 543794,
+      "date": "2026-06-22T10:24:41",
+      "title": "Milheiro LATAM a partir de R$ 23,28! Transfira pontos Livelo para o LATAM Pass usando pontos + dinheiro",
+      "link": "https://passageirodeprimeira.com/milheiro-latam-a-partir-de-r-2328-transfira-pontos-livelo-para-o-latam-pass-usando-pontos-dinheiro/"
+    },
+    {
+      "id": 543685,
+      "date": "2026-06-22T10:00:30",
+      "title": "Só hoje! LATAM Pass oferece 25% de bônus na transferência de pontos Livelo",
+      "link": "https://passageirodeprimeira.com/so-hoje-latam-pass-oferece-25-de-bonus-na-transferencia-de-pontos-livelo-3/"
+    },
+    {
+      "id": 543763,
+      "date": "2026-06-22T09:42:53",
+      "title": "Azul Fidelidade oferece até 120% de bônus nas transferências de pontos – incluindo Livelo e Esfera",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-120-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito-incluindo-livelo/"
+    },
+    {
+      "id": 542462,
+      "date": "2026-06-17T13:00:19",
+      "title": "Último dia para ganhar 25% de bônus nas transferências de pontos Esfera para o Iberia Club",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-para-ganhar-25-de-bonus-nas-transferencias-de-pontos-esfera-para-o-iberia-club/"
+    },
+    {
+      "id": 542178,
+      "date": "2026-06-17T10:20:57",
+      "title": "BTG inicia parceria com o TAP Miles&Go e oferece 20% de bônus nas transferências",
+      "link": "https://passageirodeprimeira.com/btg-inicia-parceria-com-o-tap-milesgo-e-oferece-20-de-bonus-nas-transferencias/"
+    },
+    {
+      "id": 542023,
+      "date": "2026-06-16T11:01:13",
+      "title": "Azul oferece até 120% nas transferências de pontos do Uau Caixa e Banestes",
+      "link": "https://passageirodeprimeira.com/azul-oferece-ate-120-nas-transferencias-de-pontos-do-uau-caixa-e-banestes/"
+    },
+    {
+      "id": 541852,
+      "date": "2026-06-16T09:41:45",
+      "title": "Esfera reduz paridade para o Flying Blue por tempo limitado",
+      "link": "https://passageirodeprimeira.com/esfera-reduz-paridade-para-o-flying-blue-por-tempo-limitado/"
+    },
+    {
+      "id": 541985,
+      "date": "2026-06-16T09:01:20",
+      "title": "Prorrogado! Smiles oferece até 80% de bônus nas transferências de pontos da Livelo",
+      "link": "https://passageirodeprimeira.com/prorrogado-smiles-oferece-ate-80-de-bonus-nas-transferencias-de-pontos-da-livelo/"
+    },
+    {
+      "id": 541586,
+      "date": "2026-06-15T12:00:52",
+      "title": "Azul oferece até 120% nas transferências de pontos do Inter, C6 Bank e Coopera",
+      "link": "https://passageirodeprimeira.com/azul-oferece-90-transferencias-de-pontos-do-inter-c6-bank-e-coopera/"
+    },
+    {
+      "id": 541625,
+      "date": "2026-06-15T11:24:18",
+      "title": "Transfira pontos Livelo para a Smiles usando pontos + dinheiro – milheiro a partir de R$ 14,85",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-livelo-para-a-smiles-usando-pontos-dinheiro-milheiro-a-partir-de-r-1471/"
+    },
+    {
+      "id": 517121,
+      "date": "2026-06-15T10:45:33",
+      "title": "Só hoje! Smiles oferece até 80% de bônus nas transferências de pontos da Livelo",
+      "link": "https://passageirodeprimeira.com/so-hoje-smiles-oferece-ate-80-de-bonus-nas-transferencias-de-pontos-da-livelo/"
+    },
+    {
+      "id": 541600,
+      "date": "2026-06-15T10:31:46",
+      "title": "LATAM Pass oferece 20% de bônus nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-20-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito-3/"
+    },
+    {
+      "id": 541599,
+      "date": "2026-06-15T10:18:21",
+      "title": "Esfera oferece 25% de bônus em transferências para o Iberia Club",
+      "link": "https://passageirodeprimeira.com/esfera-oferece-25-de-bonus-em-transferencias-para-o-iberia-club/"
+    },
+    {
+      "id": 541102,
+      "date": "2026-06-12T08:50:01",
+      "title": "5 sugestões de trechos com a Azul a partir de 4 mil pontos + taxas",
+      "link": "https://passageirodeprimeira.com/5-sugestoes-de-trechos-com-a-azul-a-partir-de-4-mil-pontos-taxas-2/"
+    },
+    {
+      "id": 540826,
+      "date": "2026-06-11T11:40:52",
+      "title": "Transfira pontos Esfera para o Azul Fidelidade usando pontos + dinheiro – milheiro Azul a partir de R$ 12,08",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-esfera-para-o-azul-fidelidade-usando-pontos-dinheiro-milheiro-azul-a-partir-de-r-1208/"
+    },
+    {
+      "id": 540750,
+      "date": "2026-06-11T09:02:50",
+      "title": "Azul oferece até 120% de bônus nas transferências da Esfera",
+      "link": "https://passageirodeprimeira.com/azul-oferece-ate-120-de-bonus-nas-transferencias-da-esfera-2/"
+    },
+    {
+      "id": 540429,
+      "date": "2026-06-10T13:15:51",
+      "title": "LATAM Pass oferece 20% de bônus nas transferências de pontos do C6 Bank",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-20-de-bonus-nas-transferencias-de-pontos-do-c6-bank-2/"
+    },
+    {
+      "id": 540314,
+      "date": "2026-06-10T10:45:54",
+      "title": "Azul Fidelidade oferece até 120% de bônus nas transferências de pontos do Banrisul",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-120-de-bonus-nas-transferencias-de-pontos-do-banrisul-3/"
+    },
+    {
+      "id": 540188,
+      "date": "2026-06-10T09:30:34",
+      "title": "Último dia! Azul Fidelidade oferece até 120% de bônus nas transferências de pontos da Livelo",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-azul-fidelidade-oferece-ate-120-de-bonus-nas-transferencias-de-pontos-da-livelo-2/"
+    },
+    {
+      "id": 540078,
+      "date": "2026-06-10T07:40:06",
+      "title": "Como gerar milhas United por R$ 73 com a transferência de pontos Marriott Bonvoy",
+      "link": "https://passageirodeprimeira.com/como-gerar-milhas-united-por-r-73-com-a-transferencia-de-pontos-marriott-bonvoy/"
+    },
+    {
+      "id": 540094,
+      "date": "2026-06-09T16:00:57",
+      "title": "Inverno em Bariloche a partir de 58 mil pontos Azul ou R$ 688 + taxas",
+      "link": "https://passageirodeprimeira.com/inverno-em-bariloche-a-partir-de-58-mil-pontos-azul-ou-r-688-taxas/"
+    },
+    {
+      "id": 539941,
+      "date": "2026-06-09T14:32:22",
+      "title": "LATAM Pass oferece 20% de bônus nas transferências de pontos do Sicredi",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-20-bonus-transferencias-pontos-do-sicredi/"
+    },
+    {
+      "id": 539638,
+      "date": "2026-06-09T12:45:47",
+      "title": "Privilege Club oferece 30% de bônus nas transferências de pontos de redes hoteleiras",
+      "link": "https://passageirodeprimeira.com/privilege-club-oferece-30-de-bonus-nas-transferencias-de-pontos-de-redes-hoteleiras/"
+    },
+    {
+      "id": 539682,
+      "date": "2026-06-09T08:07:56",
+      "title": "Smiles oferece até 70% de bônus nas transferências do C6 Bank",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-70-de-bonus-nas-transferencias-do-c6-bank-6/"
+    },
+    {
+      "id": 539491,
+      "date": "2026-06-08T11:40:13",
+      "title": "Transfira pontos Livelo para o Azul Fidelidade usando pontos + dinheiro – milheiro a partir de R$ 11,67",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-livelo-para-o-azul-fidelidade-usando-pontos-dinheiro-milheiro-a-partir-de-r-11-4/"
+    },
+    {
+      "id": 539450,
+      "date": "2026-06-08T10:16:46",
+      "title": "Azul Fidelidade oferece até 120% de bônus nas transferências de pontos da Livelo",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-120-de-bonus-nas-transferencias-de-pontos-da-livelo-2/"
+    },
+    {
+      "id": 538546,
+      "date": "2026-06-03T10:30:20",
+      "title": "MileagePlus oferece 25% de bônus nas transferências de pontos de redes hoteleiras",
+      "link": "https://passageirodeprimeira.com/mileageplus-oferece-25-de-bonus-nas-transferencias-de-pontos-de-redes-hoteleiras/"
+    },
+    {
+      "id": 535709,
+      "date": "2026-06-02T09:14:07",
+      "title": "Smiles oferece até 70% de bônus nas transferências de pontos do Uau CAIXA",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-70-de-bonus-nas-transferencias-de-pontos-do-uau-caixa/"
+    },
+    {
+      "id": 537370,
+      "date": "2026-05-29T16:10:43",
+      "title": "Última chance! LATAM Pass oferece 25% de bônus nas transferências de pontos até hoje",
+      "link": "https://passageirodeprimeira.com/ultima-chance-latam-pass-oferece-25-de-bonus-nas-transferencias-de-pontos-ate-hoje/"
+    },
+    {
+      "id": 536670,
+      "date": "2026-05-28T10:00:40",
+      "title": "Último dia! Transfira pontos para o Azul Fidelidade com até 110% de bônus",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-transfira-pontos-para-o-azul-fidelidade-com-ate-110-de-bonus/"
+    },
+    {
+      "id": 535368,
+      "date": "2026-05-25T11:25:18",
+      "title": "Transfira pontos Esfera para o Azul Fidelidade usando pontos + dinheiro – milheiro Azul a partir de R$ 12,18",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-esfera-para-o-azul-fidelidade-usando-pontos-dinheiro-milheiro-azul-a-partir-de-r-1218/"
+    },
+    {
+      "id": 535312,
+      "date": "2026-05-25T10:49:37",
+      "title": "LATAM Pass oferece 25% de bônus nas transferências de pontos do Itaú e Credicard",
+      "link": "https://passageirodeprimeira.com/latam-pass-25-bonus-transferencias-pontos-itau-credicard/"
+    },
+    {
+      "id": 535321,
+      "date": "2026-05-25T10:19:56",
+      "title": "Azul Fidelidade oferece até 110% de bônus nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-110-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito/"
+    },
+    {
+      "id": 534975,
+      "date": "2026-05-22T14:50:24",
+      "title": "Livelo oferece até 40% de bônus nas transferências de pontos para o Etihad Guest",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-ate-40-de-bonus-nas-transferencias-de-pontos-para-o-etihad-guest-2/"
+    },
+    {
+      "id": 532445,
+      "date": "2026-05-22T09:52:59",
+      "title": "Última oportunidade! Ganhe 25% de bônus nas transferências de pontos para LATAM Pass",
+      "link": "https://passageirodeprimeira.com/ultima-oportunidade-ganhe-25-de-bonus-nas-transferencias-de-pontos-para-latam-pass/"
+    },
+    {
+      "id": 532609,
+      "date": "2026-05-21T13:31:11",
+      "title": "Transfira pontos Esfera para o Azul Fidelidade usando pontos + dinheiro – milheiro Azul a partir de R$ 11,48",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-esfera-para-o-azul-fidelidade-usando-pontos-dinheiro-milheiro-azul-a-partir-de-r-1148/"
+    },
+    {
+      "id": 532553,
+      "date": "2026-05-21T11:23:35",
+      "title": "Azul oferece até 110% de bônus nas transferências da Esfera",
+      "link": "https://passageirodeprimeira.com/azul-oferece-ate-110-de-bonus-nas-transferencias-da-esfera/"
+    },
+    {
+      "id": 532160,
+      "date": "2026-05-21T00:11:58",
+      "title": "Até amanhã! Ganhe 25% de bônus nas transferências de pontos para LATAM Pass",
+      "link": "https://passageirodeprimeira.com/ate-amanha-ganhe-25-de-bonus-nas-transferencias-de-pontos-para-latam-pass/"
+    },
+    {
+      "id": 531912,
+      "date": "2026-05-19T11:48:50",
+      "title": "Azul oferece até 110% nas transferências de pontos do UAU Caixa",
+      "link": "https://passageirodeprimeira.com/azul-oferece-ate-110-nas-transferencias-de-pontos-do-uau-caixa/"
+    },
+    {
+      "id": 531783,
+      "date": "2026-05-19T07:40:03",
+      "title": "Prorrogado! Smiles oferece até 80% de bônus nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/prorrogado-smiles-oferece-ate-80-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito-3/"
+    },
+    {
+      "id": 531723,
+      "date": "2026-05-18T19:50:39",
+      "title": "Últimas horas para ganhar até 80% de bônus nas transferências de pontos dos cartões de crédito para a Smiles",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-ganhar-ate-80-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito-para-a-smiles/"
+    },
+    {
+      "id": 531593,
+      "date": "2026-05-18T15:00:18",
+      "title": "Milheiro Azul a partir de R$ 13,76! Compre pontos Inter Loop na transferência para o Azul Fidelidade",
+      "link": "https://passageirodeprimeira.com/milheiro-azul-a-partir-de-r-1376-compre-pontos-inter-loop-na-transferencia-para-o-azul-fidelidade-2/"
+    },
+    {
+      "id": 531556,
+      "date": "2026-05-18T13:30:57",
+      "title": "Esfera oferece até 75% de bônus nas transferências para o ConnectMiles",
+      "link": "https://passageirodeprimeira.com/esfera-oferece-ate-75-de-bonus-nas-transferencias-para-o-connectmiles-3/"
+    },
+    {
+      "id": 531467,
+      "date": "2026-05-18T12:40:01",
+      "title": "Azul Fidelidade oferece até 110% de bônus nas transferências de pontos do Inter Loop",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-80-de-bonus-nas-transferencias-de-pontos-do-inter-loop-ate-30-por-tempo-de-clube-2/"
+    },
+    {
+      "id": 531491,
+      "date": "2026-05-18T10:50:19",
+      "title": "Transfira pontos Esfera para a Smiles usando pontos + dinheiro – milheiro Smiles a partir de R$ 14,76",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-esfera-para-a-smiles-usando-pontos-dinheiro-milheiro-smiles-a-partir-de-r-1476/"
+    },
+    {
+      "id": 531461,
+      "date": "2026-05-18T10:15:12",
+      "title": "Só hoje! Smiles oferece até 80% de bônus nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/so-hoje-smiles-oferece-ate-80-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito-3/"
+    },
+    {
+      "id": 531446,
+      "date": "2026-05-18T10:00:52",
+      "title": "LATAM Pass oferece 25% de bônus nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-25-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito-2/"
+    },
+    {
+      "id": 531038,
+      "date": "2026-05-15T14:35:04",
+      "title": "Último dia! Smiles oferece até 70% de bônus nas transferências de pontos da Esfera",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-smiles-oferece-ate-70-de-bonus-nas-transferencias-de-pontos-da-esfera/"
+    },
+    {
+      "id": 530671,
+      "date": "2026-05-15T13:55:45",
+      "title": "LATAM Pass oferece 20% de bônus nas transferências de pontos do C6 Bank",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-20-de-bonus-nas-transferencias-de-pontos-do-c6-bank/"
+    },
+    {
+      "id": 530888,
+      "date": "2026-05-14T19:00:43",
+      "title": "Últimas horas! Azul Fidelidade oferece até 110% de bônus nas transferências de pontos do Itaú",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-azul-fidelidade-oferece-ate-110-de-bonus-nas-transferencias-de-pontos-do-itau/"
+    },
+    {
+      "id": 530711,
+      "date": "2026-05-14T12:20:25",
+      "title": "Transfira pontos Esfera para a Smiles usando pontos + dinheiro – milheiro Smiles a partir de R$ 17,20",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-esfera-para-a-smiles-usando-pontos-dinheiro-milheiro-smiles-a-partir-de-r-1720/"
+    },
+    {
+      "id": 530694,
+      "date": "2026-05-14T11:20:20",
+      "title": "Smiles oferece até 70% de bônus nas transferências de pontos da Esfera",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-70-de-bonus-nas-transferencias-de-pontos-da-esfera-4/"
+    },
+    {
+      "id": 530167,
+      "date": "2026-05-13T16:50:17",
+      "title": "Azul oferece até 110% de bônus nas transferências de pontos do C6 Bank",
+      "link": "https://passageirodeprimeira.com/azul-oferece-ate-110-de-bonus-nas-transferencias-de-pontos-do-c6-bank/"
+    },
+    {
+      "id": 529859,
+      "date": "2026-05-12T18:20:48",
+      "title": "LATAM Pass oferece 20% de bônus nas transferências de pontos do BB Empresas",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-20-de-bonus-nas-transferencias-de-pontos-do-bb-empresas/"
+    },
+    {
+      "id": 529445,
+      "date": "2026-05-11T10:38:21",
+      "title": "Azul Fidelidade oferece até 110% de bônus nas transferências de pontos do Itaú",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-110-de-bonus-nas-transferencias-de-pontos-do-itau/"
+    },
+    {
+      "id": 528931,
+      "date": "2026-05-10T13:00:06",
+      "title": "Últimas horas para ganhar até 110% de bônus nas transferências de pontos da Livelo para o Azul Fidelidade",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-ganhar-ate-110-de-bonus-nas-transferencias-de-pontos-da-livelo-para-o-azul-fidelidade/"
+    },
+    {
+      "id": 528881,
+      "date": "2026-05-07T18:50:52",
+      "title": "Prorrogado! Azul oferece até 110% de bônus nas transferências de pontos da Livelo",
+      "link": "https://passageirodeprimeira.com/prorrogado-azul-oferece-ate-110-de-bonus-nas-transferencias-de-pontos-da-livelo/"
+    },
+    {
+      "id": 528390,
+      "date": "2026-05-06T18:49:33",
+      "title": "Azul Fidelidade oferece até 110% de bônus nas transferências de pontos do Sicredi",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-110-de-bonus-nas-transferencias-de-pontos-do-sicredi/"
+    },
+    {
+      "id": 528374,
+      "date": "2026-05-06T18:20:34",
+      "title": "LATAM Pass oferece 25% de bônus na transferência de pontos do Banrisul",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-25-de-bonus-na-transferencia-de-pontos-do-banrisul/"
+    },
+    {
+      "id": 528309,
+      "date": "2026-05-06T08:38:50",
+      "title": "Prorrogado! Assine o ALL Signature e garanta até 15% de bônus ao transferir pontos para o ALL Accor",
+      "link": "https://passageirodeprimeira.com/prorrogado-assine-o-all-signature-e-garanta-ate-15-de-bonus-ao-transferir-pontos-para-o-all-accor/"
+    },
+    {
+      "id": 527803,
+      "date": "2026-05-04T16:53:30",
+      "title": "TAP Miles&Go oferece 20% de bônus nas transferências de pontos da Revolut",
+      "link": "https://passageirodeprimeira.com/tap-milesgo-oferece-20-de-bonus-nas-transferencias-de-pontos-da-revolut/"
+    },
+    {
+      "id": 527554,
+      "date": "2026-05-04T10:13:13",
+      "title": "Transfira pontos Livelo para o Azul Fidelidade usando pontos + dinheiro – milheiro a partir de R$ 12",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-livelo-para-o-azul-fidelidade-usando-pontos-dinheiro-milheiro-a-partir-de-r-12/"
+    },
+    {
+      "id": 527545,
+      "date": "2026-05-04T09:37:06",
+      "title": "Azul Fidelidade oferece até 110% de bônus nas transferências de pontos da Livelo",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-110-de-bonus-nas-transferencias-de-pontos-da-livelo/"
+    },
+    {
+      "id": 527076,
+      "date": "2026-04-30T19:14:32",
+      "title": "Últimas horas para ganhar até 120% ao transferir pontos para Azul Fidelidade",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-ganhar-ate-120-ao-transferir-pontos-para-azul-fidelidade/"
+    },
+    {
+      "id": 527101,
+      "date": "2026-04-30T09:41:04",
+      "title": "Último dia! LATAM Pass oferece 25% de bônus nas transferências de pontos do Itaú e Credicard",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-latam-pass-oferece-25-de-bonus-nas-transferencias-de-pontos-do-itau-e-credicard-2/"
+    },
+    {
+      "id": 526713,
+      "date": "2026-04-29T10:05:06",
+      "title": "LATAM Pass oferece 25% de bônus nas transferências de pontos do Itaú e Credicard",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-25-de-bonus-nas-transferencias-de-pontos-do-itau-e-credicard-2/"
+    },
+    {
+      "id": 526398,
+      "date": "2026-04-28T17:12:11",
+      "title": "Último dia para ganhar 25% de bônus nas transferências de pontos para LATAM Pass",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-para-ganhar-25-de-bonus-nas-transferencias-de-pontos-para-latam-pass/"
+    },
+    {
+      "id": 526409,
+      "date": "2026-04-28T09:48:49",
+      "title": "Transfira pontos Esfera para o Azul Fidelidade usando pontos + dinheiro – milheiro Azul a partir de R$ 11,97",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-esfera-para-o-azul-fidelidade-usando-pontos-dinheiro-milheiro-azul-a-partir-de-r-1197/"
+    },
+    {
+      "id": 526079,
+      "date": "2026-04-27T09:41:41",
+      "title": "Azul oferece até 120% nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/azul-oferece-ate-120-nas-transferencias-de-pontos-dos-cartoes-de-credito-2/"
+    },
+    {
+      "id": 525715,
+      "date": "2026-04-24T10:32:55",
+      "title": "LATAM Pass oferece 25% de bônus nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-25-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito/"
+    },
+    {
+      "id": 525188,
+      "date": "2026-04-23T18:22:11",
+      "title": "Últimas horas! LATAM Pass oferece 25% de bônus na transferência de pontos da Esfera",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-latam-pass-oferece-25-de-bonus-na-transferencia-de-pontos-da-esfera/"
+    },
+    {
+      "id": 525377,
+      "date": "2026-04-23T09:44:42",
+      "title": "Suba de categoria! Smiles oferece até 15 mil milhas qualificáveis nas transferências do Itaú + até 70% de bônus",
+      "link": "https://passageirodeprimeira.com/suba-de-categoria-smiles-oferece-ate-15-mil-milhas-qualificaveis-nas-transferencias-do-itau-ate-70-de-bonus/"
+    },
+    {
+      "id": 525039,
+      "date": "2026-04-22T11:35:54",
+      "title": "Azul oferece até 120% nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/azul-oferece-ate-120-nas-transferencias-de-pontos-dos-cartoes-de-credito/"
+    },
+    {
+      "id": 525069,
+      "date": "2026-04-22T10:38:41",
+      "title": "LATAM Pass oferece 25% de bônus na transferência de pontos da Esfera",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-25-de-bonus-na-transferencia-de-pontos-da-esfera/"
+    },
+    {
+      "id": 524599,
+      "date": "2026-04-19T09:30:48",
+      "title": "Último dia! Azul oferece até 120% de bônus nas transferências da Esfera",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-azul-oferece-ate-120-de-bonus-nas-transferencias-da-esfera/"
+    },
+    {
+      "id": 524507,
+      "date": "2026-04-17T12:19:19",
+      "title": "Só hoje! LATAM Pass oferece 25% de bônus nas transferências de pontos do C6 Bank",
+      "link": "https://passageirodeprimeira.com/so-hoje-latam-pass-oferece-25-de-bonus-nas-transferencias-de-pontos-do-c6-bank/"
+    },
+    {
+      "id": 524259,
+      "date": "2026-04-16T19:59:16",
+      "title": "Últimas horas para ganhar 25% de bônus na transferência de pontos Livelo para o LATAM Pass",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-ganhar-25-de-bonus-na-transferencia-de-pontos-livelo-para-o-latam-pass/"
+    },
+    {
+      "id": 524363,
+      "date": "2026-04-16T18:02:52",
+      "title": "Confira 3 promoções para transferência de pontos com bônus vigentes hoje",
+      "link": "https://passageirodeprimeira.com/confira-3-promocoes-para-transferencia-de-pontos-com-bonus-vigentes-hoje-2/"
+    },
+    {
+      "id": 524200,
+      "date": "2026-04-16T13:14:33",
+      "title": "LATAM Pass começa a creditar o bônus de transferência da campanha com a Livelo",
+      "link": "https://passageirodeprimeira.com/latam-pass-comeca-a-creditar-o-bonus-de-transferencia-da-campanha-com-a-livelo-2/"
+    },
+    {
+      "id": 524157,
+      "date": "2026-04-16T12:16:03",
+      "title": "Transfira pontos Esfera para o Azul Fidelidade usando pontos + dinheiro – milheiro Azul a partir de R$ 12",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-esfera-para-o-azul-fidelidade-usando-pontos-dinheiro-milheiro-azul-a-partir-de-r-12-3/"
+    },
+    {
+      "id": 524033,
+      "date": "2026-04-16T10:35:20",
+      "title": "Milheiro LATAM a partir de R$ 24,00! Transfira pontos Livelo para o LATAM Pass usando pontos + dinheiro",
+      "link": "https://passageirodeprimeira.com/milheiro-latam-por-r-2400-transfira-pontos-livelo-para-o-latam-pass-usando-pontos-dinheiro/"
+    },
+    {
+      "id": 524011,
+      "date": "2026-04-16T09:59:37",
+      "title": "Só hoje! LATAM Pass oferece 25% de bônus na transferência de pontos Livelo",
+      "link": "https://passageirodeprimeira.com/so-hoje-latam-pass-oferece-25-de-bonus-na-transferencia-de-pontos-livelo-2/"
+    },
+    {
+      "id": 524026,
+      "date": "2026-04-16T09:06:56",
+      "title": "Azul oferece até 120% de bônus nas transferências da Esfera",
+      "link": "https://passageirodeprimeira.com/azul-oferece-ate-120-de-bonus-nas-transferencias-da-esfera/"
+    },
+    {
+      "id": 523777,
+      "date": "2026-04-15T13:01:05",
+      "title": "Esfera oferece até 75% de bônus nas transferências para o ConnectMiles",
+      "link": "https://passageirodeprimeira.com/esfera-oferece-ate-75-de-bonus-nas-transferencias-para-o-connectmiles-2/"
+    },
+    {
+      "id": 523161,
+      "date": "2026-04-14T19:48:14",
+      "title": "LATAM Pass oferece 25% de bônus nas transferências de pontos do BB Empresas",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-25-de-bonus-nas-transferencias-de-pontos-do-bb-empresas/"
+    },
+    {
+      "id": 522995,
+      "date": "2026-04-14T08:00:31",
+      "title": "Smiles oferece até 70% de bônus nas transferências de pontos do Sicredi",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-70-de-bonus-nas-transferencias-de-pontos-do-sicredi-11/"
+    },
+    {
+      "id": 523032,
+      "date": "2026-04-13T13:33:58",
+      "title": "Azul Fidelidade oferece até 120% de bônus nas transferências de pontos do Itaú e Banpará",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-120-de-bonus-nas-transferencias-de-pontos-do-itau-e-banpara/"
+    },
+    {
+      "id": 522940,
+      "date": "2026-04-13T11:21:13",
+      "title": "Assine o Clube Azul com até 40% de desconto – Milheiro a partir de R$ 18,72",
+      "link": "https://passageirodeprimeira.com/assine-o-clube-azul-com-ate-40-de-desconto-milheiro-a-partir-de-r-1872/"
+    },
+    {
+      "id": 522985,
+      "date": "2026-04-13T10:27:46",
+      "title": "Smiles oferece até 75% de bônus nas transferências de pontos da Esfera",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-75-de-bonus-nas-transferencias-de-pontos-da-esfera/"
+    },
+    {
+      "id": 522920,
+      "date": "2026-04-13T09:23:23",
+      "title": "Azul oferece até 120% de bônus nas transferências de pontos do C6 Bank",
+      "link": "https://passageirodeprimeira.com/azul-oferece-ate-120-de-bonus-nas-transferencias-de-pontos-do-c6-bank/"
+    },
+    {
+      "id": 522283,
+      "date": "2026-04-09T16:10:28",
+      "title": "Esfera regulariza crédito de Avios na conta Iberia Club da última campanha de transferência",
+      "link": "https://passageirodeprimeira.com/esfera-regulariza-credito-de-avios-na-conta-iberia-club-da-ultima-campanha-de-transferencia/"
+    },
+    {
+      "id": 522070,
+      "date": "2026-04-09T10:35:12",
+      "title": "Smiles oferece até 80% de bônus nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/so-hoje-smiles-oferece-ate-80-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito-2/"
+    },
+    {
+      "id": 521999,
+      "date": "2026-04-09T08:36:31",
+      "title": "Último dia! Azul Fidelidade oferece até 120% de bônus nas transferências de pontos da Livelo",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-azul-fidelidade-oferece-ate-120-de-bonus-nas-transferencias-de-pontos-da-livelo/"
+    },
+    {
+      "id": 521659,
+      "date": "2026-04-08T16:04:08",
+      "title": "Azul Fidelidade oferece até 120% de bônus nas transferências de pontos do Banco BV e Banrisul",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-bonus-transferencias-banco-bv-banrisul/"
+    },
+    {
+      "id": 521510,
+      "date": "2026-04-07T11:45:31",
+      "title": "Smiles oferece até 80% de bônus nas transferências do Inter",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-80-de-bonus-nas-transferencias-do-inter/"
+    },
+    {
+      "id": 521106,
+      "date": "2026-04-06T10:00:59",
+      "title": "Transfira pontos Livelo para o Azul Fidelidade usando pontos + dinheiro – milheiro a partir de R$ 11",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-livelo-para-o-azul-fidelidade-usando-pontos-dinheiro-milheiro-a-partir-de-r-11-3/"
+    },
+    {
+      "id": 521058,
+      "date": "2026-04-06T08:52:30",
+      "title": "Azul Fidelidade oferece até 120% de bônus nas transferências de pontos da Livelo",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-120-de-bonus-nas-transferencias-de-pontos-da-livelo/"
+    },
+    {
+      "id": 520765,
+      "date": "2026-04-02T12:30:14",
+      "title": "Iberia Club começa a creditar o bônus de transferência da campanha com a Esfera",
+      "link": "https://passageirodeprimeira.com/iberia-club-comeca-a-creditar-o-bonus-de-transferencia-da-campanha-com-a-esfera-5/"
+    },
+    {
+      "id": 520686,
+      "date": "2026-04-02T10:41:51",
+      "title": "Smiles oferece até 70% de bônus nas transferências do C6 Bank",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-70-de-bonus-nas-transferencias-do-c6-bank-5/"
+    },
+    {
+      "id": 520351,
+      "date": "2026-04-01T16:31:03",
+      "title": "Pontos qualificáveis da campanha de transferência entre Livelo e Smiles já estão sendo creditados",
+      "link": "https://passageirodeprimeira.com/pontos-qualificaveis-da-campanha-de-transferencia-entre-livelo-e-smiles-ja-estao-sendo-creditados/"
+    },
+    {
+      "id": 519023,
+      "date": "2026-03-27T10:27:01",
+      "title": "Último dia para ganhar até 30% de bônus ao transferir pontos Azul Fidelidade para ALL Accor",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-ganhe-ate-30-de-bonus-ao-transferir-pontos-azul-para-all-accor-2/"
+    },
+    {
+      "id": 518797,
+      "date": "2026-03-27T08:08:50",
+      "title": "Último dia para transferir pontos dos cartões de crédito para o Azul Fidelidade com até 130% de bônus",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-para-transferir-pontos-dos-cartoes-de-credito-para-o-azul-fidelidade-com-ate-130-de-bonus/"
+    },
+    {
+      "id": 518874,
+      "date": "2026-03-26T16:00:29",
+      "title": "Último dia para ganhar até 20% de bônus em transferências de pontos Esfera para Iberia Club",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-esfera-oferece-ate-20-de-bonus-em-transferencias-para-o-iberia-club/"
+    },
+    {
+      "id": 518781,
+      "date": "2026-03-26T09:03:51",
+      "title": "Gere o euro a partir de R$ 3,22 ao transferir pontos Azul para o ALL Accor",
+      "link": "https://passageirodeprimeira.com/gere-o-euro-a-partir-de-r-322-ao-transferir-pontos-azul-para-o-all-accor/"
+    },
+    {
+      "id": 518106,
+      "date": "2026-03-24T10:04:23",
+      "title": "Esfera oferece até 20% de bônus em transferências para o Iberia Club",
+      "link": "https://passageirodeprimeira.com/esfera-oferece-ate-20-de-bonus-em-transferencias-para-o-iberia-club/"
+    },
+    {
+      "id": 517860,
+      "date": "2026-03-23T10:50:38",
+      "title": "Transfira pontos Livelo para o Azul Fidelidade usando pontos + dinheiro – milheiro a partir de R$ 11",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-livelo-para-o-azul-fidelidade-usando-pontos-dinheiro-milheiro-a-partir-de-r-11-2/"
+    },
+    {
+      "id": 517824,
+      "date": "2026-03-23T09:48:08",
+      "title": "Azul Fidelidade oferece até 130% de bônus nas transferências de pontos dos cartões de crédito",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-130-de-bonus-nas-transferencias-de-pontos-dos-cartoes-de-credito/"
+    },
+    {
+      "id": 517445,
+      "date": "2026-03-22T11:30:59",
+      "title": "Último dia! Azul oferece até 133% de bônus nas transferências da Esfera",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-azul-oferece-ate-133-de-bonus-nas-transferencias-da-esfera/"
+    },
+    {
+      "id": 517464,
+      "date": "2026-03-20T10:37:35",
+      "title": "Transfira pontos Esfera para o Azul Fidelidade usando pontos + dinheiro – milheiro Azul a partir de R$ 11",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-esfera-para-o-azul-fidelidade-usando-pontos-dinheiro-milheiro-azul-a-partir-de-r-11/"
+    },
+    {
+      "id": 517386,
+      "date": "2026-03-20T09:14:37",
+      "title": "Azul oferece até 133% de bônus nas transferências da Esfera",
+      "link": "https://passageirodeprimeira.com/azul-oferece-ate-133-de-bonus-nas-transferencias-da-esfera/"
+    },
+    {
+      "id": 517385,
+      "date": "2026-03-20T08:50:29",
+      "title": "Prorrogado! Envie milhas Smiles para o ALL Accor com até 25% de bônus",
+      "link": "https://passageirodeprimeira.com/prorrogado-envie-milhas-smiles-para-o-all-accor-com-ate-25-de-bonus/"
+    },
+    {
+      "id": 517372,
+      "date": "2026-03-20T08:00:18",
+      "title": "Prorrogado! Transfira pontos Livelo para a Smiles com até 80% de bônus",
+      "link": "https://passageirodeprimeira.com/prorrogado-transfira-pontos-livelo-para-a-smiles-com-80-de-bonus/"
+    },
+    {
+      "id": 517243,
+      "date": "2026-03-19T15:40:08",
+      "title": "Voe para Nova York a partir de R$ 1.082 ou 71 mil milhas Smiles",
+      "link": "https://passageirodeprimeira.com/voe-para-nova-york-a-partir-de-r-1-082-ou-71-mil-milhas-smiles/"
+    },
+    {
+      "id": 517241,
+      "date": "2026-03-19T12:10:17",
+      "title": "Gere o euro a partir de R$ 3,65 ao transferir milhas Smiles para o ALL Accor",
+      "link": "https://passageirodeprimeira.com/gere-o-euro-a-partir-de-r-365-ao-transferir-milhas-smiles-para-o-all-accor/"
+    },
+    {
+      "id": 517189,
+      "date": "2026-03-19T11:10:35",
+      "title": "Transfira pontos Livelo para a Smiles usando pontos + dinheiro – milheiro a partir de R$ 15,24",
+      "link": "https://passageirodeprimeira.com/transfira-pontos-livelo-para-a-smiles-usando-pontos-dinheiro-milheiro-a-partir-de-r-1524/"
+    },
+    {
+      "id": 517122,
+      "date": "2026-03-19T10:11:55",
+      "title": "Smiles oferece até 80% de bônus na transferência da Livelo + milhas qualificáveis para cartões alta renda",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-80-de-bonus-na-transferencia-da-livelo-milhas-qualificaveis-para-cartoes-alta-renda/"
+    },
+    {
+      "id": 516464,
+      "date": "2026-03-17T11:17:43",
+      "title": "Smiles oferece até 65% de bônus nas transferências de pontos da Esfera",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-65-de-bonus-nas-transferencias-de-pontos-da-esfera/"
+    },
+    {
+      "id": 516133,
+      "date": "2026-03-16T12:40:01",
+      "title": "Smiles oferece até 70% de bônus nas transferências de pontos do BRB",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-70-de-bonus-nas-transferencias-de-pontos-do-brb-2/"
+    },
+    {
+      "id": 516032,
+      "date": "2026-03-16T12:14:31",
+      "title": "Azul oferece até 130% nas transferências de pontos do C6 Bank e UAU Caixa",
+      "link": "https://passageirodeprimeira.com/azul-oferece-ate-130-nas-transferencias-de-pontos-do-c6-bank-e-uau-caixa/"
+    },
+    {
+      "id": 515585,
+      "date": "2026-03-13T10:50:47",
+      "title": "Converta pontos ALL Accor para o KrisFlyer com 50% de bônus",
+      "link": "https://passageirodeprimeira.com/converta-pontos-all-accor-para-o-krisflyer-com-50-de-bonus/"
+    }
+  ]
+}

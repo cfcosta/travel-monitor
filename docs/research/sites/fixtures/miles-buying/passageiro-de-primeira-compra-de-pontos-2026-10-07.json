@@ -1,0 +1,827 @@
+{
+  "_note": "Passageiro de Primeira, WordPress REST API, category compra-de-pontos (id 3905), every post from the category start (2026-03-13) to 2026-10-07. GET https://passageirodeprimeira.com/wp-json/wp/v2/posts?categories=3905&per_page=100&page=N&_fields=id,date,link,title; date is the site local time (America/Sao_Paulo). Fetched 2026-10-07 with plain HTTP.",
+  "posts": [
+    {
+      "id": 572035,
+      "date": "2026-10-07T16:40:39",
+      "title": "Lufthansa Miles & More oferece 50% de bônus na compra de milhas",
+      "link": "https://passageirodeprimeira.com/lufthansa-miles-more-oferece-50-de-bonus-na-compra-de-milhas/"
+    },
+    {
+      "id": 571660,
+      "date": "2026-10-04T12:00:39",
+      "title": "SUMA da Air Europa oferece até 50% de bônus na compra de milhas",
+      "link": "https://passageirodeprimeira.com/suma-da-air-europa-oferece-ate-50-de-bonus-na-compra-de-milhas/"
+    },
+    {
+      "id": 570515,
+      "date": "2026-10-02T19:30:14",
+      "title": "Últimas horas! LATAM Pass oferece até 65% de desconto na compra de milhas",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-ate-65-de-desconto-na-compra-de-milhas-4/"
+    },
+    {
+      "id": 571581,
+      "date": "2026-10-02T11:30:03",
+      "title": "Smiles oferece até 300% de bônus na compra de milhas para assinantes do Clube",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-300-de-bonus-na-compra-de-milhas-para-assinantes-do-clube-6/"
+    },
+    {
+      "id": 571323,
+      "date": "2026-10-01T17:30:29",
+      "title": "Prorrogado! Ganhe 5% de bônus na compra de pontos Livelo ao pagar com cartão Elo",
+      "link": "https://passageirodeprimeira.com/prorrogadoganhe-5-bonus-compra-pontos-livelo-pagar-cartao-elo/"
+    },
+    {
+      "id": 570876,
+      "date": "2026-09-30T18:40:11",
+      "title": "Marriott Bonvoy oferece até 55% de bônus na compra de pontos",
+      "link": "https://passageirodeprimeira.com/marriott-bonvoy-oferece-ate-55-de-bonus-na-compra-de-pontos/"
+    },
+    {
+      "id": 570685,
+      "date": "2026-09-29T18:20:04",
+      "title": "Esfera oferece até 52% de desconto na compra de pontos para assinantes do Clube",
+      "link": "https://passageirodeprimeira.com/esfera-oferece-ate-52-de-desconto-na-compra-de-pontos-para-assinantes-do-clube/"
+    },
+    {
+      "id": 570282,
+      "date": "2026-09-28T15:40:51",
+      "title": "Só hoje! Esfera oferece até 53% de desconto na compra de pontos para assinantes",
+      "link": "https://passageirodeprimeira.com/so-hoje-esfera-oferece-ate-53-de-desconto-na-compra-de-pontos-para-assinantes/"
+    },
+    {
+      "id": 570224,
+      "date": "2026-09-28T12:10:11",
+      "title": "Livelo oferece até 57% de desconto na compra de pontos – milheiro a partir de R$ 29,50",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-ate-57-de-desconto-na-compra-de-pontos-milheiro-a-partir-de-r-2950/"
+    },
+    {
+      "id": 569487,
+      "date": "2026-09-24T15:30:30",
+      "title": "Até 23h59! Multiplique seus pontos em até 25x com o Turbo Livelo – milheiro a partir de R$ 29,40",
+      "link": "https://passageirodeprimeira.com/ate-23h59-multiplique-seus-pontos-em-ate-25x-com-o-turbo-livelo-milheiro-a-partir-de-r-2940/"
+    },
+    {
+      "id": 568819,
+      "date": "2026-09-23T15:30:09",
+      "title": "Azul Fidelidade oferece até 70% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-70-de-desconto-na-compra-de-pontos-5/"
+    },
+    {
+      "id": 568849,
+      "date": "2026-09-23T08:40:28",
+      "title": "Inter oferece 55% de desconto na compra de pontos Loop",
+      "link": "https://passageirodeprimeira.com/inter-oferece-55-de-desconto-na-compra-de-pontos-loop-2/"
+    },
+    {
+      "id": 568630,
+      "date": "2026-09-22T10:30:43",
+      "title": "Confiram os e-mails! Smiles oferece cupom de 80% de desconto para compra de milhas",
+      "link": "https://passageirodeprimeira.com/confiram-os-e-mails-smiles-oferece-cupom-de-80-de-desconto-para-compra-de-milhas/"
+    },
+    {
+      "id": 566557,
+      "date": "2026-09-16T17:20:47",
+      "title": "IHG Rewards oferece até 100% de bônus na compra de pontos",
+      "link": "https://passageirodeprimeira.com/ihg-rewards-oferece-ate-100-de-bonus-na-compra-de-pontos-16/"
+    },
+    {
+      "id": 566948,
+      "date": "2026-09-16T11:20:15",
+      "title": "Prorrogado! Gere Avios por R$ 62 multiplicando o saldo no The British Airways Club",
+      "link": "https://passageirodeprimeira.com/prorrogado-gere-avios-por-r-62-multiplicando-o-saldo-no-the-british-airways-club/"
+    },
+    {
+      "id": 566293,
+      "date": "2026-09-16T10:40:22",
+      "title": "Smiles oferece até 380% de bônus na compra de milhas",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-380-de-bonus-na-compra-de-milhas/"
+    },
+    {
+      "id": 565996,
+      "date": "2026-09-14T09:20:00",
+      "title": "Aeroplan oferece até 100% de bônus na compra de milhas",
+      "link": "https://passageirodeprimeira.com/aeroplan-oferece-ate-100-de-bonus-na-compra-de-milhas-7/"
+    },
+    {
+      "id": 565365,
+      "date": "2026-09-10T14:41:48",
+      "title": "Wyndham Rewards oferece até 90% de bônus na compra de pontos",
+      "link": "https://passageirodeprimeira.com/wyndham-rewards-oferece-ate-90-de-bonus-na-compra-de-pontos-2/"
+    },
+    {
+      "id": 564947,
+      "date": "2026-09-09T10:30:08",
+      "title": "Gere Avios por R$62 multiplicando o saldo no The British Airways Club",
+      "link": "https://passageirodeprimeira.com/gere-avios-por-r62-multiplicando-o-saldo-no-the-british-airways-club/"
+    },
+    {
+      "id": 562990,
+      "date": "2026-09-03T10:36:04",
+      "title": "Multiplique seus pontos em até 25x com o Turbo Livelo – milheiro a partir de R$ 29,40",
+      "link": "https://passageirodeprimeira.com/multiplique-seus-pontos-em-ate-25x-com-o-turbo-livelo-milheiro-a-partir-de-r-2940/"
+    },
+    {
+      "id": 563678,
+      "date": "2026-09-03T09:20:45",
+      "title": "Virgin Atlantic oferece até 70% de bônus na compra de pontos",
+      "link": "https://passageirodeprimeira.com/virgin-atlantic-oferece-ate-70-de-bonus-na-compra-de-pontos-8/"
+    },
+    {
+      "id": 563593,
+      "date": "2026-09-02T11:26:22",
+      "title": "Smiles oferece até 300% de bônus na compra de milhas para assinantes do Clube",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-300-de-bonus-na-compra-de-milhas-para-assinantes-do-clube-5/"
+    },
+    {
+      "id": 563278,
+      "date": "2026-09-01T11:50:03",
+      "title": "Livelo oferece até 58% de desconto na compra de pontos – milheiro a partir de R$ 28,81",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-ate-58-de-desconto-na-compra-de-pontos-milheiro-a-partir-de-r-2881/"
+    },
+    {
+      "id": 561148,
+      "date": "2026-08-28T17:40:40",
+      "title": "Último dia para comprar milhas LATAM Pass com até 65% de desconto",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-ate-65-de-desconto-na-compra-de-milhas-3/"
+    },
+    {
+      "id": 562549,
+      "date": "2026-08-28T17:00:02",
+      "title": "Livelo oferece 55% de desconto na compra de pontos – milheiro a partir de R$ 30,87",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-55-de-desconto-na-compra-de-pontos-milheiro-a-partir-de-r-3087/"
+    },
+    {
+      "id": 562283,
+      "date": "2026-08-27T16:37:12",
+      "title": "Oportunidade para gerar milhas Smiles a partir de R$ 14,91 comprando pontos Livelo",
+      "link": "https://passageirodeprimeira.com/oportunidade-para-gerar-milhas-smiles-a-partir-de-1491-comprando-pontos-livelo/"
+    },
+    {
+      "id": 561614,
+      "date": "2026-08-26T14:20:34",
+      "title": "Multiplique seus pontos em até 15x com o Turbo Livelo – milheiro a partir de R$ 29,58",
+      "link": "https://passageirodeprimeira.com/multiplique-seus-pontos-em-ate-15x-com-o-turbo-livelo-milheiro-a-partir-de-r-2958/"
+    },
+    {
+      "id": 561421,
+      "date": "2026-08-26T07:59:02",
+      "title": "Aprenda a emitir a Classe Executiva da Aeromexico para Cidade do México a partir de R$ 3.307 ou 135.000 milhas LATAM Pass",
+      "link": "https://passageirodeprimeira.com/aprenda-a-emitir-a-classe-executiva-da-aeromexico-para-cidade-do-mexico-a-partir-de-r-3-307-ou-135-000-milhas-latam-pass/"
+    },
+    {
+      "id": 561481,
+      "date": "2026-08-25T17:40:45",
+      "title": "Livelo oferece até 54% de desconto na compra de pontos + 20% de bônus para portadores dos cartões Elo – milheiro a partir de R$ 26,83",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-ate-54-de-desconto-na-compra-de-pontos-20-de-bonus-para-portadores-dos-cartoes-elo-milheiro-a-partir-de-r-2683/"
+    },
+    {
+      "id": 560984,
+      "date": "2026-08-24T16:50:35",
+      "title": "Oportunidade para emitir a Classe Executiva da Japan Airlines entre a Europa e o Japão a partir de R$ 3.394 ou 144.000 milhas LATAM Pass",
+      "link": "https://passageirodeprimeira.com/oportunidade-para-emitir-a-classe-executiva-da-japan-airlines-para-o-japao-a-partir-de-r-3-394-ou-144-000-milhas-latam-pass/"
+    },
+    {
+      "id": 560886,
+      "date": "2026-08-24T12:13:28",
+      "title": "Só hoje! Livelo oferece 56% de desconto na compra de pontos – milheiro a partir de R$ 29,26",
+      "link": "https://passageirodeprimeira.com/so-hoje-livelo-oferece-56-de-desconto-na-compra-de-pontos-milheiro-a-partir-de-r-2926/"
+    },
+    {
+      "id": 560557,
+      "date": "2026-08-21T13:55:59",
+      "title": "Oportunidade para emitir a Primeira Classe da Lufthansa comprando milhas no Miles&More",
+      "link": "https://passageirodeprimeira.com/oportunidade-para-emitir-a-primeira-classe-da-lufthansa-comprando-milhas-no-milesmore/"
+    },
+    {
+      "id": 560479,
+      "date": "2026-08-20T17:10:36",
+      "title": "Apenas hoje! Compre milhas do MileagePlus com até 50% de desconto",
+      "link": "https://passageirodeprimeira.com/apenas-hoje-compre-milhas-do-mileageplus-com-ate-50-de-desconto/"
+    },
+    {
+      "id": 559960,
+      "date": "2026-08-19T11:20:01",
+      "title": "Smiles oferece até 355% de bônus na compra de milhas",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-355-de-bonus-na-compra-de-milhas/"
+    },
+    {
+      "id": 559629,
+      "date": "2026-08-18T15:26:05",
+      "title": "Passagens de São Paulo a Cidade do Panamá em Classe Executiva a partir de R$ 2.238 o trecho ou 33.000 milhas Flying Blue",
+      "link": "https://passageirodeprimeira.com/passagens-de-sao-paulo-a-cidade-do-panama-em-classe-executiva-a-partir-de-r-2-238-o-trecho-ou-33-000-milhas-flying-blue/"
+    },
+    {
+      "id": 559537,
+      "date": "2026-08-18T13:20:24",
+      "title": "Como reservar um resort com tudo incluso em Curaçao com até 45% de desconto",
+      "link": "https://passageirodeprimeira.com/como-reservar-um-resort-com-tudo-incluso-em-curacao-com-ate-45-de-desconto/"
+    },
+    {
+      "id": 559643,
+      "date": "2026-08-18T10:52:46",
+      "title": "Livelo oferece 56% de desconto na compra de pontos – milheiro a partir de R$ 29,30",
+      "link": "https://passageirodeprimeira.com/livelo-56-de-desconto-compra-de-pontos-2/"
+    },
+    {
+      "id": 559466,
+      "date": "2026-08-18T09:40:44",
+      "title": "Marriott Bonvoy oferece até 40% de bônus na compra de pontos",
+      "link": "https://passageirodeprimeira.com/marriott-bonvoy-oferece-ate-40-de-bonus-na-compra-de-pontos-5/"
+    },
+    {
+      "id": 480723,
+      "date": "2026-08-13T17:20:04",
+      "title": "World of Hyatt oferece 20% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/world-of-hyatt-oferece-20-de-desconto-na-compra-de-pontos-2/"
+    },
+    {
+      "id": 558720,
+      "date": "2026-08-13T14:10:08",
+      "title": "Shopping Smiles oferece até 11 milhas por real gasto nas Casas Bahia",
+      "link": "https://passageirodeprimeira.com/shopping-smiles-oferece-11-milhas-real-gasto-casas-bahia/"
+    },
+    {
+      "id": 558333,
+      "date": "2026-08-13T09:10:47",
+      "title": "Reserve um resort all inclusive no Nordeste com 55% de desconto usando pontos Wyndham Rewards",
+      "link": "https://passageirodeprimeira.com/reserve-um-resort-all-inclusive-no-nordeste-com-55-de-desconto-usando-pontos-wyndham-rewards/"
+    },
+    {
+      "id": 557964,
+      "date": "2026-08-11T13:20:23",
+      "title": "Multiplique seus pontos em até 20x com o Turbo Livelo – milheiro a partir de R$ 29,60",
+      "link": "https://passageirodeprimeira.com/multiplique-seus-pontos-em-ate-20x-com-o-turbo-livelo-milheiro-a-partir-de-r-2960/"
+    },
+    {
+      "id": 557836,
+      "date": "2026-08-11T11:04:08",
+      "title": "Como reservar um hotel de luxo em Turks and Caicos com mais de 60% de desconto",
+      "link": "https://passageirodeprimeira.com/como-reservar-um-hotel-de-luxo-em-turks-and-caicos-com-mais-de-60-de-desconto/"
+    },
+    {
+      "id": 557693,
+      "date": "2026-08-10T16:30:56",
+      "title": "Smiles oferece até 375% de bônus na compra de milhas",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-375-de-bonus-na-compra-de-milhas-3/"
+    },
+    {
+      "id": 556761,
+      "date": "2026-08-07T09:20:28",
+      "title": "Hilton Honors oferece 100% de bônus na compra de pontos",
+      "link": "https://passageirodeprimeira.com/hilton-honors-oferece-100-de-bonus-na-compra-de-pontos-33/"
+    },
+    {
+      "id": 555854,
+      "date": "2026-08-05T18:00:28",
+      "title": "IHG Rewards oferece até 100% de bônus na compra de pontos",
+      "link": "https://passageirodeprimeira.com/ihg-rewards-oferece-ate-100-de-bonus-na-compra-de-pontos-15/"
+    },
+    {
+      "id": 555961,
+      "date": "2026-08-04T11:42:12",
+      "title": "Smiles oferece até 300% de bônus na compra de milhas para assinantes do Clube",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-300-de-bonus-na-compra-de-milhas-para-assinantes-do-clube-4/"
+    },
+    {
+      "id": 556062,
+      "date": "2026-08-04T10:50:15",
+      "title": "Livelo oferece 56% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-56-de-desconto-na-compra-de-pontos-2/"
+    },
+    {
+      "id": 555780,
+      "date": "2026-08-03T13:00:45",
+      "title": "Azul Fidelidade oferece até 317% de bônus na compra de pontos",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-317-de-bonus-na-compra-de-pontos/"
+    },
+    {
+      "id": 554960,
+      "date": "2026-07-31T14:30:06",
+      "title": "Wyndham Rewards oferece até 90% de bônus na compra de pontos",
+      "link": "https://passageirodeprimeira.com/wyndham-rewards-oferece-ate-80-de-bonus-na-compra-de-pontos-2/"
+    },
+    {
+      "id": 554965,
+      "date": "2026-07-30T10:39:49",
+      "title": "PP 15 anos! Último dia para comprar pontos Esfera com 50% de desconto",
+      "link": "https://passageirodeprimeira.com/pp-15-anos-ultimo-dia-para-comprar-pontos-esfera-com-50-de-desconto/"
+    },
+    {
+      "id": 554267,
+      "date": "2026-07-28T13:00:27",
+      "title": "Esfera oferece 55% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/esfera-oferece-55-de-desconto-na-compra-de-pontos/"
+    },
+    {
+      "id": 554333,
+      "date": "2026-07-28T11:30:13",
+      "title": "Só hoje! Livelo oferece até 54% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/so-hoje-livelo-oferece-ate-54-de-desconto-na-compra-de-pontos-2/"
+    },
+    {
+      "id": 554087,
+      "date": "2026-07-27T19:59:18",
+      "title": "Multiplique seus pontos em até 20x com o Turbo Livelo – milheiro a partir de R$ 30,55",
+      "link": "https://passageirodeprimeira.com/multiplique-seus-pontos-em-ate-20x-com-o-turbo-livelo-milheiro-a-partir-de-r-3055/"
+    },
+    {
+      "id": 553872,
+      "date": "2026-07-27T13:40:52",
+      "title": "Últimas horas! LATAM Pass oferece 63% de desconto na compra de milhas",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-latam-pass-oferece-63-de-desconto-na-compra-de-milhas/"
+    },
+    {
+      "id": 553607,
+      "date": "2026-07-26T12:00:29",
+      "title": "Singapore Airlines oferece 30% de desconto em trechos selecionados no KrisFlyer",
+      "link": "https://passageirodeprimeira.com/singapore-airlines-oferece-30-de-desconto-em-trechos-selecionados-no-krisflyer-4/"
+    },
+    {
+      "id": 553677,
+      "date": "2026-07-26T10:20:36",
+      "title": "Smiles oferece 6 milhas por real gasto e até 40% de desconto em reservas no Booking.com",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-6-milhas-por-real-gasto-e-40-desconto-em-reservas-no-booking-com/"
+    },
+    {
+      "id": 553517,
+      "date": "2026-07-26T09:00:52",
+      "title": "Último dia para comprar pontos Livelo com 52% de desconto + 5% off no Pix",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-para-comprar-pontos-livelo-com-52-de-desconto-5-off-no-pix/"
+    },
+    {
+      "id": 553467,
+      "date": "2026-07-25T11:30:44",
+      "title": "Prorrogado! LATAM Pass oferece 63% de desconto na compra de milhas",
+      "link": "https://passageirodeprimeira.com/prorrogado-latam-pass-oferece-63-de-desconto-na-compra-de-milhas/"
+    },
+    {
+      "id": 553463,
+      "date": "2026-07-24T17:30:14",
+      "title": "Último dia! LATAM Pass oferece 63% de desconto na compra de milhas",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-latam-pass-oferece-63-de-desconto-na-compra-de-milhas-2/"
+    },
+    {
+      "id": 553496,
+      "date": "2026-07-24T10:44:58",
+      "title": "Livelo oferece 52% de desconto compra de pontos",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-52-de-desconto-compra-de-pontos-2/"
+    },
+    {
+      "id": 553294,
+      "date": "2026-07-23T15:22:58",
+      "title": "Só hoje! Livelo oferece até 54% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/so-hoje-livelo-oferece-ate-54-de-desconto-na-compra-de-pontos/"
+    },
+    {
+      "id": 552990,
+      "date": "2026-07-22T17:00:17",
+      "title": "PP 15 anos! Transfira pontos Livelo para a Smiles usando pontos + dinheiro – milheiro a partir de R$ 15,48",
+      "link": "https://passageirodeprimeira.com/pp-15-anos-transfira-pontos-livelo-para-a-smiles-usando-pontos-dinheiro-milheiro-a-partir-de-r-1548/"
+    },
+    {
+      "id": 552422,
+      "date": "2026-07-21T10:19:03",
+      "title": "LATAM Pass oferece 63% de desconto na compra de milhas",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-63-de-desconto-na-compra-de-milhas-3/"
+    },
+    {
+      "id": 552150,
+      "date": "2026-07-21T07:41:53",
+      "title": "Smiles oferece até 365% de bônus na compra de milhas e 10% off para voar",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-365-de-bonus-na-compra-de-milhas-e-10-off-para-voar/"
+    },
+    {
+      "id": 552311,
+      "date": "2026-07-20T18:15:38",
+      "title": "Multiplique seus pontos em até 20x com o Turbo Livelo – milheiro a partir de R$ 30,06",
+      "link": "https://passageirodeprimeira.com/multiplique-seus-pontos-em-ate-20x-com-o-turbo-livelo-milheiro-a-partir-de-r-3006-2/"
+    },
+    {
+      "id": 551701,
+      "date": "2026-07-20T07:40:55",
+      "title": "Indo para a Espanha? Iberia Club oferece 6 Avios por euro gasto no El Corte Inglés",
+      "link": "https://passageirodeprimeira.com/iberia-club-oferece-avios-dobro-el-corte-ingles/"
+    },
+    {
+      "id": 551537,
+      "date": "2026-07-17T09:50:45",
+      "title": "Inter oferece 54% de desconto na compra de pontos Loop",
+      "link": "https://passageirodeprimeira.com/inter-oferece-54-de-desconto-na-compra-de-pontos-loop/"
+    },
+    {
+      "id": 551211,
+      "date": "2026-07-16T13:50:38",
+      "title": "Aeroplan oferece até 110% de bônus na compra de milhas",
+      "link": "https://passageirodeprimeira.com/aeroplan-oferece-ate-110-de-bonus-na-compra-de-milhas/"
+    },
+    {
+      "id": 550923,
+      "date": "2026-07-15T18:40:43",
+      "title": "PP 15 anos! Compre pontos Esfera com 50% de desconto",
+      "link": "https://passageirodeprimeira.com/pp-15-anos-compre-pontos-esfera-com-50-de-desconto/"
+    },
+    {
+      "id": 550846,
+      "date": "2026-07-15T11:17:46",
+      "title": "Smiles oferece até 375% de bônus na compra de milhas",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-375-de-bonus-na-compra-de-milhas/"
+    },
+    {
+      "id": 547295,
+      "date": "2026-07-13T12:40:38",
+      "title": "Hotel nas Maldivas com 15% OFF! World of Hyatt oferece 20% de bônus na compra de pontos",
+      "link": "https://passageirodeprimeira.com/hotel-nas-maldivas-com-15-off-world-of-hyatt-oferece-20-de-bonus-na-compra-de-pontos/"
+    },
+    {
+      "id": 549409,
+      "date": "2026-07-08T15:00:09",
+      "title": "Passagens para Paris na Classe Executiva da Air France a partir de R$ 5.192 o trecho ou 63 mil milhas Flying Blue",
+      "link": "https://passageirodeprimeira.com/passagens-para-paris-na-classe-executiva-da-air-france-a-partir-de-r-5-192-o-trecho-ou-63-mil-milhas-flying-blue/"
+    },
+    {
+      "id": 549358,
+      "date": "2026-07-08T12:30:49",
+      "title": "Apenas hoje: compre pontos Livelo com até 55% de desconto + 5% off no Pix",
+      "link": "https://passageirodeprimeira.com/apenas-hoje-compre-pontos-livelo-com-ate-55-de-desconto-5-off-no-pix/"
+    },
+    {
+      "id": 549295,
+      "date": "2026-07-08T11:58:34",
+      "title": "Flying Blue oferece até 45% de desconto na compra de milhas",
+      "link": "https://passageirodeprimeira.com/flying-blue-oferece-ate-45-de-desconto-na-compra-de-milhas-3/"
+    },
+    {
+      "id": 548644,
+      "date": "2026-07-08T09:29:17",
+      "title": "Lufthansa oferece pacote de milhas com até 50% de bônus: emita a Primeira Classe da companhia com antecedência",
+      "link": "https://passageirodeprimeira.com/lufthansa-oferece-pacote-de-milhas-com-ate-50-de-bonus-emita-a-primeira-classe-da-companhia-com-antecedencia/"
+    },
+    {
+      "id": 548466,
+      "date": "2026-07-06T17:15:40",
+      "title": "Só hoje: multiplique seus pontos em até 20x com o Turbo Livelo – milheiro a partir de R$ 30,07",
+      "link": "https://passageirodeprimeira.com/multiplique-seus-pontos-em-ate-20x-com-o-turbo-livelo-milheiro-a-partir-de-r-3006/"
+    },
+    {
+      "id": 547806,
+      "date": "2026-07-03T18:51:01",
+      "title": "Últimas horas para comprar pontos Livelo com até 55% de desconto + 5% off no Pix",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-para-comprar-pontos-livelo-com-ate-55-de-desconto-5-off-no-pix/"
+    },
+    {
+      "id": 546910,
+      "date": "2026-07-02T13:48:56",
+      "title": "PP 15 anos! Gere o euro a partir de R$ 3,46 ao transferir pontos Azul para o ALL Accor",
+      "link": "https://passageirodeprimeira.com/pp-15-anos-gere-o-euro-a-partir-de-r-346-ao-transferir-pontos-azul-para-o-all-accor/"
+    },
+    {
+      "id": 546726,
+      "date": "2026-07-02T11:50:36",
+      "title": "PP 15 anos! Esfera oferece até 50% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/pp-15-anos-esfera-oferece-ate-50-de-desconto-na-compra-de-pontos/"
+    },
+    {
+      "id": 546885,
+      "date": "2026-07-02T08:12:13",
+      "title": "Compre pontos Livelo com até 55% de desconto + 5% off no Pix",
+      "link": "https://passageirodeprimeira.com/compre-pontos-livelo-com-ate-55-de-desconto-5-off-no-pix/"
+    },
+    {
+      "id": 545650,
+      "date": "2026-06-30T09:00:09",
+      "title": "Últimas horas! LATAM Pass oferece até 60% de desconto na compra de milhas",
+      "link": "https://passageirodeprimeira.com/ultimas-horas-latam-pass-oferece-ate-60-de-desconto-na-compra-de-milhas/"
+    },
+    {
+      "id": 544715,
+      "date": "2026-06-26T13:58:24",
+      "title": "IHG Rewards oferece até 100% de bônus na compra de pontos",
+      "link": "https://passageirodeprimeira.com/ihg-rewards-oferece-ate-100-de-bonus-na-compra-de-pontos-14/"
+    },
+    {
+      "id": 544591,
+      "date": "2026-06-24T11:06:55",
+      "title": "LATAM Pass oferece até 60% de desconto na compra de milhas",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-ate-60-de-desconto-na-compra-de-milhas-5/"
+    },
+    {
+      "id": 543824,
+      "date": "2026-06-22T19:37:01",
+      "title": "Azul Fidelidade oferece até 70% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-70-de-desconto-na-compra-de-pontos-4/"
+    },
+    {
+      "id": 543367,
+      "date": "2026-06-19T14:40:37",
+      "title": "Smiles oferece até 365% de bônus na compra de milhas",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-365-de-bonus-na-compra-de-milhas/"
+    },
+    {
+      "id": 540979,
+      "date": "2026-06-13T08:57:18",
+      "title": "O prazo está acabando! Assine o Clube Smiles 2.000 e ganhe 14 mil milhas bônus",
+      "link": "https://passageirodeprimeira.com/o-prazo-esta-acabando-assine-o-clube-smiles-2-000-e-ganhe-14-mil-milhas-bonus/"
+    },
+    {
+      "id": 541255,
+      "date": "2026-06-12T14:20:22",
+      "title": "Livelo oferece 52% de desconto compra de pontos",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-52-de-desconto-compra-de-pontos/"
+    },
+    {
+      "id": 540604,
+      "date": "2026-06-11T18:30:28",
+      "title": "Hilton Honors oferece 100% de bônus na compra de pontos",
+      "link": "https://passageirodeprimeira.com/hilton-honors-oferece-100-de-bonus-na-compra-de-pontos-32/"
+    },
+    {
+      "id": 540853,
+      "date": "2026-06-11T15:30:55",
+      "title": "Compre pontos Esfera com até 50% de desconto",
+      "link": "https://passageirodeprimeira.com/compre-pontos-esfera-com-ate-50-de-desconto/"
+    },
+    {
+      "id": 539955,
+      "date": "2026-06-09T15:00:53",
+      "title": "Multiplique seus pontos em até 25x com o Turbo Livelo – milheiro a partir de R$ 29,40",
+      "link": "https://passageirodeprimeira.com/multiplique-seus-pontos-em-ate-25x-com-o-turbo-livelo-milheiro-a-partir-de-r-2940-2/"
+    },
+    {
+      "id": 539347,
+      "date": "2026-06-08T13:00:38",
+      "title": "Virgin Atlantic oferece até 70% de bônus na compra de pontos",
+      "link": "https://passageirodeprimeira.com/virgin-atlantic-oferece-ate-70-de-bonus-na-compra-de-pontos-7/"
+    },
+    {
+      "id": 538869,
+      "date": "2026-06-07T09:03:26",
+      "title": "Último dia! Ganhe até 340% de bônus na compra de pontos Azul",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-ganhe-ate-340-de-bonus-na-compra-de-pontos-azul/"
+    },
+    {
+      "id": 538664,
+      "date": "2026-06-03T17:20:40",
+      "title": "Último dia! SUMA da Air Europa oferece até 50% de bônus na compra de milhas",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-suma-da-air-europa-oferece-ate-50-de-bonus-na-compra-de-milhas/"
+    },
+    {
+      "id": 538724,
+      "date": "2026-06-03T10:59:42",
+      "title": "Azul Fidelidade oferece até 340% de bônus na compra de pontos – milheiro a partir de R$ 14",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-340-de-bonus-na-compra-de-pontos-milheiro-a-partir-de-r-1431/"
+    },
+    {
+      "id": 538089,
+      "date": "2026-06-02T17:50:38",
+      "title": "Marriott Bonvoy oferece até 30% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/marriott-bonvoy-oferece-ate-30-de-desconto-na-compra-de-pontos/"
+    },
+    {
+      "id": 537884,
+      "date": "2026-06-01T18:20:07",
+      "title": "Livelo oferece 56% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-56-de-desconto-na-compra-de-pontos/"
+    },
+    {
+      "id": 537181,
+      "date": "2026-05-29T09:43:33",
+      "title": "Último dia para comprar milhas LATAM Pass com até 63% de desconto",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-para-comprar-milhas-latam-pass-com-ate-63-de-desconto/"
+    },
+    {
+      "id": 535926,
+      "date": "2026-05-26T16:04:49",
+      "title": "Esfera oferece até 50% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/esfera-oferece-ate-50-de-desconto-na-compra-de-pontos-28/"
+    },
+    {
+      "id": 535806,
+      "date": "2026-05-26T13:54:36",
+      "title": "Segue valendo! LATAM Pass oferece 63% de desconto na compra de milhas",
+      "link": "https://passageirodeprimeira.com/segue-valendo-latam-pass-oferece-63-de-desconto-na-compra-de-milhas/"
+    },
+    {
+      "id": 532171,
+      "date": "2026-05-26T08:42:37",
+      "title": "IHG Rewards oferece até 100% de bônus na compra de pontos",
+      "link": "https://passageirodeprimeira.com/ihg-rewards-oferece-ate-100-de-bonus-na-compra-de-pontos-13/"
+    },
+    {
+      "id": 535263,
+      "date": "2026-05-25T09:59:03",
+      "title": "LATAM Pass oferece 63% de desconto na compra de milhas",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-63-de-desconto-na-compra-de-milhas-2/"
+    },
+    {
+      "id": 531750,
+      "date": "2026-05-23T16:02:36",
+      "title": "Esfera oferece até 50% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/esfera-oferece-ate-50-de-desconto-na-compra-de-pontos-23/"
+    },
+    {
+      "id": 531550,
+      "date": "2026-05-19T08:07:39",
+      "title": "Smiles oferece até 350% de bônus na compra de milhas para assinantes do Clube",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-350-de-bonus-na-compra-de-milhas-para-assinantes-do-clube-4/"
+    },
+    {
+      "id": 531542,
+      "date": "2026-05-18T18:00:58",
+      "title": "Livelo oferece até 52% de desconto compra de pontos",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-ate-52-de-desconto-compra-de-pontos/"
+    },
+    {
+      "id": 531414,
+      "date": "2026-05-18T11:35:27",
+      "title": "Executiva para Europa por R$ 3.000 + taxas! SUMA da Air Europa oferece até 50% de bônus na compra de milhas",
+      "link": "https://passageirodeprimeira.com/executiva-para-europa-por-r-3-000-taxas-suma-da-air-europa-oferece-ate-50-de-bonus-na-compra-de-milhas/"
+    },
+    {
+      "id": 530683,
+      "date": "2026-05-15T17:20:34",
+      "title": "Esfera oferece até 50% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/esfera-oferece-ate-50-de-desconto-na-compra-de-pontos-22/"
+    },
+    {
+      "id": 530091,
+      "date": "2026-05-14T17:30:04",
+      "title": "ConnectMiles da Copa oferece 80% de bônus na compra de milhas",
+      "link": "https://passageirodeprimeira.com/connectmiles-da-copa-oferece-80-de-bonus-na-compra-de-milhas/"
+    },
+    {
+      "id": 530200,
+      "date": "2026-05-13T13:20:43",
+      "title": "Livelo oferece até 57% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-ate-57-de-desconto-na-compra-de-pontos-3/"
+    },
+    {
+      "id": 530199,
+      "date": "2026-05-13T11:50:49",
+      "title": "Smiles oferece até 300% de bônus na compra de milhas",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-300-de-bonus-na-compra-de-milhas-6/"
+    },
+    {
+      "id": 528690,
+      "date": "2026-05-07T16:20:28",
+      "title": "Livelo oferece até 56% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-ate-56-de-desconto-na-compra-de-pontos-12/"
+    },
+    {
+      "id": 527576,
+      "date": "2026-05-04T15:30:29",
+      "title": "Multiplique seus pontos em até 15x com o Turbo Livelo – milheiro a partir de R$ 29,88",
+      "link": "https://passageirodeprimeira.com/multiplique-seus-pontos-em-ate-15x-com-o-turbo-livelo-milheiro-a-partir-de-r-2988/"
+    },
+    {
+      "id": 527644,
+      "date": "2026-05-04T12:40:46",
+      "title": "Smiles oferece até 365% de bônus na compra de milhas para assinantes do Clube",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-365-de-bonus-na-compra-de-milhas-para-assinantes-do-clube-2/"
+    },
+    {
+      "id": 526490,
+      "date": "2026-05-02T13:20:36",
+      "title": "United MileagePlus oferece até 50% de desconto na compra de milhas",
+      "link": "https://passageirodeprimeira.com/united-mileageplus-oferece-ate-50-de-desconto-na-compra-de-milhas/"
+    },
+    {
+      "id": 525495,
+      "date": "2026-04-23T16:42:34",
+      "title": "Multiplique seus pontos em até 15x com o Turbo Livelo – milheiro por R$ 31",
+      "link": "https://passageirodeprimeira.com/multiplique-seus-pontos-em-ate-15x-com-o-turbo-livelo-milheiro-por-r-31/"
+    },
+    {
+      "id": 521737,
+      "date": "2026-04-18T10:15:35",
+      "title": "Hilton Honors oferece 100% de bônus na compra de pontos",
+      "link": "https://passageirodeprimeira.com/hilton-honors-oferece-100-de-bonus-na-compra-de-pontos-31/"
+    },
+    {
+      "id": 523352,
+      "date": "2026-04-14T11:08:46",
+      "title": "Livelo oferece 58% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-58-de-desconto-na-compra-de-pontos/"
+    },
+    {
+      "id": 523008,
+      "date": "2026-04-13T10:50:07",
+      "title": "Esfera oferece até 55% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/esfera-oferece-ate-55-de-desconto-na-compra-de-pontos/"
+    },
+    {
+      "id": 522691,
+      "date": "2026-04-10T19:09:06",
+      "title": "Último dia! LATAM Pass oferece 63% de desconto na compra de milhas",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-latam-pass-oferece-63-de-desconto-na-compra-de-milhas/"
+    },
+    {
+      "id": 522539,
+      "date": "2026-04-10T14:30:28",
+      "title": "Livelo oferece até 54% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-ate-54-de-desconto-na-compra-de-pontos-13/"
+    },
+    {
+      "id": 522210,
+      "date": "2026-04-09T13:11:49",
+      "title": "Acaba amanhã! LATAM Pass oferece 63% de desconto na compra de milhas",
+      "link": "https://passageirodeprimeira.com/ate-amanha-latam-pass-oferece-63-de-desconto-na-compra-de-milhas-2/"
+    },
+    {
+      "id": 521773,
+      "date": "2026-04-08T12:20:10",
+      "title": "Smiles oferece até 365% de bônus na compra de milhas para assinantes do Clube",
+      "link": "https://passageirodeprimeira.com/smiles-oferece-ate-365-de-bonus-na-compra-de-milhas-para-assinantes-do-clube/"
+    },
+    {
+      "id": 521488,
+      "date": "2026-04-07T13:28:26",
+      "title": "Multiplique seus pontos em até 20x com o Turbo Livelo – milheiro a partir de R$ 30",
+      "link": "https://passageirodeprimeira.com/multiplique-seus-pontos-em-ate-20x-com-o-turbo-livelo-milheiro-a-partir-de-r-30/"
+    },
+    {
+      "id": 521386,
+      "date": "2026-04-07T09:27:28",
+      "title": "LATAM Pass oferece 63% de desconto na compra de milhas",
+      "link": "https://passageirodeprimeira.com/latam-pass-oferece-63-de-desconto-na-compra-de-milhas/"
+    },
+    {
+      "id": 521033,
+      "date": "2026-04-06T08:05:25",
+      "title": "Azul Fidelidade oferece até 340% de bônus na compra de pontos",
+      "link": "https://passageirodeprimeira.com/azul-fidelidade-oferece-ate-340-de-bonus-na-compra-de-pontos/"
+    },
+    {
+      "id": 520670,
+      "date": "2026-04-02T16:37:51",
+      "title": "Livelo oferece até 56% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/livelo-56-de-desconto-compra-de-pontos/"
+    },
+    {
+      "id": 520296,
+      "date": "2026-04-01T14:02:21",
+      "title": "Prorrogado! Smiles oferece até 355% de bônus na compra de milhas para assinantes do Clube",
+      "link": "https://passageirodeprimeira.com/prorrogado-smiles-oferece-ate-355-de-bonus-na-compra-de-milhas-para-assinantes-do-clube/"
+    },
+    {
+      "id": 519130,
+      "date": "2026-03-28T08:31:26",
+      "title": "Livelo oferece até 54% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-ate-54-de-desconto-na-compra-de-pontos-3-2/"
+    },
+    {
+      "id": 518280,
+      "date": "2026-03-24T13:13:42",
+      "title": "Livelo oferece até 58% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-ate-58-de-desconto-na-compra-de-pontos/"
+    },
+    {
+      "id": 518263,
+      "date": "2026-03-24T11:14:13",
+      "title": "Compre pontos Esfera com 52% de desconto e gere Avios a partir de R$ 56",
+      "link": "https://passageirodeprimeira.com/compre-pontos-esfera-com-52-de-desconto-e-gere-avios-a-partir-de-r-56/"
+    },
+    {
+      "id": 517492,
+      "date": "2026-03-20T13:50:26",
+      "title": "Livelo oferece até 55% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-ate-55-de-desconto-na-compra-de-pontos-12/"
+    },
+    {
+      "id": 517200,
+      "date": "2026-03-19T12:50:58",
+      "title": "Livelo oferece até 57% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-ate-57-de-desconto-na-compra-de-pontos-2/"
+    },
+    {
+      "id": 516758,
+      "date": "2026-03-17T18:22:18",
+      "title": "Milheiro por R$ 30! Multiplique seus pontos em até 30x com o Turbo Livelo",
+      "link": "https://passageirodeprimeira.com/milheiro-por-r-30-multiplique-seus-pontos-em-ate-30x-com-o-turbo-livelo/"
+    },
+    {
+      "id": 516563,
+      "date": "2026-03-17T15:00:15",
+      "title": "Compre pontos Esfera com até 52% de desconto",
+      "link": "https://passageirodeprimeira.com/compre-pontos-esfera-com-ate-52-de-desconto/"
+    },
+    {
+      "id": 515997,
+      "date": "2026-03-16T09:30:05",
+      "title": "Prorrogado! Azul Fidelidade oferece até 310% de bônus na compra de pontos",
+      "link": "https://passageirodeprimeira.com/prorrogado-azul-fidelidade-oferece-ate-310-de-bonus-na-compra-de-pontos/"
+    },
+    {
+      "id": 515879,
+      "date": "2026-03-15T13:30:38",
+      "title": "Último dia! Azul Fidelidade oferece até 310% de bônus na compra de pontos",
+      "link": "https://passageirodeprimeira.com/ultimo-dia-azul-fidelidade-oferece-ate-310-de-bonus-na-compra-de-pontos/"
+    },
+    {
+      "id": 515651,
+      "date": "2026-03-13T17:20:37",
+      "title": "Livelo oferece até 54% de desconto na compra de pontos",
+      "link": "https://passageirodeprimeira.com/livelo-oferece-ate-54-de-desconto-na-compra-de-pontos-12/"
+    }
+  ]
+}

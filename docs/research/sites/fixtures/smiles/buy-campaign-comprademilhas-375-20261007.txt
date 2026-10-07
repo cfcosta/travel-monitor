@@ -1,0 +1,167 @@
+# Smiles buy-miles page, loaded logged out in the user's Chrome 2026-10-07 20:52 UTC.
+# GET https://www.smiles.com.br/comprar-milhas -> redirected to https://www.smiles.com.br/portal/campanhas/comprademilhas-375-20261007
+# Server-rendered Liferay page; the regulation is in the HTML. Visible text (header and footer menus cut), then the regulation.
+# Note: the banner says the promotion ends 21h on 12/10/2026; the regulation says 21h on 16/10/2026.
+
+--- visible text ---
+Comprar Milhas
+Comprar Milhas
+
+Aumente seu saldo e fique
+mais perto da próxima viagem!
+
+Mais saldo para você ir mais longe!
+
+Quer mais milhas para viajar? Aproveite até 375% de bônus na compra de milhas, de acordo com o seu plano do Clube Smiles.
+
+Ainda não é Clube Smiles? Assine agora, receba milhas todos os meses e aproveite benefícios e condições exclusivas para deixar seus planos de viagem ainda mais perto de acontecer!
+
+Promoção válida das 10h do dia 07/10/2026 até as 21h do dia 12/10/2026 (horário de Brasília).
+
+Quantas milhas você quer comprar?
+-
++
+
+(apenas em lotes de 1.000)
+
+Clube Smiles
+
+Plano 1.000
+Plano 2.000
+Plano 5.000
+Plano 7.000
+Plano 10.000
+Plano 20.000 e/ou categoria Magno/Diamante
+
+Você leva 3.250 milhas bônus
+
+Total: 4.250
+
+Comprar milhas
+
+Oferta exclusiva para clientes Clube Smiles! Nessa promoção, você ganha mais milhas bônus de acordo com seu plano!
+
+Saiba mais
+O CLUBE SMILES TE LEVA MAIS LONGE!
+Escolha o plano que mais combina com você e aproveite essa oferta.
+Plano 1.000
+A partir de:
+R$ 43,70
+ao mês
+Plano 2.000
+Mais vendido!
+A partir de:
+R$ 77,90
+ao mês
+Plano 5.000
+A partir de:
+R$ 174,80
+ao mês
+Plano 10.000
+A partir de:
+R$ 323,00
+ao mês
+Plano 20.000
+A partir de:
+R$ 819,00
+ao mês
+Assine e torne-se cliente Diamante
+Plano 1.000
+Ganhe até 10.000 milhas na hora!
+1.000 milhas todo mês
+Junte 21.000 milhas em até 12 meses
+Detalhes da promoção
+Confira alguns benefícios exclusivos
+Descontos garantidos
+Milhas qualificáveis
+Outlet de passagens
+Conta família
+5 reservas gratuitas GOL
+10% de bônus com o meu Bônus VIP
+Milhas do Clube válidas por 10 anos
+Bônus na quitação do Viaje Fácil
+5% off
+Anual parcelado
+De: R$ 46,00 ao mês
+Por: até 12x R$ 43,70
+Assinar parcelado
+10% off
+Anual à vista
+De: R$ 552,00 ao ano
+Por: R$ 496,80 ao ano
+Assinar à vista
+Na Smiles, você planeja toda a sua viagem em um só lugar. Veja onde usar suas milhas!
+Resgate já
+Reserve já
+Alugue já
+Alugue já
+Resgate já
+
+
+--- regulation ---
+REGULAMENTO Esta ação promocional (“Promoção”) é promovida pela GOL LINHAS AÉREAS S.A., 
+administradora do Programa Smiles, sociedade anônima regularmente constituída no país, inscrita no 
+CNPJ/MF sob nº 07.575.651/0037-60, com sede na Alameda Rio Negro, nº 585, Edifício Padauiri, Bloco 
+B, 2º andar, conjuntos 21 e 22 – Parte A, Alphaville, CEP 06454-000, na Cidade de Barueri, Estado 
+de São Paulo, doravante designada simplesmente “GOL”. I – REGULAMENTO 1. O Participante do Programa 
+Smiles, residente e domiciliado no Brasil, portador de CPF válido com cadastro ativo no Clube 
+Smiles e/ou pertencente à categoria Diamante ou Magno, com CPF válido (“Participante” ou 
+“Participantes”), entre 10h00 (horário de Brasília) do dia 07 de outubro de 2026 e 21h00 (horário 
+de Brasília) do dia 16 de outubro de 2026 (Período de Vigência”), poderá comprar (utilizando a 
+moeda corrente nacional), no mínimo, 1.000 (mil) e, no máximo, 300.000 (trezentas mil) Milhas 
+Smiles por ano (“Milhas Compradas”), e poderá receber Milhas Smiles Bônus (“Milhas Bônus”), 
+conforme apresentado nas regras a seguir. 1.1 O Participante com cadastro ativo no Clube Smiles nos 
+planos 1.000, 2.000, 3.000, 5.000, 7.000, 10.000, 20.000 e/ou pertencente à Categoria Diamante ou 
+Magno que, durante o Período de Vigência, comprar Milhas Compradas, receberá 315% (trezentos e 
+quinze por cento) de Milhas Bônus calculadas sobre o total de Milhas Compradas em decorrência da 
+presente Promoção. 1.2. Demais Participantes que, durante o Período de Vigência, comprarem Milhas 
+Compradas, não serão elegíveis às Milhas Bônus sobre o total de Milhas Compradas em decorrência da 
+presente Promoção. 2. O valor da Milha Smiles para fins desta Promoção é de R$0,08 (oito centavos 
+de real)/unidade. O valor total da aquisição poderá variar de acordo com a quantidade de Milhas 
+Smiles adquiridas pelo Participante. 3. As Milhas Compradas serão disponibilizadas na Conta Smiles 
+do Participante em até 72 (setenta e duas) horas após a confirmação do pagamento, seja à vista ou 
+parcelado. 4. As Milhas Compradas serão válidas por 12 (doze) meses e as Milhas Bônus serão válidas 
+por 12 (doze) meses, a contar da data do crédito destas na Conta Smiles do Participante. 5. A 
+compra das Milhas Smiles poderá ser parcelada em até 5 (cinco) vezes sem juros no cartão de 
+crédito, que precisa ser emitido no Brasil. Caso o pagamento seja feito utilizando o cartão de 
+crédito GOL Smiles, o parcelamento poderá ser realizado em até 12 (doze) vezes sem juros. 6. Os 
+Participantes do Programa Smiles, com cadastro ativo no Clube Smiles, nos planos 1.000, 2.000, 
+3.000, 5.000, 7.000, 10.000, 20.000 e/ou pertencentes à Categoria Diamante ou Magno, que efetuarem 
+compra de Milhas Compradas durante o Período de Vigência, receberão ainda, diferenciação no Acúmulo 
+de Milhas Smiles como bonificação (“Milhas Bônus”), calculadas sobre o total de Milhas Compradas, 
+nos seguintes moldes: • Plano Clube Smiles 1.000 – a bonificação será de 10% (dez por cento), 
+totalizando 325% (trezentos e vinte e cinco por cento) de Milhas Smiles Bônus; • Plano Clube Smiles 
+2.000 – a bonificação será de 20% (vinte por cento), totalizando 335% (trezentos e trinta e cinco 
+por cento) de Milhas Smiles Bônus; • Plano Clube Smiles 3.000 – a bonificação será de 20% (vinte 
+por cento), totalizando 335% (trezentos e trinta e cinco por cento) de Milhas Smiles Bônus; • Plano 
+Clube Smiles 5.000 – a bonificação será de 30% (trinta por cento), totalizando 345% (trezentos e 
+quarenta e cinco por cento) de Milhas Smiles Bônus; • Plano Clube Smiles 7.000 – a bonificação será 
+de 40% (quarenta por cento), totalizando 355% (trezentos e cinquenta e cinco por cento) de Milhas 
+Smiles Bônus; • Plano Clube Smiles 10.000 – a bonificação será de 50% (cinquenta por cento), 
+totalizando 365% (trezentos e sessenta e cinco por cento) de Milhas Smiles Bônus; • Plano Clube 
+Smiles 20.000 – a bonificação será de 60% (sessenta por cento), totalizando 375% (trezentos e 
+setenta e cinco por cento) de Milhas Smiles Bônus; e • Categoria Diamante ou Magno – a bonificação 
+será de 60% (sessenta por cento), totalizando 375% (trezentos e setenta e cinco por cento) de 
+Milhas Smiles Bônus. 7. As Milhas Bônus acima indicadas, recebidas como bonificação pelos 
+Participantes do Programa Smiles, com cadastro ativo no Clube Smiles, nos planos 1.000, 2.000, 
+3.000, 5.000, 7.000, 10.000, 20.000 e/ou pertencentes à Categoria Diamante ou Magno serão válidas 
+por 12 (doze) meses a contar de sua disponibilização na Conta Smiles do Participante. As Milhas 
+Bônus serão disponibilizadas em até 72 (setenta e duas) horas após o crédito das Milhas Compradas. 
+8. Esta Promoção não é cumulativa com outras promoções que estejam em vigor ou que venham a ser 
+lançadas. 9. A GOL reserva-se no direito de alterar, suspender ou mesmo encerrar esta Promoção a 
+qualquer momento, mediante aviso prévio. 10. Caso seja identificada, a qualquer tempo pela GOL, 
+inclusive após o término da Promoção, a inelegibilidade do Participante ou qualquer irregularidade 
+cometida pelo Participante, inclusive fraude comprovada, a GOL poderá: (i) suspender ou cancelar a 
+Conta Smiles e excluir da Promoção e/ou do Programa Smiles o Participante, inclusive o Participante 
+inelegível a Promoção, que atuou de maneira irregular ou fraudulenta, em caráter temporário ou 
+definitivo; (ii) estornar da Conta Smiles do Participante, inclusive o Participante inelegível a 
+Promoção, as Milhas Smiles obtidas irregularmente, inclusive obtidas mediante fraude; e/ou (iii) 
+cancelar todas as transações realizadas com Milhas Smiles provenientes desta Promoção, obtidas 
+irregularmente ou mediante fraude, incluindo, mas não se limitando, o cancelamento das transações 
+de resgate de prêmios. 11. Em caso de inelegibilidade do Participante, fraude comprovada ou 
+infração ao presente Regulamento, o Participante será excluído automaticamente da Promoção, podendo 
+ainda responder na esfera cível e criminal pelos danos ocasionados, aplicando-se a esta Promoção 
+exclusivamente a legislação brasileira. 12. A tolerância, omissão ou transigência da GOL não 
+implicará em renúncia, ou modificação das condições expressas nas regras deste Regulamento. 13. 
+Esta Promoção independe de qualquer modalidade aleatória, não estando, portanto, sujeito à 
+autorização prévia estabelecida no Art. 1º da Lei n° 5.768/71.
