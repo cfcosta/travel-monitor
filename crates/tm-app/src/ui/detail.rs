@@ -431,6 +431,7 @@ impl TravelMonitor {
                         labels: false,
                     },
                     fonts.clone(),
+                    None,
                     |_, _, _| {},
                 ))
         };

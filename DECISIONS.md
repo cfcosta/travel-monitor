@@ -1075,3 +1075,26 @@ each in its own tab of the site's Chromium. TAP gets the same.
 
 `tmd --parallel <n>` changes the number of lanes (1 gives the old
 behaviour).
+
+## 0073: The map uses the Robinson projection and zooms and pans
+
+- Date: 2026-10-07
+- Refines [0044](#0044-the-apps-main-screen-is-a-map-with-a-list).
+
+The night map was a plain latitude/longitude grid. Once the watchlist
+reached Anchorage, Auckland and Ushuaia, it showed the whole globe, and
+that grid stretches the high latitudes until the continents look
+wrong. It now uses the Robinson projection, the usual compromise for a
+world map: its parallels are evenly spaced enough that the 2° land dots
+stay a regular field, where Mercator would spread the rows apart
+towards the poles.
+
+The Deals map zooms and pans. The wheel or a pinch zooms around the
+cursor, from the whole globe up to 16× the fitted view. Dragging pans,
+a click that does not move still picks a destination, and a double
+click, or choosing another origin, fits the routes again. The globe's
+edge stops a pan, and drawing stays inside the map's pane. Arcs, labels
+and dots keep their fitted sizes while zoomed (the dots grow a little,
+up to a cap). The Routes screen's header map and the detail card's
+small map stay fixed: one sits in a scrolling page, the other is too
+small to explore.

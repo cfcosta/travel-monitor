@@ -371,6 +371,7 @@ impl TravelMonitor {
                 div().absolute().inset_0().child(map(
                     model,
                     fonts.clone(),
+                    Some(self.deals_map.clone()),
                     picker,
                 )),
             ))

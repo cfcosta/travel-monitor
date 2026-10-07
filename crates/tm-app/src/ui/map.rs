@@ -1,12 +1,19 @@
-//! The night map (DECISIONS.md 0044): land as dots, an arc from the
-//! origin to every watched destination, deals in yellow, the selected
-//! route brightest.
+//! The night map (DECISIONS.md 0044, 0073): land as dots on a Robinson
+//! projection, an arc from the origin to every watched destination,
+//! deals in yellow, the selected route brightest. A map given a
+//! [`MapState`] zooms with the wheel (or a pinch) around the cursor,
+//! pans when dragged, and fits again on a double click or when the
+//! origin changes.
 
-use std::{cell::Cell, rc::Rc};
+use std::{
+    cell::{Cell, RefCell},
+    rc::Rc,
+};
 
 use gpui::{
     App,
     Bounds,
+    ContentMask,
     FontWeight,
     Hsla,
     MouseButton,
@@ -27,7 +34,7 @@ use gpui::{
 };
 
 use crate::{
-    geo::{self, GeoWindow, LabelSide, Projection, Pt, Rect},
+    geo::{self, GeoWindow, LabelSide, Projection, Pt, Rect, View},
     land_dots::LAND_DOTS,
     theme::{self, Fonts, alpha, color},
 };
@@ -79,55 +86,216 @@ impl MapModel {
     }
 }
 
-/// Where the map was last drawn, for clicks.
-type Drawn = Rc<Cell<Option<(Projection, Bounds<Pixels>)>>>;
+/// A map's zoom and pan, kept by its screen across frames (0073).
+#[derive(Clone, Default)]
+pub struct MapState(Rc<RefCell<Interaction>>);
+
+#[derive(Default)]
+struct Interaction {
+    view: View,
+    /// The origin the view was made for: another origin fits again.
+    origin: Option<SharedString>,
+    /// A press on the map: where it started and where it was last seen,
+    /// and whether it has moved far enough to be a drag.
+    press: Option<(Pt, Pt, bool)>,
+}
+
+impl MapState {
+    /// Sets the view, as if the user had zoomed and panned (screenshots).
+    #[cfg(test)]
+    pub fn set_view(&self, view: View) {
+        self.0.borrow_mut().view = view;
+    }
+}
+
+/// How far a press moves before it is a drag rather than a click.
+const DRAG_SLOP: f32 = 4.0;
+
+/// Where the map was last drawn: the projection on screen, the fitted
+/// one under the view, and the box the view applies in.
+#[derive(Clone, Copy)]
+struct Drawn {
+    proj: Projection,
+    base: Projection,
+    area: (f32, f32, f32, f32),
+}
+
+impl Drawn {
+    fn centre(&self) -> Pt {
+        let (x, y, w, h) = self.area;
+        Pt::new(x + w / 2.0, y + h / 2.0)
+    }
+
+    fn min_zoom(&self) -> f32 {
+        self.base.min_zoom(self.area.2, self.area.3)
+    }
+}
+
+fn at(position: gpui::Point<Pixels>) -> Pt {
+    Pt::new(f32::from(position.x), f32::from(position.y))
+}
 
 /// The map; `on_pick` gets the index of a destination clicked near its
-/// dot.
+/// dot. With `state`, it zooms and pans.
 pub fn map(
     model: MapModel,
     fonts: Fonts,
+    state: Option<MapState>,
     on_pick: impl Fn(usize, &mut Window, &mut App) + 'static,
 ) -> impl IntoElement {
-    let drawn: Drawn = Rc::new(Cell::new(None));
-    let painted = drawn.clone();
+    let drawn: Rc<Cell<Option<Drawn>>> = Rc::new(Cell::new(None));
     let hits: Vec<(f32, f32)> = model
         .destinations
         .iter()
         .map(|d| (d.place.lon, d.place.lat))
         .collect();
-    div()
-        .size_full()
-        .on_mouse_down(MouseButton::Left, move |event, window, cx| {
-            let Some((proj, _)) = drawn.get() else {
+    let pick = {
+        let drawn = drawn.clone();
+        move |click: Pt, window: &mut Window, cx: &mut App| {
+            let Some(d) = drawn.get() else {
                 return;
             };
-            let click = Pt::new(
-                f32::from(event.position.x),
-                f32::from(event.position.y),
-            );
             let nearest = hits
                 .iter()
                 .enumerate()
                 .map(|(i, (lon, lat))| {
-                    (i, proj.project(*lon, *lat).distance(click))
+                    (i, d.proj.project(*lon, *lat).distance(click))
                 })
-                .filter(|(_, d)| *d <= 14.0)
+                .filter(|(_, dist)| *dist <= 14.0)
                 .min_by(|a, b| a.1.total_cmp(&b.1));
             if let Some((i, _)) = nearest {
                 on_pick(i, window, cx);
             }
-        })
-        .child(
-            canvas(
-                |_, _, _| {},
-                move |bounds, _, window, cx| {
-                    let proj = paint_map(&model, &fonts, bounds, window, cx);
-                    painted.set(Some((proj, bounds)));
-                },
-            )
-            .size_full(),
+        }
+    };
+    let canvas = {
+        let drawn = drawn.clone();
+        let state = state.clone();
+        canvas(
+            |_, _, _| {},
+            move |bounds, _, window, cx| {
+                let view = state.as_ref().map(|s| {
+                    let mut s = s.0.borrow_mut();
+                    let origin = model.origin.as_ref().map(|o| o.code.clone());
+                    if s.origin != origin {
+                        s.origin = origin;
+                        s.view = View::default();
+                    }
+                    s.view
+                });
+                let painted = window.with_content_mask(
+                    Some(ContentMask { bounds }),
+                    |window| {
+                        paint_map(&model, &fonts, bounds, view, window, cx)
+                    },
+                );
+                if let (Some(state), Some(kept)) = (&state, painted.view) {
+                    state.0.borrow_mut().view = kept;
+                }
+                drawn.set(Some(painted.drawn));
+            },
         )
+        .size_full()
+    };
+    let base = div().size_full().overflow_hidden().child(canvas);
+    let Some(state) = state else {
+        return base
+            .on_mouse_down(MouseButton::Left, move |event, window, cx| {
+                pick(at(event.position), window, cx);
+            })
+            .into_any_element();
+    };
+    let dragging = state.0.borrow().press.is_some_and(|(_, _, moved)| moved);
+    let (down, moving, up, out, wheel, pinch) = (
+        state.clone(),
+        state.clone(),
+        state.clone(),
+        state.clone(),
+        state.clone(),
+        state,
+    );
+    let (wheel_drawn, pinch_drawn) = (drawn.clone(), drawn);
+    let base = if dragging {
+        base.cursor_grabbing()
+    } else {
+        base.cursor_grab()
+    };
+    base.on_mouse_down(MouseButton::Left, move |event, window, _| {
+        let p = at(event.position);
+        let mut s = down.0.borrow_mut();
+        if event.click_count >= 2 {
+            // A double click fits the routes again.
+            s.view = View::default();
+            s.press = None;
+            window.refresh();
+        } else {
+            s.press = Some((p, p, false));
+        }
+    })
+    .on_mouse_move(move |event, window, _| {
+        if event.pressed_button != Some(MouseButton::Left) {
+            return;
+        }
+        let p = at(event.position);
+        let mut s = moving.0.borrow_mut();
+        let Some((start, last, moved)) = s.press else {
+            return;
+        };
+        let moved = moved || start.distance(p) > DRAG_SLOP;
+        if moved {
+            s.view = s.view.dragged(p.x - last.x, p.y - last.y);
+            s.press = Some((start, p, true));
+            window.refresh();
+        }
+    })
+    .on_mouse_up(MouseButton::Left, move |event, window, cx| {
+        let press = up.0.borrow_mut().press.take();
+        if let Some((_, _, false)) = press {
+            pick(at(event.position), window, cx);
+        }
+        window.refresh();
+    })
+    .on_mouse_up_out(MouseButton::Left, move |_, window, _| {
+        if out.0.borrow_mut().press.take().is_some() {
+            window.refresh();
+        }
+    })
+    .on_scroll_wheel(move |event, window, cx| {
+        let Some(d) = wheel_drawn.get() else {
+            return;
+        };
+        let dy = match event.delta {
+            gpui::ScrollDelta::Pixels(p) => f32::from(p.y) / 40.0,
+            gpui::ScrollDelta::Lines(l) => l.y,
+        };
+        if dy == 0.0 {
+            return;
+        }
+        let mut s = wheel.0.borrow_mut();
+        s.view = s.view.zoomed_at(
+            1.2_f32.powf(dy),
+            at(event.position),
+            d.centre(),
+            d.min_zoom(),
+        );
+        cx.stop_propagation();
+        window.refresh();
+    })
+    .on_pinch(move |event, window, cx| {
+        let Some(d) = pinch_drawn.get() else {
+            return;
+        };
+        let mut s = pinch.0.borrow_mut();
+        s.view = s.view.zoomed_at(
+            1.0 + event.delta,
+            at(event.position),
+            d.centre(),
+            d.min_zoom(),
+        );
+        cx.stop_propagation();
+        window.refresh();
+    })
+    .into_any_element()
 }
 
 fn pt(p: Pt) -> gpui::Point<Pixels> {
@@ -201,13 +369,21 @@ fn shape(label: &Label, window: &mut Window) -> gpui::ShapedLine {
     )
 }
 
+/// What painting left behind: where things were drawn, and the view as
+/// it ended up once kept on the globe.
+struct Painted {
+    drawn: Drawn,
+    view: Option<View>,
+}
+
 fn paint_map(
     model: &MapModel,
     fonts: &Fonts,
     bounds: Bounds<Pixels>,
+    view: Option<View>,
     window: &mut Window,
     cx: &mut App,
-) -> Projection {
+) -> Painted {
     let (x, y) = (f32::from(bounds.origin.x), f32::from(bounds.origin.y));
     let (w, h) = (f32::from(bounds.size.width), f32::from(bounds.size.height));
     let inset = if h - model.bottom_inset > 160.0 {
@@ -215,7 +391,7 @@ fn paint_map(
     } else {
         0.0
     };
-    let proj = Projection::fit(
+    let base = Projection::fit(
         model.window,
         x + 8.0,
         y + 8.0,
@@ -223,11 +399,25 @@ fn paint_map(
         h - inset - 16.0,
     )
     .clamped_to_globe(x, y, w, h - inset);
-    let z = proj.zoom().clamp(0.45, 2.5);
+    let area = (x, y, w, h - inset);
+    let (proj, view) = match view {
+        Some(v) => {
+            let (p, kept) = base.viewed(v, x, y, w, h - inset);
+            (p, Some(kept))
+        }
+        None => (base, None),
+    };
+    let painted = Painted {
+        drawn: Drawn { proj, base, area },
+        view,
+    };
+    // Strokes and labels follow the fitted size, not the zoom.
+    let z = base.zoom().clamp(0.45, 2.5);
 
-    // Land: a 2° grid of dots, about 44% of the spacing wide.
+    // Land: a 2° grid of dots (about 1.7 plane units apart), about 44% of
+    // the spacing wide, never blobs when zoomed in.
     let land = color(theme::LAND);
-    let r = (proj.scale * 2.0 * 0.22).max(0.8);
+    let r = (proj.scale * 1.7 * 0.22).clamp(0.8, 4.0);
     // Every land dot that lands in the panel, not only those inside the
     // fitted window, so the dot field fills the slack with more globe
     // instead of stopping at a hard edge.
@@ -238,7 +428,7 @@ fn paint_map(
     }
 
     let Some(origin) = &model.origin else {
-        return proj;
+        return painted;
     };
     let o = proj.project(origin.lon, origin.lat);
     let dests: Vec<(Pt, &MapDest)> = model
@@ -276,7 +466,7 @@ fn paint_map(
     circle(window, o, 4.5 * z, color(theme::TEAL));
 
     if !model.labels {
-        return proj;
+        return painted;
     }
     let label_size = (10.0 * z).clamp(9.0, 14.0);
     let origin_label = Label {
@@ -366,5 +556,5 @@ fn paint_map(
         window,
         cx,
     );
-    proj
+    painted
 }

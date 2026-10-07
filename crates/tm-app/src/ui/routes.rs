@@ -141,6 +141,7 @@ pub(super) fn small_map(
             labels,
         },
         fonts.clone(),
+        None,
         |_, _, _| {},
     )
 }

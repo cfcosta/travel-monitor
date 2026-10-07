@@ -1,5 +1,6 @@
-//! The night map's geometry (DECISIONS.md 0044): an equirectangular
-//! projection fitted to a box, and the curved arcs from the origin.
+//! The night map's geometry (DECISIONS.md 0044, 0073): the Robinson
+//! projection fitted to a box, the user's zoom and pan over it, and the
+//! curved arcs from the origin.
 //!
 //! Pure functions on plain `f32` points, so they are tested without a
 //! window. The map view turns them into gpui paths.
@@ -40,10 +41,12 @@ impl GeoWindow {
         south: -58.0,
     };
 
+    #[cfg(test)]
     pub fn width(&self) -> f32 {
         self.east - self.west
     }
 
+    #[cfg(test)]
     pub fn height(&self) -> f32 {
         self.north - self.south
     }
@@ -116,14 +119,88 @@ impl GeoWindow {
     }
 }
 
-/// An equirectangular projection of a [`GeoWindow`] into a box,
-/// keeping degrees square and centring the slack ("meet").
+/// Robinson's table (1974), every 5° of latitude from the equator to
+/// the pole: the parallel's length relative to the equator's, and its
+/// distance from the equator relative to the pole's.
+const ROBINSON_X: [f32; 19] = [
+    1.0000, 0.9986, 0.9954, 0.9900, 0.9822, 0.9730, 0.9600, 0.9427, 0.9216,
+    0.8962, 0.8679, 0.8350, 0.7986, 0.7597, 0.7186, 0.6732, 0.6213, 0.5722,
+    0.5322,
+];
+const ROBINSON_Y: [f32; 19] = [
+    0.0000, 0.0620, 0.1240, 0.1860, 0.2480, 0.3100, 0.3720, 0.4340, 0.4958,
+    0.5571, 0.6176, 0.6769, 0.7346, 0.7903, 0.8435, 0.8936, 0.9394, 0.9761,
+    1.0000,
+];
+
+/// The Robinson projection of `(lon, lat)` in degrees onto a plane, x
+/// east and y north, in units where a degree of longitude on the
+/// equator is 0.8487 (the equator is about 305.5 long, pole to pole
+/// about 155). Linear between the table's rows, which is closer than a
+/// 2° dot grid can show.
+pub fn robinson(lon: f32, lat: f32) -> Pt {
+    let a = lat.abs().min(90.0) / 5.0;
+    let i = (a.floor() as usize).min(17);
+    let t = a - i as f32;
+    let x = ROBINSON_X[i] + (ROBINSON_X[i + 1] - ROBINSON_X[i]) * t;
+    let y = ROBINSON_Y[i] + (ROBINSON_Y[i + 1] - ROBINSON_Y[i]) * t;
+    Pt::new(
+        0.8487 * x * lon,
+        1.3523 * y * 180.0 / std::f32::consts::PI * lat.signum(),
+    )
+}
+
+/// A box on the projected plane: west/east x, north/south y.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Plane {
+    pub west: f32,
+    pub east: f32,
+    pub north: f32,
+    pub south: f32,
+}
+
+impl Plane {
+    /// The smallest box holding every point of `window`: its meridians
+    /// are widest at the latitude nearest the equator.
+    pub fn of(window: &GeoWindow) -> Self {
+        let widest = 0.0_f32.clamp(window.south, window.north);
+        Self {
+            west: robinson(window.west, widest).x,
+            east: robinson(window.east, widest).x,
+            north: robinson(0.0, window.north).y,
+            south: robinson(0.0, window.south).y,
+        }
+    }
+
+    /// The land data's extent: the map never shows sky past it.
+    pub fn globe() -> Self {
+        Self::of(&GeoWindow {
+            west: -180.0,
+            east: 180.0,
+            north: 84.0,
+            south: -88.0,
+        })
+    }
+
+    pub fn width(&self) -> f32 {
+        self.east - self.west
+    }
+
+    pub fn height(&self) -> f32 {
+        self.north - self.south
+    }
+}
+
+/// The Robinson projection of a [`GeoWindow`] into a box, keeping the
+/// plane's units square and centring the slack ("meet").
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Projection {
     pub window: GeoWindow,
-    /// Pixels per degree.
+    /// The window on the plane.
+    pub plane: Plane,
+    /// Pixels per plane unit.
     pub scale: f32,
-    /// Where (west, north) lands.
+    /// Where the plane's (west, north) lands.
     pub origin: Pt,
 }
 
@@ -136,13 +213,15 @@ impl Projection {
         width: f32,
         height: f32,
     ) -> Self {
-        let scale = (width / window.width())
-            .min(height / window.height())
+        let plane = Plane::of(&window);
+        let scale = (width / plane.width())
+            .min(height / plane.height())
             .max(0.0);
-        let used_w = window.width() * scale;
-        let used_h = window.height() * scale;
+        let used_w = plane.width() * scale;
+        let used_h = plane.height() * scale;
         Self {
             window,
+            plane,
             scale,
             origin: Pt::new(
                 x + (width - used_w) / 2.0,
@@ -150,12 +229,6 @@ impl Projection {
             ),
         }
     }
-
-    /// The land data's extent: the map never shows sky past these.
-    pub const GLOBE_NORTH: f32 = 84.0;
-    pub const GLOBE_SOUTH: f32 = -88.0;
-    pub const GLOBE_WEST: f32 = -180.0;
-    pub const GLOBE_EAST: f32 = 180.0;
 
     /// Slides the map inside the box `(x, y, width, height)` so its
     /// slack never shows beyond the globe: when the box shows more than
@@ -174,33 +247,77 @@ impl Projection {
             return self;
         }
         let s = self.scale;
-        // Latitude: the top of the box shows `north + (origin.y − y)/s`.
+        let globe = Plane::globe();
+        // Vertically: the top of the box shows `north + (origin.y − y)/s`.
         let span = height / s;
-        let globe = Self::GLOBE_NORTH - Self::GLOBE_SOUTH;
-        let top = self.window.north + (self.origin.y - y) / s;
-        let top = if span >= globe {
-            Self::GLOBE_NORTH + (span - globe) / 2.0
+        let top = self.plane.north + (self.origin.y - y) / s;
+        let top = if span >= globe.height() {
+            globe.north + (span - globe.height()) / 2.0
         } else {
-            top.min(Self::GLOBE_NORTH).max(Self::GLOBE_SOUTH + span)
+            top.min(globe.north).max(globe.south + span)
         };
-        self.origin.y = y + (top - self.window.north) * s;
-        // Longitude: the left of the box shows `west − (origin.x − x)/s`.
+        self.origin.y = y + (top - self.plane.north) * s;
+        // Horizontally: the left of the box shows `west − (origin.x − x)/s`.
         let span = width / s;
-        let globe = Self::GLOBE_EAST - Self::GLOBE_WEST;
-        let left = self.window.west - (self.origin.x - x) / s;
-        let left = if span >= globe {
-            Self::GLOBE_WEST - (span - globe) / 2.0
+        let left = self.plane.west - (self.origin.x - x) / s;
+        let left = if span >= globe.width() {
+            globe.west - (span - globe.width()) / 2.0
         } else {
-            left.max(Self::GLOBE_WEST).min(Self::GLOBE_EAST - span)
+            left.max(globe.west).min(globe.east - span)
         };
-        self.origin.x = x + (self.window.west - left) * s;
+        self.origin.x = x + (self.plane.west - left) * s;
         self
     }
 
+    /// `view` applied to this fitted map in the box `(x, y, width,
+    /// height)`, kept on the globe, with the view as it ends up once
+    /// kept there (a pan past the globe's edge is taken back).
+    pub fn viewed(
+        self,
+        view: View,
+        x: f32,
+        y: f32,
+        width: f32,
+        height: f32,
+    ) -> (Self, View) {
+        let c = Pt::new(x + width / 2.0, y + height / 2.0);
+        let mut p = self;
+        p.scale *= view.zoom;
+        p.origin = Pt::new(
+            c.x + (self.origin.x - c.x) * view.zoom + view.pan.x,
+            c.y + (self.origin.y - c.y) * view.zoom + view.pan.y,
+        );
+        let kept = p.clamped_to_globe(x, y, width, height);
+        let pan = Pt::new(
+            view.pan.x + kept.origin.x - p.origin.x,
+            view.pan.y + kept.origin.y - p.origin.y,
+        );
+        (
+            kept,
+            View {
+                zoom: view.zoom,
+                pan,
+            },
+        )
+    }
+
+    /// The least zoom that still fills the box `width × height` with
+    /// globe along one axis: zooming out further only adds empty sky.
+    pub fn min_zoom(&self, width: f32, height: f32) -> f32 {
+        let globe = Plane::globe();
+        if self.scale <= 0.0 {
+            return 1.0;
+        }
+        (width / (globe.width() * self.scale))
+            .max(height / (globe.height() * self.scale))
+            .min(1.0)
+    }
+
     pub fn project(&self, lon: f32, lat: f32) -> Pt {
+        let p = robinson(lon, lat);
         Pt::new(
-            self.origin.x + (lon - self.window.west) * self.scale,
-            self.origin.y + (self.window.north - lat) * self.scale,
+            self.origin.x + (p.x - self.plane.west) * self.scale,
+            self.origin.y + (self.plane.north - p.y) * self.scale,
         )
     }
 
@@ -232,7 +349,54 @@ impl Projection {
     /// How large the map is drawn relative to the designs' 1000-unit
     /// width, for stroke widths and dot sizes.
     pub fn zoom(&self) -> f32 {
-        self.window.width() * self.scale / 1000.0
+        self.plane.width() * self.scale / 1000.0
+    }
+}
+
+/// The deepest zoom over the fitted map.
+pub const MAX_ZOOM: f32 = 16.0;
+
+/// The user's zoom and pan over the fitted map (0073): `zoom` around
+/// the box's centre, then `pan` in pixels.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct View {
+    pub zoom: f32,
+    pub pan: Pt,
+}
+
+impl Default for View {
+    fn default() -> Self {
+        Self {
+            zoom: 1.0,
+            pan: Pt::new(0.0, 0.0),
+        }
+    }
+}
+
+impl View {
+    /// Zoomed by `factor` (within `min..=MAX_ZOOM`) keeping the point
+    /// under the screen point `at` where it is; `centre` is the centre
+    /// of the box the view applies in.
+    pub fn zoomed_at(self, factor: f32, at: Pt, centre: Pt, min: f32) -> Self {
+        let zoom = (self.zoom * factor).clamp(min.min(1.0), MAX_ZOOM);
+        // The fitted map's point under `at`, before and after.
+        let bx = centre.x + (at.x - self.pan.x - centre.x) / self.zoom;
+        let by = centre.y + (at.y - self.pan.y - centre.y) / self.zoom;
+        Self {
+            zoom,
+            pan: Pt::new(
+                at.x - centre.x - (bx - centre.x) * zoom,
+                at.y - centre.y - (by - centre.y) * zoom,
+            ),
+        }
+    }
+
+    /// Moved by `dx, dy` pixels.
+    pub fn dragged(self, dx: f32, dy: f32) -> Self {
+        Self {
+            zoom: self.zoom,
+            pan: Pt::new(self.pan.x + dx, self.pan.y + dy),
+        }
     }
 }
 
@@ -364,30 +528,89 @@ mod tests {
         (a.x - b.x).abs() <= tol && (a.y - b.y).abs() <= tol
     }
 
-    /// The mockup's 1000 × 434 viewBox puts SAO at (284.6, 313.2) and
-    /// LIS at (415.7, 95.5).
     #[test]
-    fn matches_the_mockup_projection() {
-        let p = Projection::fit(GeoWindow::DEFAULT, 0.0, 0.0, 1000.0, 434.0);
-        let sao = p.project(-46.63, -23.55);
-        let lis = p.project(-9.14, 38.72);
-        let tyo = p.project(139.69, 35.68);
-        assert!(close(sao, Pt::new(284.6, 313.2), 1.5), "{sao:?}");
-        assert!(close(lis, Pt::new(415.7, 95.5), 1.5), "{lis:?}");
-        assert!(close(tyo, Pt::new(936.0, 106.0), 1.5), "{tyo:?}");
-        assert!((p.zoom() - 1.0).abs() < 0.01);
+    fn robinson_follows_its_table() {
+        assert_eq!(robinson(0.0, 0.0), Pt::new(0.0, 0.0));
+        // The equator 0.8487 × 360 long, the pole 1.3523 radians up.
+        assert!((robinson(180.0, 0.0).x - 152.766).abs() < 1e-2);
+        assert!((robinson(0.0, 90.0).y - 77.481).abs() < 1e-2);
+        assert!((robinson(0.0, -90.0).y + 77.481).abs() < 1e-2);
+        // Row 45°: X 0.8962, Y 0.5571.
+        let p = robinson(100.0, 45.0);
+        assert!((p.x - 0.8487 * 0.8962 * 100.0).abs() < 1e-3, "{p:?}");
+        assert!((p.y - 1.3523 * 0.5571 * 57.29578).abs() < 1e-2, "{p:?}");
+        // Halfway between rows is halfway between their values.
+        let mid = robinson(10.0, 47.5).x;
+        let want = 0.8487 * (0.8962 + 0.8679) / 2.0 * 10.0;
+        assert!((mid - want).abs() < 1e-3);
+        // Parallels shorten towards the poles; the map is about twice as
+        // wide as it is tall.
+        assert!(robinson(180.0, 60.0).x < robinson(180.0, 30.0).x);
+        let globe = Plane::globe();
+        let whole =
+            robinson(180.0, 0.0).x * 2.0 / (robinson(0.0, 90.0).y * 2.0);
+        assert!((whole - 1.97).abs() < 0.01, "{whole}");
+        assert!(globe.width() > 0.0 && globe.height() > 0.0);
     }
 
     #[test]
-    fn fitting_keeps_degrees_square_and_centres() {
-        let p = Projection::fit(GeoWindow::DEFAULT, 10.0, 20.0, 2000.0, 434.0);
-        // Height-bound: 434 / 124 = 3.5 px per degree.
-        assert!((p.scale - 3.5).abs() < 1e-3);
-        let used = GeoWindow::DEFAULT.width() * p.scale;
+    fn fitting_keeps_units_square_and_centres() {
+        let w = GeoWindow::DEFAULT;
+        let plane = Plane::of(&w);
+        let p = Projection::fit(w, 10.0, 20.0, 2000.0, 434.0);
+        // Height-bound.
+        assert!((p.scale - 434.0 / plane.height()).abs() < 1e-3);
+        let used = plane.width() * p.scale;
         assert!((p.origin.x - (10.0 + (2000.0 - used) / 2.0)).abs() < 1e-3);
         assert!((p.origin.y - 20.0).abs() < 1e-3);
-        let nw = p.project(-128.0, 66.0);
-        assert!(close(nw, p.origin, 1e-3));
+        // The window's corners and places inside it land in the box.
+        for (lon, lat) in [
+            (w.west, w.north),
+            (w.east, w.south),
+            (-46.63, -23.55),
+            (139.69, 35.68),
+        ] {
+            assert!(p.lands_in(lon, lat, 10.0, 20.0, 2000.0, 434.0));
+        }
+        // North is up and east is right.
+        let sao = p.project(-46.63, -23.55);
+        let lis = p.project(-9.14, 38.72);
+        assert!(lis.x > sao.x && lis.y < sao.y);
+    }
+
+    /// Zooming keeps the point under the cursor in place, and a view
+    /// pans no further than the globe's edge.
+    #[test]
+    fn views_zoom_at_the_cursor_and_stay_on_the_globe() {
+        let w = GeoWindow {
+            west: -90.0,
+            east: 30.0,
+            north: 50.0,
+            south: -60.0,
+        };
+        let (x, y, bw, bh) = (0.0, 0.0, 1200.0, 800.0);
+        let base =
+            Projection::fit(w, x, y, bw, bh).clamped_to_globe(x, y, bw, bh);
+        let centre = Pt::new(600.0, 400.0);
+        let lis = base.project(-9.14, 38.72);
+        let view = View::default().zoomed_at(3.0, lis, centre, 1.0);
+        assert!((view.zoom - 3.0).abs() < 1e-6);
+        let (zoomed, kept) = base.viewed(view, x, y, bw, bh);
+        assert!(close(zoomed.project(-9.14, 38.72), lis, 1e-2));
+        assert_eq!(kept, view, "inside the globe: nothing taken back");
+        assert!((zoomed.scale - base.scale * 3.0).abs() < 1e-3);
+        // Zoom is bounded both ways.
+        let deep = View::default().zoomed_at(1000.0, lis, centre, 1.0);
+        assert_eq!(deep.zoom, MAX_ZOOM);
+        let out = View::default().zoomed_at(0.01, lis, centre, 0.5);
+        assert_eq!(out.zoom, 0.5);
+        // Dragged far east, the date line stops at the box's right edge.
+        let (far, kept) = base.viewed(view.dragged(-1.0e6, 0.0), x, y, bw, bh);
+        assert!((far.project(180.0, 0.0).x - bw).abs() < 1e-1);
+        assert!(kept.pan.x > -1.0e6);
+        // And the fitted view is the plain projection.
+        let (same, _) = base.viewed(View::default(), x, y, bw, bh);
+        assert_eq!(same, base);
     }
 
     #[test]
@@ -425,14 +648,15 @@ mod tests {
             north: 40.0,
             south: -30.0,
         };
-        // 10 px per degree, 2000 px tall: 200° shown, more than the
-        // globe's 172°, so it is centred: 14° of slack at each end.
+        // Width-bound in a box 2000 px tall: more than the whole globe
+        // shows vertically, so it is centred, with as much sky above as
+        // below.
         let p = Projection::fit(w, 0.0, 0.0, 800.0, 2000.0)
             .clamped_to_globe(0.0, 0.0, 800.0, 2000.0);
-        let top = p.project(0.0, Projection::GLOBE_NORTH).y;
-        let bottom = p.project(0.0, Projection::GLOBE_SOUTH).y;
-        assert!((top - 140.0).abs() < 1e-3, "{top}");
-        assert!((2000.0 - bottom - 140.0).abs() < 1e-3, "{bottom}");
+        let top = p.project(0.0, 84.0).y;
+        let bottom = p.project(0.0, -88.0).y;
+        assert!(top > 0.0, "{top}");
+        assert!((top - (2000.0 - bottom)).abs() < 1e-2, "{top} {bottom}");
         // A window near the pole in a box taller than it: the top edge
         // is pulled back to the data's north.
         let arctic = GeoWindow {
@@ -443,7 +667,7 @@ mod tests {
         };
         let p = Projection::fit(arctic, 0.0, 0.0, 800.0, 900.0)
             .clamped_to_globe(0.0, 0.0, 800.0, 900.0);
-        assert!(p.project(0.0, Projection::GLOBE_NORTH).y.abs() < 1e-3);
+        assert!(p.project(0.0, 84.0).y.abs() < 1e-2);
         // And the window itself is still on screen.
         assert!(p.lands_in(-20.0, 60.0, 0.0, 0.0, 800.0, 900.0));
     }

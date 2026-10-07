@@ -193,6 +193,8 @@ pub struct TravelMonitor {
     pub(crate) settings_form: Option<Entity<SettingsForm>>,
     /// Miles programs with a login window open.
     pub(crate) logins: HashSet<String>,
+    /// The Deals map's zoom and pan (0073).
+    pub(crate) deals_map: map::MapState,
     notified: HashSet<DealId>,
     generation: u64,
     /// The wall clock, moved every second (0057).
@@ -234,6 +236,7 @@ impl TravelMonitor {
             toast: None,
             settings_form: None,
             logins: HashSet::new(),
+            deals_map: map::MapState::default(),
             notified: HashSet::new(),
             generation: 0,
             now,

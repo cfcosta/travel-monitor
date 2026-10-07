@@ -92,6 +92,24 @@ fn screenshots() -> anyhow::Result<()> {
             image.save(&path)?;
             eprintln!("wrote {}", path.display());
         }
+        if (w, h) == (1440., 900.) {
+            // Zoomed in on the Deals map (0073): it stays inside its pane.
+            cx.update_window(window.into(), |_, window, cx| {
+                view.update(cx, |tm, cx| {
+                    tm.deals_map.set_view(crate::geo::View {
+                        zoom: 3.0,
+                        pan: crate::geo::Pt::new(-120.0, 160.0),
+                    });
+                    tm.navigate(Screen::Deals, window, cx);
+                });
+                window.refresh();
+            })?;
+            cx.run_until_parked();
+            let image = cx.capture_screenshot(window.into())?;
+            let path = dir.join("deals-zoomed.png");
+            image.save(&path)?;
+            eprintln!("wrote {}", path.display());
+        }
     }
     Ok(())
 }
