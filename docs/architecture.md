@@ -30,7 +30,10 @@ Places, routes, cabins, points of sale, money (integer minor units),
 query families (`FamilyKey` = route × cabin × source × pos × kind,
 `FamilyKind::{Leg, RoundTrip, Explore}`), observations, Explore hints,
 deals, seller quotes, query reasons and outcomes, settings and their
-validation. Read the source: it is the shared vocabulary.
+validation. Read the source: it is the shared vocabulary. `country`
+(0087): `country_code` reads Google's country names ("Türkiye") back
+into ISO codes, `metro_code` names the metro area a known airport
+belongs to (SFB → ORL).
 
 Awards (`award`, 0083): `AwardPrice` (miles + taxes, `63,848 mi +
 R$69`), `MilesUnit` (`mi`, `pts`), `Seats`, `AwardDetail` on an
@@ -112,9 +115,14 @@ committed offline data (`crates/tm-store/.sqlx`), WAL mode so the app
 reads while the daemon writes (0020, 0040).
 
 - `Store::open(path)` creates, migrates and returns a pool;
-  `seed_defaults()` on an empty database: SAO, the watchlist of 0006,
-  points of sale BR/US/PT/IN, default settings, airline and miles
-  sources (0012, 0023).
+  `seed_defaults()` on an empty database: SAO, the watchlist (0006 and
+  its additions up to 0086, 163 destinations), points of sale
+  BR/US/PT/IN, default settings, airline and miles sources (0012,
+  0023). A metro area whose airports Google groups is a city with its
+  Freebase ID (ORL covers MCO and SFB, CHI covers ORD and MDW); the
+  seed carries the IDs already known, the daemon learns the rest with
+  a `q=` search (0041). Changes to the live database's watchlist ship
+  as idempotent SQL in `docs/ops/` (2026-10-07-destinations.sql).
 - Configuration (0035): places (origins, destinations, with coordinates,
   country, IATA code, Freebase ID), points of sale, settings (one typed
   row), airline sources (code, name, served destinations), miles
@@ -128,8 +136,18 @@ reads while the daemon writes (0020, 0040).
   as one record.
 - Query log: `start_query`, `finish_query` (reason, score, runner-up,
   outcome, page loads, timings).
-- Observations (append-only), Explore hints, deals (candidate →
-  confirmed/rejected/expired, `seen` for the app), seller quotes.
+- Observations (append-only), Explore hints (with Explore's own name,
+  country and coordinates for the destination, migration 0007), deals
+  (candidate → confirmed/rejected/expired, `seen` for the app), seller
+  quotes.
+- Explore finds (0087): `unwatched_explore_hints(since)` is the hints
+  of destinations that are not configured places (by airport code, a
+  city's Freebase ID, or a Freebase ID Explore filed a watched airport
+  under; a removed destination still counts as watched);
+  `latest_explore_hint_at`; `explore_drops` (`start_explore_drop`, at
+  most one open per origin × cabin × destination, `end_explore_drop`,
+  `open_explore_drops`, `unnotified_explore_drops`,
+  `mark_explore_drop_notified`).
 - Requests (0046): the app enqueues (`CheckRoute`, `CheckFamily`,
   `ConfirmDeal`, `OpenLogin { program }`, `CloseLogin { program }`,
   `ReloadConfig`); the daemon claims and completes them. A
@@ -179,6 +197,13 @@ reads while the daemon writes (0020, 0040).
   irregular gaps (Cho & Garcia-Molina; interval-censored MLE).
 - `update_after_check`: posterior updates from a check's summary.
 - `hints`: Explore hint → families, hint precision learning.
+- `finds` (0087): `explore_finds(hints, now, FindParams)` → one
+  `ExploreFind` per origin × cabin × unwatched destination priced in
+  the last 24 h: the cheapest and the latest hint, the airports seen,
+  sweeps, and the median of its older hints (up to 60 days) once there
+  are 8 sweeps on 3 days. `verdict` judges the latest price: `Drop` at
+  the deal threshold (20%) under the median, `Normal` above 10% under,
+  `Between` keeps an open drop.
 - `fanout`: a drop raises related families (other cabins, points of
   sale, sources, legs ↔ round trip).
 - `baseline`: days-to-departure buckets (3/7/14/21/45/90/180), Brazilian
@@ -222,7 +247,9 @@ A coordinator and one worker per site (0060, 0062).
   its check. A check's fetch runs on a task of its own; when it lands,
   the worker writes observations, updates scheduler state, evaluates
   trips and confirms deals (Google Flights only) and raises a desktop
-  notification for each confirmed one (`--no-notify` to skip, 0080), records blocks on its
+  notification for each confirmed one (`--no-notify` to skip, 0080);
+  after an Explore sweep it opens and ends the drops of unwatched
+  destinations and announces each new one once (0087); records blocks on its
   own budget, and writes its `site_status` and `site_checks` rows as
   checks start and end. A `Pause` closes its browser for a login window; `Resume` reads
   the program's profile for a session (0064) and lets the site run.
@@ -275,7 +302,10 @@ and `notify` words miles deals and "log in again" (0083).
 ### tm-app (`tm`)
 
 gpui-pre `=0.3.7`. The main screen is the map + list of 0044; also a
-routes overview, a route detail with the departure × length grid,
+routes overview (with "Found by Explore": unwatched destinations the
+sweeps priced, against their own Explore median, each with a Watch
+button that adds it as Settings would, 0087), a route detail with the
+departure × length grid,
 activity, and settings that edit the configuration. Reads the database
 directly; writes only configuration and requests. The status chip and
 the activity screen show every check running now (one "Now checking"
