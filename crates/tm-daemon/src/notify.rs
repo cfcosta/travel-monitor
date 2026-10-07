@@ -7,6 +7,7 @@ use std::sync::Mutex;
 
 use chrono::{Datelike, NaiveDate};
 use tm_domain::{Deal, Leg, MilesUnit, Money, Route, program_name};
+use tm_store::ExploreDrop;
 
 /// One desktop notification.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -147,6 +148,45 @@ pub fn award_notice(
         deal.seats.filter(|s| s.few()).map(|s| s.text()),
         deal.cash.as_ref().map(|c| format!("cash {c}")),
         valued,
+    ]
+    .into_iter()
+    .flatten()
+    .collect::<Vec<_>>()
+    .join(" · ");
+    Notice { title, body }
+}
+
+/// An unwatched destination that Explore priced well under its own
+/// Explore history (0087):
+/// `Found by Explore: SAO → CGK, R$5,207 (−24%)` over
+/// `Jakarta · Economy · Nov 3 – 10 · Garuda Indonesia, 1 stop ·
+/// usually R$6,850 · not on the watchlist`.
+pub fn explore_notice(drop: &ExploreDrop, origin: &str) -> Notice {
+    let title = format!(
+        "Found by Explore: {origin} → {}, {}{}",
+        drop.destination_airport,
+        drop.price,
+        drop.change()
+            .map(|c| format!(" ({})", change(c)))
+            .unwrap_or_default()
+    );
+    let airline = drop.carrier.clone().map(|c| match drop.stops {
+        Some(0) => format!("{c}, nonstop"),
+        Some(1) => format!("{c}, 1 stop"),
+        Some(n) => format!("{c}, {n} stops"),
+        None => c,
+    });
+    let body = [
+        drop.destination_name.clone(),
+        Some(drop.cabin.label().to_owned()),
+        match (drop.departure, drop.return_date) {
+            (Some(d), Some(r)) => Some(date_range(d, r)),
+            (Some(d), None) => Some(short(d)),
+            _ => None,
+        },
+        airline,
+        Some(format!("usually {}", drop.usual)),
+        Some("not on the watchlist".to_owned()),
     ]
     .into_iter()
     .flatten()
@@ -311,6 +351,36 @@ mod tests {
         let n = notice(&trip, &route());
         assert!(n.title.starts_with("SAO → LIS: 263,848 mi"), "{}", n.title);
         assert!(n.body.contains("Nov 10 – 17"));
+    }
+
+    #[test]
+    fn an_explore_find_says_it_is_not_watched() {
+        let drop = ExploreDrop {
+            id: 1,
+            origin: tm_domain::PlaceId(1),
+            cabin: tm_domain::Cabin::Economy,
+            destination_freebase_id: "/m/044rv".into(),
+            destination_airport: "CGK".into(),
+            destination_name: Some("Jakarta".into()),
+            price: Money::brl_whole(5_207),
+            usual: Money::brl_whole(6_850),
+            departure: Some(d(11, 3)),
+            return_date: Some(d(11, 10)),
+            carrier: Some("Garuda Indonesia".into()),
+            stops: Some(1),
+            found_at: chrono::Utc::now(),
+            notified_at: None,
+        };
+        let n = explore_notice(&drop, "SAO");
+        assert_eq!(
+            n.title,
+            "Found by Explore: SAO → CGK, R$5,207 (\u{2212}24%)"
+        );
+        assert_eq!(
+            n.body,
+            "Jakarta · Economy · Nov 3 – 10 · Garuda Indonesia, 1 stop · \
+             usually R$6,850 · not on the watchlist"
+        );
     }
 
     #[test]

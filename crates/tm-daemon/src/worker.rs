@@ -94,6 +94,7 @@ use tm_scheduler::{
     Params,
     awards::{AwardKey, award_points, cheapest_by_dates},
     fanout,
+    finds::{FindParams, Verdict, explore_finds},
     hints::{HintTarget, add_hint, hinted_families},
     plan_tick,
     trips::{build_trips, compare_round_trips},
@@ -611,6 +612,11 @@ impl<S: Sources + 'static> Worker<S> {
             && let Err(e) = self.notify_deals().await
         {
             warn!("cannot announce deals: {e:#}");
+        }
+        if self.is_google()
+            && let Err(e) = self.notify_explore_drops().await
+        {
+            warn!("cannot announce Explore finds: {e:#}");
         }
         let mut next_tick = Instant::now();
         let mut shutdown = self.shared.shutdown.clone();
@@ -2058,6 +2064,101 @@ impl<S: Sources + 'static> Worker<S> {
         }
         let min = hints.iter().map(|h| h.price.minor).min();
         self.learn(family, min, page_loads, reason, at).await?;
+        if let Err(e) = self
+            .track_explore_drops(sweep.origin.id, family.key.cabin, at)
+            .await
+        {
+            warn!("cannot follow Explore finds: {e:#}");
+        }
+        if let Err(e) = self.notify_explore_drops().await {
+            warn!("cannot announce Explore finds: {e:#}");
+        }
+        Ok(())
+    }
+
+    /// After a sweep from `origin` in `cabin`, opens a drop for each
+    /// unwatched destination now well under its own Explore history,
+    /// and ends the drops that are over: the price came back, or the
+    /// destination left the sweep or the finds (0087).
+    async fn track_explore_drops(
+        &self,
+        origin: PlaceId,
+        cabin: Cabin,
+        now: DateTime<Utc>,
+    ) -> anyhow::Result<()> {
+        let params = FindParams::from_settings(self.settings());
+        let store = self.store();
+        let hints = store.unwatched_explore_hints(params.since(now)).await?;
+        let finds: Vec<_> = explore_finds(&hints, now, &params)
+            .into_iter()
+            .filter(|f| f.origin == origin && f.cabin == cabin)
+            .collect();
+        let open: Vec<_> = store
+            .open_explore_drops(origin)
+            .await?
+            .into_iter()
+            .filter(|d| d.cabin == cabin)
+            .collect();
+        for find in &finds {
+            let opened = open
+                .iter()
+                .find(|d| d.destination_freebase_id == find.freebase_id);
+            match (find.verdict(&params), opened, &find.usual) {
+                (Verdict::Drop, None, Some(usual)) => {
+                    if let Some(id) = store
+                        .start_explore_drop(&find.latest, usual, now)
+                        .await?
+                    {
+                        info!(
+                            drop = id,
+                            destination = %find.main_airport(),
+                            price = %find.latest.price,
+                            %usual,
+                            "Explore find dropped"
+                        );
+                    }
+                }
+                (Verdict::Normal, Some(d), _) => {
+                    store.end_explore_drop(d.id, now).await?;
+                }
+                _ => {}
+            }
+        }
+        for d in &open {
+            if !finds
+                .iter()
+                .any(|f| f.freebase_id == d.destination_freebase_id)
+            {
+                store.end_explore_drop(d.id, now).await?;
+            }
+        }
+        Ok(())
+    }
+
+    /// Shows a desktop notification for each Explore drop not shown yet,
+    /// and marks it notified (0080, 0087). One that cannot be shown is
+    /// tried after the next sweep.
+    async fn notify_explore_drops(&self) -> anyhow::Result<()> {
+        let Some(notifier) = self.config().notifier.clone() else {
+            return Ok(());
+        };
+        let store = self.store();
+        for drop in store.unnotified_explore_drops().await? {
+            let origin = store
+                .place(drop.origin)
+                .await?
+                .map(|p| p.code)
+                .unwrap_or_default();
+            let notice = notify::explore_notice(&drop, &origin);
+            let notifier = Arc::clone(&notifier);
+            tokio::task::spawn_blocking(move || notifier.show(&notice))
+                .await
+                .context("the notification task failed")??;
+            store
+                .mark_explore_drop_notified(drop.id, Utc::now())
+                .await?;
+            info!(drop = drop.id, "Explore find announced");
+        }
         Ok(())
     }
 

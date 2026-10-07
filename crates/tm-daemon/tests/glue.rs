@@ -1148,6 +1148,146 @@ async fn explore_hints_raise_their_families() {
     assert_eq!(mia.state.n_hints, 0);
 }
 
+/// An unwatched destination that Explore prices well under its own
+/// Explore history is announced once per drop (0087).
+#[tokio::test]
+async fn an_unwatched_drop_is_announced_once() {
+    let store_probe = Store::open_in_memory().await.expect("opens");
+    store_probe.seed_defaults().await.expect("seeds");
+    let pos = home(&store_probe).await;
+    let sao = store_probe
+        .place_by_code("SAO")
+        .await
+        .expect("reads")
+        .expect("SAO");
+    let sweep = store_probe
+        .sweep_route(sao.id)
+        .await
+        .expect("reads")
+        .expect("a sweep");
+    let explore = family(
+        &store_probe,
+        sweep,
+        Cabin::Economy,
+        Source::GoogleFlights,
+        pos,
+        FamilyKind::Explore,
+    )
+    .await;
+    let price = Arc::new(std::sync::atomic::AtomicI64::new(5_000));
+    let notices = Arc::new(Recorder::default());
+    let mut h = harness_with(
+        Config {
+            notifier: Some(notices.clone()),
+            ..test_config(Only {
+                family: Some(explore),
+                destination: None,
+            })
+        },
+        {
+            let price = Arc::clone(&price);
+            move |f| {
+                f.explore = Box::new(move |_| {
+                    let jakarta = ExploreDestination {
+                        freebase_id: "/m/044rv".into(),
+                        airport: Some("CGK".into()),
+                        origin_airport: Some("GRU".into()),
+                        price: Some(price.load(Ordering::SeqCst)),
+                        exact: None,
+                        departure: NaiveDate::from_ymd_opt(2026, 11, 3),
+                        return_date: NaiveDate::from_ymd_opt(2026, 11, 10),
+                        stops: Some(1),
+                        duration_minutes: Some(1_500),
+                        carrier_code: Some("GA".into()),
+                        carrier: Some("Garuda Indonesia".into()),
+                        name: Some("Jakarta".into()),
+                        country: Some("Indonesia".into()),
+                        coordinates: Some((-6.2, 106.85)),
+                    };
+                    // A watched destination dropping is a deal's
+                    // business, not a find's.
+                    let lisbon = ExploreDestination {
+                        freebase_id: "/m/04llb".into(),
+                        airport: Some("LIS".into()),
+                        price: Some(100),
+                        name: Some("Lisbon".into()),
+                        ..jakarta.clone()
+                    };
+                    Fetch::ok(vec![jakarta, lisbon], 1)
+                })
+            }
+        },
+    )
+    .await;
+    let store = h.store().clone();
+    // Ten earlier sweeps priced both at R$7,000, two to seven days ago.
+    for k in 0..10 {
+        let at = Utc::now() - TimeDelta::hours(48 + 12 * k);
+        let q = store
+            .start_query(explore, &QueryReason::Manual, at)
+            .await
+            .expect("starts");
+        let past = |freebase: &str, airport: &str| tm_domain::ExploreHint {
+            query: q,
+            origin: sao.id,
+            cabin: Cabin::Economy,
+            pos,
+            observed_at: at,
+            destination_freebase_id: freebase.into(),
+            destination_airport: airport.into(),
+            price: Money::brl_whole(7_000),
+            departure: None,
+            return_date: None,
+            stops: Some(1),
+            duration_minutes: None,
+            carrier: None,
+            destination_name: None,
+            destination_country: None,
+            destination_coordinates: None,
+        };
+        store
+            .insert_explore_hints(&[
+                past("/m/044rv", "CGK"),
+                past("/m/04llb", "LIS"),
+            ])
+            .await
+            .expect("inserts");
+    }
+    async fn check(h: &mut Harness, explore: FamilyId) {
+        h.daemon
+            .run_check(explore, QueryReason::Manual)
+            .await
+            .expect("checks");
+    }
+
+    // 29% under: announced.
+    check(&mut h, explore).await;
+    let shown = notices.shown();
+    assert_eq!(shown.len(), 1, "{shown:?}");
+    assert_eq!(
+        shown[0].title,
+        "Found by Explore: SAO → CGK, R$5,000 (\u{2212}29%)"
+    );
+    assert!(shown[0].body.starts_with("Jakarta · Economy · Nov 3 – 10"));
+    // Still down: the same drop, not announced again.
+    check(&mut h, explore).await;
+    assert_eq!(notices.shown().len(), 1);
+    // Back to 7% under: the drop is over.
+    price.store(6_500, Ordering::SeqCst);
+    check(&mut h, explore).await;
+    assert!(
+        store
+            .open_explore_drops(sao.id)
+            .await
+            .expect("reads")
+            .is_empty()
+    );
+    // Down again: a new drop, announced again.
+    price.store(5_000, Ordering::SeqCst);
+    check(&mut h, explore).await;
+    assert_eq!(notices.shown().len(), 2);
+}
+
 /// Airline and miles sites other than TAP have no reader (0059): a
 /// check of one, even a manual one, loads nothing and records no query.
 #[tokio::test]

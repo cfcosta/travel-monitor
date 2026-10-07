@@ -9,9 +9,9 @@
 //! its older hints, once it has been priced in enough sweeps on enough
 //! days.
 //!
-//! A find is a **drop** when its recent price is `drop` (the deal
-//! threshold, 20%) or more under that median, as a deal is under its
-//! route's (0022). Explore prices are one date pair of "about a week",
+//! A find is a **drop** when its latest price (the last sweep's) is
+//! `drop` (the deal threshold, 20%) or more under that median, as a deal
+//! is under its route's (0022). Explore prices are one date pair of "about a week",
 //! so they are noisier than a route's series: the median needs 8 prior
 //! sweeps on at least 3 different days. A drop stays a drop until the
 //! price comes back above half the threshold (10% under the median), so
@@ -75,6 +75,9 @@ pub struct ExploreFind {
     /// The cheapest hint of the last `recent`: price, dates, carrier,
     /// stops and the airport priced.
     pub cheapest: ExploreHint,
+    /// The latest hint: what the last sweep saw. Drops are judged on it,
+    /// so a fare gone since does not start or keep one.
+    pub latest: ExploreHint,
     /// Every airport Explore priced for it, most often first.
     pub airports: Vec<String>,
     /// The latest name, country (in words) and coordinates Explore gave.
@@ -103,18 +106,27 @@ pub enum Verdict {
 }
 
 impl ExploreFind {
-    /// The recent price against the usual one (`-0.25` is 25% under).
-    pub fn change(&self) -> Option<f64> {
+    fn against_usual(&self, price: &Money) -> Option<f64> {
         let usual = self.usual.as_ref()?;
-        (usual.minor > 0).then(|| {
-            self.cheapest.price.minor as f64 / usual.minor as f64 - 1.0
-        })
+        (usual.minor > 0).then(|| price.minor as f64 / usual.minor as f64 - 1.0)
     }
 
+    /// The cheapest recent price against the usual one (`-0.25` is 25%
+    /// under).
+    pub fn change(&self) -> Option<f64> {
+        self.against_usual(&self.cheapest.price)
+    }
+
+    /// The latest price against the usual one.
+    pub fn latest_change(&self) -> Option<f64> {
+        self.against_usual(&self.latest.price)
+    }
+
+    /// The latest price's verdict.
     pub fn verdict(&self, params: &FindParams) -> Verdict {
         // Exactly 20% under is a drop, whatever the float rounding.
         const EPS: f64 = 1e-9;
-        match self.change() {
+        match self.latest_change() {
             Some(c) if c <= -params.drop + EPS => Verdict::Drop,
             Some(c) if c <= -params.drop / 2.0 + EPS => Verdict::Between,
             _ => Verdict::Normal,
@@ -182,6 +194,12 @@ pub fn explore_finds(
                     (h.price.minor, std::cmp::Reverse(h.observed_at))
                 })
                 .copied()?;
+            let last = group
+                .iter()
+                .filter(|h| h.price.currency == cheapest.price.currency)
+                .max_by_key(|h| h.observed_at)
+                .copied()
+                .unwrap_or(cheapest);
             let currency = &cheapest.price.currency;
             let prior: Vec<&&ExploreHint> = group
                 .iter()
@@ -242,6 +260,7 @@ pub fn explore_finds(
                 prior_days,
                 usual,
                 cheapest: cheapest.clone(),
+                latest: last.clone(),
             })
         })
         .collect();
@@ -397,6 +416,19 @@ mod tests {
     }
 
     #[test]
+    fn drops_are_judged_on_the_last_sweep() {
+        let p = FindParams::default();
+        let mut hints = history("/m/x", "XXX", 10_000);
+        hints.push(hint(1, 6, "/m/x", "XXX", 7_000));
+        hints.push(hint(2, 1, "/m/x", "XXX", 9_500));
+        let f = &explore_finds(&hints, now(), &p)[0];
+        // The list shows the day's cheapest; the fare is gone since.
+        assert_eq!(f.cheapest.price, Money::brl_whole(7_000));
+        assert_eq!(f.latest.price, Money::brl_whole(9_500));
+        assert_eq!(f.verdict(&p), Verdict::Normal);
+    }
+
+    #[test]
     fn medians_round_to_the_nearest_unit() {
         assert_eq!(median(vec![]), None);
         assert_eq!(median(vec![3, 1, 2]), Some(2));
@@ -450,7 +482,10 @@ mod tests {
                     assert!(f.prior_sweeps >= p.min_prior_sweeps);
                 }
                 if f.verdict(&p) == Verdict::Drop {
-                    assert!(f.change().is_some_and(|c| c <= -p.drop + 1e-9));
+                    assert!(
+                        f.latest_change().is_some_and(|c| c <= -p.drop + 1e-9)
+                    );
+                    assert!(f.change() <= f.latest_change());
                 }
             }
         }
