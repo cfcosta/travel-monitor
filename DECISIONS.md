@@ -1423,3 +1423,42 @@ one notice; Akamai's denial is a block. An award deal is confirmed by
 reading its date again (one load) and holds within 3% of its miles. A
 worker re-reads its budget row's limits each tick, so the app's changes
 are kept.
+
+## 0086: Forty-seven destinations join, and metro areas are cities
+
+- Date: 2026-10-07
+- Adds to [0066](#0066-iceland-greenland-and-alaska-join-the-watchlist);
+  refines [0041](#0041-google-flights-urls-are-generated-jev-handles-the-rest).
+
+The watchlist grows from 116 to 163, in the live database
+(docs/ops/2026-10-07-destinations.sql) and the first-run seed: VCE, FLR,
+NCE, EDI, BUD, CPH, MLA, JTR, FNC, PDL, SVQ, DBV; OSA, TPE, SGN, HAN,
+HKT, KUL, DEL, BOM, MLE, MRU, SEZ; HNL, YVR, SEA, SAN, DEN, MSY, YYC,
+TQO, SJD, SJU, NAS, MBJ, PNT, LEC; TLV, AMM, CAI, NBO, ZNZ, VFA, MEL,
+ZQN, PPT, NAN. A metro area is a city when Google prices several of its
+airports under one Freebase ID: Orlando (ORL: MCO, SFB), Chicago (CHI:
+ORD, MDW), Houston (HOU: IAH, Hobby), Toronto (YTO: YYZ, YTZ), Montreal
+(YMQ: YUL, YHU), Dallas (DFW, DAL), Bangkok (BKK, DMK), Mexico City
+(MEX, NLU), Istanbul (IST, SAW), Dubai (DXB, SHJ), Osaka (OSA) and
+Taipei (TPE). Their places changed in place, so the routes keep their
+ids and history; from now on a route's prices are the whole city's, so
+early on a fare from a newly included airport may read as a drop
+against the old single-airport median. San Francisco and Los Angeles
+stay airports. Miami stays MIA: its city also covers FLL, which is
+watched on its own.
+
+## 0087: Destinations Explore finds outside the watchlist are shown
+
+- Date: 2026-10-07
+- Refines [0006](#0006-a-pinned-watchlist-plus-an-explore-sweep) and
+  [0080](#0080-the-daemon-raises-the-deal-notifications).
+
+Explore hints of unwatched destinations become finds: the day's
+cheapest price, its trip, the sweeps that saw it, and the median of its
+older hints once there are 8 sweeps on 3 days. The routes overview lists
+them under "Found by Explore", each with a Watch button that adds the
+destination (a city by its Freebase ID when Explore priced several
+airports or the metro is known, otherwise the airport). When the last
+sweep's price is the deal threshold (20%) under that median, the daemon
+notifies once; the drop ends when the price is back within 10% or the
+destination leaves the sweep.
