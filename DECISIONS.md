@@ -1482,3 +1482,18 @@ trips are not checked: their return price needs a click on an outbound
 fare, and two one-ways are not the same price; they wait for a live run
 that shows the click works. LATAM Pass's worker, which also runs
 LATAM's cash checks, starts at 80 loads a day, at most 160.
+
+## 0091: LATAM's offscreen browser gets a moving mouse
+
+- Date: 2026-10-07
+- Supersedes in part [0052](#0052-sites-that-deny-the-daemons-browser-stay-off) (for LATAM);
+  refines [0081](#0081-latams-chromium-runs-headed-on-the-daemons-own-offscreen-compositor).
+
+A click with no movement before it on LATAM's results page started a
+search Akamai refused (403); the offscreen pointer had never moved. The
+compositor's seat pointer now takes input (`PointerHandle`), and
+`tm_browser::Mouse` moves it as a hand does: curved paths with
+overshoot, Fitts's-law timing, off-centre held clicks, wheel scrolling,
+and idle wandering while pages load. This deliberately departs from
+0052's "no disguise" for LATAM only, at the user's request; the user
+accepts the risk to their own account. Other sites keep CDP input.
