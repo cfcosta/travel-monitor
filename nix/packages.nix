@@ -20,12 +20,25 @@ let
   common = {
     version = "0.1.0";
 
+    # Only what the build reads, so documents, notes and fixtures the
+    # build never opens do not change the source and rebuild both
+    # binaries.
     src = lib.fileset.toSource {
       root = src;
       fileset = lib.fileset.unions [
         (src + "/Cargo.toml")
         (src + "/Cargo.lock")
-        (src + "/crates")
+        # Every crate's manifest, build script and Rust sources.
+        (lib.fileset.fileFilter (
+          f: f.hasExt "rs" || f.name == "Cargo.toml"
+        ) (src + "/crates"))
+        # Embedded by sqlx at compile time.
+        (src + "/crates/tm-store/migrations")
+        (src + "/crates/tm-store/.sqlx")
+        # Read by tm-gflights' tests, which `tmd` runs.
+        (lib.fileset.fileFilter (f: f.hasExt "txt") (
+          src + "/crates/tm-gflights/tests/fixtures"
+        ))
       ];
     };
 
