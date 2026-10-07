@@ -123,6 +123,10 @@ impl MapState {
 /// How far a press moves before it is a drag rather than a click.
 const DRAG_SLOP: f32 = 4.0;
 
+/// How fast a drag turns the globe: at 1 the surface under the pointer
+/// follows it; twice that crosses the world in fewer strokes.
+const DRAG_SPEED: f32 = 2.0;
+
 /// Points per arc.
 const ARC_STEPS: usize = 48;
 
@@ -255,8 +259,8 @@ pub fn map(
         };
         if moved || start.distance(p) > DRAG_SLOP {
             s.view = Some(globe.view.rotated(
-                p.x - last.x,
-                p.y - last.y,
+                (p.x - last.x) * DRAG_SPEED,
+                (p.y - last.y) * DRAG_SPEED,
                 globe.radius,
             ));
             s.press = Some((start, p, true));
