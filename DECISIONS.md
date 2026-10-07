@@ -1327,3 +1327,29 @@ visit as a login.
   direction, the reader may click up to six other days on the page's
   date strip. Each click is the site's own search with no page load; it
   counts against the budget as a load and is spaced like one (20–45 s).
+
+## 0083: Awards are their own series; the value of a mile is measured
+
+- Date: 2026-10-07
+- Refines [0023](#0023-award-prices-are-tracked-in-smiles-latam-pass-and-azul-fidelidade),
+  [0030](#0030-deal-baselines-are-per-days-to-departure-bucket),
+  [0060](#0060-each-website-has-its-own-daily-budget),
+  [0080](#0080-the-daemon-raises-the-deal-notifications) and
+  [0082](#0082-latam-pass-miles-are-measured-against-cash-and-its-login-is-_xp_session).
+- Design: "Miles + cash UI" canvas (https://claude.ai/artifact/Rqw53vGmA4JTmfCbasGGoH).
+
+An award series is one program × route × cabin × leg, or its round
+trip, priced at the cabin's cheapest brand (LIGHT in economy). It has
+its own baselines in miles and its own deals, one way per leg or for
+the round trip; miles and reais never share a baseline. The app may
+show an award against cash (its rate, "cash R$… for these dates",
+"≈R$… at your value") for display only. Each award keeps its fare
+before taxes, fare basis, brand and seats, and the value of a mile is
+computed from them per award, never set: the program's usual rate is
+the 30-day median of its checks, and a rate 15% away from it is
+flagged. This is also the ground for deals on buying miles later: a buy
+price per program, unset by default, shows what an award costs paid
+with bought miles and what it saves against cash. Nothing is valued
+until the user sets a value of 1,000 miles. The active program leads
+(only LATAM Pass for now). Each miles program starts at 40 award loads
+a day, at most 80. "Check award" asks for the selected trip's legs.
