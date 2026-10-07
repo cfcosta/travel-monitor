@@ -405,8 +405,9 @@ pub(crate) struct Worker<S: Sources> {
     /// The fetches in flight, at most [`Config::parallel`] (0072).
     flights: JoinSet<Landed>,
     /// Each fetch's query and request, to close them should its task
-    /// panic.
-    flight_ids: HashMap<tokio::task::Id, (QueryId, Option<RequestId>)>,
+    /// panic, and the loads its family is expected to cost: a tick plans
+    /// only what the bank holds beyond the checks still in flight.
+    flight_ids: HashMap<tokio::task::Id, (QueryId, Option<RequestId>, u32)>,
     /// Lanes resting after a check, until these instants (0039).
     resting: Vec<Instant>,
     /// When the browser last did something, to close it when idle.
@@ -1111,7 +1112,15 @@ impl<S: Sources + 'static> Worker<S> {
             budget::ticks_left_today(self.config().tick)
         };
         let mut rng = StdRng::from_rng(&mut self.rng);
-        let tick_budget = self.budget.tick(now, ticks_left, &params, &mut rng);
+        let mut tick_budget =
+            self.budget.tick(now, ticks_left, &params, &mut rng);
+        // A check's loads leave the bank when it lands: until then its
+        // expected cost is held back, or a tick planned while checks ran
+        // would spend the same loads again and leave the site idle once
+        // they landed (0079).
+        let reserved: u32 = self.flight_ids.values().map(|f| f.2).sum();
+        tick_budget.loads_available =
+            tick_budget.loads_available.saturating_sub(reserved);
         let site_params = self.budget.params(&params);
         let picks =
             plan_tick(&candidates, now, &tick_budget, &site_params, &mut rng);
@@ -1120,6 +1129,7 @@ impl<S: Sources + 'static> Worker<S> {
             candidates = candidates.len(),
             ?skipped,
             loads_available = tick_budget.loads_available,
+            reserved,
             loads_today = self.budget.loads_today,
             budget = self.budget.daily(now, &params),
             picks = picks.len(),
@@ -1389,6 +1399,7 @@ impl<S: Sources + 'static> Worker<S> {
             reason,
             request,
         };
+        let expected = flight_cost(&flight.family);
         let sources = Arc::clone(&self.sources);
         let task = self.flights.spawn(async move {
             let (fetch, found) = match &job {
@@ -1406,7 +1417,8 @@ impl<S: Sources + 'static> Worker<S> {
                 found,
             }
         });
-        self.flight_ids.insert(task.id(), (query, request));
+        self.flight_ids
+            .insert(task.id(), (query, request, expected));
         Ok(Some(query))
     }
 
@@ -1433,7 +1445,7 @@ impl<S: Sources + 'static> Worker<S> {
             }
             Err(e) => {
                 warn!(site = %self.site, "a check's task failed: {e}");
-                let Some((query, request)) = self.flight_ids.remove(&e.id())
+                let Some((query, request, _)) = self.flight_ids.remove(&e.id())
                 else {
                     return (None, Err(e.into()));
                 };
@@ -2192,6 +2204,17 @@ impl<S: Sources + 'static> Worker<S> {
                 .await?;
         }
         Ok(())
+    }
+}
+
+/// The loads a check of `family` is expected to cost, held back from the
+/// bank while it runs (0079).
+fn flight_cost(family: &FamilyRecord) -> u32 {
+    let cost = family.state.cost_loads;
+    if cost.is_finite() && cost > 0.0 {
+        cost.ceil() as u32
+    } else {
+        1
     }
 }
 

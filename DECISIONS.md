@@ -1219,3 +1219,20 @@ ticks.
   separate and unchanged.
 - Ticks come every 5 seconds instead of 10. With checks due every 23
   seconds or so, a 10-second tick rounded some gaps up to 15 seconds.
+
+## 0079: A tick holds back the cost of the checks in flight
+
+- Date: 2026-10-07
+- Refines [0072](#0072-each-site-runs-three-checks-at-once) and
+  [0078](#0078-new-families-are-charged-a-full-check-ticks-every-5-seconds).
+
+A check's loads leave the bank only when it lands. With three lanes, a
+tick planned while checks were still running saw a bank not yet charged
+for them and started two or three more checks at once. When those
+landed the bank went into debt, and Google Flights sat idle for about
+40 seconds between bursts: the right number of checks a day, all
+bunched together. A tick now plans only what the bank holds beyond the
+expected cost of the checks in flight. While the budget is the limit,
+checks run one after another (about 15 seconds each, then a gap of
+about 8); the extra lanes only start checks when the budget has room
+for them.
