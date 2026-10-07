@@ -185,7 +185,8 @@ A coordinator and one worker per site (0060, 0062).
   picks in turn (0071) on free lanes, each lane resting 4–10 s after
   its check. A check's fetch runs on a task of its own; when it lands,
   the worker writes observations, updates scheduler state, evaluates
-  trips and confirms deals (Google Flights only), records blocks on its
+  trips and confirms deals (Google Flights only) and raises a desktop
+  notification for each confirmed one (`--no-notify` to skip, 0080), records blocks on its
   own budget, and writes its `site_status` and `site_checks` rows as
   checks start and end. A `Pause` closes its browser for a login window; `Resume` reads
   the program's profile for a session (0064) and lets the site run.
@@ -211,8 +212,7 @@ pause and resume for logins.
 gpui-pre `=0.3.7`. The main screen is the map + list of 0044; also a
 routes overview, a route detail with the departure × length grid,
 activity, and settings that edit the configuration. Reads the database
-directly; writes only configuration and requests. Shows a desktop
-notification for each newly confirmed deal (0040). The status chip and
+directly; writes only configuration and requests. The status chip and
 the activity screen show every check running now (one "Now checking"
 row per busy site) and each site's loads and budget today (`Google
 1,234/4,800 · TAP 40/300`); settings list the site budgets read-only

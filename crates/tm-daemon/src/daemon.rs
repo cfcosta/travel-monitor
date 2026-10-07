@@ -47,6 +47,7 @@ use crate::{
     budget::{self, Budget},
     candidates::{self, Context, Only},
     jobs::JobOptions,
+    notify::Notifier,
     sources::Sources,
     worker::{self, Command, Loaded, Shared, Tracker, Worker, World},
 };
@@ -80,6 +81,9 @@ pub struct Config {
     pub profile_dir: Option<PathBuf>,
     /// A site's browser closes after this long without work (0062).
     pub idle_close: Duration,
+    /// Where newly confirmed deals are announced (0080); `None` sends
+    /// nothing and leaves them unseen.
+    pub notifier: Option<Arc<dyn Notifier>>,
 }
 
 impl Default for Config {
@@ -98,6 +102,7 @@ impl Default for Config {
             seed: None,
             profile_dir: None,
             idle_close: Duration::from_secs(5 * 60),
+            notifier: None,
         }
     }
 }

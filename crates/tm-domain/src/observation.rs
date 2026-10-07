@@ -84,7 +84,7 @@ pub struct ExploreHint {
 pub enum DealStatus {
     /// Found, waiting for the confirming query (DECISIONS.md 0031).
     Candidate,
-    /// The second query held; the app notifies.
+    /// The second query held; the daemon notifies (0080).
     Confirmed,
     /// The second query did not hold.
     Rejected,
@@ -124,7 +124,7 @@ pub struct Deal {
     pub status: DealStatus,
     pub found_at: DateTime<Utc>,
     pub confirmed_at: Option<DateTime<Utc>>,
-    /// The app has shown it (0040).
+    /// Its notification was shown (0080).
     pub seen: bool,
     pub carrier: Option<String>,
     pub seller: Option<String>,

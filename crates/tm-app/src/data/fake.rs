@@ -47,7 +47,6 @@ use super::{
     MilesRow,
     NewPlace,
     NewPos,
-    Notice,
     Request,
     Role,
     RouteRow,
@@ -168,7 +167,6 @@ struct FakeState {
     pos: Vec<PointOfSale>,
     settings: Settings,
     miles: Vec<MilesRow>,
-    seen: HashSet<DealId>,
     tickets: HashMap<i64, (Request, u32)>,
     next_ticket: i64,
     next_place: i64,
@@ -272,8 +270,6 @@ impl FakeBackend {
                 last_checked: None,
             },
         ];
-        // Every sample deal was shown already: `tm --fake` stays quiet.
-        let seen = (0..SAMPLES.len() as i64).map(|i| DealId(100 + i)).collect();
         Self {
             state: Mutex::new(FakeState {
                 origins,
@@ -282,7 +278,6 @@ impl FakeBackend {
                 pos,
                 settings: Settings::default(),
                 miles,
-                seen,
                 tickets: HashMap::new(),
                 next_ticket: 1,
                 next_place: 100,
@@ -304,16 +299,6 @@ impl FakeBackend {
             now: Some(now),
             ..Self::new()
         }
-    }
-
-    /// Leaves the deal of `code` unseen, so the next snapshot carries
-    /// its notice.
-    #[cfg(test)]
-    pub fn with_unseen(self, code: &str) -> Self {
-        if let Some(i) = SAMPLES.iter().position(|s| s.code == code) {
-            self.lock().seen.remove(&DealId(100 + i as i64));
-        }
-        self
     }
 
     /// The requests enqueued so far.
@@ -922,33 +907,6 @@ impl Backend for FakeBackend {
                     .then(|| now - Duration::minutes(s.checked_min)),
             });
         }
-        let notices = rows
-            .iter()
-            .filter(|r| r.status == RowStatus::Deal)
-            .filter_map(|r| {
-                let deal = r.deal?;
-                let trip = r.best.as_ref()?;
-                (!state.seen.contains(&deal)).then(|| Notice {
-                    deal,
-                    title: format!(
-                        "{} → {}: {} ({})",
-                        origin.code,
-                        r.code(),
-                        trip.price,
-                        crate::format::change(r.change.unwrap_or(0.0)),
-                    ),
-                    body: format!(
-                        "{} · {} · {}",
-                        r.city(),
-                        crate::format::date_range(
-                            trip.departure,
-                            trip.return_date
-                        ),
-                        trip.carrier_label().unwrap_or_default(),
-                    ),
-                })
-            })
-            .collect();
         let settings = state.settings.clone();
         let detail = query.selected.and_then(|key| {
             let row = rows.iter().find(|r| r.key() == key)?;
@@ -1077,7 +1035,6 @@ impl Backend for FakeBackend {
                 last_sweep: Some(now - Duration::hours(6)),
                 destinations: 72,
             },
-            notices,
             detail,
         })
     }
@@ -1103,11 +1060,6 @@ impl Backend for FakeBackend {
             2 => TicketState::Running,
             _ => TicketState::Done,
         })
-    }
-
-    async fn mark_seen(&self, deals: Vec<DealId>) -> anyhow::Result<()> {
-        self.lock().seen.extend(deals);
-        Ok(())
     }
 
     async fn save_settings(&self, settings: Settings) -> anyhow::Result<()> {
@@ -1245,7 +1197,6 @@ mod tests {
             NaiveDate::from_ymd_opt(2026, 11, 10).expect("date")
         );
         assert_eq!(trip.carrier_label().as_deref(), Some("TAP nonstop"));
-        assert!(s.notices.is_empty());
         assert!(s.detail.is_none());
     }
 
@@ -1303,17 +1254,6 @@ mod tests {
             .min_by_key(|s| s.effective.minor)
             .expect("sellers");
         assert_eq!(cheapest.pos.as_str(), "PT");
-    }
-
-    #[test]
-    fn unseen_deals_become_notices_once() {
-        let b = FakeBackend::at(now()).with_unseen("LIS");
-        let s = run(snap(&b, SnapshotQuery::default()));
-        assert_eq!(s.notices.len(), 1);
-        assert!(s.notices[0].title.starts_with("SAO → LIS: R$3,932"));
-        run(b.mark_seen(vec![s.notices[0].deal])).expect("seen");
-        let s = run(snap(&b, SnapshotQuery::default()));
-        assert!(s.notices.is_empty());
     }
 
     #[test]

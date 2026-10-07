@@ -19,11 +19,10 @@ mod grid;
 mod land_dots;
 mod live;
 mod login;
-mod notify;
 mod theme;
 mod ui;
 
-use std::{path::PathBuf, rc::Rc, sync::Arc, time::Duration};
+use std::{path::PathBuf, sync::Arc, time::Duration};
 
 use clap::Parser;
 use gpui::{
@@ -40,7 +39,6 @@ use gpui::{
 use crate::{
     data::SharedBackend,
     login::LoginConfig,
-    notify::{Desktop, Notifier, Recorder},
     ui::{AppEnv, TravelMonitor},
 };
 
@@ -63,9 +61,6 @@ struct Args {
     /// soon as the daemon writes (0057).
     #[arg(long, default_value_t = 30)]
     refresh: u64,
-    /// No desktop notifications.
-    #[arg(long)]
-    quiet: bool,
 }
 
 fn default_db() -> PathBuf {
@@ -98,14 +93,8 @@ fn main() -> anyhow::Result<()> {
         tracing::info!("database: {}", path.display());
         data::store::backend(path, runtime.handle().clone())
     };
-    let notifier: Rc<dyn Notifier> = if args.quiet {
-        Rc::new(Recorder::default())
-    } else {
-        Rc::new(Desktop)
-    };
     let env = AppEnv {
         backend,
-        notifier,
         login: LoginConfig::resolve(
             args.profile_dir.clone(),
             args.chromium.clone(),

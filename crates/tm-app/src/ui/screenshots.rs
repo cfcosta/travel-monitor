@@ -4,13 +4,13 @@
 //! TM_SCREENSHOTS=/tmp/tm cargo test -p tm-app -- --ignored screenshots
 //! ```
 
-use std::{path::PathBuf, rc::Rc, sync::Arc, time::Duration};
+use std::{path::PathBuf, sync::Arc, time::Duration};
 
 use chrono::{TimeZone, Utc};
 use gpui::{AppContext as _, HeadlessAppContext, px, size};
 
 use super::{AppEnv, Screen, TravelMonitor};
-use crate::{data::fake::FakeBackend, login::LoginConfig, notify::Recorder};
+use crate::{data::fake::FakeBackend, login::LoginConfig};
 
 #[test]
 #[ignore = "renders on the GPU; run with --ignored to write PNGs"]
@@ -32,7 +32,6 @@ fn screenshots() -> anyhow::Result<()> {
     let now = Utc.with_ymd_and_hms(2026, 10, 6, 15, 0, 0).unwrap();
     let env = AppEnv {
         backend: Arc::new(FakeBackend::at(now)),
-        notifier: Rc::new(Recorder::default()),
         login: LoginConfig::resolve(None, None),
         tokio: None,
         refresh_every: Duration::from_secs(30),

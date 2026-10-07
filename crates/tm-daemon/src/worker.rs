@@ -116,6 +116,7 @@ use crate::{
     },
     deals::{self, Group},
     jobs::{self, Job, JobError, JobOptions},
+    notify,
     sources::{Cell, ConfirmJob, Fetch, Sources},
 };
 
@@ -498,6 +499,12 @@ impl<S: Sources + 'static> Worker<S> {
     async fn run(mut self) {
         info!(site = %self.site, reader = self.reader, "site worker started");
         self.status().await;
+        // Deals confirmed while no notification could be shown.
+        if self.is_google()
+            && let Err(e) = self.notify_deals().await
+        {
+            warn!("cannot announce deals: {e:#}");
+        }
         let mut next_tick = Instant::now();
         let mut shutdown = self.shared.shutdown.clone();
         // A dropped sender cannot signal any more: stop watching it.
@@ -2034,7 +2041,35 @@ impl<S: Sources + 'static> Worker<S> {
             self.checks.truncate(before);
             self.status().await;
         }
+        if let Err(e) = self.notify_deals().await {
+            warn!("cannot announce deals: {e:#}");
+        }
         result
+    }
+
+    /// Shows a desktop notification for each confirmed deal not shown
+    /// yet, oldest first, and marks it seen (0080). One that cannot be
+    /// shown stays unseen and is tried after the next confirmation.
+    async fn notify_deals(&self) -> anyhow::Result<()> {
+        let Some(notifier) = self.config().notifier.clone() else {
+            return Ok(());
+        };
+        let store = self.store();
+        for deal in store.unseen_confirmed().await? {
+            let (Some(id), Some(route)) =
+                (deal.id, store.route(deal.route).await?)
+            else {
+                continue;
+            };
+            let notice = notify::notice(&deal, &route);
+            let notifier = Arc::clone(&notifier);
+            tokio::task::spawn_blocking(move || notifier.show(&notice))
+                .await
+                .context("the notification task failed")??;
+            store.mark_deal_seen(id).await?;
+            info!(deal = %id, "deal announced");
+        }
+        Ok(())
     }
 
     async fn confirm_deal(

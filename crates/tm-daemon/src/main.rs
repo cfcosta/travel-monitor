@@ -1,5 +1,7 @@
 //! `tmd`, the travel monitor daemon. See the library's documentation.
 
+use std::sync::Arc;
+
 use anyhow::Context as _;
 use clap::Parser;
 use tm_browser::ChromiumConfig;
@@ -9,6 +11,7 @@ use tm_daemon::{
     candidates::Only,
     cli::Cli,
     jobs::JobOptions,
+    notify::{Desktop, Notifier},
     sources::browser::{BrowserSources, site_config},
 };
 use tm_domain::FamilyId;
@@ -75,6 +78,8 @@ async fn run(cli: Cli) -> anyhow::Result<()> {
         site_budgets: cli.site_budgets.clone(),
         profile_dir: Some(cli.profile_path()),
         idle_close: cli.idle_close(),
+        notifier: (!cli.no_notify)
+            .then(|| Arc::new(Desktop) as Arc<dyn Notifier>),
         ..Config::default()
     };
 

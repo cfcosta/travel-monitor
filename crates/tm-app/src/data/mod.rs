@@ -394,14 +394,6 @@ pub struct ExploreSummary {
     pub destinations: u32,
 }
 
-/// A newly confirmed deal the app has not shown (0040).
-#[derive(Debug, Clone, PartialEq)]
-pub struct Notice {
-    pub deal: DealId,
-    pub title: String,
-    pub body: String,
-}
-
 /// The selected row in depth: the detail card and the route detail.
 #[derive(Debug, Clone, PartialEq)]
 pub struct RouteDetail {
@@ -443,7 +435,6 @@ pub struct Snapshot {
     pub blocks: Vec<BlockRow>,
     pub feed: Vec<FeedItem>,
     pub explore: ExploreSummary,
-    pub notices: Vec<Notice>,
     pub detail: Option<RouteDetail>,
 }
 
@@ -571,8 +562,6 @@ pub trait Backend: Send + Sync + 'static {
     fn changes(&self) -> Changes;
     async fn enqueue(&self, request: Request) -> anyhow::Result<Ticket>;
     async fn ticket(&self, ticket: Ticket) -> anyhow::Result<TicketState>;
-    /// The app has shown these deals (0040).
-    async fn mark_seen(&self, deals: Vec<DealId>) -> anyhow::Result<()>;
     async fn save_settings(&self, settings: Settings) -> anyhow::Result<()>;
     async fn add_place(
         &self,

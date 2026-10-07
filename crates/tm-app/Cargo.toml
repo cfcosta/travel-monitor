@@ -33,10 +33,6 @@ gpui_platform = { package = "gpui-pre-platform", version = "=0.3.7", features = 
   "font-kit",
 ] }
 
-# Desktop notifications over D-Bus in Rust (zbus), no libdbus.
-[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies]
-notify-rust.workspace = true
-
 [dev-dependencies]
 # Offscreen rendering for the screenshot test (`--ignored screenshots`).
 gpui_platform = { package = "gpui-pre-platform", version = "=0.3.7", features = [

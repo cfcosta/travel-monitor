@@ -1,5 +1,5 @@
 //! Deals: candidate → confirmed / rejected / expired, seller quotes, and
-//! the app's `seen` flag (DECISIONS.md 0030, 0031, 0034, 0040).
+//! the `seen` flag (DECISIONS.md 0030, 0031, 0034, 0080).
 
 use std::collections::HashMap;
 
@@ -177,7 +177,7 @@ impl Store {
         Ok(())
     }
 
-    /// The app has shown the deal (0040).
+    /// The deal's notification was shown (0080).
     pub async fn mark_deal_seen(&self, id: DealId) -> Result<()> {
         let done =
             sqlx::query!("UPDATE deals SET seen = 1 WHERE id = ?1", id.0)
@@ -240,8 +240,8 @@ impl Store {
         self.with_sellers(rows).await
     }
 
-    /// Confirmed deals the app has not shown yet, oldest first, for its
-    /// notifications (0040).
+    /// Confirmed deals not notified yet, oldest first, for the daemon's
+    /// notifications (0080).
     pub async fn unseen_confirmed(&self) -> Result<Vec<Deal>> {
         let mut deals = self
             .list_deals(&DealFilter {

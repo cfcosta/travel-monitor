@@ -23,6 +23,7 @@ use tm_daemon::{
     Daemon,
     budget,
     candidates::Only,
+    notify::Recorder,
     sources::{
         CalendarJob,
         Cell,
@@ -839,10 +840,14 @@ async fn deals_are_found_and_confirmed() {
     store_probe.seed_defaults().await.expect("seeds");
     let out_id = leg(&store_probe, "LIS", Leg::Outbound).await;
     let first = today() + Days::new(50);
-    let mut h = harness(
-        Only {
-            family: Some(out_id),
-            destination: None,
+    let notices = Arc::new(Recorder::default());
+    let mut h = harness_with(
+        Config {
+            notifier: Some(notices.clone()),
+            ..test_config(Only {
+                family: Some(out_id),
+                destination: None,
+            })
         },
         move |f| {
             // The outbound drops 40% on two departures.
@@ -967,6 +972,14 @@ async fn deals_are_found_and_confirmed() {
         .expect("reads")
         .expect("a state");
     assert_eq!(trip_state.rt_discount_n, 2);
+    // Each confirmed deal is announced once, and then seen (0080).
+    let shown = notices.shown();
+    assert_eq!(shown.len(), 2);
+    for n in &shown {
+        assert!(n.title.starts_with("SAO → LIS: R$1,68"), "{n:?}");
+        assert!(n.body.contains("via Kiwi.com"), "{n:?}");
+    }
+    assert!(store.unseen_confirmed().await.expect("reads").is_empty());
 
     // The same check again finds the same trips: already known.
     h.daemon
@@ -974,6 +987,7 @@ async fn deals_are_found_and_confirmed() {
         .await
         .expect("checks");
     assert_eq!(h.log().confirm.len(), 2);
+    assert_eq!(notices.shown().len(), 2);
 }
 
 #[tokio::test]
@@ -982,7 +996,12 @@ async fn a_rejected_confirmation_does_not_alert() {
     store_probe.seed_defaults().await.expect("seeds");
     let out_id = leg(&store_probe, "MIA", Leg::Outbound).await;
     let first = today() + Days::new(50);
-    let mut h = harness(Only::default(), move |f| {
+    let notices = Arc::new(Recorder::default());
+    let config = Config {
+        notifier: Some(notices.clone()),
+        ..test_config(Only::default())
+    };
+    let mut h = harness_with(config, move |f| {
         f.calendar = Box::new(move |_| {
             Fetch::ok(cells(first, 20, |i| if i == 0 { 500 } else { 1_000 }), 3)
         });
@@ -1016,6 +1035,7 @@ async fn a_rejected_confirmation_does_not_alert() {
     assert_eq!(deals.len(), 1);
     assert_eq!(deals[0].status, DealStatus::Rejected);
     assert!(store.unseen_confirmed().await.expect("reads").is_empty());
+    assert!(notices.shown().is_empty());
 }
 
 #[tokio::test]

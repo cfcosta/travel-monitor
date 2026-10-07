@@ -27,7 +27,6 @@ use tm_domain::{
     Cabin,
     CountryCode,
     Deal,
-    DealId,
     DealStatus,
     FamilyId,
     FamilyKind,
@@ -72,7 +71,6 @@ use super::{
     MilesRow,
     NewPlace,
     NewPos,
-    Notice,
     Request,
     Role,
     RouteRow,
@@ -479,33 +477,6 @@ fn seller_rows(
     (best, direct)
 }
 
-fn notice(deal: &Deal, routes: &[Route]) -> Option<Notice> {
-    let route = routes.iter().find(|r| r.id == deal.route)?;
-    Some(Notice {
-        deal: deal.id?,
-        title: format!(
-            "{} → {}: {}{}",
-            route.origin.code,
-            route.destination.code,
-            deal.effective_brl,
-            deal.change
-                .map(|c| format!(" ({})", format::change(c)))
-                .unwrap_or_default()
-        ),
-        body: [
-            Some(route.destination.name.clone()),
-            Some(deal.cabin.label().to_owned()),
-            Some(format::date_range(deal.departure, deal.return_date)),
-            deal.carrier.clone(),
-            deal.seller.clone().map(|s| format!("via {s}")),
-        ]
-        .into_iter()
-        .flatten()
-        .collect::<Vec<_>>()
-        .join(" · "),
-    })
-}
-
 async fn snapshot(
     inner: &Inner,
     query: SnapshotQuery,
@@ -824,12 +795,6 @@ async fn snapshot(
     }));
     feed.sort_by_key(|f| std::cmp::Reverse(f.at));
     feed.truncate(8);
-    let notices = store
-        .unseen_confirmed()
-        .await?
-        .iter()
-        .filter_map(|d| notice(d, &all_routes))
-        .collect();
     let miles = store
         .list_miles_programs()
         .await?
@@ -861,7 +826,6 @@ async fn snapshot(
         blocks,
         feed,
         explore,
-        notices,
         detail,
     })
 }
@@ -1096,17 +1060,6 @@ impl Backend for StoreBackend {
                 RequestStatus::Done => TicketState::Done,
                 RequestStatus::Failed => TicketState::Failed,
             })
-        })
-        .await
-    }
-
-    async fn mark_seen(&self, deals: Vec<DealId>) -> anyhow::Result<()> {
-        self.run(move |inner| async move {
-            let store = inner.store().await?;
-            for deal in deals {
-                store.mark_deal_seen(deal).await?;
-            }
-            Ok(())
         })
         .await
     }
@@ -1445,8 +1398,6 @@ mod tests {
         let lis_row = row("LIS");
         assert_eq!(lis_row.status, RowStatus::Deal);
         assert_eq!(lis_row.change, Some(-0.19));
-        assert_eq!(s.notices.len(), 1);
-        assert!(s.notices[0].title.starts_with("SAO → LIS: R$3,932"));
 
         let s = backend
             .snapshot(SnapshotQuery {
@@ -1473,13 +1424,6 @@ mod tests {
             Some("https://www.google.com/travel/flights/search?tfs=x")
         );
         assert_eq!(d.grid.rows.len(), 5);
-
-        backend.mark_seen(vec![DealId(id.0)]).await.expect("seen");
-        let s = backend
-            .snapshot(SnapshotQuery::default())
-            .await
-            .expect("after");
-        assert!(s.notices.is_empty());
         let _ = std::fs::remove_dir_all(dir);
     }
 

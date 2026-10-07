@@ -197,6 +197,7 @@ separately.
 
 - Date: 2026-10-05
 - Refined by [0040](#0040-the-app-runs-on-the-same-box-and-raises-the-alerts): the app, not the daemon, raises the notification.
+- Refined by [0080](#0080-the-daemon-raises-the-deal-notifications): the daemon raises it after all.
 
 The app has a deals view. When the daemon finds a new deal, it also
 sends a desktop notification. Nothing is sent off the machine.
@@ -497,6 +498,8 @@ real limit is measured over time.
 - Date: 2026-10-06
 - Refines [0019](#0019-deals-are-shown-in-the-app-and-as-desktop-notifications)
   and [0037](#0037-the-daemon-runs-on-an-always-on-nixos-box-set-up-by-a-home-manager-module).
+- Superseded in part by [0080](#0080-the-daemon-raises-the-deal-notifications):
+  the daemon, not the app, raises the notifications.
 
 The always-on box has a desktop session, and the gpui app runs there.
 It opens the daemon's SQLite file directly, as in
@@ -1236,3 +1239,23 @@ expected cost of the checks in flight. While the budget is the limit,
 checks run one after another (about 15 seconds each, then a gap of
 about 8); the extra lanes only start checks when the budget has room
 for them.
+
+## 0080: The daemon raises the deal notifications
+
+- Date: 2026-10-07
+- Supersedes in part [0040](#0040-the-app-runs-on-the-same-box-and-raises-the-alerts).
+- Refines [0019](#0019-deals-are-shown-in-the-app-and-as-desktop-notifications).
+
+The app raised the desktop notification for a confirmed deal, and only
+while it was open, so a deal found overnight waited for the app to
+start. The daemon now raises it with notify-rust over the session D-Bus,
+right after the confirmation, so it arrives with the app closed. The
+app sends no notifications any more and its `--quiet` flag is gone.
+
+The deal's `seen` flag now means "notified": the daemon sets it once
+the notification server took the notice. A notice that fails (no
+session bus, say) leaves the deal unseen; the daemon tries again after
+its next confirmation and when it starts. `tmd --no-notify` sends
+nothing and leaves deals unseen. Only confirmed deals are announced:
+candidates still need their round-trip check (0031), which is what
+weeds out a one-off leg price that the real round trip does not match.

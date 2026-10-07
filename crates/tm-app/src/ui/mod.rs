@@ -22,7 +22,6 @@ pub mod widgets;
 
 use std::{
     collections::HashSet,
-    rc::Rc,
     time::{Duration, Instant},
 };
 
@@ -40,22 +39,13 @@ use gpui::{
     prelude::*,
     px,
 };
-use tm_domain::{Cabin, DealId, PlaceId};
+use tm_domain::{Cabin, PlaceId};
 
 pub use self::settings::SettingsForm;
 use crate::{
-    data::{
-        Notice,
-        Request,
-        RouteRow,
-        RowKey,
-        SharedBackend,
-        Snapshot,
-        SnapshotQuery,
-    },
+    data::{Request, RouteRow, RowKey, SharedBackend, Snapshot, SnapshotQuery},
     live::{self, Clock, Debounce, Fresh, Highlights},
     login::LoginConfig,
-    notify::Notifier,
     theme::{self, color},
 };
 
@@ -162,7 +152,6 @@ pub enum Menu {
 #[derive(Clone)]
 pub struct AppEnv {
     pub backend: SharedBackend,
-    pub notifier: Rc<dyn Notifier>,
     pub login: LoginConfig,
     /// The runtime that runs the login window; `None` in tests.
     pub tokio: Option<tokio::runtime::Handle>,
@@ -195,7 +184,6 @@ pub struct TravelMonitor {
     pub(crate) logins: HashSet<String>,
     /// The Deals map's zoom and pan (0073).
     pub(crate) deals_map: map::MapState,
-    notified: HashSet<DealId>,
     generation: u64,
     /// The wall clock, moved every second (0057).
     pub(crate) now: DateTime<Utc>,
@@ -237,7 +225,6 @@ impl TravelMonitor {
             settings_form: None,
             logins: HashSet::new(),
             deals_map: map::MapState::default(),
-            notified: HashSet::new(),
             generation: 0,
             now,
             opened_at,
@@ -387,7 +374,6 @@ impl TravelMonitor {
     ) {
         match result {
             Ok(snapshot) => {
-                self.notify_new(&snapshot.notices, cx);
                 let arrived = self
                     .snapshot
                     .as_ref()
@@ -429,30 +415,6 @@ impl TravelMonitor {
             }
         }
         cx.notify();
-    }
-
-    /// Shows a desktop notification for each confirmed deal not shown
-    /// yet, then marks them seen (0040).
-    fn notify_new(&mut self, notices: &[Notice], cx: &mut Context<Self>) {
-        let fresh: Vec<&Notice> = notices
-            .iter()
-            .filter(|n| !self.notified.contains(&n.deal))
-            .collect();
-        if fresh.is_empty() {
-            return;
-        }
-        for notice in &fresh {
-            self.env.notifier.show(notice);
-            self.notified.insert(notice.deal);
-        }
-        let ids: Vec<DealId> = fresh.iter().map(|n| n.deal).collect();
-        let backend = self.env.backend.clone();
-        cx.background_spawn(async move {
-            if let Err(error) = backend.mark_seen(ids).await {
-                tracing::warn!("cannot mark deals seen: {error:#}");
-            }
-        })
-        .detach();
     }
 
     /// The rows of the main list, filtered and sorted.

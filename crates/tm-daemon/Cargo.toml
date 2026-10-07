@@ -37,6 +37,10 @@ tokio = { workspace = true, features = [
 tracing.workspace = true
 tracing-subscriber.workspace = true
 
+# Desktop notifications over D-Bus in Rust (zbus), no libdbus (0080).
+[target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies]
+notify-rust.workspace = true
+
 [dev-dependencies]
 # Chromium-shaped cookie jars for the login tests.
 sqlx.workspace = true

@@ -103,6 +103,11 @@ pub struct Cli {
     /// Seconds without work before a site's browser closes (0062).
     #[arg(long, hide = true, default_value_t = 300, value_name = "N")]
     pub idle_close_seconds: u64,
+
+    /// Send no desktop notifications for confirmed deals; they stay
+    /// unseen until a run that sends them (DECISIONS.md 0080).
+    #[arg(long)]
+    pub no_notify: bool,
 }
 
 fn parse_site_budget(text: &str) -> Result<(String, SiteLimits), String> {
@@ -242,6 +247,7 @@ mod tests {
         assert_eq!(cli.tick(), Duration::from_secs(5));
         assert_eq!(cli.pace, (4, 10));
         assert_eq!(cli.parallel, 3);
+        assert!(!cli.no_notify);
     }
 
     /// Headless: the module leaves `--headed` out.
@@ -272,6 +278,7 @@ mod tests {
             "0,0",
             "--parallel",
             "1",
+            "--no-notify",
         ])
         .expect("parses");
         assert!(!cli.headed);
@@ -282,6 +289,7 @@ mod tests {
         assert_eq!(cli.max_graph_pages, Some(2));
         assert_eq!(cli.pace, (0, 0));
         assert_eq!(cli.parallel, 1);
+        assert!(cli.no_notify);
     }
 
     #[test]

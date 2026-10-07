@@ -16,6 +16,7 @@
 //! - [`jobs`], [`candidates`], [`deals`]: the pure glue between the
 //!   store, the scheduler and the sources.
 //! - [`budget`]: each site's page-load budget, persisted (0039, 0060).
+//! - [`notify`]: desktop notifications for confirmed deals (0080).
 
 pub mod budget;
 pub mod candidates;
@@ -23,6 +24,7 @@ pub mod cli;
 pub mod daemon;
 pub mod deals;
 pub mod jobs;
+pub mod notify;
 pub mod sites;
 pub mod sources;
 pub mod worker;

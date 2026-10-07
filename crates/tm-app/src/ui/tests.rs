@@ -1,7 +1,7 @@
 //! The window against the fake backend: loading, selection, filters,
-//! notifications, requests, links and settings.
+//! requests, links and settings.
 
-use std::{rc::Rc, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 
 use chrono::{DateTime, TimeZone, Utc};
 use gpui::{Entity, Modifiers, TestAppContext, VisualTestContext};
@@ -28,7 +28,6 @@ use crate::{
     },
     live::{self, Clock, Debounce, Fresh},
     login::LoginConfig,
-    notify::Recorder,
 };
 
 fn now() -> DateTime<Utc> {
@@ -39,7 +38,6 @@ struct Opened {
     view: Entity<TravelMonitor>,
     cx: VisualTestContext,
     fake: Arc<FakeBackend>,
-    notices: Rc<Recorder>,
 }
 
 fn open(cx: &mut TestAppContext, fake: FakeBackend) -> Opened {
@@ -50,10 +48,8 @@ fn open(cx: &mut TestAppContext, fake: FakeBackend) -> Opened {
         cx.set_reduce_motion(true);
     });
     let fake = Arc::new(fake);
-    let notices = Rc::new(Recorder::default());
     let env = AppEnv {
         backend: fake.clone(),
-        notifier: notices.clone(),
         login: LoginConfig::resolve(
             Some("/tmp/tm-profile".into()),
             Some("true".into()),
@@ -68,12 +64,7 @@ fn open(cx: &mut TestAppContext, fake: FakeBackend) -> Opened {
     let view = window.root(cx).expect("root");
     let cx = VisualTestContext::from_window(window.into(), cx);
     cx.run_until_parked();
-    Opened {
-        view,
-        cx,
-        fake,
-        notices,
-    }
+    Opened { view, cx, fake }
 }
 
 #[gpui::test]
@@ -134,29 +125,6 @@ fn clicking_a_row_selects_it(cx: &mut TestAppContext) {
             .expect("detail");
         assert_eq!(detail.key, lis);
         assert_eq!(detail.sellers.len(), 4);
-    });
-}
-
-#[gpui::test]
-fn a_new_deal_is_notified_once(cx: &mut TestAppContext) {
-    let Opened {
-        view,
-        mut cx,
-        notices,
-        ..
-    } = open(cx, FakeBackend::at(now()).with_unseen("LIS"));
-    assert_eq!(notices.shown.borrow().len(), 1);
-    assert!(notices.shown.borrow()[0].title.contains("LIS"));
-    view.update(&mut cx, |tm, cx| tm.refresh(cx));
-    cx.run_until_parked();
-    view.update(&mut cx, |tm, cx| tm.refresh(cx));
-    cx.run_until_parked();
-    assert_eq!(notices.shown.borrow().len(), 1);
-    view.read_with(&cx, |tm, _| {
-        assert!(
-            tm.snapshot.as_ref().is_some_and(|s| s.notices.is_empty()),
-            "marked seen"
-        );
     });
 }
 
