@@ -49,6 +49,7 @@ use tm_domain::{
     effective_brl,
     has_award_reader,
 };
+use tm_scheduler::finds::{ExploreFind, FindParams, explore_finds};
 use tm_store::{
     ChangeWatch,
     DealFilter,
@@ -91,12 +92,16 @@ use super::{
     Trip,
     awards::{AwardInputs, AwardMarks, route_awards, summary},
     detail::{Baselines, DetailInputs, assemble},
+    found,
     history::{self, History},
 };
 use crate::{format, grid::TripInputs};
 
 /// A cached read and the last check it reflects.
 type Stamped<T> = (Option<DateTime<Utc>>, Arc<T>);
+
+/// The latest Explore hint and the configuration version.
+type FindsStamp = (Option<DateTime<Utc>>, i64);
 
 /// Cached reads, keyed by when the family (or route) was last checked.
 #[derive(Default)]
@@ -105,6 +110,9 @@ struct Cache {
     history: HashMap<RowKey, Stamped<History>>,
     /// An award family's last 60 days (0083).
     award_history: HashMap<FamilyId, Stamped<Vec<Observation>>>,
+    /// Explore finds (0087), as of the latest hint and the configuration
+    /// version: they change when a sweep lands or the watchlist does.
+    finds: Option<(FindsStamp, Arc<Vec<ExploreFind>>)>,
 }
 
 struct Inner {
@@ -254,6 +262,28 @@ impl Inner {
             .award_history
             .insert(family.id, (stamp, obs.clone()));
         Ok(obs)
+    }
+
+    async fn finds(
+        &self,
+        store: &Store,
+        settings: &Settings,
+        now: DateTime<Utc>,
+    ) -> anyhow::Result<Arc<Vec<ExploreFind>>> {
+        let stamp = (
+            store.latest_explore_hint_at().await?,
+            store.config_version().await?,
+        );
+        if let Some((at, finds)) = &self.lock().finds
+            && *at == stamp
+        {
+            return Ok(finds.clone());
+        }
+        let params = FindParams::from_settings(settings);
+        let hints = store.unwatched_explore_hints(params.since(now)).await?;
+        let finds = Arc::new(explore_finds(&hints, now, &params));
+        self.lock().finds = Some((stamp, finds.clone()));
+        Ok(finds)
     }
 
     async fn history(
@@ -970,9 +1000,11 @@ async fn snapshot(
     let sweep = queries
         .iter()
         .find(|q| q.sweep && matches!(q.outcome, Some(QueryOutcome::Ok)));
+    let finds = inner.finds(store, &settings, now).await?;
     let explore = ExploreSummary {
         last_sweep: sweep.map(|q| q.finished_at.unwrap_or(q.started_at)),
         destinations: sweep.map_or(0, |q| q.cells),
+        found: found::found_rows(&finds, origin.as_ref().map(|o| o.id)),
     };
     let all_routes = store.list_routes(false).await?;
     let mut feed: Vec<FeedItem> = deals

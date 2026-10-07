@@ -130,6 +130,20 @@ impl Store {
         rows.into_iter().map(ExploreHint::try_from).collect()
     }
 
+    /// When the latest Explore hint was observed: finds only change
+    /// when a sweep lands (or the watchlist does).
+    pub async fn latest_explore_hint_at(
+        &self,
+    ) -> Result<Option<DateTime<Utc>>> {
+        let at = sqlx::query_scalar!(
+            r#"SELECT MAX(observed_at) AS "at: DateTime<Utc>"
+               FROM explore_hints"#
+        )
+        .fetch_one(&self.pool)
+        .await?;
+        Ok(at)
+    }
+
     /// Opens a drop for `hint`'s origin, cabin and destination, unless
     /// one is open already. Returns the new drop's id.
     pub async fn start_explore_drop(

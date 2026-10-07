@@ -22,7 +22,7 @@ use super::{
     widgets::{self, mono},
 };
 use crate::{
-    data::{RouteRow, RowStatus, Snapshot, Tone},
+    data::{NewPlace, Role, RouteRow, RowStatus, Snapshot, Tone},
     format,
     geo::Region,
     theme::{self, Fonts, color},
@@ -30,6 +30,13 @@ use crate::{
 
 /// Column widths of the routes table.
 const COLS: [f32; 7] = [100., 110., 170., 140., 140., 110., 110.];
+
+/// Column widths of "Found by Explore": cabin, price, against its own
+/// Explore usual, dates, airline, sweeps, the button.
+const FOUND_COLS: [f32; 7] = [100., 110., 170., 140., 190., 120., 110.];
+
+/// How many finds are listed; the rest are counted.
+const FOUND_SHOWN: usize = 10;
 
 pub(super) fn tone_color(tone: Tone) -> u32 {
     match tone {
@@ -162,6 +169,7 @@ impl TravelMonitor {
             .flex()
             .flex_col()
             .child(self.render_today(fonts, s))
+            .children(self.render_found(fonts, s, cx))
             .child(self.render_routes_table(fonts, s, cx))
             .into_any_element()
     }
@@ -247,7 +255,16 @@ impl TravelMonitor {
                             s.explore
                                 .last_sweep
                                 .map_or_else(|| "–".to_owned(), format::clock),
-                            format!("{} destinations", s.explore.destinations),
+                            match s.explore.found.len() {
+                                0 => format!(
+                                    "{} destinations",
+                                    s.explore.destinations
+                                ),
+                                n => format!(
+                                    "{n} unwatched of {}",
+                                    s.explore.destinations
+                                ),
+                            },
                             theme::TEXT,
                         )
                         .flex_1(),
@@ -351,6 +368,235 @@ impl TravelMonitor {
                     .child(widgets::heading("Activity", 14.))
                     .children(feed),
             )
+    }
+
+    /// Destinations the Explore sweep priced that nobody watches
+    /// (0087), drops under their own Explore history first, each with a
+    /// button that adds it to the watchlist.
+    fn render_found(
+        &self,
+        fonts: &Fonts,
+        s: &Snapshot,
+        cx: &mut Context<Self>,
+    ) -> Option<Div> {
+        let found = &s.explore.found;
+        if found.is_empty() {
+            return None;
+        }
+        let threshold = s.settings.deal_threshold;
+        let now = self.now;
+        let head =
+            |text: &'static str, w: f32| div().w(px(w)).flex_none().child(text);
+        let header = div()
+            .flex()
+            .gap(px(12.))
+            .px(px(16.))
+            .py(px(10.))
+            .text_size(px(12.))
+            .text_color(color(theme::TEXT_LABEL))
+            .border_b_1()
+            .border_color(color(theme::BORDER))
+            .child(div().flex_1().min_w(px(180.)).child("Destination"))
+            .child(head("Cabin", FOUND_COLS[0]))
+            .child(head("Cheapest today", FOUND_COLS[1]).text_right())
+            .child(head("vs its Explore usual", FOUND_COLS[2]))
+            .child(head("Dates", FOUND_COLS[3]))
+            .child(head("Airline", FOUND_COLS[4]))
+            .child(head("Sweeps", FOUND_COLS[5]))
+            .child(head("", FOUND_COLS[6]));
+        let body = found.iter().take(FOUND_SHOWN).map(|r| {
+            let drop = r.is_drop(threshold);
+            div()
+                .id(SharedString::from(format!(
+                    "found-{}-{}",
+                    r.code,
+                    r.cabin.code()
+                )))
+                .flex()
+                .items_center()
+                .gap(px(12.))
+                .px(px(16.))
+                .py(px(9.))
+                .border_b_1()
+                .border_color(color(theme::ROW_RULE_FAINT))
+                .relative()
+                .when(drop, |d| {
+                    d.bg(color(theme::DEAL_ROW)).child(widgets::accent())
+                })
+                .child(
+                    div()
+                        .flex_1()
+                        .min_w(px(180.))
+                        .flex()
+                        .items_baseline()
+                        .gap(px(8.))
+                        .child(
+                            div()
+                                .font_weight(FontWeight::BOLD)
+                                .text_size(px(15.))
+                                .child(r.code.clone()),
+                        )
+                        .child(
+                            div()
+                                .truncate()
+                                .text_color(color(theme::TEXT_MUTED))
+                                .child(match &r.country {
+                                    Some(c) => format!("{}, {c}", r.name),
+                                    None => r.name.clone(),
+                                }),
+                        ),
+                )
+                .child(
+                    div()
+                        .w(px(FOUND_COLS[0]))
+                        .flex_none()
+                        .text_color(color(theme::TEXT_MUTED))
+                        .child(r.cabin.label()),
+                )
+                .child(
+                    mono(fonts, format::money(&r.price))
+                        .w(px(FOUND_COLS[1]))
+                        .flex_none()
+                        .text_right()
+                        .font_weight(FontWeight::BOLD),
+                )
+                .child(
+                    div().w(px(FOUND_COLS[2])).flex_none().child(
+                        match &r.usual {
+                            Some(_) => change_bar(fonts, r.change, drop)
+                                .into_any_element(),
+                            None => div()
+                                .text_size(px(12.))
+                                .text_color(color(theme::TEXT_FAINT))
+                                .child("new, no history yet")
+                                .into_any_element(),
+                        },
+                    ),
+                )
+                .child(
+                    div()
+                        .w(px(FOUND_COLS[3]))
+                        .flex_none()
+                        .text_color(color(theme::TEXT_SOFT))
+                        .child(match (r.departure, r.return_date) {
+                            (Some(d), Some(ret)) => format::date_range(d, ret),
+                            _ => "–".to_owned(),
+                        }),
+                )
+                .child(
+                    div()
+                        .w(px(FOUND_COLS[4]))
+                        .flex_none()
+                        .truncate()
+                        .text_color(color(theme::TEXT_SOFT))
+                        .child(r.airline_label().unwrap_or_else(|| "–".into())),
+                )
+                .child(
+                    div()
+                        .w(px(FOUND_COLS[5]))
+                        .flex_none()
+                        .text_color(color(theme::TEXT_FAINT))
+                        .child(format!(
+                            "{} · {}",
+                            r.sweeps,
+                            format::ago(now, r.seen_at)
+                        )),
+                )
+                .child(
+                    div().w(px(FOUND_COLS[6])).flex_none().flex().child(
+                        match r.watch.clone() {
+                            Some(place) => widgets::ghost_button(
+                                SharedString::from(format!(
+                                    "watch-{}-{}",
+                                    r.code,
+                                    r.cabin.code()
+                                )),
+                                "Watch",
+                            )
+                            .debug_selector({
+                                let selector = format!(
+                                    "watch-{}-{}",
+                                    r.code,
+                                    r.cabin.code()
+                                );
+                                move || selector
+                            })
+                            .py(px(5.))
+                            .on_click(cx.listener(move |this, _, _, cx| {
+                                this.watch_found(place.clone(), cx)
+                            }))
+                            .into_any_element(),
+                            None => div()
+                                .text_size(px(12.))
+                                .text_color(color(theme::TEXT_FAINT))
+                                .child("add in Settings")
+                                .into_any_element(),
+                        },
+                    ),
+                )
+        });
+        let more = found.len().saturating_sub(FOUND_SHOWN);
+        Some(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(12.))
+                .px(px(24.))
+                .pt(px(18.))
+                .child(
+                    div()
+                        .flex()
+                        .items_baseline()
+                        .gap(px(10.))
+                        .child(widgets::heading("Found by Explore", 18.))
+                        .child(
+                            div()
+                                .text_size(px(13.))
+                                .text_color(color(theme::TEXT_MUTED))
+                                .child(
+                                    "Priced by the Explore sweep, not on the \
+                                     watchlist",
+                                ),
+                        ),
+                )
+                .child(
+                    div()
+                        .debug_selector(|| "found-by-explore".into())
+                        .flex()
+                        .flex_col()
+                        .border_1()
+                        .border_color(color(theme::BORDER))
+                        .rounded(px(12.))
+                        .overflow_hidden()
+                        .child(header)
+                        .children(body)
+                        .when(more > 0, |d| {
+                            d.child(
+                                div()
+                                    .px(px(16.))
+                                    .py(px(9.))
+                                    .text_size(px(12.))
+                                    .text_color(color(theme::TEXT_FAINT))
+                                    .child(format!("{more} more")),
+                            )
+                        }),
+                ),
+        )
+    }
+
+    /// "Watch" on a find: adds it as a destination, as Settings would
+    /// (0035), and asks the daemon to reload.
+    pub(super) fn watch_found(
+        &mut self,
+        place: NewPlace,
+        cx: &mut Context<Self>,
+    ) {
+        let backend = self.env.backend.clone();
+        self.write(
+            async move { backend.add_place(Role::Destination, place).await },
+            "Watching it now",
+            cx,
+        );
     }
 
     fn render_routes_table(

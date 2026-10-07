@@ -27,6 +27,7 @@ use tm_domain::{
     DealId,
     DealReason,
     DealStatus,
+    ExploreHint,
     FamilyId,
     Leg,
     MilesUnit,
@@ -47,6 +48,7 @@ use tm_domain::{
     SiteLimits,
     effective_brl,
 };
+use tm_scheduler::finds::{FindParams, explore_finds};
 
 use super::{
     ActivityRow,
@@ -76,6 +78,7 @@ use super::{
     Trip,
     awards::{AwardInputs, AwardMarks, route_awards, summary},
     detail::{Baselines, DetailInputs, assemble},
+    found::found_rows,
 };
 use crate::grid::{LegPrices, TripInputs};
 
@@ -1114,6 +1117,118 @@ fn activity(origin: &str, now: DateTime<Utc>) -> Vec<ActivityRow> {
     rows
 }
 
+/// Explore hints of destinations off the sample watchlist (0087):
+/// Jakarta well under its own Explore history, Perth near it, Kazan
+/// too new for one, and Fairbanks in business. Ten earlier sweeps, two
+/// to six days ago, then two in the last day.
+fn explore_hints(origin: PlaceId, now: DateTime<Utc>) -> Vec<ExploreHint> {
+    #[allow(clippy::type_complexity)]
+    let finds: [(
+        &str,
+        &str,
+        &str,
+        &str,
+        (f64, f64),
+        Cabin,
+        Option<i64>,
+        i64,
+        (&str, u8),
+    ); 4] = [
+        (
+            "/m/044rv",
+            "CGK",
+            "Jakarta",
+            "Indonesia",
+            (-6.21, 106.85),
+            Cabin::Economy,
+            Some(6_850),
+            5_207,
+            ("Garuda Indonesia", 1),
+        ),
+        (
+            "/m/062qg",
+            "PER",
+            "Perth",
+            "Australia",
+            (-31.95, 115.86),
+            Cabin::Economy,
+            Some(9_800),
+            9_542,
+            ("Qatar Airways", 1),
+        ),
+        (
+            "/m/01cr28",
+            "KZN",
+            "Kazan",
+            "Russia",
+            (55.80, 49.11),
+            Cabin::Economy,
+            None,
+            8_819,
+            ("Turkish Airlines", 2),
+        ),
+        (
+            "/m/0qf5p",
+            "FAI",
+            "Fairbanks",
+            "United States",
+            (64.84, -147.72),
+            Cabin::Business,
+            Some(26_500),
+            24_100,
+            ("American", 2),
+        ),
+    ];
+    let mut out = Vec::new();
+    let mut query = 9_000;
+    for (
+        freebase,
+        airport,
+        name,
+        country,
+        coords,
+        cabin,
+        usual,
+        now_price,
+        (carrier, stops),
+    ) in finds
+    {
+        let mut hint = |hours: i64, price: i64| {
+            query += 1;
+            let departure = now.date_naive() + Duration::days(40);
+            ExploreHint {
+                query: QueryId(query),
+                origin,
+                cabin,
+                pos: PosId(1),
+                observed_at: now - Duration::hours(hours),
+                destination_freebase_id: freebase.to_owned(),
+                destination_airport: airport.to_owned(),
+                price: brl(price),
+                departure: Some(departure),
+                return_date: Some(departure + Duration::days(7)),
+                stops: Some(stops),
+                duration_minutes: None,
+                carrier: Some(carrier.to_owned()),
+                destination_name: Some(name.to_owned()),
+                destination_country: Some(country.to_owned()),
+                destination_coordinates: Some(coords),
+            }
+        };
+        match usual {
+            Some(usual) => {
+                for k in 0..10 {
+                    out.push(hint(48 + 10 * k, usual + (k % 3 - 1) * 50));
+                }
+            }
+            None => out.push(hint(30, now_price + 300)),
+        }
+        out.push(hint(8, now_price + 120));
+        out.push(hint(2, now_price));
+    }
+    out
+}
+
 fn feed(now: DateTime<Utc>) -> Vec<FeedItem> {
     let item = |min: i64, text: &str, tone: Tone| FeedItem {
         at: now - Duration::minutes(min),
@@ -1425,6 +1540,25 @@ impl Backend for FakeBackend {
             explore: ExploreSummary {
                 last_sweep: Some(now - Duration::hours(6)),
                 destinations: 72,
+                found: {
+                    // Every configured place counts as watched, removed
+                    // or not, as in the store.
+                    let hints: Vec<ExploreHint> = explore_hints(origin.id, now)
+                        .into_iter()
+                        .filter(|h| {
+                            !state.destinations.iter().any(|p| {
+                                p.code == h.destination_airport
+                                    || p.google_id()
+                                        == Some(&h.destination_freebase_id)
+                            })
+                        })
+                        .collect();
+                    let params = FindParams::from_settings(&state.settings);
+                    found_rows(
+                        &explore_finds(&hints, now, &params),
+                        Some(origin.id),
+                    )
+                },
             },
             detail,
         })

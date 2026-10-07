@@ -235,6 +235,59 @@ fn settings_are_validated_then_saved(cx: &mut TestAppContext) {
     assert!(fake.requests().contains(&Request::ReloadConfig));
 }
 
+#[gpui::test]
+fn explore_finds_are_listed_and_watched(cx: &mut TestAppContext) {
+    let Opened {
+        view, mut cx, fake, ..
+    } = open(cx, FakeBackend::at(now()));
+    cx.update(|window, cx| {
+        view.update(cx, |tm, cx| tm.navigate(Screen::Routes, window, cx))
+    });
+    cx.run_until_parked();
+    cx.update(|window, _| window.refresh());
+    cx.run_until_parked();
+    view.read_with(&cx, |tm, _| {
+        let s = tm.snapshot.as_ref().expect("snapshot");
+        let codes: Vec<&str> =
+            s.explore.found.iter().map(|r| r.code.as_str()).collect();
+        // Jakarta's drop first; Kazan has no history, so it comes last.
+        assert_eq!(codes, ["CGK", "FAI", "PER", "KZN"]);
+        let cgk = &s.explore.found[0];
+        assert!(cgk.is_drop(s.settings.deal_threshold));
+        assert_eq!(cgk.price.whole(), 5_207);
+        assert_eq!(cgk.sweeps, 12);
+        assert_eq!(
+            cgk.airline_label().as_deref(),
+            Some("Garuda Indonesia, 1 stop")
+        );
+        assert!(s.explore.found[3].usual.is_none());
+    });
+    assert!(cx.debug_bounds("found-by-explore").is_some());
+    let watch = cx.debug_bounds("watch-CGK-1").expect("a Watch button");
+    cx.simulate_click(watch.center(), Modifiers::default());
+    cx.run_until_parked();
+    view.read_with(&cx, |tm, _| {
+        assert!(
+            tm.toast.as_ref().is_some_and(|t| t.contains("Watching")),
+            "{:?}",
+            tm.toast
+        );
+        let s = tm.snapshot.as_ref().expect("snapshot");
+        // CGK is one of Jakarta's airports (with Halim): Google searches
+        // the city, so the city is what is watched.
+        let jakarta = s
+            .destinations
+            .iter()
+            .find(|p| p.code == "JKT")
+            .expect("Jakarta is watched");
+        assert_eq!(jakarta.name, "Jakarta");
+        assert_eq!(jakarta.country.as_str(), "ID");
+        assert_eq!(jakarta.google_id(), Some("/m/044rv"));
+        assert!(s.explore.found.iter().all(|r| r.code != "CGK"));
+    });
+    assert!(fake.requests().contains(&Request::ReloadConfig));
+}
+
 // ---------------------------------------------------------------------
 // Live updates (0057)
 // ---------------------------------------------------------------------

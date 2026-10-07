@@ -1,0 +1,21 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT MAX(observed_at) AS \"at: DateTime<Utc>\"\n               FROM explore_hints",
+  "describe": {
+    "columns": [
+      {
+        "name": "at: DateTime<Utc>",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "6d3186e92446339525c9576f2687ebabd631cc5c1aa5adf97a0cddff7e42a14a"
+}

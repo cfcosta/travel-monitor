@@ -98,7 +98,12 @@ async fn only_unwatched_destinations_are_finds() {
         hint(&store, q, 6, "/m/044rv", "CGK", 6_600).await,
         hint(&store, q, 6, "/m/062qg", "PER", 9_500).await,
     ];
+    assert_eq!(store.latest_explore_hint_at().await.expect("reads"), None);
     store.insert_explore_hints(&hints).await.expect("inserts");
+    assert_eq!(
+        store.latest_explore_hint_at().await.expect("reads"),
+        Some(at(6, 6))
+    );
     let found = store
         .unwatched_explore_hints(at(1, 0))
         .await

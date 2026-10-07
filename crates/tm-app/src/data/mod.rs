@@ -13,6 +13,7 @@
 pub mod awards;
 pub mod detail;
 pub mod fake;
+pub mod found;
 pub mod history;
 pub mod store;
 
@@ -632,6 +633,8 @@ impl MilesRow {
 pub struct ExploreSummary {
     pub last_sweep: Option<DateTime<Utc>>,
     pub destinations: u32,
+    /// Destinations it priced that nobody watches (0087).
+    pub found: Vec<found::FoundRow>,
 }
 
 /// The selected row in depth: the detail card and the route detail.
