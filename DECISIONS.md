@@ -1374,3 +1374,26 @@ count is kept. A miles program's limits are left to the app.
 
 TAP has 42 one-way legs and checks each at most every 6 hours, about
 500 loads a day, so for now its routes, not its budget, limit it.
+
+## 0089: Buy-miles offers come from a promo blog and are confirmed on the programs' pages
+
+- Date: 2026-10-07
+- Refines [0023](#0023-award-prices-are-tracked-in-smiles-latam-pass-and-azul-fidelidade),
+  [0052](#0052-sites-that-deny-the-daemons-browser-stay-off) and
+  [0083](#0083-awards-are-their-own-series-the-value-of-a-mile-is-measured).
+- Research: [docs/research/sites/miles-buying.md](docs/research/sites/miles-buying.md).
+
+Offers to buy miles (direct, transfers with a bonus, points plus cash,
+club sign-ups) are recorded as buy offers, one row per price per
+audience, with validity, caps and source. Every program shows only its
+base price logged out; the price a member pays depends on club, card
+and tier. Passageiro de Primeira's WordPress categories (buying,
+transfers, clubs) are polled every 2 hours over plain HTTP as a site of
+their own, about 40 requests a day: they are leads and history. LATAM
+Pass and Smiles offers are confirmed on the program's own logged-out
+page once a day and when a lead appears (LATAM Pass in the shared LATAM
+profile, counted in its budget; Smiles after its 0050 probe). Azul,
+Livelo and Esfera rely on the blog. The user's clubs, cards and tiers
+pick the price that applies. A purchase is judged against the program's
+last 365 days, the measured value of a mile (0083) and the cash prices
+of watched trips; only a watched-trip saving or a record low notifies.
