@@ -165,8 +165,9 @@ pub fn is_unusual(rate: f64, usual: &UsualRate, threshold: f64) -> bool {
             .is_some_and(|c| c.abs() >= threshold - EPSILON)
 }
 
-/// A date for a one-way award, a date pair for a round trip.
-pub type AwardDates = (NaiveDate, Option<NaiveDate>);
+/// What an award series prices: a date for a one-way award, a date
+/// pair for a round trip.
+pub type AwardKey = (NaiveDate, Option<NaiveDate>);
 
 /// The award series' price of each date (one way) or date pair (round
 /// trip) among `cells`: the award with the fewest miles, then the
@@ -174,8 +175,8 @@ pub type AwardDates = (NaiveDate, Option<NaiveDate>);
 /// left out.
 pub fn cheapest_by_dates<'a>(
     cells: impl IntoIterator<Item = &'a Observation>,
-) -> BTreeMap<AwardDates, &'a Observation> {
-    let mut out: BTreeMap<AwardDates, &Observation> = BTreeMap::new();
+) -> BTreeMap<AwardKey, &'a Observation> {
+    let mut out: BTreeMap<AwardKey, &Observation> = BTreeMap::new();
     for c in cells {
         if c.miles.is_none_or(|m| m <= 0) {
             continue;

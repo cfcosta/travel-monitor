@@ -40,7 +40,7 @@ use tm_scheduler::{
     Params,
     PricePoint,
     Trip,
-    awards::AwardDates,
+    awards::AwardKey,
     baseline::compute_by_key,
     effective::effective,
     evaluate,
@@ -540,7 +540,7 @@ pub struct FoundAward {
 /// the same family, without the check being judged), best first. Awards
 /// departing outside `first..=last` are ignored.
 pub fn find_awards(
-    current: &BTreeMap<AwardDates, &Observation>,
+    current: &BTreeMap<AwardKey, &Observation>,
     points: &[PricePoint],
     now: DateTime<Utc>,
     params: &Params,
@@ -578,7 +578,7 @@ pub fn known_award(
     deals: &[Deal],
     series: &Series,
     (route, cabin, leg): (RouteId, Cabin, Option<Leg>),
-    (departure, return_date): AwardDates,
+    (departure, return_date): AwardKey,
     now: DateTime<Utc>,
 ) -> bool {
     deals.iter().any(|d| {
@@ -684,7 +684,7 @@ pub fn award_candidate(
 /// the latest check's cheapest award per date).
 pub fn award_expired(
     deal: &Deal,
-    current: &BTreeMap<AwardDates, &Observation>,
+    current: &BTreeMap<AwardKey, &Observation>,
     today: NaiveDate,
 ) -> bool {
     if deal.departure < today {
