@@ -1580,13 +1580,16 @@ async fn a_shutdown_stops_every_site() {
         once: false,
         tick: Duration::from_millis(200),
         request_poll: Duration::from_millis(50),
-        budget: Some(100_000),
-        max_budget: Some(100_000),
+        // A tick gets the day's budget over the seconds left in it, so
+        // just after midnight 100,000 loads came to about one a tick:
+        // too little for a check, and the test failed by the clock.
+        budget: Some(100_000_000),
+        max_budget: Some(100_000_000),
         site_budgets: vec![(
             "airline:TP".into(),
             SiteLimits {
-                start: 100_000,
-                max: 100_000,
+                start: 100_000_000,
+                max: 100_000_000,
             },
         )],
         ..test_config(Only {
