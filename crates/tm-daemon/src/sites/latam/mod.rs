@@ -1,5 +1,5 @@
 //! LATAM Airlines (`airline:LA`) and LATAM Pass (`miles:latam_pass`) on
-//! `www.latamairlines.com` (DECISIONS.md 0081, 0082, 0084, 0085;
+//! `www.latamairlines.com` (DECISIONS.md 0081, 0082, 0084, 0085, 0090;
 //! research: `docs/research/sites/latam.md` and `latam-pass.md`). Pure:
 //! the results URL, the parsers for the responses the results page
 //! makes, and how a blocked or logged-out page looks.
@@ -79,6 +79,15 @@ pub enum LatamError {
 /// Why a LATAM family cannot be checked, if it cannot.
 ///
 /// - Explore: LATAM has none.
+/// - Round trips, cash or award, until verified (0090): the first page
+///   prices each outbound only as its half of a trip, and the return's
+///   price comes after a click on an outbound fare, which triggers a new
+///   `offers/search`. A search a click triggered on the date strip got
+///   Akamai's 403 in the live run, so this one probably does too. Two
+///   one-way searches are no stand-in: an award round trip cost 36%
+///   less than its one-ways (latam-pass.md, "Measuring cash against
+///   miles" §3). The reader keeps its round-trip code for when a live
+///   run shows the click is not denied.
 /// - Parties other than one adult: the page prices each passenger
 ///   (latam.md §4), and storing per-person prices for a party would
 ///   break 0036; multiplying them would be a guess, as for TAP (0053).
@@ -88,6 +97,9 @@ pub fn unsupported(
 ) -> Option<&'static str> {
     match kind {
         FamilyKind::Explore => Some("LATAM has no Explore"),
+        FamilyKind::RoundTrip { .. } => Some(
+            "LATAM prices a round trip only after a click on an outbound fare, which Akamai probably denies: off until a live run verifies it (0090)",
+        ),
         _ if *passengers != Passengers::default() => {
             Some("LATAM's results price one passenger")
         }
@@ -1205,13 +1217,16 @@ mod tests {
     }
 
     #[test]
-    fn one_adult_legs_and_round_trips_run() {
+    fn one_adult_legs_run_and_round_trips_wait() {
         let one = Passengers::default();
         let leg = FamilyKind::Leg {
             leg: tm_domain::Leg::Return,
         };
         assert_eq!(unsupported(leg, &one), None);
-        assert_eq!(unsupported(FamilyKind::RoundTrip { days: 7 }, &one), None);
+        assert!(
+            unsupported(FamilyKind::RoundTrip { days: 7 }, &one)
+                .is_some_and(|why| why.contains("round trip"))
+        );
         assert!(unsupported(FamilyKind::Explore, &one).is_some());
         let two = Passengers { adults: 2, ..one };
         assert!(unsupported(leg, &two).is_some());

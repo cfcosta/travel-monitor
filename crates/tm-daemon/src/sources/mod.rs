@@ -90,6 +90,16 @@ impl<T> Fetch<T> {
     pub fn is_ok(&self) -> bool {
         self.outcome == QueryOutcome::Ok
     }
+
+    /// A fetch that failed (`outcome`) after reading `value`: a later
+    /// step was blocked or broke, and what came before is kept (0090).
+    pub fn partial(outcome: QueryOutcome, value: T, page_loads: u32) -> Self {
+        Self {
+            outcome,
+            value,
+            page_loads,
+        }
+    }
 }
 
 impl<T: Default> Fetch<T> {
@@ -162,11 +172,13 @@ pub struct TapJob {
     pub fresh_since: DateTime<Utc>,
 }
 
-/// One LATAM search (0085): the results page for one leg (or round
-/// trip) and date, cash or LATAM Pass, read through the offers call
-/// the page makes. A one-way search may then click days of the page's
-/// date strip ([`crate::sites::latam::dates::Strip`]), each one more
-/// search. Every cabin comes in one search; the job keeps its family's.
+/// One LATAM search (0085, 0090): the results page for one leg (or
+/// round trip) and date, cash or LATAM Pass, read through the offers
+/// call the page makes, one page load. With the strip switched on, a
+/// one-way search may then click days of the page's date strip
+/// ([`crate::sites::latam::dates::Strip`]), each one more search; off
+/// (the default), its strip is [`Strip::none`](crate::sites::latam::dates::Strip::none).
+/// Every cabin comes in one search; the job keeps its family's.
 #[derive(Debug, Clone, PartialEq)]
 pub struct LatamJob {
     pub pos: PosId,
@@ -188,7 +200,10 @@ pub struct LatamJob {
     pub strip: crate::sites::latam::dates::Strip,
 }
 
-/// What a LATAM search saw besides its cells.
+/// What a LATAM search saw besides its cells. A search that read a page
+/// and then failed (a block on a strip click's search or a round trip's
+/// second step) keeps what it read here, under its failed outcome
+/// ([`Fetch::partial`]), and the worker records it (0090).
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct LatamFound {
     pub cells: Vec<Cell>,

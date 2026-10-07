@@ -1,14 +1,17 @@
-//! LATAM in the daemon's Chromium (DECISIONS.md 0081, 0082, 0084, 0085):
-//! load the results page, read the offers call the page makes, and for
-//! a one-way search click days of its date strip; for a round trip,
-//! choose the cheapest outbound brand to make the page price the return
-//! leg. [`crate::sites::latam`] parses; this module drives the page and
-//! turns offers into cells.
+//! LATAM in the daemon's Chromium (DECISIONS.md 0081, 0082, 0084, 0085,
+//! 0090): load the results page and read the offers call the page
+//! makes, one page load per date; with the strip switched on, click
+//! days of the page's date strip for a one-way award search; for a round
+//! trip, choose the cheapest outbound brand to make the page price the
+//! return leg. [`crate::sites::latam`] parses; this module drives the
+//! page and turns offers into cells.
 //!
 //! The page runs in the profile's own browser context, not a point of
 //! sale's isolated one: the login and the warm-up the user did by hand
 //! live in its cookies (0084). The searches are the page's own: the
-//! daemon never calls LATAM's API (latam-pass.md §5, 0052).
+//! daemon never calls LATAM's API (latam-pass.md §5, 0052). The strip is
+//! off by default (`Config::latam_strip`, 0090): in the live run a
+//! search a strip click made got Akamai's 403.
 //!
 //! - **Cash** (`airline:LA`): one cell per date, the cabin's cheapest
 //!   brand (LIGHT in economy), with its carrier, stops and itinerary.
@@ -19,10 +22,15 @@
 //!   of the trip; choosing the cheapest outbound brand of the cabin
 //!   makes the page call again for the return leg (latam.md §2). The
 //!   cells are that outbound with each return, one per return
-//!   itinerary × brand (one cell for cash, the cheapest).
+//!   itinerary × brand (one cell for cash, the cheapest). The choice is
+//!   a click, so round trips are not scheduled until a live run shows
+//!   it is not denied ([`crate::sites::latam::unsupported`], 0090).
 //! - **Blocks and logins**: Akamai's "Access Denied", or a 403 on a BFF
 //!   call, is a block (0039, 0060), never retried; a page on LATAM's
-//!   login is a session that ended.
+//!   login is a session that ended. A block or failure after the page
+//!   was read keeps what was read ([`Fetch::partial`]): the page's
+//!   cells and the strip days read before it, or for a round trip only
+//!   the page's calendar, since its outbound halves price nothing alone.
 
 use std::collections::BTreeMap;
 
@@ -284,8 +292,8 @@ enum Missed {
 }
 
 /// Waits for an offers call of `call` that `wanted` accepts, keeping
-/// every captured response in `seen`. Offers calls for other dates are
-/// skipped (a strip click is recorded only for the date it asked for).
+/// every captured response in `seen`. Offers calls for other searches
+/// are skipped: a search is recorded only for the date it asked for.
 async fn wait_offers(
     capture: &tm_browser::Capture,
     seen: &mut Vec<Captured>,
@@ -317,8 +325,8 @@ async fn wait_offers(
     }
 }
 
-/// A random pause between `t.strip_pause`'s bounds: a strip click is
-/// spaced like a page load (0084).
+/// A random pause between `t.strip_pause`'s bounds: a strip click (or
+/// the round trip's outbound choice) is spaced like a page load (0084).
 async fn strip_pause(t: Timeouts) {
     let (min, max) = t.strip_pause;
     let (min, max) = (min.as_millis() as u64, max.as_millis() as u64);
@@ -454,163 +462,225 @@ pub(crate) async fn latam_on(
         total = offers.total,
         "LATAM offers read"
     );
-    let mut any_flights = !offers.itineraries.is_empty();
-    let mut clicks = 0;
-    let cells = if let Some(return_date) = job.return_date {
-        if !any_flights {
-            return Fetch::failed(QueryOutcome::NoFlights, loads);
-        }
-        let Some((card, brand, itinerary, fare)) =
-            chosen_outbound(&offers, job.cabin)
-        else {
-            info!(cabin = ?job.cabin, "LATAM sells no round trip in this cabin");
-            let mut empty =
-                Cell::priced(job.departure, Some(return_date), None);
-            empty.seller = Some(job.seller.clone());
-            return finish(page, job, &capture, seen, vec![empty], loads, 0, t)
-                .await;
+    if offers.itineraries.is_empty() {
+        return Fetch::failed(QueryOutcome::NoFlights, loads);
+    }
+    let Some(return_date) = job.return_date else {
+        let cells = leg_cells(&offers, job.cabin, job.departure, &job.seller);
+        return read_strip(page, job, &capture, seen, cells, t).await;
+    };
+    let Some((card, brand, itinerary, fare)) =
+        chosen_outbound(&offers, job.cabin)
+    else {
+        info!(cabin = ?job.cabin, "LATAM sells no round trip in this cabin");
+        let mut empty = Cell::priced(job.departure, Some(return_date), None);
+        empty.seller = Some(job.seller.clone());
+        return finish(page, job, &capture, seen, vec![empty], loads, 0, t)
+            .await;
+    };
+    // Choosing the outbound is a search of its own: spaced and counted
+    // like a page load. From here a failure keeps what the page read
+    // (0090); the outbound halves price nothing alone, so no cells.
+    strip_pause(t).await;
+    loads += 1;
+    let chosen = click_when_shown(page, &page::card_header(card), t.open_graph)
+        .await
+        && click_when_shown(page, &page::brand_select(brand), t.open_graph)
+            .await;
+    if !chosen {
+        let outcome = QueryOutcome::Unexpected {
+            detail: format!(
+                "the outbound fare (card {card}, brand {brand}) could not be chosen"
+            ),
         };
-        // Choosing the outbound is a search of its own: spaced and
-        // counted like a page load.
-        strip_pause(t).await;
-        loads += 1;
-        let chosen =
-            click_when_shown(page, &page::card_header(card), t.open_graph)
-                .await
-                && click_when_shown(
-                    page,
-                    &page::brand_select(brand),
-                    t.open_graph,
-                )
-                .await;
-        if !chosen {
-            return Fetch::failed(
+        return failed_after(
+            job,
+            &capture,
+            seen,
+            Vec::new(),
+            outcome,
+            loads,
+            0,
+        );
+    }
+    // The LATAM+ upsell, when it shows.
+    let _ = click_when_shown(page, page::UPSELL_CONTINUE, t.settle * 2).await;
+    let offer = fare.offer_id.clone();
+    let back = wait_offers(
+        &capture,
+        &mut seen,
+        call,
+        |url| {
+            latam::is_return_leg(url)
+                && (offer.is_empty() || url.contains(&offer))
+        },
+        t.response * 2,
+    )
+    .await;
+    let back = match back {
+        Ok(r) => parse(&r),
+        Err(Missed::Blocked(detail)) => Err(QueryOutcome::Blocked { detail }),
+        Err(Missed::Timeout) => {
+            Err(page_state(page).await.unwrap_or_else(|| {
                 QueryOutcome::Unexpected {
-                    detail: format!(
-                        "the outbound fare (card {card}, brand {brand}) could not be chosen"
-                    ),
-                },
+                    detail: "no return-leg offers after choosing the outbound"
+                        .into(),
+                }
+            }))
+        }
+    };
+    let back = match back {
+        Ok(o) => o,
+        Err(outcome) => {
+            return failed_after(
+                job,
+                &capture,
+                seen,
+                Vec::new(),
+                outcome,
                 loads,
+                0,
             );
         }
-        // The LATAM+ upsell, when it shows.
-        let _ =
-            click_when_shown(page, page::UPSELL_CONTINUE, t.settle * 2).await;
-        let offer = fare.offer_id.clone();
-        let back = wait_offers(
-            &capture,
-            &mut seen,
-            call,
-            |url| {
-                latam::is_return_leg(url)
-                    && (offer.is_empty() || url.contains(&offer))
-            },
-            t.response * 2,
-        )
-        .await;
-        let back = match back {
-            Ok(r) => r,
-            Err(Missed::Blocked(detail)) => {
-                return Fetch::failed(QueryOutcome::Blocked { detail }, loads);
-            }
-            Err(Missed::Timeout) => {
-                let outcome = page_state(page).await.unwrap_or_else(|| {
-                    QueryOutcome::Unexpected {
-                        detail:
-                            "no return-leg offers after choosing the outbound"
-                                .into(),
-                    }
-                });
-                return Fetch::failed(outcome, loads);
-            }
-        };
-        let back = match parse(&back) {
-            Ok(o) => o,
-            Err(outcome) => return Fetch::failed(outcome, loads),
-        };
-        round_trip_cells(
-            (itinerary, fare),
-            &back,
-            job.cabin,
-            (job.departure, return_date),
-            &job.seller,
-        )
+    };
+    let cells = round_trip_cells(
+        (itinerary, fare),
+        &back,
+        job.cabin,
+        (job.departure, return_date),
+        &job.seller,
+    );
+    finish(page, job, &capture, seen, cells, loads, 0, t).await
+}
+
+/// After a one-way page was read (`cells`, one load): clicks the strip
+/// days `job.strip` picks, when the strip is switched on (0084, 0090),
+/// each one more search and load, and wraps up. A click whose search is
+/// blocked or that shows the login keeps the cells read so far
+/// ([`failed_after`]).
+async fn read_strip(
+    page: &Page,
+    job: &LatamJob,
+    capture: &tm_browser::Capture,
+    mut seen: Vec<Captured>,
+    mut cells: Vec<Cell>,
+    t: Timeouts,
+) -> Fetch<LatamFound> {
+    let call = if job.award {
+        OffersCall::Award
     } else {
-        let mut cells =
-            leg_cells(&offers, job.cabin, job.departure, &job.seller);
-        if job.strip.max_clicks > 0 {
-            tokio::time::sleep(t.settle).await;
-            seen.extend(capture.drain());
-            let mut shown = Vec::new();
-            for day in strip_days(job.departure) {
-                let found = page
-                    .eval(&page::strip_day_js(day, false))
-                    .await
-                    .unwrap_or(Value::Null);
-                if !found.is_null() {
-                    shown.push(day);
-                }
+        OffersCall::Cash
+    };
+    let mut loads = 1;
+    let mut clicks = 0;
+    if job.strip.max_clicks > 0 {
+        tokio::time::sleep(t.settle).await;
+        seen.extend(capture.drain());
+        let mut shown = Vec::new();
+        for day in strip_days(job.departure) {
+            let found = page
+                .eval(&page::strip_day_js(day, false))
+                .await
+                .unwrap_or(Value::Null);
+            if !found.is_null() {
+                shown.push(day);
             }
-            let calendar = calendar_of(&seen, job);
-            let picks = job.strip.clicks(job.departure, &shown, &calendar);
-            info!(shown = shown.len(), picks = ?picks, "LATAM date strip");
-            for pick in picks {
-                strip_pause(t).await;
-                if !click_where(page, &page::strip_day_js(pick, true)).await {
-                    warn!(%pick, "the date strip has no button for this day: stopping");
-                    break;
+        }
+        let calendar = calendar_of(&seen, job);
+        let picks = job.strip.clicks(job.departure, &shown, &calendar);
+        info!(shown = shown.len(), picks = ?picks, "LATAM date strip");
+        for pick in picks {
+            strip_pause(t).await;
+            if !click_where(page, &page::strip_day_js(pick, true)).await {
+                warn!(%pick, "the date strip has no button for this day: stopping");
+                break;
+            }
+            loads += 1;
+            clicks += 1;
+            let got = wait_offers(
+                capture,
+                &mut seen,
+                call,
+                |url| {
+                    !latam::is_return_leg(url)
+                        && latam::out_from(url) == Some(pick)
+                },
+                t.response * 2,
+            )
+            .await;
+            match got {
+                Ok(r) => match parse(&r) {
+                    Ok(o) => {
+                        info!(%pick, itineraries = o.itineraries.len(), "LATAM strip day read");
+                        // A day with no flights still counts as read.
+                        cells.extend(leg_cells(
+                            &o,
+                            job.cabin,
+                            pick,
+                            &job.seller,
+                        ));
+                    }
+                    Err(outcome) => {
+                        warn!(%pick, ?outcome, "a strip day was not read")
+                    }
+                },
+                Err(Missed::Blocked(detail)) => {
+                    return failed_after(
+                        job,
+                        capture,
+                        seen,
+                        cells,
+                        QueryOutcome::Blocked { detail },
+                        loads,
+                        clicks,
+                    );
                 }
-                loads += 1;
-                clicks += 1;
-                let got = wait_offers(
-                    &capture,
-                    &mut seen,
-                    call,
-                    |url| {
-                        !latam::is_return_leg(url)
-                            && latam::out_from(url) == Some(pick)
-                    },
-                    t.response * 2,
-                )
-                .await;
-                match got {
-                    Ok(r) => match parse(&r) {
-                        Ok(o) => {
-                            info!(%pick, itineraries = o.itineraries.len(), "LATAM strip day read");
-                            any_flights |= !o.itineraries.is_empty();
-                            cells.extend(leg_cells(
-                                &o,
-                                job.cabin,
-                                pick,
-                                &job.seller,
-                            ));
-                        }
-                        Err(outcome) => {
-                            warn!(%pick, ?outcome, "a strip day was not read")
-                        }
-                    },
-                    Err(Missed::Blocked(detail)) => {
-                        return Fetch::failed(
-                            QueryOutcome::Blocked { detail },
-                            loads,
+                Err(Missed::Timeout) => {
+                    if let Some(outcome) = page_state(page).await {
+                        return failed_after(
+                            job, capture, seen, cells, outcome, loads, clicks,
                         );
                     }
-                    Err(Missed::Timeout) => {
-                        if let Some(outcome) = page_state(page).await {
-                            return Fetch::failed(outcome, loads);
-                        }
-                        warn!(%pick, "no offers call after a strip click: stopping");
-                        break;
-                    }
+                    warn!(%pick, "no offers call after a strip click: stopping");
+                    break;
                 }
             }
         }
-        if !any_flights {
-            return Fetch::failed(QueryOutcome::NoFlights, loads);
-        }
-        cells
-    };
-    finish(page, job, &capture, seen, cells, loads, clicks, t).await
+    }
+    finish(page, job, capture, seen, cells, loads, clicks, t).await
+}
+
+/// A search that failed (`outcome`) after its page was read: the
+/// `cells` it read and the page's calendar are kept, under the failure,
+/// which the worker still treats as one (0090). The session is not read
+/// on a failure.
+fn failed_after(
+    job: &LatamJob,
+    capture: &tm_browser::Capture,
+    mut seen: Vec<Captured>,
+    cells: Vec<Cell>,
+    outcome: QueryOutcome,
+    loads: u32,
+    clicks: u32,
+) -> Fetch<LatamFound> {
+    seen.extend(capture.drain());
+    let calendar = calendar_of(&seen, job);
+    warn!(
+        ?outcome,
+        cells = cells.len(),
+        calendar = calendar.len(),
+        "a later step of a LATAM search failed: keeping what was read"
+    );
+    Fetch::partial(
+        outcome,
+        LatamFound {
+            cells,
+            calendar,
+            session: None,
+            clicks,
+        },
+        loads,
+    )
 }
 
 /// The page's calendar among `seen`.
@@ -651,6 +721,7 @@ async fn finish(
     info!(
         cells = cells.len(),
         calendar = calendar.len(),
+        loads,
         clicks,
         session = ?session,
         "LATAM search read"

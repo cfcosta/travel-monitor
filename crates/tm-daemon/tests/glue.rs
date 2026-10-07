@@ -2113,67 +2113,154 @@ async fn award_cells_keep_every_field() {
     assert!((rates[0].brl_per_1000 - 28.8).abs() < 0.05, "{rates:?}");
 }
 
-/// An award round trip is the outbound brand chosen plus each return
-/// (latam-pass.md §3): its cells carry both dates.
+/// LATAM's round trips wait (0090): the return's price comes only after
+/// a click on an outbound fare, which Akamai probably denies. The
+/// scheduler skips them with a reason, and a manual check loads
+/// nothing.
 #[tokio::test]
-async fn award_round_trips_record_both_dates() {
+async fn latam_round_trips_wait_for_a_verified_click() {
     let mut h = harness(Only::default(), |a| {
         a.latam = Box::new(|job| {
-            let out = latam_offers(
-                "latam-pass/offers-search-redemption-rt-gru-mia-2027-03-04-outbound-br.json",
-            );
-            let back = latam_offers(
-                "latam-pass/offers-search-redemption-rt-gru-mia-2027-03-11-inbound-br.json",
-            );
-            let (_, _, itinerary, fare) =
-                tm_daemon::sources::latam::chosen_outbound(&out, job.cabin)
-                    .expect("an outbound");
-            let cells = tm_daemon::sources::latam::round_trip_cells(
-                (itinerary, fare),
-                &back,
-                job.cabin,
-                (job.departure, job.return_date.expect("a round trip")),
-                &job.seller,
-            );
-            // The page load and the outbound's choice.
             Fetch::ok(
                 LatamFound {
-                    cells,
+                    cells: latam_cells(job),
                     ..LatamFound::default()
                 },
-                2,
+                1,
             )
         });
     })
     .await;
     let store = h.store().clone();
     log_in(&store).await;
-    let rt =
+    let award =
         latam_family(&store, "MIA", pass(), FamilyKind::RoundTrip { days: 7 })
             .await;
+    let cash = latam_family(
+        &store,
+        "MIA",
+        latam_airline(),
+        FamilyKind::RoundTrip { days: 7 },
+    )
+    .await;
+    let world = h.daemon.world().await.expect("loads");
+    let cx = h.daemon.context(&world, Utc::now()).await.expect("builds");
+    for id in [award, cash] {
+        let f = world.families.iter().find(|f| f.id == id).expect("family");
+        assert_eq!(
+            tm_daemon::candidates::eligibility(f, &cx),
+            Err(tm_daemon::candidates::Skip::Unsupported)
+        );
+        assert!(
+            tm_daemon::sites::unsupported(&f.key, &Default::default())
+                .is_some_and(|why| why.contains("click")),
+        );
+    }
     h.daemon
-        .run_check(rt, QueryReason::Manual)
+        .run_check(award, QueryReason::Manual)
         .await
         .expect("checks");
-    let job = h.log().latam.last().cloned().expect("a job");
-    let ret = job.return_date.expect("a round trip");
-    assert_eq!((ret - job.departure).num_days(), 7);
-    assert_eq!(job.strip.max_clicks, 0);
-    assert!(job.url.contains("&trip=RT&"));
-    let obs = store
-        .history(rt, Utc::now() - TimeDelta::hours(1))
-        .await
-        .expect("reads");
-    assert!(!obs.is_empty());
-    assert!(obs.iter().all(|o| o.return_date == Some(ret)));
-    assert!(obs.iter().all(|o| o.miles.is_some()));
-    let recent = store.recent_queries(1).await.expect("reads");
-    assert_eq!(recent[0].page_loads, Some(2));
+    assert!(h.log().latam.is_empty(), "{:?}", h.log().latam);
 }
 
-/// An award check reads the cheapest cash day not read lately, and
-/// clicks the strip days whose cash is low, each a load counted against
-/// LATAM's budget, never more than the budget has left (0084, 0085).
+/// An award check reads one date, one page load (0090): the cheapest
+/// cash day within 15% of the leg's cheapest not read in three days,
+/// then the next; once those were read, a spot check past the next few
+/// days.
+#[tokio::test]
+async fn award_checks_read_one_low_cash_date_each() {
+    let first = today() + Days::new(40);
+    let mut h = harness(Only::default(), |a| {
+        a.latam = Box::new(|job| {
+            Fetch::ok(
+                LatamFound {
+                    cells: latam_cells(job),
+                    ..LatamFound::default()
+                },
+                1,
+            )
+        });
+    })
+    .await;
+    let store = h.store().clone();
+    log_in(&store).await;
+    // Cheapest trips only: no weekly spot check.
+    store
+        .save_miles_settings(
+            "latam_pass",
+            &tm_domain::ProgramSettings {
+                active: true,
+                dates: tm_domain::AwardDates::CheapTrips,
+                ..tm_domain::ProgramSettings::default()
+            },
+        )
+        .await
+        .expect("saves");
+    // Google Flights' outbound: R$1,000 a day, with a dip around
+    // first + 5.
+    let google = leg(&store, "LIS", Leg::Outbound).await;
+    let q = store
+        .start_query(google, &QueryReason::Random, Utc::now())
+        .await
+        .expect("starts");
+    let obs: Vec<Observation> = (0..20)
+        .map(|i| Observation {
+            id: None,
+            query: q,
+            family: google,
+            observed_at: Utc::now(),
+            departure: first + Days::new(i),
+            return_date: None,
+            price: Some(Money::brl_whole(match i {
+                5 => 800,
+                6 => 850,
+                4 => 900,
+                _ => 1_000,
+            })),
+            miles: None,
+            carrier: None,
+            stops: None,
+            duration_minutes: None,
+            seller: None,
+            flights: None,
+            award: None,
+        })
+        .collect();
+    store.insert_observations(&obs).await.expect("inserts");
+    store
+        .finish_query(q, &QueryOutcome::Ok, 8, Utc::now())
+        .await
+        .expect("finishes");
+
+    let award = latam_family(&store, "LIS", pass(), OUTBOUND).await;
+    let mut read = Vec::new();
+    for _ in 0..4 {
+        h.daemon
+            .run_check(award, QueryReason::Manual)
+            .await
+            .expect("checks");
+        let job = h.log().latam.last().cloned().expect("a job");
+        assert!(job.url.contains(&format!("outbound={}T", job.departure)));
+        // The strip is off by default: nothing to click.
+        assert_eq!(job.strip.max_clicks, 0);
+        read.push(job.departure);
+    }
+    // The low days, cheapest first (R$800, R$850, R$900: all within 15%
+    // of R$800); R$1,000 is not low, so the fourth is a spot check, far
+    // from the days just read and past the next three days.
+    assert_eq!(&read[..3], [5, 6, 4].map(|d| first + Days::new(d)));
+    assert!(read[3] > today() + Days::new(3), "{read:?}");
+    assert!(!read[..3].contains(&read[3]), "{read:?}");
+    // One page load each.
+    assert_eq!(h.site_budget("miles:latam_pass").await.loads_today, 4);
+    let recent = store.recent_queries(4).await.expect("reads");
+    assert!(recent.iter().all(|q| q.page_loads == Some(1)), "{recent:?}");
+}
+
+/// With the strip switched on (`--latam-strip`, 0090), an award check
+/// reads the cheapest cash day not read lately and clicks the strip days
+/// whose cash is low, each a load counted against LATAM's budget, never
+/// more than the budget has left (0084, 0085).
 #[tokio::test]
 async fn strip_clicks_follow_cash_and_the_budget() {
     let first = today() + Days::new(40);
@@ -2183,6 +2270,7 @@ async fn strip_clicks_follow_cash_and_the_budget() {
                 "miles:latam_pass".into(),
                 SiteLimits { start: 4, max: 4 },
             )],
+            latam_strip: true,
             ..test_config(Only::default())
         },
         |a| {
@@ -2304,6 +2392,84 @@ async fn strip_clicks_follow_cash_and_the_budget() {
     );
     // One load left today: no click.
     assert_eq!(job.strip.max_clicks, 0);
+}
+
+/// A check whose page was read and whose next step (a strip click's
+/// search, a round trip's return) was denied keeps what it read (0090):
+/// the cells are recorded, and the denial is still a block that backs
+/// LATAM's worker off.
+#[tokio::test]
+async fn a_block_after_the_page_keeps_what_was_read() {
+    let quiet = Config {
+        budget: Some(1),
+        max_budget: Some(1),
+        ..test_config(Only::default())
+    };
+    let mut h = harness_with(quiet, |a| {
+        a.latam = Box::new(|job| {
+            // The page read, then the second step's search got 403.
+            Fetch::partial(
+                QueryOutcome::Blocked {
+                    detail: "Akamai denied the offers search (403)".into(),
+                },
+                LatamFound {
+                    cells: latam_cells(job),
+                    calendar: [(job.departure, 200_141)].into(),
+                    session: None,
+                    clicks: 1,
+                },
+                2,
+            )
+        });
+    })
+    .await;
+    let store = h.store().clone();
+    log_in(&store).await;
+    let award = latam_family(&store, "LIS", pass(), OUTBOUND).await;
+    h.daemon
+        .run_check(award, QueryReason::Manual)
+        .await
+        .expect("checks");
+    let job = h.log().latam.last().cloned().expect("a job");
+    // The cells are recorded under the blocked query.
+    let obs = store
+        .history(award, Utc::now() - TimeDelta::hours(1))
+        .await
+        .expect("reads");
+    assert_eq!(obs.len(), latam_cells(&job).len());
+    assert!(obs.iter().any(|o| o.miles == Some(63_848)));
+    let recent = store.recent_queries(1).await.expect("reads");
+    assert!(
+        matches!(recent[0].outcome, Some(QueryOutcome::Blocked { .. })),
+        "{recent:?}"
+    );
+    assert_eq!(recent[0].page_loads, Some(2));
+    assert_eq!(h.site_budget("miles:latam_pass").await.loads_today, 2);
+    // The family learned its minimum from them.
+    let f = store.family(award).await.expect("reads").expect("exists");
+    assert_eq!(f.state.last_min_price_minor, Some(63_848));
+    // And the block backs off: recorded, halved, cooling down.
+    let blocks = store
+        .blocks_since(Utc::now() - TimeDelta::hours(1))
+        .await
+        .expect("reads");
+    assert_eq!(blocks.len(), 1);
+    assert_eq!(blocks[0].site, "miles:latam_pass");
+    assert_eq!(h.site_budget("miles:latam_pass").await.daily_budget, 50);
+    assert_eq!(h.status("miles:latam_pass").await.state, "cooling down");
+    let world = h.daemon.world().await.expect("loads");
+    let cx = h.daemon.context(&world, Utc::now()).await.expect("builds");
+    let f = world
+        .families
+        .iter()
+        .find(|f| f.id == award)
+        .expect("family");
+    assert_eq!(
+        tm_daemon::candidates::eligibility(f, &cx),
+        Err(tm_daemon::candidates::Skip::CoolingDown)
+    );
+    // The login is not touched by a block.
+    assert_eq!(latam_pass(&store).await.login_state, LoginState::LoggedIn);
 }
 
 /// A login wall ends LATAM Pass's session: the program is expired, its
@@ -2468,9 +2634,9 @@ async fn an_akamai_denial_blocks_both_latam_sites() {
         .expect("reads");
     assert_eq!(blocks.len(), 1);
     assert_eq!(blocks[0].site, "miles:latam_pass");
-    // Halved, but never under the site's start of 40 (0039).
+    // Halved from its start of 80, to the floor of 50 (0039, 0090).
     let budget = h.site_budget("miles:latam_pass").await;
-    assert_eq!(budget.daily_budget, 40, "{budget:?}");
+    assert_eq!(budget.daily_budget, 50, "{budget:?}");
     assert_eq!(h.status("miles:latam_pass").await.state, "cooling down");
     let world = h.daemon.world().await.expect("loads");
     let cx = h.daemon.context(&world, Utc::now()).await.expect("builds");
@@ -2612,7 +2778,6 @@ async fn award_deals_are_confirmed_by_a_fresh_read_and_announced() {
     h.daemon.run_manual().await;
     let job = h.log().latam.last().cloned().expect("a job");
     assert_eq!(job.departure, first);
-    assert_eq!(job.strip.max_clicks, 0);
     let recent = store.recent_queries(1).await.expect("reads");
     assert_eq!(recent[0].reason, QueryReason::Confirmation);
     let d = store
@@ -2691,7 +2856,7 @@ async fn check_award_reads_the_trips_legs() {
         (back.destination.as_str(), back.departure),
         ("GRU", return_date)
     );
-    assert!(jobs.iter().all(|j| j.award && j.strip.max_clicks == 0));
+    assert!(jobs.iter().all(|j| j.award && j.return_date.is_none()));
     let r = store
         .request(request)
         .await

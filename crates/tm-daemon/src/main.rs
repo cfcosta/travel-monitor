@@ -86,6 +86,7 @@ async fn run(cli: Cli) -> anyhow::Result<()> {
         idle_close: cli.idle_close(),
         notifier: (!cli.no_notify)
             .then(|| Arc::new(Desktop) as Arc<dyn Notifier>),
+        latam_strip: cli.latam_strip,
         ..Config::default()
     };
 

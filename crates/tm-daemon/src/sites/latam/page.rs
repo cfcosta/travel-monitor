@@ -1,8 +1,13 @@
 //! The scripts the LATAM reader runs in the results page (DECISIONS.md
-//! 0084, 0085). Each only reads the page or finds where a person would
-//! click; the clicks themselves are mouse events at the point a script
-//! returns (`tm_browser::Page::click_at`), the input a person uses.
-//! Nothing is typed and no API is called (0052).
+//! 0084, 0085, 0090). Each only reads the page or finds where a person
+//! would click; the clicks themselves are mouse events at the point a
+//! script returns (`tm_browser::Page::click_at`), the input a person
+//! uses. Nothing is typed and no API is called (0052).
+//!
+//! Two things click: the date strip, only when switched on
+//! (`Config::latam_strip`), and a round trip's outbound fare, whose
+//! families are not scheduled (`sites::latam::unsupported`). In the
+//! live run a search a strip click made got Akamai's 403 (0090).
 
 use chrono::NaiveDate;
 

@@ -114,6 +114,12 @@ pub struct Cli {
     /// unseen until a run that sends them (DECISIONS.md 0080).
     #[arg(long)]
     pub no_notify: bool,
+
+    /// Let LATAM award checks click up to six days of the results page's
+    /// date strip, each one more search (DECISIONS.md 0084). Off by
+    /// default: a search a strip click made got Akamai's 403 (0090).
+    #[arg(long)]
+    pub latam_strip: bool,
 }
 
 fn parse_site_budget(text: &str) -> Result<(String, SiteLimits), String> {
@@ -254,6 +260,7 @@ mod tests {
         assert_eq!(cli.pace, (4, 10));
         assert_eq!(cli.parallel, 3);
         assert!(!cli.no_notify);
+        assert!(!cli.latam_strip, "the strip is off by default (0090)");
     }
 
     /// Headless: the module leaves `--headed` out.
@@ -285,6 +292,7 @@ mod tests {
             "--parallel",
             "1",
             "--no-notify",
+            "--latam-strip",
         ])
         .expect("parses");
         assert!(!cli.headed);
@@ -296,6 +304,7 @@ mod tests {
         assert_eq!(cli.pace, (0, 0));
         assert_eq!(cli.parallel, 1);
         assert!(cli.no_notify);
+        assert!(cli.latam_strip);
     }
 
     #[test]

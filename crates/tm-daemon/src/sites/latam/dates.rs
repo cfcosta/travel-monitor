@@ -1,25 +1,35 @@
-//! Which departures a LATAM check reads (DECISIONS.md 0082, 0084, 0085).
+//! Which departure a LATAM check reads (DECISIONS.md 0082, 0085, 0090).
 //! Pure.
 //!
 //! There is no award calendar: every award is a search under the user's
-//! own account, one page load, or one click on the results page's date
-//! strip (seven days around the searched one, 0084). So a check reads
-//! one date, its *anchor*, and may click up to [`STRIP_CLICKS`] other
-//! days of the strip, each counted and spaced like a page load.
+//! own account. A check reads one date, its *anchor*, on its own results
+//! page, one load. With the strip switched on (`Config::latam_strip`,
+//! off by default, 0090) an award leg may then click up to
+//! [`STRIP_CLICKS`] other days of the page's date strip (seven days
+//! around the searched one, 0084), each counted and spaced like a page
+//! load ([`Strip`]); off, each date is a page load of its own, and the
+//! schedule below walks the dates the strip would have clicked over
+//! successive checks.
 //!
-//! - **Cheap** (the default, and cash checks): the anchor is the
-//!   departure whose cash fare is lowest for the leg (Google Flights'
-//!   legs in the database, LATAM's own cash when present, LATAM's cached
-//!   calendar from an earlier check), among those this family has not
-//!   read in [`READ_AGAIN_HOURS`]. Strip days are clicked when their
-//!   cash is low, within [`LOW_CASH`] of the leg's cheapest: where an
-//!   award deal would be, if its bucket is open (latam-pass.md,
-//!   "Measuring cash against miles").
-//! - **Spot**: one date a week per route ([`SPOT_DAYS`]), rotating over
-//!   a weekly grid of the horizon by whichever was read longest ago, so
-//!   the award series has a baseline and the silent discounts that cash
-//!   does not show are caught. It clicks at most [`SPOT_CLICKS`] of the
-//!   nearest days.
+//! - **Cheap** (the default, and cash checks): the departure whose cash
+//!   fare is lowest for the leg (Google Flights' legs in the database,
+//!   LATAM's own cash when present, LATAM's cached calendar from an
+//!   earlier check), among the *low* days, those within [`LOW_CASH`] of
+//!   the leg's cheapest, that this family has not read in
+//!   [`READ_AGAIN_HOURS`]. A low cash day is where an award deal would
+//!   be, if its bucket is open (latam-pass.md, "Measuring cash against
+//!   miles"). Successive checks walk the low days, cheapest first; once
+//!   each was read lately, the check is a spot check. Strip days are
+//!   clicked when their cash is low too.
+//! - **Spot**: once a week per family ([`SPOT_DAYS`]), the departure
+//!   farthest from every date the family read lately, so the award
+//!   series has a baseline across the horizon and the silent discounts
+//!   that cash does not show are caught. It never picks a departure in
+//!   the next [`NEAR_DAYS`] days unless nothing later qualifies: those
+//!   are rarely worth booking with miles, and a grid that started at
+//!   tomorrow picked tomorrow every time the horizon moved on. It
+//!   clicks at most [`SPOT_CLICKS`] of the nearest days, none of them
+//!   near either.
 //! - **Every**: every departure in range, the one read longest ago
 //!   first, and the strip's other days around it.
 //!
@@ -36,23 +46,26 @@ pub const STRIP_CLICKS: u32 = 6;
 /// The strip shows the searched day and this many on each side
 /// (latam-pass.md, "Measuring cash against miles" §4).
 pub const STRIP_REACH: u64 = 3;
+/// Strip clicks of a spot check, the nearest days.
+pub const SPOT_CLICKS: u32 = 2;
 /// A departure the family read this recently is not chosen again by
 /// the schedule.
 pub const READ_AGAIN_HOURS: i64 = 72;
-/// A strip day's cash is low when it is at most this much above the
-/// leg's cheapest known cash.
+/// A day's cash is low when it is at most this much above the leg's
+/// cheapest known cash.
 pub const LOW_CASH: f64 = 1.15;
 /// A program's spot check comes once a week per family.
 pub const SPOT_DAYS: i64 = 7;
-/// Strip clicks of a spot check, the nearest days.
-pub const SPOT_CLICKS: u32 = 2;
+/// A spot check leaves out the first this many departures (tomorrow
+/// and the two days after it), unless nothing later qualifies.
+pub const NEAR_DAYS: u64 = 3;
 
-/// How a check chooses its dates.
+/// How a check chooses its date.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Pick {
     /// Where cash is low.
     Cheap,
-    /// A rotating date of the weekly grid.
+    /// Far from what was read lately, past the next few days.
     Spot,
     /// Every departure, the one read longest ago first.
     Every,
@@ -115,19 +128,75 @@ impl Known {
             .min()
     }
 
-    /// The day read longest ago among `days` (never read first, then
-    /// the earliest).
-    fn stalest(
+    /// Every departure in range, in order.
+    fn days(&self) -> impl Iterator<Item = NaiveDate> + '_ {
+        let span = (self.last - self.first).num_days().max(-1);
+        (0..=span)
+            .filter_map(|k| self.first.checked_add_days(Days::new(k as u64)))
+    }
+
+    /// The cheapest low cash day not read recently.
+    fn cheap(&self, now: DateTime<Utc>) -> Option<NaiveDate> {
+        let cheapest = self.cheapest_cash()?;
+        let bar = (cheapest as f64 * LOW_CASH).round() as i64;
+        self.cash
+            .iter()
+            .filter(|(d, p)| {
+                self.in_range(**d)
+                    && **p <= bar
+                    && !self.read_recently(**d, now)
+            })
+            .min_by_key(|(d, p)| (**p, **d))
+            .map(|(d, _)| *d)
+    }
+
+    /// The spot check's day: the one farthest from every departure read
+    /// lately, past the near days, or among them when nothing later
+    /// qualifies.
+    fn spot(&self, now: DateTime<Utc>) -> Option<NaiveDate> {
+        let later = self.first.checked_add_days(Days::new(NEAR_DAYS))?;
+        self.farthest(later, now)
+            .or_else(|| self.farthest(self.first, now))
+    }
+
+    /// The departure from `from` on, not read recently, farthest from
+    /// every departure read lately. With nothing read, the middle of
+    /// that range; ties go to the earlier day.
+    fn farthest(
         &self,
-        days: impl Iterator<Item = NaiveDate>,
+        from: NaiveDate,
+        now: DateTime<Utc>,
     ) -> Option<NaiveDate> {
-        days.filter(|d| self.in_range(*d))
-            .min_by_key(|d| (self.read.get(d).copied(), *d))
+        if from > self.last {
+            return None;
+        }
+        let middle = from + (self.last - from) / 2;
+        let read: Vec<NaiveDate> = self.read.keys().copied().collect();
+        let gap =
+            |d: NaiveDate| read.iter().map(|r| (d - *r).num_days().abs()).min();
+        self.days()
+            .filter(|d| *d >= from && !self.read_recently(*d, now))
+            .max_by_key(|d| {
+                let score = gap(*d).unwrap_or(i64::MAX);
+                // Nothing read: every day scores the same, and the one
+                // nearest the middle wins.
+                let central = if read.is_empty() {
+                    -(*d - middle).num_days().abs()
+                } else {
+                    0
+                };
+                (score, central, std::cmp::Reverse(*d))
+            })
+    }
+
+    /// The day read longest ago (never read first, then the earliest).
+    fn stalest(&self) -> Option<NaiveDate> {
+        self.days().min_by_key(|d| (self.read.get(d).copied(), *d))
     }
 }
 
-/// The anchor of a check, and how it was chosen: a cheap pick with no
-/// cash to go on, or with every cheap day read recently, becomes a spot
+/// The date of a check, and how it was chosen: a cheap pick with no
+/// cash to go on, or with every low day read recently, becomes a spot
 /// check.
 pub fn anchor(
     pick: Pick,
@@ -139,30 +208,11 @@ pub fn anchor(
     }
     match pick {
         Pick::Cheap => known
-            .cash
-            .iter()
-            .filter(|(d, _)| {
-                known.in_range(**d) && !known.read_recently(**d, now)
-            })
-            .min_by_key(|(d, p)| (**p, **d))
-            .map(|(d, _)| (*d, Pick::Cheap))
+            .cheap(now)
+            .map(|d| (d, Pick::Cheap))
             .or_else(|| anchor(Pick::Spot, known, now)),
-        Pick::Spot => {
-            let span = (known.last - known.first).num_days();
-            let grid = (0..=span / SPOT_DAYS).filter_map(|k| {
-                known
-                    .first
-                    .checked_add_days(Days::new((k * SPOT_DAYS) as u64))
-            });
-            known.stalest(grid).map(|d| (d, Pick::Spot))
-        }
-        Pick::Every => {
-            let span = (known.last - known.first).num_days();
-            let days = (0..=span).filter_map(|k| {
-                known.first.checked_add_days(Days::new(k as u64))
-            });
-            known.stalest(days).map(|d| (d, Pick::Every))
-        }
+        Pick::Spot => known.spot(now).map(|d| (d, Pick::Spot)),
+        Pick::Every => known.stalest().map(|d| (d, Pick::Every)),
     }
 }
 
@@ -179,7 +229,8 @@ pub fn strip_days(anchor: NaiveDate) -> Vec<NaiveDate> {
         .collect()
 }
 
-/// What a check may click on the strip once its page has loaded.
+/// What a check may click on the strip once its page has loaded, when
+/// the strip is switched on (0084, 0090).
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Strip {
     /// Cut to [`STRIP_CLICKS`] and to what the budget has left.
@@ -195,13 +246,14 @@ pub struct Strip {
 }
 
 impl Strip {
-    /// No clicks: a dated check (the app's "Check award", a deal's
-    /// confirmation) or a cash check.
+    /// No clicks: the strip switched off, a dated check (the app's
+    /// "Check award", a deal's confirmation) or a cash check.
     pub fn none() -> Self {
         Self::default()
     }
 
-    /// The plan for a check of `pick` whose anchor came from `known`.
+    /// The plan for a check of `pick` whose anchor came from `known`. A
+    /// spot check clicks no near day either ([`NEAR_DAYS`]).
     pub fn plan(
         pick: Pick,
         known: &Known,
@@ -212,10 +264,18 @@ impl Strip {
             Pick::Spot => SPOT_CLICKS,
             Pick::Cheap | Pick::Every => STRIP_CLICKS,
         };
+        let first = match pick {
+            Pick::Spot => known
+                .first
+                .checked_add_days(Days::new(NEAR_DAYS))
+                .filter(|d| *d <= known.last)
+                .unwrap_or(known.first),
+            Pick::Cheap | Pick::Every => known.first,
+        };
         Self {
             max_clicks: wanted.min(budget),
             pick: Some(pick),
-            first: known.first,
+            first,
             last: known.last,
             cash: known.cash.clone(),
             skip: known.recent(now),
@@ -285,7 +345,8 @@ mod tests {
     use super::*;
 
     fn d(m: u32, day: u32) -> NaiveDate {
-        NaiveDate::from_ymd_opt(2026, m, day).expect("a date")
+        let y = if m < 10 { 2027 } else { 2026 };
+        NaiveDate::from_ymd_opt(y, m, day).expect("a date")
     }
 
     fn now() -> DateTime<Utc> {
@@ -299,7 +360,7 @@ mod tests {
             first: d(10, 8),
             last: d(12, 31),
             cash: [
-                (d(11, 10), 190_000),
+                (d(11, 10), 160_000),
                 (d(11, 12), 200_000),
                 (d(11, 20), 150_000),
             ]
@@ -309,17 +370,24 @@ mod tests {
     }
 
     #[test]
-    fn the_cheapest_unread_cash_day_is_the_anchor() {
+    fn the_cheapest_unread_low_cash_day_is_the_anchor() {
         let mut k = known();
         assert_eq!(
             anchor(Pick::Cheap, &k, now()),
             Some((d(11, 20), Pick::Cheap))
         );
-        // Read yesterday: the next cheapest.
+        // Read yesterday: the next cheapest low day (R$1,600 is within
+        // 15% of R$1,500).
         k.read.insert(d(11, 20), now() - TimeDelta::hours(20));
         assert_eq!(
             anchor(Pick::Cheap, &k, now()),
             Some((d(11, 10), Pick::Cheap))
+        );
+        // Both read: R$2,000 is not low, so a spot check.
+        k.read.insert(d(11, 10), now() - TimeDelta::hours(30));
+        assert_eq!(
+            anchor(Pick::Cheap, &k, now()).map(|a| a.1),
+            Some(Pick::Spot)
         );
         // Read four days ago: due again.
         k.read.insert(d(11, 20), now() - TimeDelta::days(4));
@@ -336,28 +404,34 @@ mod tests {
     }
 
     #[test]
-    fn spot_checks_rotate_over_the_weekly_grid() {
+    fn spot_checks_spread_over_the_horizon() {
         let mut k = Known {
             cash: BTreeMap::new(),
             ..known()
         };
-        // No cash: a spot check, the first grid day never read.
-        assert_eq!(
-            anchor(Pick::Cheap, &k, now()),
-            Some((d(10, 8), Pick::Spot))
-        );
-        k.read.insert(d(10, 8), now());
+        // Nothing read and no cash: a spot check in the middle of the
+        // range past the near days (Oct 11 to Dec 31).
+        let first = anchor(Pick::Cheap, &k, now());
+        assert_eq!(first, Some((d(11, 20), Pick::Spot)));
+        // Then the day farthest from it: the end of the range.
+        k.read.insert(d(11, 20), now());
         assert_eq!(
             anchor(Pick::Spot, &k, now()),
-            Some((d(10, 15), Pick::Spot))
+            Some((d(12, 31), Pick::Spot))
         );
-        for (i, day) in
-            [d(10, 15), d(10, 22), d(10, 29)].into_iter().enumerate()
-        {
-            k.read.insert(day, now() - TimeDelta::days(10 - i as i64));
-        }
-        // Every grid day after Oct 29 is unread: Nov 5 next.
-        assert_eq!(anchor(Pick::Spot, &k, now()), Some((d(11, 5), Pick::Spot)));
+        // Then the near end, past the near days: Oct 11, 40 days from
+        // Nov 20, before the gap between Nov 20 and Dec 31 (20 days).
+        k.read.insert(d(12, 31), now());
+        assert_eq!(
+            anchor(Pick::Spot, &k, now()),
+            Some((d(10, 11), Pick::Spot))
+        );
+        k.read.insert(d(10, 11), now());
+        // The largest gap's middle, the earlier of two.
+        assert_eq!(
+            anchor(Pick::Spot, &k, now()),
+            Some((d(10, 31), Pick::Spot))
+        );
         assert_eq!(Pick::of(AwardDates::CheapTripsAndWeekly, true), Pick::Spot);
         assert_eq!(
             Pick::of(AwardDates::CheapTripsAndWeekly, false),
@@ -371,6 +445,46 @@ mod tests {
             ..Known::default()
         };
         assert_eq!(anchor(Pick::Every, &empty, now()), None);
+        assert_eq!(anchor(Pick::Spot, &empty, now()), None);
+    }
+
+    /// The live run's spot pick was tomorrow (0090): never, while a day
+    /// past the near ones is left.
+    #[test]
+    fn spot_checks_leave_the_next_days_out() {
+        let mut k = Known {
+            cash: BTreeMap::new(),
+            ..known()
+        };
+        // Everything past Oct 10 read lately, the near days not: only
+        // then a near day, the farthest from what was read.
+        for day in k.days().collect::<Vec<_>>() {
+            if day > d(10, 10) {
+                k.read.insert(day, now() - TimeDelta::hours(1));
+            }
+        }
+        assert_eq!(anchor(Pick::Spot, &k, now()), Some((d(10, 8), Pick::Spot)));
+        // A range inside the near days: they are all there is.
+        let short = Known {
+            first: d(10, 8),
+            last: d(10, 10),
+            ..Known::default()
+        };
+        assert_eq!(
+            anchor(Pick::Spot, &short, now()),
+            Some((d(10, 9), Pick::Spot))
+        );
+        // Tomorrow read three weeks ago is the only read: the far end,
+        // not a near day.
+        let k = Known {
+            read: [(d(10, 8), now() - TimeDelta::days(20))].into(),
+            cash: BTreeMap::new(),
+            ..known()
+        };
+        assert_eq!(
+            anchor(Pick::Spot, &k, now()),
+            Some((d(12, 31), Pick::Spot))
+        );
     }
 
     #[test]
@@ -437,6 +551,11 @@ mod tests {
         assert_eq!(
             spot.clicks(d(11, 10), &shown, &none),
             vec![d(11, 9), d(11, 11)]
+        );
+        // A spot check's strip clicks no near day: Oct 8 to 10.
+        assert_eq!(
+            spot.clicks(d(10, 11), &strip_days(d(10, 11)), &none),
+            vec![d(10, 12), d(10, 13)]
         );
         let every = Strip::plan(Pick::Every, &k, now(), 4);
         assert_eq!(

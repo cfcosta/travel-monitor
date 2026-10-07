@@ -665,7 +665,13 @@ mod tests {
         assert_eq!((tap.loads_today, tap.day), (241, day));
         assert_eq!(tap.last_ramp_at, Some(at(7, 19)), "the ramp restarts");
         assert_eq!(row("airline:AD").await, old("airline:AD", 300, 300, 1000));
-        assert_eq!(row("airline:LA").await, old("airline:LA", 300, 330, 1000));
+        // LATAM's cash site counts on LATAM Pass's budget (0085): a row
+        // an earlier daemon left shows the miles limits (0090).
+        let la = row("airline:LA").await;
+        assert_eq!(
+            (la.start_budget, la.daily_budget, la.max_daily_budget),
+            (80, 80, 160)
+        );
         assert_eq!(
             row("miles:latam_pass").await,
             old("miles:latam_pass", 60, 60, 120)

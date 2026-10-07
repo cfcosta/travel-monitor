@@ -36,14 +36,16 @@ pub enum Job {
     Latam(LatamJob),
 }
 
-/// The dates one LATAM check reads (0085), chosen by the worker from
-/// the database ([`crate::sites::latam::dates`]).
+/// The dates one LATAM check reads (0085, 0090), chosen by the worker
+/// from the database ([`crate::sites::latam::dates`]): one results page,
+/// and the strip days it may click when the strip is switched on.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LatamDates {
     pub departure: NaiveDate,
     /// A round trip's return; a leg's is ignored.
     pub return_date: Option<NaiveDate>,
-    /// The strip days the check may click (one-way searches only).
+    /// The strip days the check may click (one-way searches only;
+    /// [`Strip::none`] with the strip off).
     pub strip: Strip,
 }
 
@@ -743,30 +745,21 @@ mod tests {
         assert!(job.url.starts_with("http://127.0.0.1:9/br/pt/oferta-voos?origin=LIS&destination=GRU&outbound=2026-11-10T"));
         assert!(job.url.contains("&trip=OW&cabin=Economy&redemption=true"));
 
-        // A cash round trip: its length, and no strip.
-        let job = build(
-            &key(
-                Source::Airline { code: "LA".into() },
-                Cabin::Economy,
-                FamilyKind::RoundTrip { days: 7 },
-            ),
-            &route(PlaceKind::Airport),
-            &home_pos(),
-            &settings,
-            day(10, 6),
-            &options,
-        );
-        let Ok(Job::Latam(job)) = job else {
-            panic!("a LATAM job: {job:?}");
-        };
-        assert!(!job.award);
-        assert_eq!(job.return_date, Some(day(11, 17)));
-        assert_eq!(job.strip, Strip::none());
-        assert!(job.url.contains("&inbound=2026-11-17T12%3A00%3A00.000Z"));
-        assert!(job.url.contains("&trip=RT&cabin=Economy&redemption=false"));
-        assert!(job.url.starts_with(
-            "http://127.0.0.1:9/br/pt/oferta-voos?origin=GRU&destination=LIS&"
-        ));
+        // Round trips wait for a verified click (0090), cash or award.
+        for source in [Source::Airline { code: "LA".into() }, pass.clone()] {
+            let job = build(
+                &key(source, Cabin::Economy, FamilyKind::RoundTrip { days: 7 }),
+                &route(PlaceKind::Airport),
+                &home_pos(),
+                &settings,
+                day(10, 6),
+                &options,
+            );
+            assert!(
+                matches!(&job, Err(JobError::Unsupported(why)) if why.contains("round trip")),
+                "{job:?}"
+            );
+        }
 
         // Larger parties are not LATAM's.
         let mut two = settings.clone();

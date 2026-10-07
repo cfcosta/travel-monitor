@@ -112,17 +112,14 @@ impl SiteLimits {
         max: 4000,
     };
 
-    /// LATAM's cash site, `airline:LA`: it runs on the user's own LATAM
-    /// Pass profile (0084), so it keeps 0060's 300 a day, ramping to
-    /// 1,000, until a live run shows more is safe (0088).
-    pub const LATAM: SiteLimits = SiteLimits {
-        start: 300,
-        max: 1000,
-    };
-
     /// A miles program: every award is a page load under the user's own
-    /// account, so 40 a day, at most 80 (0083).
-    pub const MILES: SiteLimits = SiteLimits { start: 40, max: 80 };
+    /// account. 80 a day, at most 160 (0090; 0083 had 40 and 80): LATAM
+    /// Pass's worker also runs LATAM's cash checks (0085), one page load
+    /// each, so `airline:LA` starts from these too.
+    pub const MILES: SiteLimits = SiteLimits {
+        start: 80,
+        max: 160,
+    };
 
     /// At least one load a day, and a maximum no lower than the start.
     pub fn normalized(self) -> Self {
@@ -241,7 +238,14 @@ mod tests {
                 max: 4000
             }
         );
-        assert_eq!(s.default_limits("airline:LA"), SiteLimits::LATAM);
-        assert_eq!(s.default_limits("miles:latam_pass"), SiteLimits::MILES);
+        // LATAM's cash site counts on LATAM Pass's budget (0085, 0090).
+        assert_eq!(s.default_limits("airline:LA"), SiteLimits::MILES);
+        assert_eq!(
+            s.default_limits("miles:latam_pass"),
+            SiteLimits {
+                start: 80,
+                max: 160
+            }
+        );
     }
 }

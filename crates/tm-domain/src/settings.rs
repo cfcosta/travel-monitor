@@ -153,16 +153,17 @@ impl Settings {
     }
 
     /// The budget limits `site` starts from: Google Flights' from these
-    /// settings, a miles program's [`crate::SiteLimits::MILES`] (0083),
-    /// LATAM's cash site's [`crate::SiteLimits::LATAM`] and every other
-    /// site's [`crate::SiteLimits::OTHER`] (0060, 0088).
+    /// settings, a miles program's [`crate::SiteLimits::MILES`] (0083,
+    /// 0090) and every other site's [`crate::SiteLimits::OTHER`] (0060,
+    /// 0088). LATAM's cash site, `airline:LA`, runs and counts on LATAM
+    /// Pass's worker and budget (0085), so it has the miles limits too:
+    /// a row of its own is never spent from, and this keeps one that an
+    /// earlier daemon left from showing other limits.
     pub fn default_limits(&self, site: &str) -> crate::SiteLimits {
         if site == crate::GOOGLE_FLIGHTS {
             self.google_flights_limits()
-        } else if site.starts_with("miles:") {
+        } else if site.starts_with("miles:") || site == "airline:LA" {
             crate::SiteLimits::MILES
-        } else if site == "airline:LA" {
-            crate::SiteLimits::LATAM
         } else {
             crate::SiteLimits::OTHER
         }

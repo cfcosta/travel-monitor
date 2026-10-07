@@ -157,10 +157,10 @@ reads while the daemon writes (0020, 0040).
   `loads_today`, `day`, `last_ramp_at`). A site without a row starts
   from its defaults (`Settings::default_limits`): Google Flights from
   the settings' `daily_budget` and `max_daily_budget`, a miles program
-  from `SiteLimits::MILES` (40, ramping to 80; the app edits it, 0083),
-  LATAM's cash site from `SiteLimits::LATAM` (300, ramping to 1,000) and
-  any other site from `SiteLimits::OTHER` (1,200, ramping to 4,000;
-  0088). `configure_site_budget` applies configured limits (a changed
+  from `SiteLimits::MILES` (80, ramping to 160; the app edits it, 0083,
+  0090), LATAM's cash site from the same (it counts on LATAM Pass's row,
+  0085, so a row of its own is never spent from) and any other site from
+  `SiteLimits::OTHER` (1,200, ramping to 4,000; 0088). `configure_site_budget` applies configured limits (a changed
   start resets the budget in force; an unchanged one keeps the ramp;
   today's count is kept); at each start the daemon applies Google
   Flights', each `--site-budget` and every other stored non-miles
@@ -255,22 +255,33 @@ A coordinator and one worker per site (0060, 0062).
   the program's profile for a session (0064) and lets the site run.
   Different sites run at the same time; a block, cooldown or login on
   one never slows another.
-- **LATAM** (0084, 0085): `airline:LA` and `miles:latam_pass` share
-  one worker, named for LATAM Pass (`sites::worker_site`), so one
+- **LATAM** (0084, 0085, 0090): `airline:LA` and `miles:latam_pass`
+  share one worker, named for LATAM Pass (`sites::worker_site`), so one
   headed offscreen Chromium on `miles-latam_pass` (the profile the user
-  logged in to and warmed), one budget (LATAM Pass's row, 40 a day to
-  80), one check at a time and 20–45 s between searches. A check loads
-  the results page in the profile's own context (not a point of sale's
-  isolated one) and reads the offers call the page makes
+  logged in to and warmed), one budget (LATAM Pass's row, 80 a day to
+  160), one check at a time and 20–45 s between searches. A check loads
+  the results page for one date in the profile's own context (not a
+  point of sale's isolated one) and reads the offers call the page makes
   (`sources::latam`): cash, the cabin's cheapest brand for the date;
   awards, every itinerary × brand of the cabin with miles, taxes, fare,
-  fare basis and seats. Award legs may click up to six days of the
-  page's date strip, each one more search, counted and spaced like a
-  load; a round trip chooses the cheapest outbound brand to make the
-  page price the return. Dates come from `sites::latam::dates`: the
-  cheapest cash day (Google Flights' legs, LATAM's own cash, the cached
-  calendar a page fetched, which is never recorded) not read in three
-  days, a weekly spot check, or every day, per the program's setting.
+  fare basis and seats. One page load a check. With `--latam-strip`
+  (`Config::latam_strip`, off by default) award legs may also click up
+  to six days of the page's date strip, each one more search, counted
+  and spaced like a load; off, because a search a strip click made got
+  Akamai's 403. Dates come from `sites::latam::dates`: the cheapest
+  cash day within 15% of the leg's cheapest (Google Flights' legs,
+  LATAM's own cash, the cached calendar a page fetched, which is never
+  recorded) not read in three days; once those are read, or weekly, a
+  spot check on the day farthest from what the family read lately,
+  never in the next three days unless nothing later qualifies; or every
+  day, per the program's setting. Round trips, cash or award, are
+  `Skip::Unsupported` (`sites::latam::unsupported`): the return's price
+  comes after a click on an outbound brand, likely denied the same way;
+  the reader keeps that code for when a live run verifies it. A check
+  that fails after its page was read (a blocked strip click or return
+  call) records the cells it read under the failed query
+  (`Fetch::partial`, `keep_read`), and the failure still blocks or
+  expires as usual.
   After each check the worker records the session cookie's end
   (`_xp_session`); a login wall or a missing cookie expires LATAM Pass,
   its award families wait (`Skip::LoggedOut`) and one "log in again"
@@ -289,7 +300,8 @@ once; `--budget`/`--max-budget` are Google Flights' start and maximum
 (the settings' `daily_budget`/`max_daily_budget`); `--site-budget
 airline:TP=1200:4000` (repeatable) sets another site's; `--cdp-port` is
 Google Flights' Chromium (other sites pick free ports);
-`--latam-origin` (hidden) points LATAM's URLs at a test server.
+`--latam-origin` (hidden) points LATAM's URLs at a test server;
+`--latam-strip` lets LATAM award legs click the date strip (off, 0090).
 Sources: Google Flights (legs, round trips, Explore, booking pages),
 TAP's booking site (0051) and LATAM's results page, cash and LATAM Pass
 awards (0085). A check whose page does not produce what is expected ends

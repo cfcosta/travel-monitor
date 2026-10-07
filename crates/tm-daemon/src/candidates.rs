@@ -129,7 +129,8 @@ pub enum Skip {
     /// one ([`sites::scripted`]).
     Unprobed,
     /// A family its site cannot run ([`sites::unsupported`]): TAP's
-    /// round trips, or a party TAP's calendar does not price.
+    /// round trips, LATAM's until its outbound click is verified (0090),
+    /// or a party these sites do not price.
     Unsupported,
     /// A miles program that is not logged in, or whose session ended
     /// (0085).

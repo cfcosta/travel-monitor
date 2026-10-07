@@ -379,7 +379,7 @@ fn the_check_in_progress_comes_and_goes(cx: &mut TestAppContext) {
     assert!(cx.debug_bounds("now-checking").is_none());
     assert_eq!(
         status(&view, &mut cx),
-        "idle · next in 4 min · Google 212/30,000 · TAP 40/300 · LATAM Pass 3/40"
+        "idle · next in 4 min · Google 212/30,000 · TAP 40/300 · LATAM Pass 3/80"
     );
     let at = cx.executor().now();
     view.read_with(&cx, |tm, _| {
@@ -408,19 +408,19 @@ fn the_clock_moves_relative_times(cx: &mut TestAppContext) {
     // The fake's next check is 15:04; the clock reads 15:01:01.
     assert_eq!(
         status(&view, &mut cx),
-        "idle · next in 3 min · Google 212/30,000 · TAP 40/300 · LATAM Pass 3/40"
+        "idle · next in 3 min · Google 212/30,000 · TAP 40/300 · LATAM Pass 3/80"
     );
     advance(&mut cx, Duration::from_secs(30));
     assert_eq!(
         status(&view, &mut cx),
-        "idle · next in 2 min · Google 212/30,000 · TAP 40/300 · LATAM Pass 3/40"
+        "idle · next in 2 min · Google 212/30,000 · TAP 40/300 · LATAM Pass 3/80"
     );
     advance(&mut cx, Duration::from_secs(30));
     assert_eq!(fake.snapshots(), before + 1);
     // Its heartbeat is from 14:59:56; at 15:02:01 that is stale.
     assert_eq!(
         status(&view, &mut cx),
-        "stale · seen 2 min ago · Google 212/30,000 · TAP 40/300 · LATAM Pass 3/40"
+        "stale · seen 2 min ago · Google 212/30,000 · TAP 40/300 · LATAM Pass 3/80"
     );
 }
 

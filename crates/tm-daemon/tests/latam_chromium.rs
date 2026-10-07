@@ -1,14 +1,16 @@
 //! The LATAM source in a real headless Chromium, without LATAM
-//! (DECISIONS.md 0084, 0085): a local server plays
+//! (DECISIONS.md 0084, 0085, 0090): a local server plays
 //! `www.latamairlines.com` with a tiny results page. On load it asks
 //! the cash calendar and the offers call (`offers/search`, or
 //! `offers/search/redemption` for awards) for the searched date and
 //! gets the captured responses back; it shows a seven-day date strip
-//! whose days search again without a page load, and, for a round trip,
-//! result cards whose brand choice makes the return leg's call with the
-//! chosen `outOfferId`. The page sets LATAM's session cookie. Other
-//! destinations play the login wall, Akamai's denial of the page and its
-//! denial of the offers call.
+//! whose days search again without a page load (clicked only when the
+//! job's strip says so), and, for a round trip, result cards whose
+//! brand choice makes the return leg's call with the chosen
+//! `outOfferId`. The page sets LATAM's session cookie. Other
+//! destinations play the login wall, Akamai's denial of the page, its
+//! denial of the offers call, and its denial of a strip click's search
+//! or a round trip's return call after the page was read.
 //!
 //! Skipped (with a message) when `TM_CHROMIUM` is not set; the dev
 //! shell sets it.
@@ -210,8 +212,15 @@ async fn serve(mut stream: TcpStream, seen: Seen) {
         let back = latam::is_return_leg(&target);
         let name = match (destination, award, back) {
             ("DNY", ..) => "",
-            ("MIA", true, false) => {
+            ("MIA" | "RDN", true, false) => {
                 "latam-pass/offers-search-redemption-rt-gru-mia-2027-03-04-outbound-br.json"
+            }
+            ("RDN", true, true) => "",
+            // The page's own search answers; a strip day's is denied.
+            ("SDN", true, _)
+                if param(&target, "outFrom") != Some("2026-11-10") =>
+            {
+                ""
             }
             ("MIA", true, true) => {
                 "latam-pass/offers-search-redemption-rt-gru-mia-2027-03-11-inbound-br.json"
@@ -343,8 +352,14 @@ async fn the_latam_source_reads_offers_the_strip_and_round_trips() {
         .expect("Chromium starts");
 
     let nov10 = day(2026, 11, 10);
+    // An award leg with the strip off (the default, 0090): its page,
+    // and nothing clicked.
+    let single = sources
+        .latam(&job(address, "LIS", nov10, None, true, Strip::none()))
+        .await;
+    let calls_single = seen.lock().expect("lock").clone();
     // An award leg with two strip clicks: the nearest days.
-    let strip = Strip {
+    let two_days = || Strip {
         max_clicks: 2,
         pick: Some(Pick::Every),
         first: day(2026, 10, 8),
@@ -353,7 +368,12 @@ async fn the_latam_source_reads_offers_the_strip_and_round_trips() {
         skip: BTreeSet::new(),
     };
     let award = sources
-        .latam(&job(address, "LIS", nov10, None, true, strip))
+        .latam(&job(address, "LIS", nov10, None, true, two_days()))
+        .await;
+    // The same, with the first strip day's search denied: the page's
+    // cells are kept under the block (0090).
+    let strip_denied = sources
+        .latam(&job(address, "SDN", nov10, None, true, two_days()))
         .await;
     // Cash, one date.
     let cash = sources
@@ -365,6 +385,10 @@ async fn the_latam_source_reads_offers_the_strip_and_round_trips() {
     let round = sources
         .latam(&job(address, "MIA", mar4, Some(mar11), true, Strip::none()))
         .await;
+    // The same, with the return call denied after the outbound was read.
+    let round_denied = sources
+        .latam(&job(address, "RDN", mar4, Some(mar11), true, Strip::none()))
+        .await;
     let walled = sources
         .latam(&job(address, "WAL", nov10, None, true, Strip::none()))
         .await;
@@ -375,6 +399,18 @@ async fn the_latam_source_reads_offers_the_strip_and_round_trips() {
         .latam(&job(address, "DNY", nov10, None, true, Strip::none()))
         .await;
     sources.stop().await;
+
+    // Strip off: one page load, one date, the page's own search only.
+    assert_eq!(single.outcome, QueryOutcome::Ok, "{single:?}");
+    assert_eq!(single.page_loads, 1);
+    assert_eq!(single.value.clicks, 0);
+    assert!(single.value.cells.iter().all(|c| c.departure == nov10));
+    let single_dates: Vec<&str> = calls_single
+        .iter()
+        .filter(|c| c.contains("/redemption"))
+        .filter_map(|c| param(c, "outFrom"))
+        .collect();
+    assert_eq!(single_dates, ["2026-11-10"]);
 
     assert_eq!(award.outcome, QueryOutcome::Ok, "{award:?}");
     // The page and two clicks, each a load.
@@ -399,7 +435,7 @@ async fn the_latam_source_reads_offers_the_strip_and_round_trips() {
     assert_eq!(light.price, Some(Money::new(6861, Currency::brl())));
     // Each click's own search, for its own date.
     let calls = seen.lock().expect("lock").clone();
-    let award_dates: Vec<&str> = calls
+    let award_dates: Vec<&str> = calls[calls_single.len()..]
         .iter()
         .filter(|c| c.contains("/redemption") && c.contains("destination=LIS"))
         .filter_map(|c| param(c, "outFrom"))
@@ -419,6 +455,24 @@ async fn the_latam_source_reads_offers_the_strip_and_round_trips() {
     );
     assert_eq!(cash.value.clicks, 0);
 
+    // A denied strip click is a block after two loads, and the page's
+    // own cells are kept (0090).
+    assert!(
+        matches!(&strip_denied.outcome, QueryOutcome::Blocked { detail } if detail.contains("403")),
+        "{strip_denied:?}"
+    );
+    assert_eq!(strip_denied.page_loads, 2);
+    assert_eq!(strip_denied.value.clicks, 1);
+    assert!(!strip_denied.value.cells.is_empty());
+    assert!(
+        strip_denied
+            .value
+            .cells
+            .iter()
+            .all(|c| c.departure == nov10 && c.miles.is_some())
+    );
+    assert_eq!(strip_denied.value.session, None);
+
     assert_eq!(round.outcome, QueryOutcome::Ok, "{round:?}");
     // The page and the outbound's choice.
     assert_eq!(round.page_loads, 2);
@@ -431,7 +485,7 @@ async fn the_latam_source_reads_offers_the_strip_and_round_trips() {
     );
     let returns: Vec<String> = calls_after(&seen)
         .into_iter()
-        .filter(|c| latam::is_return_leg(c))
+        .filter(|c| latam::is_return_leg(c) && c.contains("destination=MIA"))
         .collect();
     assert_eq!(returns.len(), 1, "{returns:?}");
     assert!(returns[0].contains("loyalty"), "{}", returns[0]);
@@ -445,6 +499,17 @@ async fn the_latam_source_reads_offers_the_strip_and_round_trips() {
     // The cheapest outbound (LA8212/LA4400, 67,644 miles, latam-pass.md
     // §2) plus the cheapest return.
     assert!(best > 67_644 && best < 67_644 + 100_000, "{best}");
+
+    // A denied return call is a block after two loads (0090). The
+    // outbound halves price nothing alone, so no cells are kept, and
+    // the session is not read on a failure.
+    assert!(
+        matches!(&round_denied.outcome, QueryOutcome::Blocked { detail } if detail.contains("403")),
+        "{round_denied:?}"
+    );
+    assert_eq!(round_denied.page_loads, 2);
+    assert!(round_denied.value.cells.is_empty());
+    assert_eq!(round_denied.value.session, None);
 
     assert_eq!(walled.outcome, QueryOutcome::LoggedOut, "{walled:?}");
     assert_eq!(walled.page_loads, 1);

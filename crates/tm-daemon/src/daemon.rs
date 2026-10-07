@@ -99,6 +99,11 @@ pub struct Config {
     /// Where newly confirmed deals are announced (0080); `None` sends
     /// nothing and leaves them unseen.
     pub notifier: Option<Arc<dyn Notifier>>,
+    /// Whether LATAM award legs click days of the results page's date
+    /// strip (0084, `--latam-strip`). Off by default (0090): in the live
+    /// run a search a strip click made got Akamai's 403, so each award
+    /// date is a page load of its own.
+    pub latam_strip: bool,
 }
 
 impl Default for Config {
@@ -118,6 +123,7 @@ impl Default for Config {
             profile_dir: None,
             idle_close: Duration::from_secs(5 * 60),
             notifier: None,
+            latam_strip: false,
         }
     }
 }

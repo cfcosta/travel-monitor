@@ -28,11 +28,13 @@
 //! - **LATAM shares one (0084, 0085).** `airline:LA` and
 //!   `miles:latam_pass` run on one worker, named for LATAM Pass, with
 //!   its profile, browser, budget and pace ([`crate::sites::worker_site`]):
-//!   one check at a time, 20–45 s apart. It chooses each check's dates
-//!   from the database ([`crate::sites::latam::dates`]), keeps the cash
-//!   calendar the pages fetched to rank later dates (never recorded),
-//!   follows LATAM Pass's session cookie, and judges and confirms award
-//!   deals itself.
+//!   one check at a time, 20–45 s apart. It chooses each check's date
+//!   from the database ([`crate::sites::latam::dates`]), one results
+//!   page a check (0090; with `--latam-strip`, award legs also click
+//!   strip days, 0084), keeps the cash calendar the pages fetched to
+//!   rank later dates (never recorded), follows LATAM Pass's session
+//!   cookie, and judges and confirms award deals itself. A check that
+//!   failed after reading its page still records what it read.
 //!
 //! The store is shared by every worker: each writes its own budget row
 //! and status row, and the families, observations, deals and query log
@@ -1693,6 +1695,31 @@ impl<S: Sources + 'static> Worker<S> {
             loads = fetch.page_loads,
             "checked"
         );
+        // A LATAM check that read its page and then failed keeps what it
+        // read (0090); the failure is still handled below, so a block
+        // backs off.
+        let found = match found {
+            Found::Latam(read)
+                if !matches!(
+                    fetch.outcome,
+                    QueryOutcome::Ok | QueryOutcome::NoFlights
+                ) =>
+            {
+                self.keep_read(
+                    &family,
+                    &route,
+                    &pos,
+                    query,
+                    read,
+                    finished,
+                    fetch.page_loads,
+                    reason.clone(),
+                )
+                .await?;
+                Found::Latam(LatamFound::default())
+            }
+            other => other,
+        };
         match &fetch.outcome {
             QueryOutcome::Ok => {}
             QueryOutcome::Blocked { detail } => {
@@ -1800,6 +1827,44 @@ impl<S: Sources + 'static> Worker<S> {
                 Ok(())
             }
         }
+    }
+
+    /// What a LATAM check read before a later step failed (0090): its
+    /// cells are recorded and its page's calendar kept, as for a check
+    /// that ended well. The caller handles the failure itself (a
+    /// block's backoff, a login wall). Award deals are judged only from
+    /// checks that ended well, and the session is not read.
+    #[allow(clippy::too_many_arguments)]
+    async fn keep_read(
+        &mut self,
+        family: &FamilyRecord,
+        route: &Route,
+        pos: &PointOfSale,
+        query: QueryId,
+        read: LatamFound,
+        at: DateTime<Utc>,
+        page_loads: u32,
+        reason: QueryReason,
+    ) -> anyhow::Result<()> {
+        if let FamilyKind::Leg { leg } = family.key.kind
+            && !read.calendar.is_empty()
+        {
+            self.calendars.insert((route.id, leg), (at, read.calendar));
+        }
+        if read.cells.is_empty() {
+            return Ok(());
+        }
+        info!(
+            family = %family.id,
+            cells = read.cells.len(),
+            "the check failed after reading its page: its cells are kept"
+        );
+        let world = world(self.store()).await?;
+        self.after_cells(
+            family, route, pos, query, read.cells, &world, at, page_loads,
+            reason,
+        )
+        .await
     }
 
     /// A family's state as stored now: other sites' workers may have
@@ -2251,11 +2316,12 @@ impl<S: Sources + 'static> Worker<S> {
         Ok(read)
     }
 
-    /// Which dates a LATAM check of `family` reads (0085): `at` when
-    /// given, else the anchor and strip [`latam_dates`] chooses from
-    /// the cash in the database, what the family read lately and, for
-    /// awards, the program's setting and its weekly spot check. Strip
-    /// clicks are cut to what today's budget has left.
+    /// Which date a LATAM check of `family` reads (0085, 0090): `at`
+    /// when given, else the one [`latam_dates`] chooses from the cash in
+    /// the database, what the family read lately and, for awards, the
+    /// program's setting and its weekly spot check. One results page;
+    /// with the strip switched on ([`Config::latam_strip`]), an award
+    /// leg's strip clicks too, cut to what today's budget has left.
     async fn latam_dates(
         &mut self,
         family: &FamilyRecord,
@@ -2337,24 +2403,26 @@ impl<S: Sources + 'static> Worker<S> {
             }
             _ => None,
         };
-        // Strip clicks are for awards, which have no calendar; cash has
-        // one and reads one date a check (0085). Each click is a load.
-        let left = self
-            .budget
-            .daily(now, &self.loaded.params)
-            .saturating_sub(self.budget.loads_today)
-            .saturating_sub(1);
-        let strip = if award && return_date.is_none() {
-            Strip::plan(used, &known, now, left)
-        } else {
-            Strip::none()
-        };
+        // Strip clicks are for awards, which have no calendar, and only
+        // when switched on (0090); cash reads one date a check (0085).
+        // Each click is a load.
+        let strip =
+            if self.config().latam_strip && award && return_date.is_none() {
+                let left = self
+                    .budget
+                    .daily(now, &self.loaded.params)
+                    .saturating_sub(self.budget.loads_today)
+                    .saturating_sub(1);
+                Strip::plan(used, &known, now, left)
+            } else {
+                Strip::none()
+            };
         info!(
             family = %family.id,
             %departure,
             pick = ?used,
             clicks = strip.max_clicks,
-            "LATAM dates chosen"
+            "LATAM date chosen"
         );
         Ok(Some(LatamDates {
             departure,
