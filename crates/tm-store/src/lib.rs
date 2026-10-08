@@ -49,6 +49,7 @@ pub use records::{
     FamilyStateRecord,
     FamilySync,
     Heartbeat,
+    LatestCell,
     LoginState,
     MilesProgram,
     NewPlace,

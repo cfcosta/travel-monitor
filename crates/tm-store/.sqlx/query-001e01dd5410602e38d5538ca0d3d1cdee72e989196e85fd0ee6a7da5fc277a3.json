@@ -1,0 +1,28 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT CAST(j.value AS INTEGER) AS \"family_id!: i64\",\n                      (SELECT json_group_array(json_array(\n                                  o.observed_at, o.departure, o.return_date,\n                                  o.price_minor, o.carrier, o.stops,\n                                  o.duration_minutes)\n                              ORDER BY o.departure, o.return_date)\n                       FROM observations o\n                       WHERE o.query_id = (\n                           SELECT q.id FROM queries q\n                           WHERE q.family_id = j.value AND q.outcome = 'ok'\n                             AND q.passengers = ?2\n                             AND EXISTS (SELECT 1 FROM observations x\n                                         WHERE x.query_id = q.id)\n                           ORDER BY q.finished_at DESC, q.id DESC\n                           LIMIT 1)) AS \"cells!: String\"\n               FROM json_each(?1) j",
+  "describe": {
+    "columns": [
+      {
+        "name": "family_id!: i64",
+        "ordinal": 0,
+        "type_info": "Null",
+        "origin": "Expression"
+      },
+      {
+        "name": "cells!: String",
+        "ordinal": 1,
+        "type_info": "Null",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      null,
+      true
+    ]
+  },
+  "hash": "001e01dd5410602e38d5538ca0d3d1cdee72e989196e85fd0ee6a7da5fc277a3"
+}

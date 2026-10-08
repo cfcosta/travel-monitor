@@ -140,6 +140,20 @@ impl MilesProgram {
     }
 }
 
+/// A cell of a family's latest successful query, with only what pricing
+/// a trip and naming its flight need.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LatestCell {
+    pub observed_at: DateTime<Utc>,
+    pub departure: NaiveDate,
+    pub return_date: Option<NaiveDate>,
+    /// In the observation's currency; `None` when the cell had no price.
+    pub price_minor: Option<i64>,
+    pub carrier: Option<String>,
+    pub stops: Option<u8>,
+    pub duration_minutes: Option<u32>,
+}
+
 /// A cell's price as observed, without the rest of its observation:
 /// what price histories are built from.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

@@ -31,6 +31,7 @@ use tm_domain::{
 use tm_store::{
     DealFilter,
     Heartbeat,
+    LatestCell,
     RequestKind,
     RequestStatus,
     Store,
@@ -280,7 +281,9 @@ async fn batched_reads_match_the_per_family_ones() {
         .expect("another family");
     let unchecked = FamilyId(other.id.0 + 1);
     let ids = [other.id, family.id, unchecked];
-    assert!(store.latest_cells_of(&ids).await.expect("reads").is_empty());
+    let none = store.latest_cells_of(&ids).await.expect("reads");
+    assert_eq!(none.len(), 3);
+    assert!(none.iter().all(|(_, cells)| cells.is_empty()));
     assert!(store.latest_cells_of(&[]).await.expect("reads").is_empty());
 
     run_query(&store, family.id, at(6, 8), &[100, 200], QueryOutcome::Ok).await;
@@ -297,16 +300,53 @@ async fn batched_reads_match_the_per_family_ones() {
         detail: "timeout".into(),
     };
     run_query(&store, other.id, at(6, 11), &[1], error).await;
+    // Every column the lean cells keep, a quote in the carrier and a
+    // cell without a price.
+    let q = store
+        .start_query(unchecked, &QueryReason::Random, at(6, 12))
+        .await
+        .expect("starts");
+    let mut full = cell(q, unchecked, at(6, 12), date(11, 2), Some(4200));
+    full.return_date = Some(date(11, 9));
+    full.carrier = Some("LATAM \"Brasil\"".into());
+    full.stops = Some(1);
+    full.duration_minutes = Some(745);
+    let empty = cell(q, unchecked, at(6, 12), date(11, 1), None);
+    store
+        .insert_observations(&[full, empty])
+        .await
+        .expect("inserts");
+    store
+        .finish_query(q, &QueryOutcome::Ok, 1, at(6, 12))
+        .await
+        .expect("finishes");
 
-    let mut each = store.latest_cells(family.id).await.expect("reads");
-    each.extend(store.latest_cells(other.id).await.expect("reads"));
-    each.sort_by_key(|c| (c.family.0, c.departure));
-    assert_eq!(store.latest_cells_of(&ids).await.expect("reads"), each);
-    assert_eq!(each.len(), 3 + 1);
+    let read = store.latest_cells_of(&ids).await.expect("reads");
+    assert_eq!(read.iter().map(|(f, _)| *f).collect::<Vec<_>>(), ids);
+    for (family, cells) in read {
+        let each: Vec<LatestCell> = store
+            .latest_cells(family)
+            .await
+            .expect("reads")
+            .into_iter()
+            .map(|o| LatestCell {
+                observed_at: o.observed_at,
+                departure: o.departure,
+                return_date: o.return_date,
+                price_minor: o.price.map(|p| p.minor),
+                carrier: o.carrier,
+                stops: o.stops,
+                duration_minutes: o.duration_minutes,
+            })
+            .collect();
+        assert_eq!(cells, each);
+        assert!(!cells.is_empty());
+    }
 
     let since = at(6, 9);
     let mut each = store.history(family.id, since).await.expect("reads");
     each.extend(store.history(other.id, since).await.expect("reads"));
+    each.extend(store.history(unchecked, since).await.expect("reads"));
     each.sort_by_key(|o| (o.observed_at, o.id));
     let prices = store.price_history(&ids, since).await.expect("reads");
     assert_eq!(prices.len(), each.len());
@@ -329,7 +369,8 @@ async fn batched_reads_match_the_per_family_ones() {
     let mut settings = store.settings().await.expect("reads");
     settings.passengers.adults = 2;
     store.set_settings(&settings).await.expect("saves");
-    assert!(store.latest_cells_of(&ids).await.expect("reads").is_empty());
+    let none = store.latest_cells_of(&ids).await.expect("reads");
+    assert!(none.iter().all(|(_, cells)| cells.is_empty()));
     assert!(
         store
             .price_history(&ids, at(1, 0))

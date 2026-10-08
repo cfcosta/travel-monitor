@@ -6,12 +6,12 @@ use std::collections::BTreeMap;
 use chrono::{DateTime, Duration, NaiveDate, Utc};
 use tm_domain::{FamilyKind, Leg, Observation, TripRange};
 use tm_scheduler::{BaselineKey, PricePoint};
-use tm_store::PriceCell;
+use tm_store::{LatestCell, PriceCell};
 
 use crate::grid::{TripInputs, TripPrice};
 
-/// What pricing a trip needs from an observed cell: a full
-/// [`Observation`] (the latest cells) or a [`PriceCell`] (histories).
+/// What pricing a trip needs from an observed cell: a [`LatestCell`],
+/// a [`PriceCell`] (histories) or a whole [`Observation`].
 pub trait Cell {
     fn observed_at(&self) -> DateTime<Utc>;
     fn departure(&self) -> NaiveDate;
@@ -34,6 +34,24 @@ impl Cell for Observation {
 
     fn price_minor(&self) -> Option<i64> {
         self.price.as_ref().map(|p| p.minor)
+    }
+}
+
+impl Cell for LatestCell {
+    fn observed_at(&self) -> DateTime<Utc> {
+        self.observed_at
+    }
+
+    fn departure(&self) -> NaiveDate {
+        self.departure
+    }
+
+    fn return_date(&self) -> Option<NaiveDate> {
+        self.return_date
+    }
+
+    fn price_minor(&self) -> Option<i64> {
+        self.price_minor
     }
 }
 

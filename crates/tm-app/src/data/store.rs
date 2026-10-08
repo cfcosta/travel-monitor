@@ -59,6 +59,7 @@ use tm_store::{
     ChangeWatch,
     DealFilter,
     FamilyRecord,
+    LatestCell,
     LoginState,
     PriceCell,
     QueryLogEntry,
@@ -113,6 +114,9 @@ type FindsStamp = (Option<DateTime<Utc>>, i64);
 /// Cached reads, keyed by when the family (or route) was last checked.
 #[derive(Default)]
 struct Cache {
+    /// The latest cells of the families rows are priced from.
+    latest: HashMap<FamilyId, Stamped<Vec<LatestCell>>>,
+    /// The latest cells of award families, whole (0083).
     cells: HashMap<FamilyId, Stamped<Vec<Observation>>>,
     history: HashMap<RowKey, Stamped<History>>,
     /// An award family's last 60 days (0083).
@@ -338,7 +342,7 @@ impl Inner {
                 .flat_map(|row| row.families.iter())
                 .filter(|f| {
                     cache
-                        .cells
+                        .latest
                         .get(&f.id)
                         .is_none_or(|(at, _)| *at != f.state.last_check)
                 })
@@ -353,18 +357,41 @@ impl Inner {
             let (store, ids) = (store.clone(), ids.to_vec());
             tokio::spawn(async move { store.latest_cells_of(&ids).await })
         });
-        let mut by_family: HashMap<FamilyId, Vec<Observation>> = HashMap::new();
+        let mut by_family: HashMap<FamilyId, Vec<LatestCell>> = HashMap::new();
         for read in reads.collect::<Vec<_>>() {
-            for o in read.await?? {
-                by_family.entry(o.family).or_default().push(o);
-            }
+            by_family.extend(read.await??);
         }
         let mut cache = self.lock();
         for (id, stamp) in stale {
             let cells = by_family.remove(&id).unwrap_or_default();
-            cache.cells.insert(id, (stamp, Arc::new(cells)));
+            cache.latest.insert(id, (stamp, Arc::new(cells)));
         }
         Ok(())
+    }
+
+    /// A row family's latest cells: from the cache [`Inner::prefetch_cells`]
+    /// filled, else read.
+    async fn latest(
+        &self,
+        store: &Store,
+        family: &FamilyRecord,
+    ) -> anyhow::Result<Arc<Vec<LatestCell>>> {
+        let stamp = family.state.last_check;
+        if let Some((at, cells)) = self.lock().latest.get(&family.id)
+            && *at == stamp
+        {
+            return Ok(cells.clone());
+        }
+        let cells = Arc::new(
+            store
+                .latest_cells_of(&[family.id])
+                .await?
+                .pop()
+                .map(|(_, cells)| cells)
+                .unwrap_or_default(),
+        );
+        self.lock().latest.insert(family.id, (stamp, cells.clone()));
+        Ok(cells)
     }
 
     /// Each row's price history (60 days), cached until one of its
@@ -898,9 +925,9 @@ async fn price_row(
         .calendar_days
         .unwrap_or(ctx.settings.trips.round_trip_days);
     let mut detail = None;
-    let mut cells: Vec<(FamilyKind, Arc<Vec<Observation>>)> = Vec::new();
+    let mut cells: Vec<(FamilyKind, Arc<Vec<LatestCell>>)> = Vec::new();
     for f in fams {
-        cells.push((f.key.kind, inner.cells(store, f).await?));
+        cells.push((f.key.kind, inner.latest(store, f).await?));
     }
     let inputs: TripInputs = history::trip_inputs(
         cells

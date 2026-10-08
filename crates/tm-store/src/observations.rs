@@ -17,6 +17,7 @@ use tm_domain::{
 
 use crate::{
     AwardRate,
+    LatestCell,
     PriceCell,
     Store,
     convert::{
@@ -120,50 +121,52 @@ impl Store {
         rows.into_iter().map(Observation::try_from).collect()
     }
 
-    /// [`Store::latest_cells`] of several families in one statement,
-    /// ordered by family, then departure. Families without a successful
-    /// query have no cells.
+    /// The cells of each family's latest successful query (as
+    /// [`Store::latest_cells`]), lean, for many families in one
+    /// statement; families without one have no cells. SQLite gathers
+    /// each family's cells into one JSON array, so a read of 200k cells
+    /// is a thousand rows: sqlx's per-row and per-value costs, not
+    /// SQLite, were most of the time.
     pub async fn latest_cells_of(
         &self,
         families: &[FamilyId],
-    ) -> Result<Vec<Observation>> {
+    ) -> Result<Vec<(FamilyId, Vec<LatestCell>)>> {
         if families.is_empty() {
             return Ok(Vec::new());
         }
         let passengers = self.settings().await?.passengers.key();
         let ids = id_list(families);
-        let rows = sqlx::query_as!(
-            ObservationRow,
-            r#"SELECT o.id, o.query_id, o.family_id,
-                      o.observed_at AS "observed_at: DateTime<Utc>",
-                      o.departure AS "departure: NaiveDate",
-                      o.return_date AS "return_date: NaiveDate",
-                      o.price_minor, o.currency, o.miles, o.carrier, o.stops,
-                      o.duration_minutes, o.seller, o.fare_minor,
-                      o.fare_currency, o.brand, o.fare_basis, o.seats,
-                      o.low_availability AS "low_availability: bool",
-                      o.flights
-               FROM json_each(?1) j
-               JOIN observations o ON o.query_id = (
-                   SELECT q.id FROM queries q
-                   WHERE q.family_id = j.value AND q.outcome = 'ok'
-                     AND q.passengers = ?2
-                     AND EXISTS (SELECT 1 FROM observations x
-                                 WHERE x.query_id = q.id)
-                   ORDER BY q.finished_at DESC, q.id DESC
-                   LIMIT 1)
-               ORDER BY o.family_id, o.departure, o.return_date"#,
+        let rows = sqlx::query!(
+            r#"SELECT CAST(j.value AS INTEGER) AS "family_id!: i64",
+                      (SELECT json_group_array(json_array(
+                                  o.observed_at, o.departure, o.return_date,
+                                  o.price_minor, o.carrier, o.stops,
+                                  o.duration_minutes)
+                              ORDER BY o.departure, o.return_date)
+                       FROM observations o
+                       WHERE o.query_id = (
+                           SELECT q.id FROM queries q
+                           WHERE q.family_id = j.value AND q.outcome = 'ok'
+                             AND q.passengers = ?2
+                             AND EXISTS (SELECT 1 FROM observations x
+                                         WHERE x.query_id = q.id)
+                           ORDER BY q.finished_at DESC, q.id DESC
+                           LIMIT 1)) AS "cells!: String"
+               FROM json_each(?1) j"#,
             ids,
             passengers
         )
         .fetch_all(&self.pool)
         .await?;
-        rows.into_iter().map(Observation::try_from).collect()
+        rows.into_iter()
+            .map(|r| Ok((FamilyId(r.family_id), latest_cells(&r.cells)?)))
+            .collect()
     }
 
     /// The prices the given families saw since `since`, oldest first
-    /// (by time, then insertion): only what a price history needs, so a
-    /// route's 60 days read in one statement and a few columns.
+    /// (by time, then insertion): only what a price history needs. As in
+    /// [`Store::latest_cells_of`], each family's cells come as one JSON
+    /// array.
     pub async fn price_history(
         &self,
         families: &[FamilyId],
@@ -175,31 +178,39 @@ impl Store {
         let passengers = self.settings().await?.passengers.key();
         let ids = id_list(families);
         let rows = sqlx::query!(
-            r#"SELECT family_id,
-                      observed_at AS "observed_at: DateTime<Utc>",
-                      departure AS "departure: NaiveDate",
-                      return_date AS "return_date: NaiveDate",
-                      price_minor
-               FROM observations
-               WHERE family_id IN (SELECT value FROM json_each(?1))
-                 AND observed_at >= ?2 AND passengers = ?3
-               ORDER BY observed_at, id"#,
+            r#"SELECT CAST(j.value AS INTEGER) AS "family_id!: i64",
+                      (SELECT json_group_array(json_array(
+                                  o.observed_at, o.departure, o.return_date,
+                                  o.price_minor)
+                              ORDER BY o.observed_at, o.id)
+                       FROM observations o
+                       WHERE o.family_id = j.value AND o.observed_at >= ?2
+                         AND o.passengers = ?3) AS "cells!: String"
+               FROM json_each(?1) j"#,
             ids,
             since,
             passengers
         )
         .fetch_all(&self.pool)
         .await?;
-        Ok(rows
-            .into_iter()
-            .map(|r| PriceCell {
-                family: FamilyId(r.family_id),
-                observed_at: r.observed_at,
-                departure: r.departure,
-                return_date: r.return_date,
-                price_minor: r.price_minor,
-            })
-            .collect())
+        let mut cells = Vec::new();
+        for row in rows {
+            let family = FamilyId(row.family_id);
+            let mut times = Times::default();
+            let read: Vec<PriceJson<'_>> = serde_json::from_str(&row.cells)?;
+            for (at, departure, return_date, price_minor) in read {
+                cells.push(PriceCell {
+                    family,
+                    observed_at: times.parse(at)?,
+                    departure: parse_date(departure)?,
+                    return_date: return_date.map(parse_date).transpose()?,
+                    price_minor,
+                });
+            }
+        }
+        // Each family's cells are in order; a stable sort keeps it.
+        cells.sort_by_key(|c| c.observed_at);
+        Ok(cells)
     }
 
     /// A family's observations since `since`, oldest first.
@@ -393,4 +404,80 @@ impl Store {
 fn id_list(families: &[FamilyId]) -> String {
     let ids: Vec<String> = families.iter().map(|f| f.0.to_string()).collect();
     format!("[{}]", ids.join(","))
+}
+
+/// One cell as [`Store::latest_cells_of`] gathers it: observed at,
+/// departure, return, price, carrier, stops, duration.
+type CellJson<'a> = (
+    &'a str,
+    &'a str,
+    Option<&'a str>,
+    Option<i64>,
+    Option<std::borrow::Cow<'a, str>>,
+    Option<i64>,
+    Option<i64>,
+);
+
+/// One cell as [`Store::price_history`] gathers it: observed at,
+/// departure, return, price.
+type PriceJson<'a> = (&'a str, &'a str, Option<&'a str>, Option<i64>);
+
+fn corrupt(what: &str, detail: impl std::fmt::Display) -> StoreError {
+    StoreError::Corrupt(format!("{what}: {detail}"))
+}
+
+fn parse_date(d: &str) -> Result<NaiveDate> {
+    d.parse().map_err(|e| corrupt("date", format!("{d}: {e}")))
+}
+
+/// Parses observation times; a query's cells share theirs, so the last
+/// one is kept.
+#[derive(Default)]
+struct Times<'a> {
+    last: Option<(&'a str, DateTime<Utc>)>,
+}
+
+impl<'a> Times<'a> {
+    fn parse(&mut self, at: &'a str) -> Result<DateTime<Utc>> {
+        if let Some((text, time)) = self.last
+            && text == at
+        {
+            return Ok(time);
+        }
+        let time = DateTime::parse_from_rfc3339(at)
+            .map_err(|e| corrupt("time", format!("{at}: {e}")))?
+            .with_timezone(&Utc);
+        self.last = Some((at, time));
+        Ok(time)
+    }
+}
+
+/// A family's latest cells from their JSON array.
+fn latest_cells(json: &str) -> Result<Vec<LatestCell>> {
+    let cells: Vec<CellJson<'_>> = serde_json::from_str(json)?;
+    let mut times = Times::default();
+    cells
+        .into_iter()
+        .map(
+            |(at, departure, return_date, price, carrier, stops, minutes)| {
+                Ok(LatestCell {
+                    observed_at: times.parse(at)?,
+                    departure: parse_date(departure)?,
+                    return_date: return_date.map(parse_date).transpose()?,
+                    price_minor: price,
+                    carrier: carrier.map(std::borrow::Cow::into_owned),
+                    stops: stops
+                        .map(|n| {
+                            u8::try_from(n).map_err(|e| corrupt("stops", e))
+                        })
+                        .transpose()?,
+                    duration_minutes: minutes
+                        .map(|n| {
+                            u32::try_from(n).map_err(|e| corrupt("duration", e))
+                        })
+                        .transpose()?,
+                })
+            },
+        )
+        .collect()
 }
