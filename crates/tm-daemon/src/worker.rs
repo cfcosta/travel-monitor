@@ -434,6 +434,12 @@ pub fn context(
         no_flights: world.no_flights.clone(),
         logged_out: world.logged_out.clone(),
         latam_round_trips: false,
+        favorites: world
+            .routes
+            .values()
+            .filter(|r| r.favorite)
+            .map(|r| r.id)
+            .collect(),
     }
 }
 

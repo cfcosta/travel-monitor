@@ -13,7 +13,7 @@
 //! | --- | --- | --- |
 //! | [`state`] | 0028 | Per-family posteriors and their priors |
 //! | [`score`] | 0028 | The greedy value index, Thompson sampling |
-//! | [`plan`] | 0028, 0029 | Which families to query this tick |
+//! | [`plan`] | 0028, 0029, 0094 | Which families to query this tick |
 //! | [`rates`] | 0028 | Change-rate estimators from changed/unchanged bits |
 //! | [`update`] | 0028 | Posterior updates after a check |
 //! | [`hints`] | 0028, 0041 | Explore hints → families |

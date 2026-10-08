@@ -141,6 +141,7 @@ fn run_greedy(paths: &[Path], seed: u64) -> Vec<Vec<f64>> {
                 max_interval: None,
                 min_interval: None,
                 added: i as i64,
+                favorite: false,
             })
             .collect();
         for pick in plan_tick(&candidates, now, &budget, &params, &mut rng) {
@@ -280,6 +281,7 @@ fn reasons_over_a_week() {
                 max_interval: None,
                 min_interval: None,
                 added: i as i64,
+                favorite: false,
             })
             .collect();
         for pick in plan_tick(&candidates, now, &budget, &params, &mut rng) {

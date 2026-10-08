@@ -20,6 +20,18 @@
 //!    (0028). Either way it is **Scheduled**, with its score and the
 //!    runner-up's.
 //!
+//! **Favorites** (DECISIONS.md 0094): a family whose destination the
+//! user starred ages [`Params::favorite_boost`] times faster (twice by
+//! default). Its time since the last check is multiplied by the boost
+//! wherever staleness is compared, in the stalest-first order and among
+//! the overdue, and its maximum interval is divided by it (a core
+//! family is due every 12 hours instead of 24). With the budget as the
+//! limit, a favorite is therefore checked about twice as often as a
+//! family that is not, and the others share what is left in the same
+//! order as before. The minimum interval is not scaled, so a favorite
+//! is never checked more often than any family may be, and the value
+//! index, the bootstrap order and the random checks ignore the flag.
+//!
 //! Throughout, a family is eligible only when it is active and was not
 //! checked within its minimum interval (the candidate's own
 //! [`Candidate::min_interval`], else `min_interval`), and a pick must fit both the tick's
@@ -61,6 +73,41 @@ pub struct Candidate {
     /// daemon uses the route id): never-checked families of earlier
     /// routes are filled in first (0065).
     pub added: i64,
+    /// Its destination is a favorite: it ages [`Params::favorite_boost`]
+    /// times faster (0094).
+    pub favorite: bool,
+}
+
+impl Candidate {
+    /// How much faster this family ages: [`Params::favorite_boost`] for
+    /// a favorite (at least 1), else 1.
+    pub fn boost(&self, params: &Params) -> f64 {
+        let boost = params.favorite_boost;
+        if self.favorite && boost.is_finite() && boost > 1.0 {
+            boost
+        } else {
+            1.0
+        }
+    }
+
+    /// The last check as staleness sees it: `boost` times further back
+    /// from `now` than it was. Unchanged for a family that is not a
+    /// favorite, or never checked.
+    pub fn aged_last_check(
+        &self,
+        now: DateTime<Utc>,
+        params: &Params,
+    ) -> Option<DateTime<Utc>> {
+        let last = self.state.last_check?;
+        let boost = self.boost(params);
+        if boost == 1.0 || last >= now {
+            return Some(last);
+        }
+        let ms = (now - last).num_milliseconds() as f64 * boost;
+        let aged = chrono::TimeDelta::try_milliseconds(ms as i64)
+            .and_then(|d| now.checked_sub_signed(d));
+        Some(aged.unwrap_or(DateTime::<Utc>::MIN_UTC))
+    }
 }
 
 /// What this tick may spend.
@@ -115,9 +162,11 @@ pub fn plan_tick<R: Rng + ?Sized>(
                 if tau < min_days {
                     continue;
                 }
-                let max_days = c.max_interval.map_or(max_days, days);
+                // A favorite ages faster (0094); its minimum is kept.
+                let boost = c.boost(params);
+                let max_days = c.max_interval.map_or(max_days, days) / boost;
                 if tau >= max_days {
-                    overdue.push((i, tau));
+                    overdue.push((i, tau * boost));
                 } else {
                     pool.push(i);
                 }
@@ -207,11 +256,17 @@ pub fn plan_tick<R: Rng + ?Sized>(
     };
     match params.order {
         Order::Value => scored.sort_by(by_score),
-        // Oldest check first (never-checked ones are not in the pool).
-        Order::Stalest => scored.sort_by(|a, b| {
-            let last = |i: usize| candidates[i].state.last_check;
-            last(a.0).cmp(&last(b.0)).then_with(|| by_score(a, b))
-        }),
+        // Oldest check first (never-checked ones are not in the pool),
+        // a favorite's aged by its boost (0094).
+        Order::Stalest => {
+            let aged: Vec<Option<DateTime<Utc>>> = candidates
+                .iter()
+                .map(|c| c.aged_last_check(now, params))
+                .collect();
+            scored.sort_by(|a, b| {
+                aged[a.0].cmp(&aged[b.0]).then_with(|| by_score(a, b))
+            });
+        }
     }
 
     let share = if params.random_share.is_finite() {
@@ -322,6 +377,7 @@ mod tests {
             max_interval: None,
             min_interval: None,
             added: id,
+            favorite: false,
         }
     }
 
@@ -432,6 +488,77 @@ mod tests {
         );
         assert_eq!(picks.len(), 1);
         assert_eq!(picks[0].reason, QueryReason::Overdue);
+    }
+
+    /// A favorite ages twice as fast (0094): checked 13 hours ago it
+    /// goes before a family checked 20 hours ago, and with a daily
+    /// maximum it is overdue after 12 hours.
+    #[test]
+    fn a_favorite_ages_twice_as_fast() {
+        let mut favorite = cand(1, "gf", Some(13));
+        favorite.favorite = true;
+        let other = cand(2, "gf", Some(20));
+        let picks = plan_tick(
+            &[other.clone(), favorite.clone()],
+            now(),
+            &budget(1),
+            &no_random(),
+            &mut StdRng::seed_from_u64(6),
+        );
+        assert_eq!(picks[0].family.0, 1);
+        assert!(matches!(picks[0].reason, QueryReason::Scheduled { .. }));
+        // Not twice: 13 × 2 = 26 < 30.
+        let older = cand(3, "gf", Some(30));
+        let picks = plan_tick(
+            &[favorite.clone(), older],
+            now(),
+            &budget(1),
+            &no_random(),
+            &mut StdRng::seed_from_u64(6),
+        );
+        assert_eq!(picks[0].family.0, 3);
+
+        let daily = Some(TimeDelta::hours(24));
+        favorite.max_interval = daily;
+        let mut core = cand(4, "gf", Some(20));
+        core.max_interval = daily;
+        let picks = plan_tick(
+            &[core, favorite.clone()],
+            now(),
+            &budget(2),
+            &no_random(),
+            &mut StdRng::seed_from_u64(6),
+        );
+        assert_eq!(picks[0].family.0, 1);
+        assert_eq!(picks[0].reason, QueryReason::Overdue);
+        assert!(matches!(picks[1].reason, QueryReason::Scheduled { .. }));
+
+        // The minimum interval is not scaled: 4 hours ago is too soon.
+        favorite.state.last_check = Some(now() - TimeDelta::hours(4));
+        let picks = plan_tick(
+            &[favorite.clone()],
+            now(),
+            &budget(1),
+            &no_random(),
+            &mut StdRng::seed_from_u64(6),
+        );
+        assert!(picks.is_empty());
+
+        // A boost of 1 (or nonsense) is no boost.
+        let p = Params {
+            favorite_boost: f64::NAN,
+            ..no_random()
+        };
+        assert_eq!(favorite.boost(&p), 1.0);
+        assert_eq!(
+            favorite.aged_last_check(now(), &p),
+            favorite.state.last_check
+        );
+        assert_eq!(favorite.boost(&no_random()), 2.0);
+        assert_eq!(
+            favorite.aged_last_check(now(), &no_random()),
+            Some(now() - TimeDelta::hours(8))
+        );
     }
 
     #[test]

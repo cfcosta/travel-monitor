@@ -118,6 +118,9 @@ pub struct Context {
     /// one family under `--latam-round-trips`, never for the scheduler
     /// (0090).
     pub latam_round_trips: bool,
+    /// Routes to a favorite destination: their families age twice as
+    /// fast in the scheduler (0094).
+    pub favorites: HashSet<RouteId>,
 }
 
 /// Why a family is not a candidate.
@@ -278,6 +281,7 @@ pub fn build<'a>(
                     min_interval,
                     // Route ids grow as destinations are added (0065).
                     added: f.key.route.0,
+                    favorite: cx.favorites.contains(&f.key.route),
                 });
             }
             Err(skip) => *skipped.entry(skip).or_insert(0) += 1,
@@ -457,6 +461,23 @@ mod tests {
         );
         assert_eq!(core_interval(&key(Cabin::Business, 1, leg), home), None);
         assert_eq!(core_interval(&key(Cabin::Economy, 2, leg), home), None);
+    }
+
+    /// Every family of a route to a favorite destination is a favorite
+    /// candidate, whatever its cabin or source (0094).
+    #[test]
+    fn routes_to_a_favorite_mark_their_families() {
+        let families = vec![
+            family(1, 1, Source::GoogleFlights),
+            family(2, 1, Source::Airline { code: "TP".into() }),
+            family(3, 2, Source::GoogleFlights),
+        ];
+        let mut cx = cx();
+        cx.favorites.insert(RouteId(1));
+        let (cands, _) = build(&families, &cx);
+        let favorites: Vec<(i64, bool)> =
+            cands.iter().map(|c| (c.family.0, c.favorite)).collect();
+        assert_eq!(favorites, vec![(1, true), (2, true), (3, false)]);
     }
 
     /// A family whose last check found no flights waits a week and is

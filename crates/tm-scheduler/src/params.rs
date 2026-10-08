@@ -20,6 +20,11 @@ pub struct Params {
     /// Sample the change rate from its posterior (Thompson sampling)
     /// instead of using the posterior mean. Default: `true`.
     pub thompson: bool,
+    /// How much faster a favorite destination's families age
+    /// (DECISIONS.md 0094): their staleness is multiplied by it and their
+    /// maximum interval divided by it, so they are checked about this
+    /// many times as often. Default: `2.0`.
+    pub favorite_boost: f64,
     /// The floor on the deal rate `q` (deals per day), so the score never
     /// divides by zero. Default: `1e-4` (one deal in ~27 years).
     pub epsilon_rate: f64,
@@ -106,6 +111,9 @@ pub enum Order {
     Value,
 }
 
+/// A favorite's families are checked about twice as often (0094).
+pub const FAVORITE_BOOST: f64 = 2.0;
+
 impl Params {
     pub fn from_settings(settings: &Settings) -> Self {
         Self {
@@ -117,6 +125,7 @@ impl Params {
             )),
             random_share: settings.random_share.clamp(0.0, 1.0),
             thompson: true,
+            favorite_boost: FAVORITE_BOOST,
             epsilon_rate: 1e-4,
             material_change: 0.05,
             cost_alpha: 0.3,
