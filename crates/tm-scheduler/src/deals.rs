@@ -14,6 +14,10 @@
 //!   bucket. The baseline must therefore be computed from history that
 //!   excludes the fare being evaluated.
 //!
+//! A favorite destination's series are judged with
+//! [`Params::for_deals`]: 10% under the median instead of 20% (0094),
+//! the robust-z test unchanged.
+//!
 //! When both hold the reason is [`DealReason::AllTimeLow`]. `change` is
 //! always relative to the median. Candidates are confirmed by a second
 //! query before any alert (0031); that is the daemon's job.
@@ -107,6 +111,28 @@ mod tests {
         assert_eq!(robust_z(800, &flat), None);
     }
 
+    /// A favorite's drop needs only 10% (0094); the spread still has
+    /// to make it unusual.
+    #[test]
+    fn favorites_are_deals_at_a_smaller_drop() {
+        let p = Params::default();
+        let fav = p.for_deals(true);
+        let tight = base(1000.0, 20.0, 8.0, 700);
+        // 12% under: a deal for a favorite only.
+        assert_eq!(evaluate(880, &tight, &p), None);
+        let (reason, change) = evaluate(880, &tight, &fav).expect("a deal");
+        assert_eq!(reason, DealReason::BelowMedian);
+        assert!((change + 0.12).abs() < 1e-12);
+        // 10% exactly is enough, 9.9% is not.
+        assert!(evaluate(900, &tight, &fav).is_some());
+        assert_eq!(evaluate(901, &tight, &fav), None);
+        // A wide spread still rules out a 15% drop (z ≈ 1.01).
+        let wide = base(1000.0, 100.0, 8.0, 500);
+        assert_eq!(evaluate(850, &wide, &fav), None);
+        // And too little history is too little for favorites too.
+        assert_eq!(evaluate(850, &base(1000.0, 20.0, 3.0, 500), &fav), None);
+    }
+
     #[test]
     fn all_time_low_wins() {
         let p = Params::default();
@@ -146,6 +172,11 @@ mod tests {
             }
             Some((DealReason::AllTimeLow, _)) => assert!(price < low),
             None => assert!(price >= low),
+        }
+        // A favorite's lower threshold keeps every deal the global
+        // threshold finds (0094).
+        if evaluate(price, &b, &p).is_some() {
+            assert!(evaluate(price, &b, &p.for_deals(true)).is_some());
         }
         // Lowering the price never turns a deal into a non-deal.
         if evaluate(price, &b, &p).is_some() && price > 1 {

@@ -2572,7 +2572,8 @@ impl<S: Sources + 'static> Worker<S> {
         let store = self.store().clone();
         let now = Utc::now();
         let today = budget::today();
-        let params = self.loaded.params.clone();
+        // A favorite's awards are deals at a smaller drop (0094).
+        let params = self.loaded.params.for_deals(route.favorite);
         let cells: Vec<Observation> = store
             .latest_cells(family.id)
             .await?
@@ -2790,7 +2791,8 @@ impl<S: Sources + 'static> Worker<S> {
         let mut discount = to_discount(
             &store.route_trip_state(route.id).await?.unwrap_or_default(),
         );
-        let params = self.loaded.params.clone();
+        // A favorite's trips are deals at a smaller drop (0094).
+        let params = self.loaded.params.for_deals(route.favorite);
         let settings = self.loaded.settings.clone();
         if matches!(touched, FamilyKind::RoundTrip { .. }) && !rt.is_empty() {
             let pairs = compare_round_trips(&rt, &out, &back);

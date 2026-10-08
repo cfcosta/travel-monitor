@@ -41,6 +41,7 @@ use tm_daemon::{
 use tm_domain::{
     Cabin,
     Currency,
+    DealReason,
     DealStatus,
     FamilyId,
     FamilyKey,
@@ -1056,6 +1057,78 @@ async fn a_rejected_confirmation_does_not_alert() {
     assert_eq!(deals[0].status, DealStatus::Rejected);
     assert!(store.unseen_confirmed().await.expect("reads").is_empty());
     assert!(notices.shown().is_empty());
+}
+
+/// A favorite's trips are deals at 10% under the usual price, cash and
+/// miles alike; other destinations still need 20% (0094). Both routes
+/// have the same history and the same 12.5% drop.
+#[tokio::test]
+async fn a_favorite_takes_a_smaller_drop() {
+    let first = today() + Days::new(50);
+    let notices = Arc::new(Recorder::default());
+    let config = Config {
+        notifier: Some(notices.clone()),
+        ..test_config(Only::default())
+    };
+    let mut h = harness_with(config, move |f| {
+        // R$750 out on the first departure, R$1,000 back: 1,750 for a
+        // trip that usually costs 2,000.
+        f.calendar = Box::new(move |_| {
+            Fetch::ok(cells(first, 20, |i| if i == 0 { 750 } else { 1_000 }), 3)
+        });
+        f.confirm = Box::new(|_| {
+            Fetch::ok(
+                Some(Confirmation {
+                    cheapest: Some(1_760),
+                    ..Confirmation::default()
+                }),
+                1,
+            )
+        });
+    })
+    .await;
+    let store = h.store().clone();
+    let mia = store
+        .place_by_code("MIA")
+        .await
+        .expect("reads")
+        .expect("MIA");
+    store
+        .set_destination_favorite(mia.id, true)
+        .await
+        .expect("stars");
+    let now = Utc::now();
+    for dest in ["MIA", "CUN"] {
+        let out_id = leg(&store, dest, Leg::Outbound).await;
+        let ret_id = leg(&store, dest, Leg::Return).await;
+        for k in (0..=36).rev() {
+            let at = now - TimeDelta::days(k) - TimeDelta::hours(1);
+            // One cheap week long ago holds the all-time low, so the
+            // drop must clear the threshold on its own.
+            let out = if k == 30 { 600 } else { 1_000 };
+            past_check(&store, out_id, at, first, 20, out).await;
+            past_check(&store, ret_id, at, first, 20, 1_000).await;
+        }
+        h.daemon
+            .run_check(out_id, QueryReason::Manual)
+            .await
+            .expect("checks");
+    }
+    let deals = store
+        .list_deals(&DealFilter::default())
+        .await
+        .expect("lists");
+    let mia_route = route(&store, "MIA").await;
+    assert_eq!(deals.len(), 1, "{deals:?}");
+    let deal = &deals[0];
+    assert_eq!(deal.route, mia_route);
+    assert_eq!(deal.status, DealStatus::Confirmed);
+    assert_eq!(deal.reason, DealReason::BelowMedian);
+    assert!(
+        deal.change.is_some_and(|c| (c + 0.125).abs() < 0.01),
+        "{deal:?}"
+    );
+    assert_eq!(notices.shown().len(), 1);
 }
 
 #[tokio::test]

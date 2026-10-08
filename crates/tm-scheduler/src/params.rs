@@ -56,6 +56,9 @@ pub struct Params {
     pub baseline_window: TimeDelta,
     /// A deal is at least this far under the bucket median.
     pub deal_threshold: f64,
+    /// The same for a favorite destination's series, cash and miles
+    /// (0094). Default: the settings' `0.10`.
+    pub favorite_deal_threshold: f64,
     /// And at least this many robust standard deviations under it, when
     /// the spread is not zero. Default: `2.0`.
     pub deal_min_z: f64,
@@ -134,6 +137,7 @@ impl Params {
             hint_drop: 0.10,
             baseline_window: TimeDelta::days(60),
             deal_threshold: settings.deal_threshold,
+            favorite_deal_threshold: settings.favorite_deal_threshold,
             deal_min_z: 2.0,
             min_history_weeks: f64::from(settings.min_history_weeks),
             trips: settings.trips,
@@ -153,6 +157,23 @@ impl Params {
             pacing_jitter: 0.25,
             iof: settings.iof,
             card_spread: settings.card_spread,
+        }
+    }
+
+    /// These parameters for judging a destination's deals, cash and
+    /// miles alike: a favorite's take [`Params::favorite_deal_threshold`]
+    /// in place of [`Params::deal_threshold`] (DECISIONS.md 0094). The
+    /// robust-z test, the history a bucket needs and the confirmation
+    /// stay the same.
+    pub fn for_deals(&self, favorite: bool) -> Self {
+        let deal_threshold = if favorite {
+            self.favorite_deal_threshold
+        } else {
+            self.deal_threshold
+        };
+        Self {
+            deal_threshold,
+            ..self.clone()
         }
     }
 }
@@ -187,6 +208,21 @@ mod tests {
         assert_eq!(p.random_share, 0.2);
         assert_eq!(p.daily_budget, 30_000);
         assert_eq!(p.min_history_weeks, 4.0);
+    }
+
+    #[test]
+    fn favorites_take_their_own_threshold() {
+        let settings = Settings {
+            deal_threshold: 0.25,
+            favorite_deal_threshold: 0.12,
+            ..Settings::default()
+        };
+        let p = Params::from_settings(&settings);
+        assert_eq!(p.for_deals(true).deal_threshold, 0.12);
+        assert_eq!(p.for_deals(false).deal_threshold, 0.25);
+        assert_eq!(p.for_deals(true).deal_min_z, p.deal_min_z);
+        assert_eq!(Params::default().for_deals(true).deal_threshold, 0.10);
+        assert_eq!(Params::default().favorite_boost, 2.0);
     }
 
     #[test]
