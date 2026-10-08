@@ -188,6 +188,10 @@ impl Store {
     /// point per award check, oldest first (0083): the mean over the
     /// check's awards of the fare before taxes over the miles, in BRL
     /// per 1,000 miles. Awards without a BRL fare are left out.
+    ///
+    /// The `CROSS JOIN` keeps the program's families as the outer loop,
+    /// so each is read through `observations_family`; joined the other
+    /// way round, SQLite scans every observation to group by query.
     pub async fn award_rates(
         &self,
         program: &str,
@@ -198,8 +202,9 @@ impl Store {
             r#"SELECT MAX(o.observed_at) AS "observed_at!: DateTime<Utc>",
                       AVG(o.fare_minor * 10.0 / o.miles) AS "rate!: f64",
                       COUNT(*) AS "awards!: i64"
-               FROM observations o JOIN families f ON f.id = o.family_id
-               WHERE f.source = 'miles' AND f.source_code = ?1
+               FROM families f CROSS JOIN observations o
+               WHERE o.family_id = f.id
+                 AND f.source = 'miles' AND f.source_code = ?1
                  AND o.observed_at >= ?2 AND o.passengers = ?3
                  AND o.miles > 0 AND o.fare_minor > 0
                  AND o.fare_currency = 'BRL'
