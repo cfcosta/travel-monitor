@@ -349,9 +349,15 @@ impl Inner {
             return Ok(());
         }
         let ids: Vec<FamilyId> = stale.iter().map(|(id, _)| *id).collect();
+        let reads = ids.chunks(ids.len().div_ceil(READERS)).map(|ids| {
+            let (store, ids) = (store.clone(), ids.to_vec());
+            tokio::spawn(async move { store.latest_cells_of(&ids).await })
+        });
         let mut by_family: HashMap<FamilyId, Vec<Observation>> = HashMap::new();
-        for o in store.latest_cells_of(&ids).await? {
-            by_family.entry(o.family).or_default().push(o);
+        for read in reads.collect::<Vec<_>>() {
+            for o in read.await?? {
+                by_family.entry(o.family).or_default().push(o);
+            }
         }
         let mut cache = self.lock();
         for (id, stamp) in stale {
@@ -394,12 +400,24 @@ impl Inner {
                 owner.insert(f.id, (i, f.key.kind));
             }
         }
-        let ids: Vec<FamilyId> = owner.keys().copied().collect();
+        // Each row's families stay in one read, so that its cells keep
+        // their order (by time, then insertion).
+        let since = now - Duration::days(60);
+        let reads = stale.chunks(stale.len().div_ceil(READERS)).map(|rows| {
+            let ids: Vec<FamilyId> = rows
+                .iter()
+                .flat_map(|(row, _)| row.families.iter().map(|f| f.id))
+                .collect();
+            let store = store.clone();
+            tokio::spawn(async move { store.price_history(&ids, since).await })
+        });
         let mut cells: Vec<Vec<(FamilyKind, PriceCell)>> =
             vec![Vec::new(); stale.len()];
-        for c in store.price_history(&ids, now - Duration::days(60)).await? {
-            if let Some((i, kind)) = owner.get(&c.family) {
-                cells[*i].push((*kind, c));
+        for read in reads.collect::<Vec<_>>() {
+            for c in read.await?? {
+                if let Some((i, kind)) = owner.get(&c.family) {
+                    cells[*i].push((*kind, c));
+                }
             }
         }
         let mut cache = self.lock();
@@ -415,6 +433,11 @@ impl Inner {
         Ok(out)
     }
 }
+
+/// How many statements of a batched read run at once, each on its own
+/// task and pooled connection: decoding rows is most of a large read's
+/// time, and so it spreads over the runtime's threads.
+const READERS: usize = 4;
 
 /// A row of the list before it is priced: its route × cabin, the
 /// families its prices come from and its route's round-trip discount.
@@ -1203,8 +1226,12 @@ async fn snapshot(
     });
 
     let specs = row_specs(&ctx.routes, &ctx.families, ctx.home);
-    inner.prefetch_cells(store, &specs).await?;
-    let histories = inner.histories(store, &specs, &ctx.settings, now).await?;
+    let (cells, histories) = tokio::join!(
+        inner.prefetch_cells(store, &specs),
+        inner.histories(store, &specs, &ctx.settings, now),
+    );
+    cells?;
+    let histories = histories?;
     let mut rows = Vec::new();
     let mut detail = None;
     for spec in &specs {
