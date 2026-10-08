@@ -193,9 +193,33 @@ pub fn holidays(year: i32) -> Vec<Holiday> {
 /// holiday period.
 pub fn is_holiday_departure(departure: NaiveDate) -> bool {
     let year = departure.year();
-    [year, year + 1].into_iter().flat_map(holidays).any(|h| {
-        departure >= h.start - TimeDelta::days(HOLIDAY_LEAD_DAYS)
-            && departure <= h.end
+    [year, year + 1].into_iter().any(|y| {
+        with_holidays(y, |hs| {
+            hs.iter().any(|h| {
+                departure >= h.start - TimeDelta::days(HOLIDAY_LEAD_DAYS)
+                    && departure <= h.end
+            })
+        })
+    })
+}
+
+/// Runs `f` on [`holidays`] of `year`, computed once per thread: every
+/// fare's [`Season`] asks, so baselines over a list of routes would
+/// otherwise rebuild the same calendars hundreds of thousands of times.
+fn with_holidays<T>(year: i32, f: impl FnOnce(&[Holiday]) -> T) -> T {
+    thread_local! {
+        static YEARS: std::cell::RefCell<Vec<(i32, Vec<Holiday>)>> =
+            const { std::cell::RefCell::new(Vec::new()) };
+    }
+    YEARS.with_borrow_mut(|years| {
+        let i = match years.iter().position(|(y, _)| *y == year) {
+            Some(i) => i,
+            None => {
+                years.push((year, holidays(year)));
+                years.len() - 1
+            }
+        };
+        f(&years[i].1)
     })
 }
 
