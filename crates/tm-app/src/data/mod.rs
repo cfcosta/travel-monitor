@@ -17,7 +17,7 @@ pub mod found;
 pub mod history;
 pub mod store;
 
-use std::sync::Arc;
+use std::{collections::BTreeSet, sync::Arc};
 
 use async_trait::async_trait;
 use chrono::{DateTime, NaiveDate, Utc};
@@ -351,6 +351,11 @@ impl RouteRow {
 
     pub fn code(&self) -> &str {
         &self.route.destination.code
+    }
+
+    /// The destination, which a star makes a favorite (0094).
+    pub fn place(&self) -> PlaceId {
+        self.route.destination.id
     }
 
     pub fn city(&self) -> &str {
@@ -721,6 +726,9 @@ pub struct Snapshot {
     /// The origin the rows are for.
     pub origin: Option<PlaceId>,
     pub destinations: Vec<Place>,
+    /// The destinations the user starred (0094): every route to one is
+    /// a favorite, in every cabin, cash and miles.
+    pub favorites: BTreeSet<PlaceId>,
     pub points_of_sale: Vec<PointOfSale>,
     pub settings: Settings,
     pub miles: Vec<MilesRow>,
@@ -742,6 +750,11 @@ impl Snapshot {
 
     pub fn row(&self, key: RowKey) -> Option<&RouteRow> {
         self.rows.iter().find(|r| r.key() == key)
+    }
+
+    /// Whether the user starred this destination (0094).
+    pub fn is_favorite(&self, place: PlaceId) -> bool {
+        self.favorites.contains(&place)
     }
 }
 
@@ -894,6 +907,12 @@ pub trait Backend: Send + Sync + 'static {
         &self,
         site: String,
         limits: SiteLimits,
+    ) -> anyhow::Result<()>;
+    /// Stars or unstars a destination (0094).
+    async fn set_favorite(
+        &self,
+        place: PlaceId,
+        favorite: bool,
     ) -> anyhow::Result<()>;
 }
 

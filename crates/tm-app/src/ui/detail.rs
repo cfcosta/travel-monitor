@@ -267,7 +267,13 @@ impl TravelMonitor {
                             .font_weight(FontWeight::MEDIUM)
                             .text_color(color(theme::TEXT_LABEL))
                             .child(row.city().to_owned()),
-                    ),
+                    )
+                    .child(self.star(
+                        "detail-star".to_owned(),
+                        row.place(),
+                        26.,
+                        cx,
+                    )),
             )
             .child(
                 div()

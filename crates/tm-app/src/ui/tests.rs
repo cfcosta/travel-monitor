@@ -925,3 +925,121 @@ fn award_checks_name_the_program() {
         "checking SAO→LIS · award out · LATAM Pass · 14 s"
     );
 }
+
+// ---------------------------------------------------------------------
+// Favorites (0094)
+// ---------------------------------------------------------------------
+
+fn click(cx: &mut VisualTestContext, selector: &str) {
+    cx.update(|window, _| window.refresh());
+    cx.run_until_parked();
+    let bounds = cx
+        .debug_bounds(Box::leak(selector.to_owned().into_boxed_str()))
+        .unwrap_or_else(|| panic!("{selector} drawn"));
+    cx.simulate_click(bounds.center(), Modifiers::default());
+    cx.run_until_parked();
+}
+
+fn favorite_codes(
+    view: &Entity<TravelMonitor>,
+    cx: &mut VisualTestContext,
+) -> Vec<String> {
+    view.read_with(cx, |tm, _| {
+        let s = tm.snapshot.as_ref().expect("snapshot");
+        s.destinations
+            .iter()
+            .filter(|p| s.is_favorite(p.id))
+            .map(|p| p.code.clone())
+            .collect()
+    })
+}
+
+/// "Favorites" next to "Pay with" lists only the starred places: the
+/// sample stars Lisbon (a cash deal in economy, a miles deal in
+/// business) and Tokyo (no deal).
+#[gpui::test]
+fn the_favorites_filter_lists_starred_places(cx: &mut TestAppContext) {
+    let Opened { view, mut cx, .. } = open(cx, FakeBackend::at(now()));
+    let codes = |cx: &mut VisualTestContext| {
+        view.read_with(cx, |tm, _| {
+            tm.visible_rows()
+                .iter()
+                .map(|r| format!("{} {}", r.code(), r.cabin.label()))
+                .collect::<Vec<_>>()
+        })
+    };
+    assert_eq!(favorite_codes(&view, &mut cx), ["LIS", "TYO"]);
+    assert_eq!(codes(&mut cx).len(), 7);
+    click(&mut cx, "places-favorites");
+    assert!(view.read_with(&cx, |tm, _| tm.favorites_only));
+    let mut deals = codes(&mut cx);
+    deals.sort();
+    assert_eq!(deals, ["LIS Business", "LIS Economy"]);
+    view.update(&mut cx, |tm, _| tm.pay = PayWith::Cash);
+    assert_eq!(codes(&mut cx), ["LIS Economy"]);
+    view.update(&mut cx, |tm, _| {
+        tm.pay = PayWith::Both;
+        tm.list_tab = ListTab::All;
+    });
+    let mut all = codes(&mut cx);
+    all.sort();
+    assert_eq!(all, ["LIS Business", "LIS Economy", "TYO Economy"]);
+    click(&mut cx, "places-all");
+    assert_eq!(codes(&mut cx).len(), 17);
+}
+
+/// A row's star makes its place a favorite through the configuration
+/// write (the daemon is asked to reload) without selecting the row; the
+/// card, the route page and the settings' destinations have one too.
+#[gpui::test]
+fn a_star_makes_a_place_a_favorite(cx: &mut TestAppContext) {
+    let Opened {
+        view, mut cx, fake, ..
+    } = open(cx, FakeBackend::at(now()));
+    let (selected, mia) = view.read_with(&cx, |tm, _| {
+        let s = tm.snapshot.as_ref().expect("snapshot");
+        let mia = s
+            .rows
+            .iter()
+            .find(|r| r.code() == "MIA")
+            .expect("MIA")
+            .key();
+        (tm.selected, mia)
+    });
+    let star = format!("star-{}-{}", mia.route, mia.cabin.code());
+    click(&mut cx, &star);
+    assert_eq!(favorite_codes(&view, &mut cx), ["LIS", "MIA", "TYO"]);
+    view.read_with(&cx, |tm, _| {
+        assert_eq!(tm.selected, selected, "the star does not select");
+        assert!(
+            tm.toast
+                .as_ref()
+                .is_some_and(|t| t.contains("Added to favorites")),
+            "{:?}",
+            tm.toast
+        );
+    });
+    assert!(fake.requests().contains(&Request::ReloadConfig));
+    // The snapshot after the write agrees, and the filter follows.
+    view.update(&mut cx, |tm, _| tm.favorites_only = true);
+    assert!(
+        view.read_with(&cx, |tm, _| tm.visible_rows().len()) == 3,
+        "LIS twice and MIA"
+    );
+
+    // The card's star unstars the selected place.
+    view.update(&mut cx, |tm, cx| tm.select(mia, cx));
+    cx.run_until_parked();
+    click(&mut cx, "card-star");
+    assert_eq!(favorite_codes(&view, &mut cx), ["LIS", "TYO"]);
+    go(&view, &mut cx, Screen::Detail);
+    assert!(cx.debug_bounds("detail-star").is_some());
+
+    // And so do the settings' destinations (LIS is the first in view).
+    go(&view, &mut cx, Screen::Settings);
+    assert!(cx.debug_bounds("star-place-TYO").is_some());
+    click(&mut cx, "star-place-LIS");
+    assert_eq!(favorite_codes(&view, &mut cx), ["TYO"]);
+    click(&mut cx, "star-place-LIS");
+    assert_eq!(favorite_codes(&view, &mut cx), ["LIS", "TYO"]);
+}

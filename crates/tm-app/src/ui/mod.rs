@@ -173,6 +173,8 @@ pub struct TravelMonitor {
     pub(crate) list_tab: ListTab,
     /// Cash, miles or both (0083).
     pub(crate) pay: PayWith,
+    /// Only the starred destinations' rows (0094).
+    pub(crate) favorites_only: bool,
     pub(crate) cabin: Option<Cabin>,
     pub(crate) sort: Sort,
     pub(crate) routes_filter: RoutesFilter,
@@ -219,6 +221,7 @@ impl TravelMonitor {
             screen: Screen::Deals,
             list_tab: ListTab::Deals,
             pay: PayWith::Both,
+            favorites_only: false,
             cabin: None,
             sort: Sort::BiggestDrop,
             routes_filter: RoutesFilter::All,
@@ -438,9 +441,36 @@ impl TravelMonitor {
                 ListTab::All => self.pay != PayWith::Miles || r.award.is_some(),
             })
             .filter(|r| self.cabin.is_none_or(|c| c == r.cabin))
+            .filter(|r| !self.favorites_only || s.is_favorite(r.place()))
             .collect();
         sort_rows(&mut rows, self.sort, self.pay);
         rows
+    }
+
+    /// Stars or unstars a destination (0094) through the configuration
+    /// write path: the daemon reloads and the window refreshes. The star
+    /// flips at once.
+    pub fn toggle_favorite(&mut self, place: PlaceId, cx: &mut Context<Self>) {
+        let Some(s) = self.snapshot.as_mut() else {
+            return;
+        };
+        let favorite = !s.is_favorite(place);
+        if favorite {
+            s.favorites.insert(place);
+        } else {
+            s.favorites.remove(&place);
+        }
+        let backend = self.env.backend.clone();
+        self.write(
+            async move { backend.set_favorite(place, favorite).await },
+            if favorite {
+                "Added to favorites: checked more often, smaller drops count"
+            } else {
+                "Removed from favorites"
+            },
+            cx,
+        );
+        cx.notify();
     }
 
     pub fn select(&mut self, key: RowKey, cx: &mut Context<Self>) {

@@ -59,6 +59,9 @@ pub struct DetailInputs {
     /// The leading program's awards, and which dates have one (0083).
     pub awards: Option<RouteAwards>,
     pub award_marks: Option<AwardMarks>,
+    /// The route's destination is a favorite: its calendar marks deals
+    /// at the favorite threshold (0094).
+    pub favorite: bool,
 }
 
 /// Weeks the calendar covers: the horizon, from the week of today.
@@ -95,7 +98,11 @@ pub fn assemble(
         calendar_weeks(settings.horizon_days),
         calendar_days,
         |d| baselines.at(d),
-        settings.deal_threshold,
+        if inputs.favorite {
+            settings.favorite_deal_threshold
+        } else {
+            settings.deal_threshold
+        },
         departure.or(inputs.trip.as_ref().map(|t| t.departure)),
     );
     let mut calendar = calendar;

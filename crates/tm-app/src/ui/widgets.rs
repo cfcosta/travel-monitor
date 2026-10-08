@@ -228,6 +228,22 @@ pub fn small_button(
         .child(label.into())
 }
 
+/// The favorite toggle (0094): a filled yellow star on a favorite, a
+/// hollow faint one otherwise. `id` is also its debug selector.
+pub fn star(id: String, on: bool, size: f32) -> Stateful<Div> {
+    let selector = id.clone();
+    div()
+        .id(SharedString::from(id))
+        .debug_selector(move || selector.clone())
+        .flex_none()
+        .px(px(2.))
+        .text_size(px(size))
+        .cursor_pointer()
+        .text_color(color(if on { theme::YELLOW } else { theme::TEXT_DIM }))
+        .hover(|s| s.text_color(color(theme::YELLOW)))
+        .child(if on { "★" } else { "☆" })
+}
+
 /// The track of a segmented control.
 pub fn segments() -> Div {
     div()

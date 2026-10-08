@@ -53,6 +53,7 @@ pub enum Field {
     Iof,
     CardSpread,
     DealThreshold,
+    FavoriteDealThreshold,
     UnusualRate,
     RandomShare,
     DailyBudget,
@@ -87,6 +88,7 @@ impl Field {
                 Field::Iof,
                 Field::CardSpread,
                 Field::DealThreshold,
+                Field::FavoriteDealThreshold,
                 Field::UnusualRate,
             ],
         ),
@@ -114,6 +116,7 @@ impl Field {
             Field::Iof => "IOF, %",
             Field::CardSpread => "Card spread, %",
             Field::DealThreshold => "Deal threshold, %",
+            Field::FavoriteDealThreshold => "Favorite threshold, %",
             Field::UnusualRate => "Unusual mile value, %",
             Field::RandomShare => "Random checks, %",
             Field::DailyBudget => "Google Flights loads per day",
@@ -141,6 +144,7 @@ impl Field {
             Field::Iof => pct(s.iof),
             Field::CardSpread => pct(s.card_spread),
             Field::DealThreshold => pct(s.deal_threshold),
+            Field::FavoriteDealThreshold => pct(s.favorite_deal_threshold),
             Field::UnusualRate => pct(s.unusual_rate),
             Field::RandomShare => pct(s.random_share),
             Field::DailyBudget => s.daily_budget.to_string(),
@@ -186,6 +190,7 @@ impl Field {
             Field::Iof => s.iof = pct()?,
             Field::CardSpread => s.card_spread = pct()?,
             Field::DealThreshold => s.deal_threshold = pct()?,
+            Field::FavoriteDealThreshold => s.favorite_deal_threshold = pct()?,
             Field::UnusualRate => s.unusual_rate = pct()?,
             Field::RandomShare => s.random_share = pct()?,
             Field::DailyBudget => s.daily_budget = int(100_000)? as u32,
@@ -669,6 +674,17 @@ impl TravelMonitor {
                          p: &tm_domain::Place,
                          cx: &mut Context<Self>| {
             let id = p.id;
+            // Destinations can be starred here too (0094).
+            let star = (role == Role::Destination).then(|| {
+                widgets::star(
+                    format!("star-place-{}", p.code),
+                    s.is_favorite(id),
+                    15.,
+                )
+                .on_click(cx.listener(
+                    move |this, _, _, cx| this.toggle_favorite(id, cx),
+                ))
+            });
             div()
                 .flex()
                 .items_center()
@@ -676,6 +692,7 @@ impl TravelMonitor {
                 .py(px(6.))
                 .border_t_1()
                 .border_color(color(theme::ROW_RULE))
+                .children(star)
                 .child(
                     mono(fonts, p.code.clone())
                         .w(px(44.))
@@ -1434,7 +1451,13 @@ mod tests {
                 _ => {}
             }
         }
+        for (f, text) in &mut t {
+            if *f == Field::FavoriteDealThreshold {
+                *text = "12".into();
+            }
+        }
         let parsed = parse_settings(&s, &t).expect("valid");
+        assert!((parsed.favorite_deal_threshold - 0.12).abs() < 1e-9);
         assert_eq!(parsed.passengers.adults, 2);
         assert!((parsed.iof - 0.0438).abs() < 1e-9);
         assert_eq!(parsed.trips.max_days, 12);

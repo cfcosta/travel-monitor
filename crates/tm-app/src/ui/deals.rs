@@ -17,7 +17,7 @@ use gpui::{
     relative,
     rgba,
 };
-use tm_domain::{Cabin, Currency, Money};
+use tm_domain::{Cabin, Currency, Money, PlaceId};
 
 use super::{
     ListTab,
@@ -65,15 +65,42 @@ impl TravelMonitor {
             .into_any_element()
     }
 
+    /// The star of `place` (0094); a click stars or unstars it without
+    /// selecting the row under it.
+    pub(super) fn star(
+        &self,
+        id: String,
+        place: PlaceId,
+        size: f32,
+        cx: &mut Context<Self>,
+    ) -> Stateful<Div> {
+        let on = self.snapshot.as_ref().is_some_and(|s| s.is_favorite(place));
+        widgets::star(id, on, size).on_click(cx.listener(
+            move |this, _, _, cx| {
+                cx.stop_propagation();
+                this.toggle_favorite(place, cx);
+            },
+        ))
+    }
+
     fn render_list(&self, fonts: &Fonts, cx: &mut Context<Self>) -> Div {
         let Some(s) = &self.snapshot else {
             return div();
         };
         let pay = self.pay;
-        let deal_count = s.rows.iter().filter(|r| r.is_deal(pay)).count();
+        let favorites_only = self.favorites_only;
+        let listed =
+            |r: &&RouteRow| !favorites_only || s.is_favorite(r.place());
+        let deal_count = s
+            .rows
+            .iter()
+            .filter(listed)
+            .filter(|r| r.is_deal(pay))
+            .count();
         let all_count = s
             .rows
             .iter()
+            .filter(listed)
             .filter(|r| pay != PayWith::Miles || r.award.is_some())
             .count();
         let tab = |id: &'static str,
@@ -114,6 +141,23 @@ impl TravelMonitor {
                 cx.notify();
             }))
         }));
+        // Every place, or only the starred ones (0094).
+        let places = widgets::segments().children(
+            [
+                (false, "All", "places-all"),
+                (true, "★ Favorites", "places-favorites"),
+            ]
+            .map(|(only, label, id)| {
+                widgets::segment(id, label, favorites_only == only)
+                    .debug_selector(move || id.to_owned())
+                    .flex_1()
+                    .py(px(4.))
+                    .on_click(cx.listener(move |this, _, _, cx| {
+                        this.favorites_only = only;
+                        cx.notify();
+                    }))
+            }),
+        );
         let cabin_menu = self.dropdown(
             Menu::Cabin,
             "cabin",
@@ -163,6 +207,12 @@ impl TravelMonitor {
                 .p(px(24.))
                 .text_color(color(theme::TEXT_FAINT))
                 .child(match (pay, self.list_tab) {
+                    _ if favorites_only && s.favorites.is_empty() => {
+                        "No favorites yet. Star a place with ☆ on its row to follow it closely.".to_owned()
+                    }
+                    (_, ListTab::Deals) if favorites_only => {
+                        "No deals on your favorites right now. They are checked about twice as often.".to_owned()
+                    }
                     (PayWith::Miles, _) if !logged_in => {
                         "No miles program is logged in. Log in under Settings.".to_owned()
                     }
@@ -204,7 +254,13 @@ impl TravelMonitor {
                     .border_b_1()
                     .border_color(color(theme::BORDER))
                     .child(tabs)
-                    .child(field("Pay with", pay_with))
+                    .child(
+                        div()
+                            .flex()
+                            .gap(px(8.))
+                            .child(field("Pay with", pay_with))
+                            .child(field("Places", places)),
+                    )
                     .child(
                         div()
                             .flex()
@@ -386,6 +442,16 @@ impl TravelMonitor {
                             .flex()
                             .items_baseline()
                             .gap(px(8.))
+                            .child(self.star(
+                                format!(
+                                    "star-{}-{}",
+                                    key.route,
+                                    key.cabin.code()
+                                ),
+                                row.place(),
+                                15.,
+                                cx,
+                            ))
                             .child(
                                 div()
                                     .text_size(px(18.))
@@ -581,6 +647,12 @@ impl TravelMonitor {
                             .font_weight(FontWeight::BOLD)
                             .child(format!("{origin} → {}", row.code())),
                     )
+                    .child(self.star(
+                        "card-star".to_owned(),
+                        row.place(),
+                        20.,
+                        cx,
+                    ))
                     .child(widgets::series_chip(
                         row.status,
                         award.map(|a| a.status),

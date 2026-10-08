@@ -4,15 +4,15 @@
 //! activity log. LATAM Pass awards come from the GRU → LIS fixture of
 //! 2026-10-07 (docs/research/sites/fixtures/latam-pass), plus a miles
 //! deal on LIS business and an unusual rate on MIA, both illustrative
-//! (0083). Edits change the in-memory state, so the settings
-//! screen works too.
+//! (0083). Lisbon and Tokyo are starred (0094). Edits change the
+//! in-memory state, so the settings screen works too.
 //!
 //! Tests stand in for the daemon: [`FakeBackend::land_query`],
 //! [`FakeBackend::set_checking`] and [`FakeBackend::check_route`] change
 //! the data and send a change notice, as a commit would (0057).
 
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{BTreeSet, HashMap, HashSet},
     sync::Mutex,
 };
 
@@ -163,6 +163,9 @@ const SAMPLES: [Sample; 17] = [
     s("LIS", "Lisbon", "PT", false, (38.72, -9.14), (15240, -3), Watching, Business, 35, ("LATAM", 0, "LATAM"), 180, 580),
 ];
 
+/// The sample's starred destinations (0094).
+const FAVORITES: [&str; 2] = ["LIS", "TYO"];
+
 /// A small deterministic generator (the mockups' own LCG).
 struct Lcg(u64);
 
@@ -185,6 +188,8 @@ struct FakeState {
     origins: Vec<Place>,
     destinations: Vec<Place>,
     removed: HashSet<PlaceId>,
+    /// Starred destinations (0094).
+    favorites: BTreeSet<PlaceId>,
     pos: Vec<PointOfSale>,
     settings: Settings,
     miles: Vec<MilesRow>,
@@ -247,7 +252,7 @@ impl FakeBackend {
             place(1, "SAO", "São Paulo", "BR", true, -23.55, -46.63),
             place(2, "VCP", "Campinas", "BR", false, -23.01, -47.13),
         ];
-        let destinations = SAMPLES
+        let destinations: Vec<Place> = SAMPLES
             .iter()
             .enumerate()
             // One place per destination; LIS has two cabins.
@@ -263,6 +268,12 @@ impl FakeBackend {
                     s.lon,
                 )
             })
+            .collect();
+        // A starred deal and a starred route without one (0094).
+        let favorites = destinations
+            .iter()
+            .filter(|p| FAVORITES.contains(&p.code.as_str()))
+            .map(|p| p.id)
             .collect();
         let pos = [("BR", true), ("US", false), ("PT", false), ("IN", false)]
             .into_iter()
@@ -305,6 +316,7 @@ impl FakeBackend {
                 origins,
                 destinations,
                 removed: HashSet::new(),
+                favorites,
                 pos,
                 settings: Settings::default(),
                 miles,
@@ -1322,7 +1334,9 @@ impl Backend for FakeBackend {
         let horizon = i64::from(settings.horizon_days);
         let mut rows = Vec::new();
         for (di, dest) in &live {
-            let route = route_of(&origin, dest, origin_index + 1, *di as i64);
+            let mut route =
+                route_of(&origin, dest, origin_index + 1, *di as i64);
+            route.favorite = state.favorites.contains(&dest.id);
             let samples = samples_of(dest);
             if samples.is_empty() {
                 // A destination added in the settings: watched, no data yet.
@@ -1431,6 +1445,7 @@ impl Backend for FakeBackend {
                     .filter(|a| a.route.ends_with(s.code))
                     .collect(),
                 next_check: Some(now + Duration::hours(5)),
+                favorite: row.route.favorite,
             };
             Some(assemble(key, inputs, &settings, today, days, query.departure))
         });
@@ -1440,6 +1455,7 @@ impl Backend for FakeBackend {
             origins: state.origins.clone(),
             origin: Some(origin.id),
             destinations: live.iter().map(|(_, p)| (*p).clone()).collect(),
+            favorites: state.favorites.clone(),
             points_of_sale: state.pos.clone(),
             settings,
             miles: state.miles.clone(),
@@ -1698,6 +1714,23 @@ impl Backend for FakeBackend {
         limits: SiteLimits,
     ) -> anyhow::Result<()> {
         self.lock().site_limits.insert(site, limits.normalized());
+        Ok(())
+    }
+
+    async fn set_favorite(
+        &self,
+        place: PlaceId,
+        favorite: bool,
+    ) -> anyhow::Result<()> {
+        let mut state = self.lock();
+        if !state.destinations.iter().any(|p| p.id == place) {
+            anyhow::bail!("no destination {place}");
+        }
+        if favorite {
+            state.favorites.insert(place);
+        } else {
+            state.favorites.remove(&place);
+        }
         Ok(())
     }
 }

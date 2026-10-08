@@ -14,7 +14,7 @@
 //! committed, it tells the window, which refreshes (debounced).
 
 use std::{
-    collections::HashMap,
+    collections::{BTreeSet, HashMap},
     path::PathBuf,
     sync::{Arc, Mutex, OnceLock, Weak},
     time::Duration as StdDuration,
@@ -690,12 +690,7 @@ async fn snapshot(
         .into_iter()
         .map(|o| o.place)
         .collect();
-    let destinations: Vec<Place> = store
-        .list_destinations(true)
-        .await?
-        .into_iter()
-        .map(|d| d.place)
-        .collect();
+    let (favorites, destinations) = destinations_of(store).await?;
     let points_of_sale = store.list_points_of_sale(false).await?;
     let home = points_of_sale.iter().find(|p| p.is_home).map(|p| p.id);
     let pos_names: HashMap<PosId, CountryCode> = points_of_sale
@@ -961,6 +956,7 @@ async fn snapshot(
                         )
                     }),
                     award_marks: award_inputs.as_ref().map(AwardMarks::of),
+                    favorite: route.favorite,
                 };
                 detail = Some(assemble(
                     key,
@@ -1082,6 +1078,7 @@ async fn snapshot(
         origin: origin.map(|o| o.id),
         origins,
         destinations,
+        favorites,
         points_of_sale,
         settings,
         miles,
@@ -1093,6 +1090,22 @@ async fn snapshot(
         explore,
         detail,
     })
+}
+
+/// The watched destinations, and which of them the user starred (0094).
+async fn destinations_of(
+    store: &Store,
+) -> anyhow::Result<(BTreeSet<PlaceId>, Vec<Place>)> {
+    let destinations = store.list_destinations(true).await?;
+    let favorites = destinations
+        .iter()
+        .filter(|d| d.favorite)
+        .map(|d| d.place.id)
+        .collect();
+    Ok((
+        favorites,
+        destinations.into_iter().map(|d| d.place).collect(),
+    ))
 }
 
 /// Every miles program, with what the user set and its measured value
@@ -1490,6 +1503,21 @@ impl Backend for StoreBackend {
                 .configure_site_budget(&site, limits, today, now)
                 .await?;
             Ok(())
+        })
+        .await
+    }
+
+    async fn set_favorite(
+        &self,
+        place: PlaceId,
+        favorite: bool,
+    ) -> anyhow::Result<()> {
+        self.run(move |inner| async move {
+            Ok(inner
+                .store()
+                .await?
+                .set_destination_favorite(place, favorite)
+                .await?)
         })
         .await
     }
