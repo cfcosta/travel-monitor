@@ -1509,3 +1509,24 @@ seconds before anything is read or clicked. With `--latam-round-trips`,
 a `check_family` request may run one LATAM round trip; the scheduler
 still never picks one until a live run shows the click works and the
 default changes.
+
+## 0094: Favorite destinations are checked more often and alert sooner
+
+- Date: 2026-10-08
+- Refines [0030](#0030-deal-baselines-are-per-days-to-departure-bucket),
+  [0035](#0035-origins-and-destinations-are-configured-in-the-app),
+  [0065](#0065-fill-in-and-refresh-the-oldest-data-first-google-flights-doubles-again),
+  [0080](#0080-the-daemon-raises-the-deal-notifications) and
+  [0083](#0083-awards-are-their-own-series-the-value-of-a-mile-is-measured).
+
+A destination can be starred in the app: on its Deals row, the route
+card and page, or in Settings. Every route to it, in every cabin, cash
+and miles, from any origin, is then a favorite. A Places switch next to
+Pay with lists only favorites. Favorites' families age twice as fast in
+the scheduler: their time since the last check counts double and their
+maximum interval is halved, so they are checked about twice as often
+within the same site budgets. The minimum interval is unchanged. Their
+cash and award series are deals at 10% under the usual price instead
+of 20%, a setting next to the global threshold; the robust-spread test
+and the confirmation are unchanged. Explore finds keep the global
+threshold.
