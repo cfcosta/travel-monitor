@@ -1264,13 +1264,20 @@ async fn snapshot(
             loads_last_hour: b.loads_last_hour,
         })
         .collect();
-    let blocks_today =
-        blocks.iter().filter(|b| b.at.date_naive() == today).count() as u32;
+    // The daemon's budget day is the local date (0060), so today's loads
+    // and blocks are counted by it, not by the UTC date.
+    let budget_day = chrono::Local::now().date_naive();
+    let blocks_today = blocks
+        .iter()
+        .filter(|b| {
+            b.at.with_timezone(&chrono::Local).date_naive() == budget_day
+        })
+        .count() as u32;
     let daemon = daemon_status(
         store,
         &ctx.settings,
         blocks_today,
-        today,
+        budget_day,
         &ctx.pos_names,
     )
     .await?;
