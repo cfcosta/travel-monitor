@@ -2015,6 +2015,7 @@ mod tests {
             destination: place(2, "RIO"),
             weight: 1.0,
             active: true,
+            favorite: false,
         };
         let d = NaiveDate::from_ymd_opt(2026, 11, 10).expect("date");
         let url = search_url(

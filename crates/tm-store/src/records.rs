@@ -82,6 +82,8 @@ pub struct Destination {
     pub place: Place,
     pub weight: f64,
     pub active: bool,
+    /// Starred in the app (DECISIONS.md 0094).
+    pub favorite: bool,
 }
 
 /// An airline site searched directly (DECISIONS.md 0012), and the

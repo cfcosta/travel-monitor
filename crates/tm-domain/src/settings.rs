@@ -91,6 +91,10 @@ pub struct Settings {
     /// A deal is at least this far under the bucket median, before the
     /// robust-spread test (0030).
     pub deal_threshold: f64,
+    /// The same threshold for favorite destinations, cash and miles
+    /// alike: smaller drops there are deals too (0094: 10%).
+    #[serde(default = "default_favorite_deal_threshold")]
+    pub favorite_deal_threshold: f64,
     /// An award's implied value of a mile this far from its program's
     /// usual rate is flagged as unusual (0083: 15%). Award deals use
     /// `deal_threshold` like cash ones.
@@ -120,12 +124,17 @@ impl Default for Settings {
             min_interval_hours: 6,
             random_share: 0.10,
             deal_threshold: 0.20,
+            favorite_deal_threshold: 0.10,
             unusual_rate: 0.15,
             min_history_weeks: 4,
             additive_checks_to_stop: 5,
             language: "en".to_owned(),
         }
     }
+}
+
+fn default_favorite_deal_threshold() -> f64 {
+    Settings::default().favorite_deal_threshold
 }
 
 #[derive(Debug, Error, PartialEq)]
@@ -187,6 +196,7 @@ impl Settings {
             ("card_spread", self.card_spread),
             ("random_share", self.random_share),
             ("deal_threshold", self.deal_threshold),
+            ("favorite_deal_threshold", self.favorite_deal_threshold),
             ("unusual_rate", self.unusual_rate),
         ] {
             if !(0.0..=1.0).contains(&value) {
@@ -266,5 +276,25 @@ mod tests {
         let mut s = Settings::default();
         s.trips.min_days = 11;
         assert_eq!(s.validate(), Err(SettingsError::TripRange(11, 10)));
+    }
+
+    #[test]
+    fn the_favorite_threshold_is_a_fraction() {
+        let s = Settings {
+            favorite_deal_threshold: 1.5,
+            ..Settings::default()
+        };
+        assert_eq!(
+            s.validate(),
+            Err(SettingsError::Fraction("favorite_deal_threshold"))
+        );
+        // Older serialized settings read the default (0094).
+        let mut json =
+            serde_json::to_value(Settings::default()).expect("serializes");
+        json.as_object_mut()
+            .expect("an object")
+            .remove("favorite_deal_threshold");
+        let back: Settings = serde_json::from_value(json).expect("reads");
+        assert_eq!(back.favorite_deal_threshold, 0.10);
     }
 }

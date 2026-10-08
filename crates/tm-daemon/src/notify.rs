@@ -264,6 +264,7 @@ mod tests {
             destination: place(2, "LIS", "Lisbon"),
             weight: 1.0,
             active: true,
+            favorite: false,
         }
     }
 

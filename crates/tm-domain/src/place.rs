@@ -76,6 +76,11 @@ pub struct Route {
     /// The scheduler's weight `w` for this route (default 1.0).
     pub weight: f64,
     pub active: bool,
+    /// Its destination is a favorite: checked more often and judged
+    /// with the lower favorite deal threshold (DECISIONS.md 0094).
+    /// Always false for an Explore sweep.
+    #[serde(default)]
+    pub favorite: bool,
 }
 
 impl Route {

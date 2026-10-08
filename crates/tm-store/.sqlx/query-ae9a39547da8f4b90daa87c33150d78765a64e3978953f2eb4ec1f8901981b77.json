@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT p.id, p.code, p.name, p.country, p.kind, p.freebase_id,\n                      p.lat, p.lon, d.weight, d.active AS \"active: bool\"\n               FROM destinations d JOIN places p ON p.id = d.place_id\n               WHERE (?1 = 0 OR d.active = 1)\n               ORDER BY p.code",
+  "query": "SELECT p.id, p.code, p.name, p.country, p.kind, p.freebase_id,\n                      p.lat, p.lon, d.weight, d.active AS \"active: bool\",\n                      d.favorite AS \"favorite: bool\"\n               FROM destinations d JOIN places p ON p.id = d.place_id\n               WHERE (?1 = 0 OR d.active = 1)\n               ORDER BY p.code",
   "describe": {
     "columns": [
       {
@@ -112,6 +112,17 @@
             "name": "active"
           }
         }
+      },
+      {
+        "name": "favorite: bool",
+        "ordinal": 10,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "destinations",
+            "name": "favorite"
+          }
+        }
       }
     ],
     "parameters": {
@@ -127,8 +138,9 @@
       false,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "4049c0ecdbd3787e717049755dd65cdd29da9ef1011e22729426c6f1539ef28f"
+  "hash": "ae9a39547da8f4b90daa87c33150d78765a64e3978953f2eb4ec1f8901981b77"
 }

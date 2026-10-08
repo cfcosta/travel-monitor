@@ -346,6 +346,7 @@ pub(crate) struct RouteRow {
     pub id: i64,
     pub active: bool,
     pub weight: f64,
+    pub favorite: bool,
     pub o_id: i64,
     pub o_code: String,
     pub o_name: String,
@@ -394,6 +395,7 @@ impl TryFrom<RouteRow> for Route {
             destination: destination.try_into()?,
             weight: row.weight,
             active: row.active,
+            favorite: row.favorite,
         })
     }
 }
@@ -443,6 +445,7 @@ pub(crate) struct SettingsRow {
     pub additive_checks_to_stop: i64,
     pub language: String,
     pub unusual_rate: f64,
+    pub favorite_deal_threshold: f64,
 }
 
 impl TryFrom<SettingsRow> for Settings {
@@ -476,6 +479,7 @@ impl TryFrom<SettingsRow> for Settings {
             )?,
             random_share: row.random_share,
             deal_threshold: row.deal_threshold,
+            favorite_deal_threshold: row.favorite_deal_threshold,
             unusual_rate: row.unusual_rate,
             min_history_weeks: count(
                 "min_history_weeks",

@@ -354,6 +354,7 @@ mod tests {
             destination: to.clone(),
             weight: 1.0,
             active: true,
+            favorite: false,
         }
     }
 

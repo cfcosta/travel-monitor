@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT r.id, r.active AS \"active: bool\",\n                      1.0 AS \"weight!: f64\",\n                      o.id AS o_id, o.code AS o_code, o.name AS o_name,\n                      o.country AS o_country, o.kind AS o_kind,\n                      o.freebase_id AS o_freebase_id, o.lat AS o_lat,\n                      o.lon AS o_lon,\n                      o.id AS d_id, o.code AS d_code, o.name AS d_name,\n                      o.country AS d_country, o.kind AS d_kind,\n                      o.freebase_id AS d_freebase_id, o.lat AS d_lat,\n                      o.lon AS d_lon\n               FROM routes r JOIN places o ON o.id = r.origin_id\n               WHERE r.sweep = 1 AND (?1 = 0 OR r.active = 1)\n               ORDER BY o.code",
+  "query": "SELECT r.id, r.active AS \"active: bool\",\n                      1.0 AS \"weight!: f64\",\n                      0 AS \"favorite!: bool\",\n                      o.id AS o_id, o.code AS o_code, o.name AS o_name,\n                      o.country AS o_country, o.kind AS o_kind,\n                      o.freebase_id AS o_freebase_id, o.lat AS o_lat,\n                      o.lon AS o_lon,\n                      o.id AS d_id, o.code AS d_code, o.name AS d_name,\n                      o.country AS d_country, o.kind AS d_kind,\n                      o.freebase_id AS d_freebase_id, o.lat AS d_lat,\n                      o.lon AS d_lon\n               FROM routes r JOIN places o ON o.id = r.origin_id\n               WHERE r.sweep = 1 AND (?1 = 0 OR r.active = 1)\n               ORDER BY o.code",
   "describe": {
     "columns": [
       {
@@ -32,8 +32,14 @@
         "origin": "Expression"
       },
       {
-        "name": "o_id",
+        "name": "favorite!: bool",
         "ordinal": 3,
+        "type_info": "Integer",
+        "origin": "Expression"
+      },
+      {
+        "name": "o_id",
+        "ordinal": 4,
         "type_info": "Integer",
         "origin": {
           "Table": {
@@ -44,7 +50,7 @@
       },
       {
         "name": "o_code",
-        "ordinal": 4,
+        "ordinal": 5,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -55,7 +61,7 @@
       },
       {
         "name": "o_name",
-        "ordinal": 5,
+        "ordinal": 6,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -66,7 +72,7 @@
       },
       {
         "name": "o_country",
-        "ordinal": 6,
+        "ordinal": 7,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -77,7 +83,7 @@
       },
       {
         "name": "o_kind",
-        "ordinal": 7,
+        "ordinal": 8,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -88,7 +94,7 @@
       },
       {
         "name": "o_freebase_id",
-        "ordinal": 8,
+        "ordinal": 9,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -99,7 +105,7 @@
       },
       {
         "name": "o_lat",
-        "ordinal": 9,
+        "ordinal": 10,
         "type_info": "Float",
         "origin": {
           "Table": {
@@ -110,7 +116,7 @@
       },
       {
         "name": "o_lon",
-        "ordinal": 10,
+        "ordinal": 11,
         "type_info": "Float",
         "origin": {
           "Table": {
@@ -121,7 +127,7 @@
       },
       {
         "name": "d_id",
-        "ordinal": 11,
+        "ordinal": 12,
         "type_info": "Integer",
         "origin": {
           "Table": {
@@ -132,7 +138,7 @@
       },
       {
         "name": "d_code",
-        "ordinal": 12,
+        "ordinal": 13,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -143,7 +149,7 @@
       },
       {
         "name": "d_name",
-        "ordinal": 13,
+        "ordinal": 14,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -154,7 +160,7 @@
       },
       {
         "name": "d_country",
-        "ordinal": 14,
+        "ordinal": 15,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -165,7 +171,7 @@
       },
       {
         "name": "d_kind",
-        "ordinal": 15,
+        "ordinal": 16,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -176,7 +182,7 @@
       },
       {
         "name": "d_freebase_id",
-        "ordinal": 16,
+        "ordinal": 17,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -187,7 +193,7 @@
       },
       {
         "name": "d_lat",
-        "ordinal": 17,
+        "ordinal": 18,
         "type_info": "Float",
         "origin": {
           "Table": {
@@ -198,7 +204,7 @@
       },
       {
         "name": "d_lon",
-        "ordinal": 18,
+        "ordinal": 19,
         "type_info": "Float",
         "origin": {
           "Table": {
@@ -220,6 +226,7 @@
       false,
       false,
       false,
+      false,
       true,
       false,
       false,
@@ -233,5 +240,5 @@
       false
     ]
   },
-  "hash": "7d26bfc200abdcf8246bb4a9526453936cfb2c8a8cb1522633eac8cab7182b5d"
+  "hash": "94b867d9f2b4b31dcf952a70f1e25e57ba0f7fac07b6ce6681d200177e8033a2"
 }

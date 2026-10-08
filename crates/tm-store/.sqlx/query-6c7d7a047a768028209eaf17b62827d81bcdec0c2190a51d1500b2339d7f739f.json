@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE destinations SET favorite = ?2 WHERE place_id = ?1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "6c7d7a047a768028209eaf17b62827d81bcdec0c2190a51d1500b2339d7f739f"
+}

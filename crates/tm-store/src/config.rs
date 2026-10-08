@@ -202,9 +202,9 @@ pub(crate) async fn set_settings_in(
              iof, card_spread, daily_budget, max_daily_budget,
              max_interval_hours, min_interval_hours, random_share,
              deal_threshold, min_history_weeks, additive_checks_to_stop,
-             language, unusual_rate)
+             language, unusual_rate, favorite_deal_threshold)
          VALUES (1, ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13,
-                 ?14, ?15, ?16, ?17, ?18, ?19, ?20)
+                 ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21)
          ON CONFLICT (id) DO UPDATE SET
              adults = excluded.adults,
              children = excluded.children,
@@ -225,7 +225,8 @@ pub(crate) async fn set_settings_in(
              min_history_weeks = excluded.min_history_weeks,
              additive_checks_to_stop = excluded.additive_checks_to_stop,
              language = excluded.language,
-             unusual_rate = excluded.unusual_rate",
+             unusual_rate = excluded.unusual_rate,
+             favorite_deal_threshold = excluded.favorite_deal_threshold",
         p.adults,
         p.children,
         p.infants_in_seat,
@@ -246,6 +247,7 @@ pub(crate) async fn set_settings_in(
         s.additive_checks_to_stop,
         s.language,
         s.unusual_rate,
+        s.favorite_deal_threshold,
     )
     .execute(&mut *conn)
     .await?;
@@ -262,7 +264,7 @@ pub(crate) async fn settings_in(
                 iof, card_spread, daily_budget, max_daily_budget,
                 max_interval_hours, min_interval_hours, random_share,
                 deal_threshold, min_history_weeks, additive_checks_to_stop,
-                language, unusual_rate
+                language, unusual_rate, favorite_deal_threshold
          FROM settings WHERE id = 1"
     )
     .fetch_optional(&mut *conn)
@@ -509,6 +511,27 @@ impl Store {
         Ok(())
     }
 
+    /// Stars or unstars a destination (DECISIONS.md 0094): every route
+    /// to it becomes, or stops being, a favorite. A removed destination
+    /// keeps its star for when it is added back.
+    pub async fn set_destination_favorite(
+        &self,
+        place: PlaceId,
+        favorite: bool,
+    ) -> Result<()> {
+        let done = sqlx::query!(
+            "UPDATE destinations SET favorite = ?2 WHERE place_id = ?1",
+            place.0,
+            favorite
+        )
+        .execute(&self.pool)
+        .await?;
+        if done.rows_affected() == 0 {
+            return Err(StoreError::not_found("destination", place));
+        }
+        Ok(())
+    }
+
     /// Records a city's Freebase ID, learned with a `q=` search (0041).
     pub async fn set_freebase_id(
         &self,
@@ -592,7 +615,8 @@ impl Store {
     ) -> Result<Vec<Destination>> {
         let rows = sqlx::query!(
             r#"SELECT p.id, p.code, p.name, p.country, p.kind, p.freebase_id,
-                      p.lat, p.lon, d.weight, d.active AS "active: bool"
+                      p.lat, p.lon, d.weight, d.active AS "active: bool",
+                      d.favorite AS "favorite: bool"
                FROM destinations d JOIN places p ON p.id = d.place_id
                WHERE (?1 = 0 OR d.active = 1)
                ORDER BY p.code"#,
@@ -616,6 +640,7 @@ impl Store {
                     place: place.try_into()?,
                     weight: r.weight,
                     active: r.active,
+                    favorite: r.favorite,
                 })
             })
             .collect()
@@ -959,6 +984,7 @@ impl Store {
             RouteRow,
             r#"SELECT r.id, r.active AS "active: bool",
                       COALESCE(d.weight, 1.0) AS "weight!: f64",
+                      COALESCE(d.favorite, 0) AS "favorite!: bool",
                       o.id AS o_id, o.code AS o_code, o.name AS o_name,
                       o.country AS o_country, o.kind AS o_kind,
                       o.freebase_id AS o_freebase_id, o.lat AS o_lat,
@@ -986,6 +1012,7 @@ impl Store {
             RouteRow,
             r#"SELECT r.id, r.active AS "active: bool",
                       1.0 AS "weight!: f64",
+                      0 AS "favorite!: bool",
                       o.id AS o_id, o.code AS o_code, o.name AS o_name,
                       o.country AS o_country, o.kind AS o_kind,
                       o.freebase_id AS o_freebase_id, o.lat AS o_lat,
@@ -1011,6 +1038,8 @@ impl Store {
             r#"SELECT r.id, r.active AS "active: bool",
                       CASE WHEN r.sweep = 1 THEN 1.0
                            ELSE COALESCE(d.weight, 1.0) END AS "weight!: f64",
+                      CASE WHEN r.sweep = 1 THEN 0
+                           ELSE COALESCE(d.favorite, 0) END AS "favorite!: bool",
                       o.id AS o_id, o.code AS o_code, o.name AS o_name,
                       o.country AS o_country, o.kind AS o_kind,
                       o.freebase_id AS o_freebase_id, o.lat AS o_lat,

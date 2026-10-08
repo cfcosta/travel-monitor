@@ -440,6 +440,7 @@ fn route_of(
         destination: dest.clone(),
         weight: 1.0,
         active: true,
+        favorite: false,
     }
 }
 

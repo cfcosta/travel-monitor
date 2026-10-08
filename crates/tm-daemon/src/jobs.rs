@@ -415,6 +415,7 @@ mod tests {
             destination: place("LIS", dest),
             weight: 1.0,
             active: true,
+            favorite: false,
         }
     }
 
