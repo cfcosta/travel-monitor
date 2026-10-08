@@ -1,0 +1,74 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT family_id,\n                      observed_at AS \"observed_at: DateTime<Utc>\",\n                      departure AS \"departure: NaiveDate\",\n                      return_date AS \"return_date: NaiveDate\",\n                      price_minor\n               FROM observations\n               WHERE family_id IN (SELECT value FROM json_each(?1))\n                 AND observed_at >= ?2 AND passengers = ?3\n               ORDER BY observed_at, id",
+  "describe": {
+    "columns": [
+      {
+        "name": "family_id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "family_id"
+          }
+        }
+      },
+      {
+        "name": "observed_at: DateTime<Utc>",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "observed_at"
+          }
+        }
+      },
+      {
+        "name": "departure: NaiveDate",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "departure"
+          }
+        }
+      },
+      {
+        "name": "return_date: NaiveDate",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "return_date"
+          }
+        }
+      },
+      {
+        "name": "price_minor",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "observations",
+            "name": "price_minor"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "103df3f61d4b88bc09a8b66c72b9dd7dbe1907e186b974e421a50e8e40e0d7f6"
+}

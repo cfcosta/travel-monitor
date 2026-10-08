@@ -140,6 +140,18 @@ impl MilesProgram {
     }
 }
 
+/// A cell's price as observed, without the rest of its observation:
+/// what price histories are built from.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PriceCell {
+    pub family: FamilyId,
+    pub observed_at: DateTime<Utc>,
+    pub departure: NaiveDate,
+    pub return_date: Option<NaiveDate>,
+    /// In the observation's currency; `None` when the cell had no price.
+    pub price_minor: Option<i64>,
+}
+
 /// One award check's implied value of a mile (DECISIONS.md 0083).
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct AwardRate {

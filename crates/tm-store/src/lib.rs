@@ -53,6 +53,7 @@ pub use records::{
     MilesProgram,
     NewPlace,
     Origin,
+    PriceCell,
     QueryLogEntry,
     RequestKind,
     RequestRecord,

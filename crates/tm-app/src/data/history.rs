@@ -6,14 +6,60 @@ use std::collections::BTreeMap;
 use chrono::{DateTime, Duration, NaiveDate, Utc};
 use tm_domain::{FamilyKind, Leg, Observation, TripRange};
 use tm_scheduler::{BaselineKey, PricePoint};
+use tm_store::PriceCell;
 
 use crate::grid::{TripInputs, TripPrice};
+
+/// What pricing a trip needs from an observed cell: a full
+/// [`Observation`] (the latest cells) or a [`PriceCell`] (histories).
+pub trait Cell {
+    fn observed_at(&self) -> DateTime<Utc>;
+    fn departure(&self) -> NaiveDate;
+    fn return_date(&self) -> Option<NaiveDate>;
+    fn price_minor(&self) -> Option<i64>;
+}
+
+impl Cell for Observation {
+    fn observed_at(&self) -> DateTime<Utc> {
+        self.observed_at
+    }
+
+    fn departure(&self) -> NaiveDate {
+        self.departure
+    }
+
+    fn return_date(&self) -> Option<NaiveDate> {
+        self.return_date
+    }
+
+    fn price_minor(&self) -> Option<i64> {
+        self.price.as_ref().map(|p| p.minor)
+    }
+}
+
+impl Cell for PriceCell {
+    fn observed_at(&self) -> DateTime<Utc> {
+        self.observed_at
+    }
+
+    fn departure(&self) -> NaiveDate {
+        self.departure
+    }
+
+    fn return_date(&self) -> Option<NaiveDate> {
+        self.return_date
+    }
+
+    fn price_minor(&self) -> Option<i64> {
+        self.price_minor
+    }
+}
 
 /// The trip inputs of one family set's cells (the latest per family,
 /// or one day's observations): legs by departure, round trips by date
 /// pair. A later observation of the same cell wins.
-pub fn trip_inputs<'a>(
-    cells: impl IntoIterator<Item = (FamilyKind, &'a Observation)>,
+pub fn trip_inputs<'a, C: Cell + 'a>(
+    cells: impl IntoIterator<Item = (FamilyKind, &'a C)>,
     discount: f64,
 ) -> TripInputs {
     let mut inputs = TripInputs {
@@ -23,7 +69,7 @@ pub fn trip_inputs<'a>(
     let mut seen: BTreeMap<(u8, NaiveDate, Option<NaiveDate>), DateTime<Utc>> =
         BTreeMap::new();
     for (kind, obs) in cells {
-        let Some(price) = &obs.price else {
+        let Some(price) = obs.price_minor() else {
             continue;
         };
         let slot = match kind {
@@ -32,20 +78,21 @@ pub fn trip_inputs<'a>(
             FamilyKind::RoundTrip { .. } => 2,
             FamilyKind::Explore => continue,
         };
-        let key = (slot, obs.departure, obs.return_date);
-        if seen.get(&key).is_some_and(|at| *at > obs.observed_at) {
+        let (departure, observed_at) = (obs.departure(), obs.observed_at());
+        let key = (slot, departure, obs.return_date());
+        if seen.get(&key).is_some_and(|at| *at > observed_at) {
             continue;
         }
-        seen.insert(key, obs.observed_at);
-        match (slot, obs.return_date) {
+        seen.insert(key, observed_at);
+        match (slot, obs.return_date()) {
             (0, _) => {
-                inputs.legs.outbound.insert(obs.departure, price.minor);
+                inputs.legs.outbound.insert(departure, price);
             }
             (1, _) => {
-                inputs.legs.inbound.insert(obs.departure, price.minor);
+                inputs.legs.inbound.insert(departure, price);
             }
             (_, Some(ret)) => {
-                inputs.round_trips.insert((obs.departure, ret), price.minor);
+                inputs.round_trips.insert((departure, ret), price);
             }
             _ => {}
         }
@@ -97,15 +144,14 @@ pub struct History {
 
 /// Groups `observations` by the day they were made and prices every
 /// trip of each day.
-pub fn history(
-    observations: &[(FamilyKind, Observation)],
+pub fn history<C: Cell>(
+    observations: &[(FamilyKind, C)],
     discount: f64,
     range: TripRange,
 ) -> History {
-    let mut days: BTreeMap<NaiveDate, Vec<(FamilyKind, &Observation)>> =
-        BTreeMap::new();
+    let mut days: BTreeMap<NaiveDate, Vec<(FamilyKind, &C)>> = BTreeMap::new();
     for (kind, obs) in observations {
-        days.entry(obs.observed_at.date_naive())
+        days.entry(obs.observed_at().date_naive())
             .or_default()
             .push((*kind, obs));
     }
@@ -113,7 +159,7 @@ pub fn history(
     for (day, cells) in days {
         let at = cells
             .iter()
-            .map(|(_, o)| o.observed_at)
+            .map(|(_, o)| o.observed_at())
             .max()
             .unwrap_or_default();
         let inputs = trip_inputs(cells, discount);

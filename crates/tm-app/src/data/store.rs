@@ -55,6 +55,7 @@ use tm_store::{
     DealFilter,
     FamilyRecord,
     LoginState,
+    PriceCell,
     QueryLogEntry,
     RequestKind,
     RequestStatus,
@@ -286,50 +287,162 @@ impl Inner {
         Ok(finds)
     }
 
-    async fn history(
+    /// Reads the latest cells of every family of `rows` whose
+    /// cached cells are older than its last check, in one statement, so
+    /// that [`Inner::cells`] then finds them cached.
+    async fn prefetch_cells(
         &self,
         store: &Store,
-        key: RowKey,
-        families: &[&FamilyRecord],
-        discount: f64,
+        rows: &[RowSpec<'_>],
+    ) -> anyhow::Result<()> {
+        let stale: Vec<(FamilyId, Option<DateTime<Utc>>)> = {
+            let cache = self.lock();
+            rows.iter()
+                .flat_map(|row| row.families.iter())
+                .filter(|f| {
+                    cache
+                        .cells
+                        .get(&f.id)
+                        .is_none_or(|(at, _)| *at != f.state.last_check)
+                })
+                .map(|f| (f.id, f.state.last_check))
+                .collect()
+        };
+        if stale.is_empty() {
+            return Ok(());
+        }
+        let ids: Vec<FamilyId> = stale.iter().map(|(id, _)| *id).collect();
+        let mut by_family: HashMap<FamilyId, Vec<Observation>> = HashMap::new();
+        for o in store.latest_cells_of(&ids).await? {
+            by_family.entry(o.family).or_default().push(o);
+        }
+        let mut cache = self.lock();
+        for (id, stamp) in stale {
+            let cells = by_family.remove(&id).unwrap_or_default();
+            cache.cells.insert(id, (stamp, Arc::new(cells)));
+        }
+        Ok(())
+    }
+
+    /// Each row's price history (60 days), cached until one of its
+    /// families is checked again. The rows whose cache is stale are read
+    /// together, in one statement.
+    async fn histories(
+        &self,
+        store: &Store,
+        rows: &[RowSpec<'_>],
         settings: &Settings,
         now: DateTime<Utc>,
-    ) -> anyhow::Result<Arc<History>> {
-        let stamp = families.iter().filter_map(|f| f.state.last_check).max();
-        if let Some((at, h)) = self.lock().history.get(&key)
-            && *at == stamp
+    ) -> anyhow::Result<HashMap<RowKey, Arc<History>>> {
+        let mut out = HashMap::new();
+        let mut stale: Vec<(&RowSpec<'_>, Option<DateTime<Utc>>)> = Vec::new();
         {
-            return Ok(h.clone());
+            let cache = self.lock();
+            for row in rows {
+                let stamp = row.last_check();
+                match cache.history.get(&row.key) {
+                    Some((at, h)) if *at == stamp => {
+                        out.insert(row.key, h.clone());
+                    }
+                    _ => stale.push((row, stamp)),
+                }
+            }
         }
-        let kinds: HashMap<FamilyId, FamilyKind> =
-            families.iter().map(|f| (f.id, f.key.kind)).collect();
-        let rows: Vec<(FamilyKind, Observation)> = store
-            .history_for_route(key.route, key.cabin, now - Duration::days(60))
-            .await?
-            .into_iter()
-            .filter_map(|o| Some((*kinds.get(&o.family)?, o)))
-            .collect();
-        let h = Arc::new(history::history(&rows, discount, settings.trips));
-        self.lock().history.insert(key, (stamp, h.clone()));
-        Ok(h)
+        if stale.is_empty() {
+            return Ok(out);
+        }
+        let mut owner: HashMap<FamilyId, (usize, FamilyKind)> = HashMap::new();
+        for (i, (row, _)) in stale.iter().enumerate() {
+            for f in &row.families {
+                owner.insert(f.id, (i, f.key.kind));
+            }
+        }
+        let ids: Vec<FamilyId> = owner.keys().copied().collect();
+        let mut cells: Vec<Vec<(FamilyKind, PriceCell)>> =
+            vec![Vec::new(); stale.len()];
+        for c in store.price_history(&ids, now - Duration::days(60)).await? {
+            if let Some((i, kind)) = owner.get(&c.family) {
+                cells[*i].push((*kind, c));
+            }
+        }
+        let mut cache = self.lock();
+        for ((row, stamp), cells) in stale.into_iter().zip(cells) {
+            let h = Arc::new(history::history(
+                &cells,
+                row.discount,
+                settings.trips,
+            ));
+            cache.history.insert(row.key, (stamp, h.clone()));
+            out.insert(row.key, h);
+        }
+        Ok(out)
     }
 }
 
-/// The families a row's prices come from: Google Flights at the home
-/// point of sale, legs and round trips.
-fn row_families(
-    families: &[FamilyRecord],
+/// A row of the list before it is priced: its route × cabin, the
+/// families its prices come from and its route's round-trip discount.
+struct RowSpec<'a> {
+    route: &'a Route,
     key: RowKey,
+    families: Vec<&'a FamilyRecord>,
+    discount: f64,
+}
+
+impl RowSpec<'_> {
+    /// The row's last check: what its cached history is keyed by.
+    fn last_check(&self) -> Option<DateTime<Utc>> {
+        self.families
+            .iter()
+            .filter_map(|f| f.state.last_check)
+            .max()
+    }
+}
+
+/// Every row of `routes`, with its families (Google Flights at the home
+/// point of sale, legs and round trips, in id order) and discount,
+/// grouped in one pass over the families.
+fn row_specs<'a>(
+    routes: &'a [Route],
+    families: &'a [FamilyRecord],
     home: Option<PosId>,
-) -> Vec<&FamilyRecord> {
-    families
+) -> Vec<RowSpec<'a>> {
+    let mut by_row: HashMap<RowKey, Vec<&FamilyRecord>> = HashMap::new();
+    let mut discounts: HashMap<tm_domain::RouteId, f64> = HashMap::new();
+    for f in families {
+        // The route's own state, joined onto each of its families.
+        discounts
+            .entry(f.key.route)
+            .or_insert_with(|| discount_of(Some(f.state.route_trip())));
+        if f.key.source == Source::GoogleFlights
+            && home.is_none_or(|h| f.key.pos == h)
+            && !matches!(f.key.kind, FamilyKind::Explore)
+        {
+            by_row
+                .entry(RowKey {
+                    route: f.key.route,
+                    cabin: f.key.cabin,
+                })
+                .or_default()
+                .push(f);
+        }
+    }
+    routes
         .iter()
-        .filter(|f| {
-            f.key.route == key.route
-                && f.key.cabin == key.cabin
-                && f.key.source == Source::GoogleFlights
-                && home.is_none_or(|h| f.key.pos == h)
-                && !matches!(f.key.kind, FamilyKind::Explore)
+        .flat_map(|route| {
+            let discount = discounts.get(&route.id).copied().unwrap_or(0.0);
+            let by_row = &by_row;
+            route.cabins().iter().map(move |&cabin| {
+                let key = RowKey {
+                    route: route.id,
+                    cabin,
+                };
+                RowSpec {
+                    route,
+                    key,
+                    families: by_row.get(&key).cloned().unwrap_or_default(),
+                    discount,
+                }
+            })
         })
         .collect()
 }
@@ -728,19 +841,19 @@ async fn snapshot(
         .calendar_days
         .unwrap_or(settings.trips.round_trip_days);
 
+    let specs = row_specs(&routes, &families, home);
+    inner.prefetch_cells(store, &specs).await?;
+    let histories = inner.histories(store, &specs, &settings, now).await?;
     let mut rows = Vec::new();
     let mut detail = None;
-    for route in &routes {
-        let discount = discount_of(store.route_trip_state(route.id).await?);
-        for &cabin in route.cabins() {
-            let key = RowKey {
-                route: route.id,
-                cabin,
-            };
-            let fams = row_families(&families, key, home);
+    for spec in &specs {
+        let (route, key, discount) = (spec.route, spec.key, spec.discount);
+        let cabin = key.cabin;
+        let fams = &spec.families;
+        {
             let mut cells: Vec<(FamilyKind, Arc<Vec<Observation>>)> =
                 Vec::new();
-            for f in &fams {
+            for f in fams {
                 cells.push((f.key.kind, inner.cells(store, f).await?));
             }
             let inputs: TripInputs = history::trip_inputs(
@@ -749,9 +862,10 @@ async fn snapshot(
                     .flat_map(|(k, obs)| obs.iter().map(move |o| (*k, o))),
                 discount,
             );
-            let hist = inner
-                .history(store, key, &fams, discount, &settings, now)
-                .await?;
+            let hist = histories
+                .get(&key)
+                .cloned()
+                .context("a row without its history")?;
             let baselines = Baselines {
                 by_departure: history::baselines_by_departure(
                     &hist.points,
@@ -2068,5 +2182,162 @@ mod tests {
             d + Duration::days(7),
         );
         assert!(url.contains("/flights/search?tfs="), "{url}");
+    }
+
+    /// Prices both legs of SAO → MIA economy, 30 to 40 days out, as one
+    /// query each observed at `at`, and records the check on the
+    /// families only when `checked`.
+    async fn price_mia(
+        store: &Store,
+        at: DateTime<Utc>,
+        whole: i64,
+        checked: bool,
+    ) {
+        use tm_domain::FamilyKey;
+        let home = store
+            .home_point_of_sale()
+            .await
+            .expect("pos")
+            .expect("home");
+        let mia = store
+            .route_between("SAO", "MIA")
+            .await
+            .expect("route")
+            .expect("SAO → MIA");
+        for leg in [Leg::Outbound, Leg::Return] {
+            let key = FamilyKey {
+                route: mia,
+                cabin: Cabin::Economy,
+                source: Source::GoogleFlights,
+                pos: home.id,
+                kind: FamilyKind::Leg { leg },
+            };
+            let family = store
+                .family_id(&key)
+                .await
+                .expect("family")
+                .expect("leg family");
+            let q = store
+                .start_query(family, &QueryReason::Random, at)
+                .await
+                .expect("start");
+            let obs: Vec<Observation> = (30..=40)
+                .map(|i| Observation {
+                    id: None,
+                    query: q,
+                    family,
+                    observed_at: at,
+                    departure: at.date_naive() + Duration::days(i),
+                    return_date: None,
+                    price: Some(Money::brl_whole(whole)),
+                    miles: None,
+                    carrier: None,
+                    stops: None,
+                    duration_minutes: None,
+                    seller: None,
+                    flights: None,
+                    award: None,
+                })
+                .collect();
+            store.insert_observations(&obs).await.expect("observations");
+            store
+                .finish_query(q, &QueryOutcome::Ok, 1, at)
+                .await
+                .expect("finish");
+            if checked {
+                let record =
+                    store.family(family).await.expect("reads").expect("family");
+                let mut state = record.state.clone();
+                state.last_check = Some(at);
+                store
+                    .save_family_state(family, &state)
+                    .await
+                    .expect("state");
+            }
+        }
+    }
+
+    /// A row's cells and history are cached until one of its families
+    /// is checked again; then both are read again.
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn a_checked_row_is_read_again() {
+        let dir = dir();
+        let path = dir.join("tm.db");
+        let store = Store::open(&path).await.expect("open");
+        store.seed_defaults().await.expect("seed");
+        let backend = backend(path, Handle::current());
+        let mia = |s: &Snapshot| {
+            let row = s
+                .rows
+                .iter()
+                .find(|r| r.code() == "MIA" && r.cabin == Cabin::Economy)
+                .expect("MIA row")
+                .clone();
+            (row.best.map(|t| t.price.whole()), row.history)
+        };
+        let now = Utc::now();
+        let yesterday = (now.date_naive() - Duration::days(1))
+            .and_hms_opt(12, 0, 0)
+            .expect("noon")
+            .and_utc();
+        price_mia(&store, yesterday, 2000, true).await;
+        let s = backend
+            .snapshot(SnapshotQuery::default())
+            .await
+            .expect("reads");
+        assert_eq!(mia(&s), (Some(4000), vec![400_000.0]));
+
+        // Written but not checked yet: the cached prices stand.
+        let later = yesterday + Duration::minutes(1);
+        price_mia(&store, later, 1500, false).await;
+        let s = backend
+            .snapshot(SnapshotQuery::default())
+            .await
+            .expect("reads");
+        assert_eq!(mia(&s), (Some(4000), vec![400_000.0]));
+
+        // Checked today: the latest cells, and both days read again.
+        price_mia(&store, now, 1000, true).await;
+        let s = backend
+            .snapshot(SnapshotQuery::default())
+            .await
+            .expect("reads");
+        assert_eq!(mia(&s), (Some(2000), vec![300_000.0, 200_000.0]));
+        store.close().await;
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    /// Times snapshots against a copy of a real database:
+    /// `TM_BENCH_DB=<copy> cargo test --release -p tm-app --bin tm --
+    /// --ignored bench_snapshot --nocapture`. Never point it at the live
+    /// file: opening it runs the migrations.
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    #[ignore = "needs TM_BENCH_DB, a copy of a real database"]
+    async fn bench_snapshot() {
+        let Some(path) = std::env::var_os("TM_BENCH_DB") else {
+            return;
+        };
+        let backend = backend(PathBuf::from(path), Handle::current());
+        let time = async |label: &str, query: SnapshotQuery| {
+            let started = std::time::Instant::now();
+            let s = backend.snapshot(query).await.expect("snapshot");
+            eprintln!(
+                "{label}: {:?} ({} rows)",
+                started.elapsed(),
+                s.rows.len()
+            );
+            s
+        };
+        let s = time("cold", SnapshotQuery::default()).await;
+        for _ in 0..3 {
+            time("warm", SnapshotQuery::default()).await;
+        }
+        for row in s.rows.iter().take(3) {
+            let query = SnapshotQuery {
+                selected: Some(row.key()),
+                ..Default::default()
+            };
+            time("selected", query).await;
+        }
     }
 }

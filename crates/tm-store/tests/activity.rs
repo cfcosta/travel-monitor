@@ -260,6 +260,85 @@ async fn latest_cells_come_from_the_latest_good_query() {
     assert_eq!(store.latest_cells(family.id).await.expect("reads").len(), 3);
 }
 
+/// The batched reads the app prices its list from agree with the
+/// per-family ones.
+#[tokio::test]
+async fn batched_reads_match_the_per_family_ones() {
+    let store = seeded().await;
+    let lis = route(&store, "SAO", "LIS").await;
+    let family = outbound(&store, lis).await;
+    let other = store
+        .list_families(true)
+        .await
+        .expect("lists")
+        .into_iter()
+        .find(|f| {
+            f.key.route == lis
+                && f.key.cabin == Cabin::Economy
+                && f.id != family.id
+        })
+        .expect("another family");
+    let unchecked = FamilyId(other.id.0 + 1);
+    let ids = [other.id, family.id, unchecked];
+    assert!(store.latest_cells_of(&ids).await.expect("reads").is_empty());
+    assert!(store.latest_cells_of(&[]).await.expect("reads").is_empty());
+
+    run_query(&store, family.id, at(6, 8), &[100, 200], QueryOutcome::Ok).await;
+    run_query(&store, other.id, at(6, 9), &[500], QueryOutcome::Ok).await;
+    run_query(
+        &store,
+        family.id,
+        at(6, 10),
+        &[110, 210, 310],
+        QueryOutcome::Ok,
+    )
+    .await;
+    let error = QueryOutcome::Error {
+        detail: "timeout".into(),
+    };
+    run_query(&store, other.id, at(6, 11), &[1], error).await;
+
+    let mut each = store.latest_cells(family.id).await.expect("reads");
+    each.extend(store.latest_cells(other.id).await.expect("reads"));
+    each.sort_by_key(|c| (c.family.0, c.departure));
+    assert_eq!(store.latest_cells_of(&ids).await.expect("reads"), each);
+    assert_eq!(each.len(), 3 + 1);
+
+    let since = at(6, 9);
+    let mut each = store.history(family.id, since).await.expect("reads");
+    each.extend(store.history(other.id, since).await.expect("reads"));
+    each.sort_by_key(|o| (o.observed_at, o.id));
+    let prices = store.price_history(&ids, since).await.expect("reads");
+    assert_eq!(prices.len(), each.len());
+    for (p, o) in prices.iter().zip(&each) {
+        assert_eq!(
+            (p.family, p.observed_at, p.departure, p.return_date),
+            (o.family, o.observed_at, o.departure, o.return_date)
+        );
+        assert_eq!(p.price_minor, o.price.as_ref().map(|m| m.minor));
+    }
+    assert!(
+        store
+            .price_history(&[], since)
+            .await
+            .expect("reads")
+            .is_empty()
+    );
+
+    // A new party starts new series (0036).
+    let mut settings = store.settings().await.expect("reads");
+    settings.passengers.adults = 2;
+    store.set_settings(&settings).await.expect("saves");
+    assert!(store.latest_cells_of(&ids).await.expect("reads").is_empty());
+    assert!(
+        store
+            .price_history(&ids, at(1, 0))
+            .await
+            .expect("reads")
+            .is_empty()
+    );
+}
+
 #[tokio::test]
 async fn explore_hints_round_trip() {
     let store = seeded().await;

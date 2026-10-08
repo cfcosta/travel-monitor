@@ -17,6 +17,7 @@ use tm_domain::{
 
 use crate::{
     AwardRate,
+    PriceCell,
     Store,
     convert::{
         HintRow,
@@ -117,6 +118,88 @@ impl Store {
         .fetch_all(&self.pool)
         .await?;
         rows.into_iter().map(Observation::try_from).collect()
+    }
+
+    /// [`Store::latest_cells`] of several families in one statement,
+    /// ordered by family, then departure. Families without a successful
+    /// query have no cells.
+    pub async fn latest_cells_of(
+        &self,
+        families: &[FamilyId],
+    ) -> Result<Vec<Observation>> {
+        if families.is_empty() {
+            return Ok(Vec::new());
+        }
+        let passengers = self.settings().await?.passengers.key();
+        let ids = id_list(families);
+        let rows = sqlx::query_as!(
+            ObservationRow,
+            r#"SELECT o.id, o.query_id, o.family_id,
+                      o.observed_at AS "observed_at: DateTime<Utc>",
+                      o.departure AS "departure: NaiveDate",
+                      o.return_date AS "return_date: NaiveDate",
+                      o.price_minor, o.currency, o.miles, o.carrier, o.stops,
+                      o.duration_minutes, o.seller, o.fare_minor,
+                      o.fare_currency, o.brand, o.fare_basis, o.seats,
+                      o.low_availability AS "low_availability: bool",
+                      o.flights
+               FROM json_each(?1) j
+               JOIN observations o ON o.query_id = (
+                   SELECT q.id FROM queries q
+                   WHERE q.family_id = j.value AND q.outcome = 'ok'
+                     AND q.passengers = ?2
+                     AND EXISTS (SELECT 1 FROM observations x
+                                 WHERE x.query_id = q.id)
+                   ORDER BY q.finished_at DESC, q.id DESC
+                   LIMIT 1)
+               ORDER BY o.family_id, o.departure, o.return_date"#,
+            ids,
+            passengers
+        )
+        .fetch_all(&self.pool)
+        .await?;
+        rows.into_iter().map(Observation::try_from).collect()
+    }
+
+    /// The prices the given families saw since `since`, oldest first
+    /// (by time, then insertion): only what a price history needs, so a
+    /// route's 60 days read in one statement and a few columns.
+    pub async fn price_history(
+        &self,
+        families: &[FamilyId],
+        since: DateTime<Utc>,
+    ) -> Result<Vec<PriceCell>> {
+        if families.is_empty() {
+            return Ok(Vec::new());
+        }
+        let passengers = self.settings().await?.passengers.key();
+        let ids = id_list(families);
+        let rows = sqlx::query!(
+            r#"SELECT family_id,
+                      observed_at AS "observed_at: DateTime<Utc>",
+                      departure AS "departure: NaiveDate",
+                      return_date AS "return_date: NaiveDate",
+                      price_minor
+               FROM observations
+               WHERE family_id IN (SELECT value FROM json_each(?1))
+                 AND observed_at >= ?2 AND passengers = ?3
+               ORDER BY observed_at, id"#,
+            ids,
+            since,
+            passengers
+        )
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(rows
+            .into_iter()
+            .map(|r| PriceCell {
+                family: FamilyId(r.family_id),
+                observed_at: r.observed_at,
+                departure: r.departure,
+                return_date: r.return_date,
+                price_minor: r.price_minor,
+            })
+            .collect())
     }
 
     /// A family's observations since `since`, oldest first.
@@ -304,4 +387,10 @@ impl Store {
         .await?;
         rows.into_iter().map(ExploreHint::try_from).collect()
     }
+}
+
+/// Ids as a JSON array, for `json_each`.
+fn id_list(families: &[FamilyId]) -> String {
+    let ids: Vec<String> = families.iter().map(|f| f.0.to_string()).collect();
+    format!("[{}]", ids.join(","))
 }
