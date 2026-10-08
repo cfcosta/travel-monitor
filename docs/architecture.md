@@ -224,6 +224,11 @@ reads while the daemon writes (0020, 0040).
   `RequestKind::CheckAward { route, cabin, departure, return_date }`.
   A miles program always has its round-trip family, additive route or
   not.
+- Favorites (0094, migration 0008): `destinations.favorite` (0/1) and
+  `settings.favorite_deal_threshold` (default 0.10). Starring is an
+  update of `destinations`, so `config_version` moves and the daemon
+  reloads. `set_destination_favorite(place, on)`; `Destination` and
+  `Route` carry `favorite` (always false on a sweep).
 
 ### tm-scheduler (pure)
 
@@ -232,7 +237,13 @@ reads while the daemon writes (0020, 0040).
 - `plan_tick(candidates, now, budget, params, rng) -> Vec<Pick>`:
   per-site limits, minimum and maximum interval, overdue families,
   ~10% random checks, then highest scores. Each pick carries its
-  `QueryReason` (score and runner-up).
+  `QueryReason` (score and runner-up). A favorite candidate (0094)
+  ages `Params::favorite_boost` (2) times faster: its elapsed time is
+  scaled in the stalest-first order and among the overdue, and its
+  maximum interval divided (core: 12 h); the minimum interval, the
+  bootstrap order and the random checks ignore it. With the budget as
+  the limit that is about twice the checks (`tests/favorites.rs`:
+  1.87× with 10% random checks).
 - `rates`: change-rate estimation from changed/unchanged bits with
   irregular gaps (Cho & Garcia-Molina; interval-censored MLE).
 - `update_after_check`: posterior updates from a check's summary.
@@ -249,6 +260,9 @@ reads while the daemon writes (0020, 0040).
 - `baseline`: days-to-departure buckets (3/7/14/21/45/90/180), Brazilian
   holiday and peak-season flags, 60-day median and MAD (0030).
 - `deals`: `evaluate` → `Option<(DealReason, change)>`.
+  `Params::for_deals(favorite)` judges a favorite's series, cash and
+  awards, at `favorite_deal_threshold` (10%) instead of 20%; the
+  robust-z test is the same (0094).
 - `awards` (0083): award series (`cheapest_by_dates`, `award_points`
   in miles, for the same baselines and `evaluate`, kept apart from
   cash), the implied value of a mile (`implied_rate`: fare before taxes
@@ -367,7 +381,11 @@ as `Unexpected` and is retried later. Other airline sites and miles
 programs have no reader and are skipped (0052, 0059); their workers only
 pause and resume for logins. `deals` judges award series
 (`find_awards`, `select_awards`, `award_candidate`, `award_expired`),
-and `notify` words miles deals and "log in again" (0083).
+and `notify` words miles deals and "log in again" (0083). Favorites
+(0094): `Context::favorites` marks the candidates of routes to a starred
+destination, and `evaluate_deals` / `evaluate_awards` judge them with
+`Params::for_deals(route.favorite)`; Explore's finds are unwatched
+places and keep the global threshold.
 
 ### tm-app (`tm`)
 
@@ -390,7 +408,11 @@ on the deals list, award lines and miles-deal rows, the award block on
 the card and the detail (brands, taxes, seats, the measured value of a
 mile against the program's usual rate, the cost with bought miles), and
 a block per program in Settings (active, value, buy price, daily award
-loads, dates).
+loads, dates). Favorites (0094): a star on every row, on the card, the
+route page and the settings' destinations (`Backend::set_favorite`,
+written like any configuration); a Places switch (All, Favorites) next
+to Pay with; `Snapshot::favorites`; the favorite threshold among the
+price settings.
 
 ### nix
 
