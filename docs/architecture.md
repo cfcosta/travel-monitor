@@ -304,7 +304,19 @@ A coordinator and one worker per site (0060, 0062).
   point of sale's isolated one) and reads the offers call the page makes
   (`sources::latam`): cash, the cabin's cheapest brand for the date;
   awards, every itinerary × brand of the cabin with miles, taxes, fare,
-  fare basis and seats. One page load a check. With `--latam-strip`
+  fare basis and seats. One page load a check. The page is handled
+  with the browser's one `Mouse` (0091), made when the LATAM Chromium
+  starts (`Mouse::new(chromium.pointer(), seed)`, the seed from the
+  worker's RNG through `Sources::start`) and held for the whole check:
+  on the offscreen display it is the compositor's real pointer. It
+  wanders while the page loads and while each search runs, looks the
+  results over for `Timeouts::look` (1.5–4 s, a drift and half the
+  time a scroll) before anything is read or clicked, and rests on the
+  page through the 20–45 s between searches. Every click (a strip day,
+  a card, its brand, the LATAM+ upsell) is `Mouse::click` on a
+  selector the page's script names (`sites::latam::page`, which never
+  scrolls or clicks): wheeled into view, reached along a hand's path,
+  pressed off-centre. With `--latam-strip`
   (`Config::latam_strip`, off by default) award legs may also click up
   to six days of the page's date strip, each one more search, counted
   and spaced like a load; off, because a search a strip click made got
@@ -317,7 +329,11 @@ A coordinator and one worker per site (0060, 0062).
   day, per the program's setting. Round trips, cash or award, are
   `Skip::Unsupported` (`sites::latam::unsupported`): the return's price
   comes after a click on an outbound brand, likely denied the same way;
-  the reader keeps that code for when a live run verifies it. A check
+  the reader keeps that code for when a live run verifies it. Under
+  `--latam-round-trips` (off by default) a manual check of one LATAM
+  round-trip family (a `check_family` request) runs, for that live run
+  (`Context::latam_round_trips`, `JobOptions::latam_round_trips`); the
+  scheduler and "check route" still skip them. A check
   that fails after its page was read (a blocked strip click or return
   call) records the cells it read under the failed query
   (`Fetch::partial`, `keep_read`), and the failure still blocks or
@@ -341,7 +357,9 @@ once; `--budget`/`--max-budget` are Google Flights' start and maximum
 airline:TP=1200:4000` (repeatable) sets another site's; `--cdp-port` is
 Google Flights' Chromium (other sites pick free ports);
 `--latam-origin` (hidden) points LATAM's URLs at a test server;
-`--latam-strip` lets LATAM award legs click the date strip (off, 0090).
+`--latam-strip` lets LATAM award legs click the date strip (off, 0090);
+`--latam-round-trips` lets a `check_family` request run one LATAM round
+trip (off, 0090).
 Sources: Google Flights (legs, round trips, Explore, booking pages),
 TAP's booking site (0051) and LATAM's results page, cash and LATAM Pass
 awards (0085). A check whose page does not produce what is expected ends
