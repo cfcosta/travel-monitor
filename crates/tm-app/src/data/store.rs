@@ -1236,16 +1236,31 @@ async fn snapshot(
     let rows = snapshot.rows.len();
     match read {
         Read::Selection => {
-            tracing::info!("snapshot: selection, {ms} ms, {rows} rows reused");
+            tracing::debug!("snapshot: selection, {ms} ms, {rows} rows reused");
         }
         Read::Rows {
             cells: 0,
             histories: 0,
-        } => tracing::info!("snapshot: warm, {ms} ms, {rows} rows"),
-        Read::Rows { cells, histories } => tracing::info!(
-            "snapshot: cold, {ms} ms, {rows} rows ({cells} families' \
-             cells, {histories} histories read)"
-        ),
+        } => tracing::debug!("snapshot: warm, {ms} ms, {rows} rows"),
+        Read::Rows { cells, histories } => {
+            // The first read and slow ones are worth a line; refreshes
+            // that re-read the few families just checked come every few
+            // seconds while the daemon works.
+            static FIRST: std::sync::Once = std::sync::Once::new();
+            let mut first = false;
+            FIRST.call_once(|| first = true);
+            if first || ms >= 1000 {
+                tracing::info!(
+                    "snapshot: cold, {ms} ms, {rows} rows ({cells} families' \
+                     cells, {histories} histories read)"
+                );
+            } else {
+                tracing::debug!(
+                    "snapshot: {ms} ms, {rows} rows ({cells} families' \
+                     cells, {histories} histories read)"
+                );
+            }
+        }
     }
     if let Read::Rows { cells, .. } = read
         && cells > 0
