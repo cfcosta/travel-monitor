@@ -145,7 +145,7 @@ impl Fake {
 
 #[async_trait]
 impl Sources for Fake {
-    async fn start(&self, _: &[PointOfSale]) -> anyhow::Result<()> {
+    async fn start(&self, _: &[PointOfSale], _: u64) -> anyhow::Result<()> {
         let site = self.site.clone();
         self.log().starts.push(site);
         self.running.store(true, Ordering::SeqCst);

@@ -1,5 +1,5 @@
-//! The LATAM source in a real headless Chromium, without LATAM
-//! (DECISIONS.md 0084, 0085, 0090): a local server plays
+//! The LATAM source in a real Chromium, without LATAM (DECISIONS.md
+//! 0084, 0085, 0090, 0091): a local server plays
 //! `www.latamairlines.com` with a tiny results page. On load it asks
 //! the cash calendar and the offers call (`offers/search`, or
 //! `offers/search/redemption` for awards) for the searched date and
@@ -12,8 +12,17 @@
 //! denial of the offers call, and its denial of a strip click's search
 //! or a round trip's return call after the page was read.
 //!
+//! Every click is the browser's mouse (0091). The page counts the
+//! trusted `mousemove`s before each click and tags the search a click
+//! starts with them (`tmMoves`, the fewest before any click so far, and
+//! `tmUntrusted`, the clicks that were not trusted), so the server sees
+//! whether a hand moved before each click. Headless, the mouse sends CDP
+//! input; [`the_offscreen_pointer_moves_before_each_click`] runs the
+//! clicks on the offscreen display's real pointer (the machine's GPU).
+//!
 //! Skipped (with a message) when `TM_CHROMIUM` is not set; the dev
-//! shell sets it.
+//! shell sets it. The offscreen test also skips without a render node
+//! or `$XDG_RUNTIME_DIR`.
 
 #![allow(
     clippy::disallowed_methods,
@@ -29,7 +38,7 @@ use std::{
 };
 
 use chrono::{NaiveDate, TimeDelta, Utc};
-use tm_browser::ChromiumConfig;
+use tm_browser::{ChromiumConfig, Display};
 use tm_daemon::{
     sites::latam::{
         self,
@@ -80,9 +89,19 @@ const round = q.get('trip') === 'RT';
 const outbound = q.get('outbound').slice(0, 10);
 const inbound = round ? q.get('inbound').slice(0, 10) : 'null';
 const path = award ? '/bff/air-offers/v2/offers/search/redemption' : '/bff/air-offers/v2/offers/search';
+// Trusted mousemoves since the last click; the fewest before any click,
+// and the clicks that were not trusted.
+let moves = 0, fewest = null, untrusted = 0;
+addEventListener('mousemove', e => { if (e.isTrusted) moves++; }, { capture: true, passive: true });
+addEventListener('click', e => {
+  fewest = fewest === null ? moves : Math.min(fewest, moves);
+  if (!e.isTrusted) untrusted++;
+  moves = 0;
+}, { capture: true, passive: true });
+const mark = () => fewest === null ? '' : '&tmMoves=' + fewest + '&tmUntrusted=' + untrusted;
 const offers = (outFrom, extra) => fetch(path + '?sort=RECOMMENDED&adult=1&child=0&infant=0&cabinType=Economy'
   + '&origin=' + origin + '&destination=' + destination + '&outFrom=' + outFrom + '&inFrom=' + inbound
-  + '&redemption=' + award + (extra || '&outOfferId=null&outFlightDate=null')).then(r => r.ok ? r.json() : null);
+  + '&redemption=' + award + (extra || '&outOfferId=null&outFlightDate=null') + mark()).then(r => r.ok ? r.json() : null);
 const [y, m] = outbound.split('-').map(Number);
 fetch('/bff/air-offers/v2/calendar?origin=' + origin + '&destination=' + destination + '&month=' + m
   + '&year=' + y + '&isRoundTrip=' + round + '&extended=true');
@@ -287,6 +306,38 @@ fn fast() -> Timeouts {
         settle: Duration::from_millis(400),
         scroll_pause: Duration::from_millis(50),
         strip_pause: (Duration::from_millis(100), Duration::from_millis(200)),
+        look: (Duration::from_millis(200), Duration::from_millis(600)),
+    }
+}
+
+/// Two strip clicks: the nearest days.
+fn two_days() -> Strip {
+    Strip {
+        max_clicks: 2,
+        pick: Some(Pick::Every),
+        first: day(2026, 10, 8),
+        last: day(2027, 4, 4),
+        cash: BTreeMap::new(),
+        skip: BTreeSet::new(),
+    }
+}
+
+/// Whether the search an offers call made followed clicks that each had
+/// trusted mouse movement before them, as the page tagged it.
+fn by_hand(call: &str) -> bool {
+    param(call, "tmMoves")
+        .and_then(|n| n.parse::<u32>().ok())
+        .is_some_and(|n| n > 0)
+        && param(call, "tmUntrusted") == Some("0")
+}
+
+fn point_of_sale() -> PointOfSale {
+    PointOfSale {
+        id: PosId(1),
+        country: CountryCode::new("BR"),
+        currency: Currency::brl(),
+        is_home: true,
+        active: true,
     }
 }
 
@@ -339,15 +390,9 @@ async fn the_latam_source_reads_offers_the_strip_and_round_trips() {
     };
     let (address, seen) = server().await;
     let sources = BrowserSources::new(config).with_timeouts(fast());
-    let pos = PointOfSale {
-        id: PosId(1),
-        country: CountryCode::new("BR"),
-        currency: Currency::brl(),
-        is_home: true,
-        active: true,
-    };
+    let pos = point_of_sale();
     sources
-        .start(std::slice::from_ref(&pos))
+        .start(std::slice::from_ref(&pos), 7)
         .await
         .expect("Chromium starts");
 
@@ -359,14 +404,6 @@ async fn the_latam_source_reads_offers_the_strip_and_round_trips() {
         .await;
     let calls_single = seen.lock().expect("lock").clone();
     // An award leg with two strip clicks: the nearest days.
-    let two_days = || Strip {
-        max_clicks: 2,
-        pick: Some(Pick::Every),
-        first: day(2026, 10, 8),
-        last: day(2027, 4, 4),
-        cash: BTreeMap::new(),
-        skip: BTreeSet::new(),
-    };
     let award = sources
         .latam(&job(address, "LIS", nov10, None, true, two_days()))
         .await;
@@ -435,12 +472,22 @@ async fn the_latam_source_reads_offers_the_strip_and_round_trips() {
     assert_eq!(light.price, Some(Money::new(6861, Currency::brl())));
     // Each click's own search, for its own date.
     let calls = seen.lock().expect("lock").clone();
-    let award_dates: Vec<&str> = calls[calls_single.len()..]
+    let award_calls: Vec<&String> = calls[calls_single.len()..]
         .iter()
         .filter(|c| c.contains("/redemption") && c.contains("destination=LIS"))
+        .collect();
+    let award_dates: Vec<&str> = award_calls
+        .iter()
         .filter_map(|c| param(c, "outFrom"))
         .collect();
     assert_eq!(award_dates, ["2026-11-10", "2026-11-09", "2026-11-11"]);
+    // The page's own search came before any click; each strip day's
+    // came from a mouse click with movement before it (0091).
+    assert!(!award_calls[0].contains("tmMoves"), "{}", award_calls[0]);
+    assert!(
+        award_calls[1..].iter().all(|c| by_hand(c)),
+        "{award_calls:?}"
+    );
     // The calendar ranks; the session cookie is read.
     assert_eq!(award.value.calendar.get(&nov10), Some(&200_141));
     let until = award.value.session.flatten().expect("a session");
@@ -489,6 +536,8 @@ async fn the_latam_source_reads_offers_the_strip_and_round_trips() {
         .collect();
     assert_eq!(returns.len(), 1, "{returns:?}");
     assert!(returns[0].contains("loyalty"), "{}", returns[0]);
+    // The card, its brand and the upsell were clicked by the mouse.
+    assert!(by_hand(&returns[0]), "{}", returns[0]);
     let best = round
         .value
         .cells
@@ -527,4 +576,55 @@ async fn the_latam_source_reads_offers_the_strip_and_round_trips() {
 /// The offers calls the server saw so far.
 fn calls_after(seen: &Seen) -> Vec<String> {
     seen.lock().expect("lock").clone()
+}
+
+/// The same clicks on the offscreen display, where the mouse is the
+/// compositor's real pointer (0091): the strip days and the round trip's
+/// outbound are clicked, each after trusted movement.
+#[tokio::test(flavor = "multi_thread")]
+async fn the_offscreen_pointer_moves_before_each_click() {
+    let dir = tempfile::tempdir().expect("a temporary directory");
+    let Some(mut config) = chromium(dir.path().join("profile")) else {
+        return;
+    };
+    if std::env::var_os("XDG_RUNTIME_DIR").is_none() {
+        eprintln!("skipping: XDG_RUNTIME_DIR is not set");
+        return;
+    }
+    if tm_compositor::find_render_node(None).is_err() {
+        eprintln!("skipping: no GPU render node");
+        return;
+    }
+    config.display = Display::Offscreen;
+    let (address, seen) = server().await;
+    let sources = BrowserSources::new(config).with_timeouts(fast());
+    sources
+        .start(&[point_of_sale()], 11)
+        .await
+        .expect("Chromium starts offscreen");
+    let nov10 = day(2026, 11, 10);
+    let (mar4, mar11) = (day(2027, 3, 4), day(2027, 3, 11));
+    let award = sources
+        .latam(&job(address, "LIS", nov10, None, true, two_days()))
+        .await;
+    let round = sources
+        .latam(&job(address, "MIA", mar4, Some(mar11), true, Strip::none()))
+        .await;
+    sources.stop().await;
+
+    assert_eq!(award.outcome, QueryOutcome::Ok, "{award:?}");
+    assert_eq!((award.page_loads, award.value.clicks), (3, 2));
+    assert_eq!(round.outcome, QueryOutcome::Ok, "{round:?}");
+    assert_eq!(round.page_loads, 2);
+    let calls = calls_after(&seen);
+    let clicked: Vec<&String> = calls
+        .iter()
+        .filter(|c| {
+            latam::is_return_leg(c)
+                || (c.contains("destination=LIS")
+                    && param(c, "outFrom") != Some("2026-11-10"))
+        })
+        .collect();
+    assert_eq!(clicked.len(), 3, "{calls:?}");
+    assert!(clicked.iter().all(|c| by_hand(c)), "{clicked:?}");
 }

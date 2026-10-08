@@ -1017,7 +1017,8 @@ impl<S: Sources + 'static> Worker<S> {
                 return false;
             }
         };
-        match self.sources.start(&pos).await {
+        let seed = self.rng.random();
+        match self.sources.start(&pos, seed).await {
             Ok(()) => {
                 self.unavailable = false;
                 self.last_work = Instant::now();

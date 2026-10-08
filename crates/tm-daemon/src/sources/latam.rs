@@ -1,10 +1,19 @@
 //! LATAM in the daemon's Chromium (DECISIONS.md 0081, 0082, 0084, 0085,
-//! 0090): load the results page and read the offers call the page
+//! 0090, 0091): load the results page and read the offers call the page
 //! makes, one page load per date; with the strip switched on, click
 //! days of the page's date strip for a one-way award search; for a round
 //! trip, choose the cheapest outbound brand to make the page price the
 //! return leg. [`crate::sites::latam`] parses; this module drives the
 //! page and turns offers into cells.
+//!
+//! The page is handled with the browser's [`Mouse`] (0091), the
+//! offscreen display's real pointer: it wanders while the page loads and
+//! while a search runs, looks the results over for a few seconds (a
+//! drift, sometimes a scroll) before anything is read or clicked, rests
+//! on the page between searches, and every click is the mouse's: the
+//! target scrolled into view with the wheel, reached along a hand's
+//! path, pressed off-centre and held. The page's scripts only say what
+//! to click ([`page`]).
 //!
 //! The page runs in the profile's own browser context, not a point of
 //! sale's isolated one: the login and the warm-up the user did by hand
@@ -37,7 +46,7 @@ use std::collections::BTreeMap;
 use chrono::{DateTime, NaiveDate, Utc};
 use rand::Rng;
 use serde_json::{Value, json};
-use tm_browser::{Captured, Page};
+use tm_browser::{Captured, Mouse, Page};
 use tm_domain::{AwardDetail, Cabin, Currency, Money, QueryOutcome, Seats};
 use tracing::{debug, info, warn};
 
@@ -325,41 +334,84 @@ async fn wait_offers(
     }
 }
 
-/// A random pause between `t.strip_pause`'s bounds: a strip click (or
-/// the round trip's outbound choice) is spaced like a page load (0084).
-async fn strip_pause(t: Timeouts) {
-    let (min, max) = t.strip_pause;
+/// A random duration between `bounds`.
+fn between(
+    (min, max): (std::time::Duration, std::time::Duration),
+) -> std::time::Duration {
     let (min, max) = (min.as_millis() as u64, max.as_millis() as u64);
-    let ms = rand::rng().random_range(min..=max.max(min));
-    tokio::time::sleep(std::time::Duration::from_millis(ms)).await;
+    std::time::Duration::from_millis(
+        rand::rng().random_range(min..=max.max(min)),
+    )
 }
 
-/// Clicks where `script` (a [`page::locate_js`] or
-/// [`page::strip_day_js`]) says, with the mouse. False when it found
-/// nothing to click.
-async fn click_where(page: &Page, script: &str) -> bool {
-    let point = page.eval(script).await.unwrap_or(Value::Null);
-    let (Some(x), Some(y)) = (point["x"].as_f64(), point["y"].as_f64()) else {
-        return false;
+/// A random pause between `t.strip_pause`'s bounds, the hand resting on
+/// the mouse: a strip click (or the round trip's outbound choice) is
+/// spaced like a page load (0084).
+async fn strip_pause(page: &Page, mouse: &Mouse, t: Timeouts) {
+    mouse.wander_for(page, between(t.strip_pause)).await;
+}
+
+/// Looks the results over before reading or clicking them, as a person
+/// does: the mouse drifts for `t.look`, and half the time turns the
+/// wheel a few notches down the results and back part of the way.
+async fn look_over(page: &Page, mouse: &Mouse, t: Timeouts) {
+    let total = between(t.look);
+    let (scrolls, down, up) = {
+        let mut rng = rand::rng();
+        let down = rng.random_range(2..=4);
+        (rng.random_bool(0.5), down, rng.random_range(0..=down))
     };
-    page.click_at(x, y).await.is_ok()
+    if !scrolls {
+        mouse.wander_for(page, total).await;
+        return;
+    }
+    mouse.wander_for(page, total / 3).await;
+    if let Err(e) = mouse.scroll(page, down).await {
+        debug!("looking over LATAM's results: {e}");
+    }
+    mouse.wander_for(page, total / 3).await;
+    if up > 0
+        && let Err(e) = mouse.scroll(page, -up).await
+    {
+        debug!("looking over LATAM's results: {e}");
+    }
+    mouse.wander_for(page, total / 3).await;
 }
 
-/// Waits for `selector` to show up, then clicks it.
+/// Clicks the element `selector` names with the mouse. False when it
+/// could not be reached or clicked.
+async fn click(page: &Page, mouse: &Mouse, selector: &str) -> bool {
+    match mouse.click(page, selector).await {
+        Ok(()) => true,
+        Err(e) => {
+            warn!(%selector, "the click did not happen: {e}");
+            false
+        }
+    }
+}
+
+/// Waits for an element matching `selector` to show up, the mouse
+/// wandering, then clicks it.
 async fn click_when_shown(
     page: &Page,
+    mouse: &Mouse,
     selector: &str,
     timeout: std::time::Duration,
 ) -> bool {
-    let script = page::locate_js(selector);
-    if page
-        .wait_until(&script, timeout, std::time::Duration::from_millis(300))
-        .await
-        .is_err()
-    {
-        return false;
+    let shown = mouse
+        .wander_while(
+            page,
+            page.wait_until(
+                &page::shown_js(selector),
+                timeout,
+                std::time::Duration::from_millis(300),
+            ),
+        )
+        .await;
+    match shown {
+        Ok(Value::String(path)) => click(page, mouse, &path).await,
+        _ => false,
     }
-    click_where(page, &script).await
 }
 
 /// The session cookie's end, from the profile's cookies for the site
@@ -409,6 +461,7 @@ fn searched(url: &str, asked: NaiveDate) -> bool {
 /// One LATAM search on `page`. See the module documentation.
 pub(crate) async fn latam_on(
     page: &Page,
+    mouse: &Mouse,
     job: &LatamJob,
     t: Timeouts,
 ) -> Fetch<LatamFound> {
@@ -422,21 +475,31 @@ pub(crate) async fn latam_on(
         OffersCall::Cash
     };
     let mut loads = 1;
-    if let Err(outcome) = navigate(page, &job.url, t.navigation).await {
+    // The hand moves the mouse while the page loads and searches.
+    let loaded = mouse
+        .wander_while(page, navigate(page, &job.url, t.navigation))
+        .await;
+    if let Err(outcome) = loaded {
         return Fetch::failed(outcome, loads);
     }
     if let Some(outcome) = page_state(page).await {
         return Fetch::failed(outcome, loads);
     }
     let mut seen: Vec<Captured> = Vec::new();
-    let first = wait_offers(
-        &capture,
-        &mut seen,
-        call,
-        |url| !latam::is_return_leg(url) && searched(url, job.departure),
-        t.response * 2,
-    )
-    .await;
+    let first = mouse
+        .wander_while(
+            page,
+            wait_offers(
+                &capture,
+                &mut seen,
+                call,
+                |url| {
+                    !latam::is_return_leg(url) && searched(url, job.departure)
+                },
+                t.response * 2,
+            ),
+        )
+        .await;
     let first = match first {
         Ok(r) => r,
         Err(Missed::Blocked(detail)) => {
@@ -465,9 +528,10 @@ pub(crate) async fn latam_on(
     if offers.itineraries.is_empty() {
         return Fetch::failed(QueryOutcome::NoFlights, loads);
     }
+    look_over(page, mouse, t).await;
     let Some(return_date) = job.return_date else {
         let cells = leg_cells(&offers, job.cabin, job.departure, &job.seller);
-        return read_strip(page, job, &capture, seen, cells, t).await;
+        return read_strip(page, mouse, job, &capture, seen, cells, t).await;
     };
     let Some((card, brand, itinerary, fare)) =
         chosen_outbound(&offers, job.cabin)
@@ -481,11 +545,17 @@ pub(crate) async fn latam_on(
     // Choosing the outbound is a search of its own: spaced and counted
     // like a page load. From here a failure keeps what the page read
     // (0090); the outbound halves price nothing alone, so no cells.
-    strip_pause(t).await;
+    strip_pause(page, mouse, t).await;
     loads += 1;
-    let chosen = click_when_shown(page, &page::card_header(card), t.open_graph)
-        .await
-        && click_when_shown(page, &page::brand_select(brand), t.open_graph)
+    let chosen =
+        click_when_shown(page, mouse, &page::card_header(card), t.open_graph)
+            .await
+            && click_when_shown(
+                page,
+                mouse,
+                &page::brand_select(brand),
+                t.open_graph,
+            )
             .await;
     if !chosen {
         let outcome = QueryOutcome::Unexpected {
@@ -504,19 +574,24 @@ pub(crate) async fn latam_on(
         );
     }
     // The LATAM+ upsell, when it shows.
-    let _ = click_when_shown(page, page::UPSELL_CONTINUE, t.settle * 2).await;
+    let _ = click_when_shown(page, mouse, page::UPSELL_CONTINUE, t.settle * 2)
+        .await;
     let offer = fare.offer_id.clone();
-    let back = wait_offers(
-        &capture,
-        &mut seen,
-        call,
-        |url| {
-            latam::is_return_leg(url)
-                && (offer.is_empty() || url.contains(&offer))
-        },
-        t.response * 2,
-    )
-    .await;
+    let back = mouse
+        .wander_while(
+            page,
+            wait_offers(
+                &capture,
+                &mut seen,
+                call,
+                |url| {
+                    latam::is_return_leg(url)
+                        && (offer.is_empty() || url.contains(&offer))
+                },
+                t.response * 2,
+            ),
+        )
+        .await;
     let back = match back {
         Ok(r) => parse(&r),
         Err(Missed::Blocked(detail)) => Err(QueryOutcome::Blocked { detail }),
@@ -560,6 +635,7 @@ pub(crate) async fn latam_on(
 /// ([`failed_after`]).
 async fn read_strip(
     page: &Page,
+    mouse: &Mouse,
     job: &LatamJob,
     capture: &tm_browser::Capture,
     mut seen: Vec<Captured>,
@@ -574,12 +650,12 @@ async fn read_strip(
     let mut loads = 1;
     let mut clicks = 0;
     if job.strip.max_clicks > 0 {
-        tokio::time::sleep(t.settle).await;
+        mouse.wander_for(page, t.settle).await;
         seen.extend(capture.drain());
         let mut shown = Vec::new();
         for day in strip_days(job.departure) {
             let found = page
-                .eval(&page::strip_day_js(day, false))
+                .eval(&page::strip_day_js(day))
                 .await
                 .unwrap_or(Value::Null);
             if !found.is_null() {
@@ -590,24 +666,36 @@ async fn read_strip(
         let picks = job.strip.clicks(job.departure, &shown, &calendar);
         info!(shown = shown.len(), picks = ?picks, "LATAM date strip");
         for pick in picks {
-            strip_pause(t).await;
-            if !click_where(page, &page::strip_day_js(pick, true)).await {
-                warn!(%pick, "the date strip has no button for this day: stopping");
+            strip_pause(page, mouse, t).await;
+            let found = page
+                .eval(&page::strip_day_js(pick))
+                .await
+                .unwrap_or(Value::Null);
+            let clicked = match found["path"].as_str() {
+                Some(path) => click(page, mouse, path).await,
+                None => false,
+            };
+            if !clicked {
+                warn!(%pick, "the date strip's button for this day was not clicked: stopping");
                 break;
             }
             loads += 1;
             clicks += 1;
-            let got = wait_offers(
-                capture,
-                &mut seen,
-                call,
-                |url| {
-                    !latam::is_return_leg(url)
-                        && latam::out_from(url) == Some(pick)
-                },
-                t.response * 2,
-            )
-            .await;
+            let got = mouse
+                .wander_while(
+                    page,
+                    wait_offers(
+                        capture,
+                        &mut seen,
+                        call,
+                        |url| {
+                            !latam::is_return_leg(url)
+                                && latam::out_from(url) == Some(pick)
+                        },
+                        t.response * 2,
+                    ),
+                )
+                .await;
             match got {
                 Ok(r) => match parse(&r) {
                     Ok(o) => {

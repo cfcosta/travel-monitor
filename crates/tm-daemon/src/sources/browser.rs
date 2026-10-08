@@ -41,6 +41,7 @@ use tm_browser::{
     Context,
     ContextOptions,
     Display,
+    Mouse,
     Page,
 };
 use tm_domain::{Cabin, Currency, PointOfSale, PosId, QueryOutcome};
@@ -106,8 +107,13 @@ pub struct Timeouts {
     pub scroll_pause: Duration,
     /// Before each click on LATAM's date strip (and the round trip's
     /// outbound choice), random between the two: each is a search,
-    /// spaced like a page load (0084: 20–45 s).
+    /// spaced like a page load (0084: 20–45 s). The mouse wanders
+    /// meanwhile (0091).
     pub strip_pause: (Duration, Duration),
+    /// How long LATAM's results are looked over, the mouse wandering
+    /// and sometimes scrolling, once they arrive and before anything is
+    /// read or clicked: random between the two (0091).
+    pub look: (Duration, Duration),
 }
 
 impl Default for Timeouts {
@@ -119,6 +125,7 @@ impl Default for Timeouts {
             settle: Duration::from_millis(1500),
             scroll_pause: Duration::from_millis(700),
             strip_pause: (Duration::from_secs(20), Duration::from_secs(45)),
+            look: (Duration::from_millis(1500), Duration::from_millis(4000)),
         }
     }
 }
@@ -166,6 +173,10 @@ struct Running {
     chromium: Chromium,
     /// Locked while a page opens, so a context is created once.
     contexts: tokio::sync::Mutex<HashMap<PosId, Context>>,
+    /// The browser's one mouse (0091): the offscreen display's pointer,
+    /// or CDP mouse events elsewhere. LATAM's pages use it, one check at
+    /// a time; the lock keeps it so.
+    mouse: tokio::sync::Mutex<Mouse>,
 }
 
 pub struct BrowserSources {
@@ -952,6 +963,7 @@ impl Sources for BrowserSources {
     async fn start(
         &self,
         points_of_sale: &[PointOfSale],
+        seed: u64,
     ) -> anyhow::Result<()> {
         if self.running().is_some() {
             return Ok(());
@@ -971,10 +983,17 @@ impl Sources for BrowserSources {
                 .await?;
             contexts.insert(pos.id, context);
         }
-        info!(contexts = contexts.len(), ws = %chromium.ws_url(), "Chromium is up");
+        let mouse = Mouse::new(chromium.pointer(), seed);
+        info!(
+            contexts = contexts.len(),
+            ws = %chromium.ws_url(),
+            real_mouse = mouse.is_real(),
+            "Chromium is up"
+        );
         let running = Arc::new(Running {
             chromium,
             contexts: tokio::sync::Mutex::new(contexts),
+            mouse: tokio::sync::Mutex::new(mouse),
         });
         if let Ok(mut slot) = self.running.lock() {
             *slot = Some(running);
@@ -1030,9 +1049,14 @@ impl Sources for BrowserSources {
 
     async fn latam(&self, job: &LatamJob) -> Fetch<LatamFound> {
         let t = self.timeouts;
+        let Some(running) = self.running() else {
+            return Fetch::error("no page: the browser is not running");
+        };
+        let mouse = running.mouse.lock().await;
         match self.profile_page().await {
             Ok(page) => {
-                let result = super::latam::latam_on(&page, job, t).await;
+                let result =
+                    super::latam::latam_on(&page, &mouse, job, t).await;
                 if let Err(e) = page.close().await {
                     debug!("closing a page failed: {e}");
                 }

@@ -260,9 +260,13 @@ pub struct ResolveJob {
 #[async_trait]
 pub trait Sources: Send + Sync {
     /// Starts the browser with one isolated context per point of sale
-    /// (0033).
-    async fn start(&self, points_of_sale: &[PointOfSale])
-    -> anyhow::Result<()>;
+    /// (0033). `seed` seeds the randomness of its mouse (0091), so a
+    /// worker's seeded run moves it the same way.
+    async fn start(
+        &self,
+        points_of_sale: &[PointOfSale],
+        seed: u64,
+    ) -> anyhow::Result<()>;
     /// Closes the browser, releasing the profile (0024).
     async fn stop(&self);
     fn is_running(&self) -> bool;

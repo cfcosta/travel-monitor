@@ -218,6 +218,7 @@ fn fast() -> Timeouts {
         settle: Duration::from_millis(400),
         scroll_pause: Duration::from_millis(50),
         strip_pause: (Duration::from_millis(50), Duration::from_millis(100)),
+        look: (Duration::ZERO, Duration::ZERO),
     }
 }
 
@@ -278,7 +279,7 @@ async fn the_tap_source_reads_the_calendar() {
         active: true,
     };
     sources
-        .start(std::slice::from_ref(&pos))
+        .start(std::slice::from_ref(&pos), 7)
         .await
         .expect("Chromium starts");
 

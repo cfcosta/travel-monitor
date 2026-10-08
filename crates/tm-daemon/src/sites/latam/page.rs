@@ -1,13 +1,15 @@
 //! The scripts the LATAM reader runs in the results page (DECISIONS.md
-//! 0084, 0085, 0090). Each only reads the page or finds where a person
-//! would click; the clicks themselves are mouse events at the point a
-//! script returns (`tm_browser::Page::click_at`), the input a person
-//! uses. Nothing is typed and no API is called (0052).
+//! 0084, 0085, 0090, 0091). Each only reads the page: it finds what a
+//! person would click and names it with a CSS selector of its own
+//! ([`PATH_JS`]), which `tm_browser::Mouse::click` then scrolls into view
+//! with the wheel and clicks as a hand does. No script scrolls or
+//! clicks, nothing is typed and no API is called (0052).
 //!
 //! Two things click: the date strip, only when switched on
 //! (`Config::latam_strip`), and a round trip's outbound fare, whose
 //! families are not scheduled (`sites::latam::unsupported`). In the
-//! live run a search a strip click made got Akamai's 403 (0090).
+//! live run a search a strip click made, with no movement before it,
+//! got Akamai's 403 (0090, 0091).
 
 use chrono::NaiveDate;
 
@@ -15,9 +17,26 @@ use chrono::NaiveDate;
 pub const TITLE_AND_TEXT_JS: &str = "[document.title || '', \
      (document.body && document.body.innerText || '').slice(0, 20000)]";
 
-/// Finds the date strip's control for `date` and, when `scroll`, brings
-/// it into view. Returns `{x, y}`, its centre in the viewport, `{found:
-/// true}` when it is there but covered or disabled, or `null`.
+/// A function of an element that returns a selector matching it and
+/// nothing before it: the nearest unique id, then `:nth-child` steps.
+/// The mouse finds the element by it; the page is not changed.
+const PATH_JS: &str = r#"(el) => {
+  const parts = [];
+  for (let e = el; e && e.nodeType === 1; e = e.parentElement) {
+    if (e.id && document.querySelectorAll('#' + CSS.escape(e.id)).length === 1) {
+      parts.unshift('#' + CSS.escape(e.id));
+      break;
+    }
+    if (!e.parentElement) { parts.unshift(e.tagName.toLowerCase()); break; }
+    parts.unshift(e.tagName.toLowerCase() + ':nth-child(' + ([...e.parentElement.children].indexOf(e) + 1) + ')');
+  }
+  const path = parts.join(' > ');
+  return document.querySelector(path) === el ? path : null;
+}"#;
+
+/// Finds the date strip's control for `date`. Returns `{path}`, a
+/// selector for it, `{found: true}` when it is there but disabled, or
+/// `null`.
 ///
 /// The strip is not described beyond "seven days around the searched
 /// date" (latam-pass.md, "Measuring cash against miles" §4), so it is
@@ -26,9 +45,10 @@ pub const TITLE_AND_TEXT_JS: &str = "[document.title || '', \
 /// ISO date, inside a container with at least five such dated controls.
 /// Controls in forms, inputs and dialogs (the search box, its date
 /// picker) are left out.
-pub fn strip_day_js(date: NaiveDate, scroll: bool) -> String {
+pub fn strip_day_js(date: NaiveDate) -> String {
     format!(
-        r#"((iso, scroll) => {{
+        r#"((iso) => {{
+  const path = {PATH_JS};
   const [y, m, d] = iso.split('-').map(Number);
   const pt = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'][m - 1];
   const en = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'][m - 1];
@@ -60,27 +80,22 @@ pub fn strip_day_js(date: NaiveDate, scroll: bool) -> String {
   const el = hits.find(e => !hits.some(o => o !== e && e.contains(o))) || hits[0];
   if (!el) return null;
   if (el.disabled || el.getAttribute('aria-disabled') === 'true') return {{found: true}};
-  if (scroll) el.scrollIntoView({{block: 'center', inline: 'center'}});
-  const r = el.getBoundingClientRect();
-  const x = r.left + r.width / 2, y2 = r.top + r.height / 2;
-  const top = document.elementFromPoint(x, y2);
-  if (!top || !(top === el || el.contains(top) || top.contains(el))) return {{found: true}};
-  return {{x, y: y2}};
-}})({iso:?}, {scroll})"#,
+  const p = path(el);
+  return p ? {{path: p}} : {{found: true}};
+}})({iso:?})"#,
         iso = date.format("%Y-%m-%d").to_string(),
     )
 }
 
-/// The centre of the first visible element matching `selector`, after
-/// scrolling it into view, or `null`.
-pub fn locate_js(selector: &str) -> String {
+/// A selector for the first visible, enabled element matching
+/// `selector` (a page may keep hidden copies), or `null`.
+pub fn shown_js(selector: &str) -> String {
     format!(
         r#"((sel) => {{
+  const path = {PATH_JS};
   const el = [...document.querySelectorAll(sel)].find(e => {{ const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; }});
   if (!el || el.disabled) return null;
-  el.scrollIntoView({{block: 'center'}});
-  const r = el.getBoundingClientRect();
-  return {{x: r.left + r.width / 2, y: r.top + r.height / 2}};
+  return path(el);
 }})({})"#,
         serde_json::to_string(selector).unwrap_or_default()
     )
@@ -108,11 +123,13 @@ mod tests {
     #[test]
     fn scripts_name_their_targets() {
         let day = NaiveDate::from_ymd_opt(2027, 6, 16).expect("a date");
-        let js = strip_day_js(day, true);
-        assert!(js.ends_with(r#"})("2027-06-16", true)"#), "{js}");
-        assert!(!strip_day_js(day, false).contains("\"2027-06-16\", true"));
+        let js = strip_day_js(day);
+        assert!(js.ends_with(r#"})("2027-06-16")"#), "{js}");
+        assert!(!js.contains("scrollIntoView") && !js.contains(".click("));
         assert_eq!(card_header(3), "[data-testid=\"wrapper-card-header-3\"]");
         assert_eq!(brand_select(0), "#bundle-detail-0-flight-select");
-        assert!(locate_js("#a\"b").contains(r##"("#a\"b")"##));
+        let js = shown_js("#a\"b");
+        assert!(js.contains(r##"("#a\"b")"##), "{js}");
+        assert!(!js.contains("scrollIntoView") && !js.contains(".click("));
     }
 }

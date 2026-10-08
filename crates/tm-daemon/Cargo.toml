@@ -45,6 +45,8 @@ notify-rust.workspace = true
 # Chromium-shaped cookie jars for the login tests.
 sqlx.workspace = true
 tempfile.workspace = true
+# The offscreen LATAM test skips without a GPU render node.
+tm-compositor.workspace = true
 tokio = { workspace = true, features = [
   "io-util",
   "macros",
