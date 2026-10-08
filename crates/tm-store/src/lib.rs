@@ -64,6 +64,7 @@ pub use records::{
     SiteStatus,
 };
 use sqlx::{
+    ConnectOptions,
     Sqlite,
     SqlitePool,
     Transaction,
@@ -83,6 +84,10 @@ static MIGRATOR: Migrator = sqlx::migrate!("./migrations");
 /// app) before giving up.
 const BUSY_TIMEOUT: Duration = Duration::from_secs(10);
 
+/// How slow a statement is before sqlx warns about it (sqlx's own
+/// default).
+const SLOW_STATEMENT: Duration = Duration::from_secs(1);
+
 /// The database. Cheap to clone: clones share one connection pool.
 #[derive(Debug, Clone)]
 pub struct Store {
@@ -91,15 +96,27 @@ pub struct Store {
 
 impl Store {
     /// Opens the database at `path`, creating it if missing, in WAL mode
-    /// with foreign keys on, and runs the migrations.
+    /// with foreign keys on, and runs the migrations. A statement slower
+    /// than a second is logged as a warning.
     pub async fn open(path: impl AsRef<Path>) -> Result<Self> {
+        Self::open_with(path, SLOW_STATEMENT).await
+    }
+
+    /// [`Store::open`], warning only about statements slower than `slow`;
+    /// faster ones are logged at debug. For a reader whose large reads
+    /// are expected (the app's first snapshot).
+    pub async fn open_with(
+        path: impl AsRef<Path>,
+        slow: Duration,
+    ) -> Result<Self> {
         let options = SqliteConnectOptions::new()
             .filename(path)
             .create_if_missing(true)
             .journal_mode(SqliteJournalMode::Wal)
             .synchronous(SqliteSynchronous::Normal)
             .busy_timeout(BUSY_TIMEOUT)
-            .foreign_keys(true);
+            .foreign_keys(true)
+            .log_slow_statements(log::LevelFilter::Warn, slow);
         let pool = SqlitePoolOptions::new()
             .max_connections(4)
             .connect_with(options)

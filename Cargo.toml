@@ -25,6 +25,7 @@ futures-util = { version = "0.3.34", default-features = false, features = [
 ] }
 gpui = { package = "gpui-pre", version = "=0.3.7" }
 hegeltest = { version = "0.48.1", features = ["serde_json", "static-engine"] }
+log = "0.4"
 notify-rust = "4"
 rand = "0.9"
 serde = { version = "1.0.229", features = ["derive"] }

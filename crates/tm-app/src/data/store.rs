@@ -21,7 +21,13 @@
 use std::{
     collections::{BTreeSet, HashMap},
     path::PathBuf,
-    sync::{Arc, Mutex, OnceLock, Weak},
+    sync::{
+        Arc,
+        Mutex,
+        OnceLock,
+        Weak,
+        atomic::{AtomicUsize, Ordering},
+    },
     time::Duration as StdDuration,
 };
 
@@ -131,6 +137,13 @@ struct Inner {
     store: OnceCell<Store>,
     cache: Mutex<Cache>,
     last: Mutex<Option<Arc<Last>>>,
+    /// Held while a snapshot is read: one at a time.
+    turn: tokio::sync::Mutex<()>,
+    /// Snapshots that read latest cells from the database.
+    cold_reads: AtomicUsize,
+    /// Snapshots being read now, and the most there ever were at once.
+    reading: AtomicUsize,
+    most_at_once: AtomicUsize,
 }
 
 pub struct StoreBackend {
@@ -140,6 +153,10 @@ pub struct StoreBackend {
     changes: OnceLock<ChangeSender>,
 }
 
+/// How slow a statement is before sqlx warns: the first snapshot's
+/// large reads are expected, and each snapshot logs its own time.
+const SLOW_STATEMENT: StdDuration = StdDuration::from_secs(5);
+
 /// How often the watcher reads `data_version`.
 pub const POLL: StdDuration = StdDuration::from_millis(250);
 
@@ -148,16 +165,26 @@ const REOPEN: StdDuration = StdDuration::from_secs(2);
 
 /// The backend for the database at `path`; nothing is opened yet.
 pub fn backend(path: PathBuf, tokio: Handle) -> SharedBackend {
-    Arc::new(StoreBackend {
-        inner: Arc::new(Inner {
-            path,
-            store: OnceCell::new(),
-            cache: Mutex::new(Cache::default()),
-            last: Mutex::new(None),
-        }),
-        tokio,
-        changes: OnceLock::new(),
-    })
+    Arc::new(StoreBackend::new(path, tokio))
+}
+
+impl StoreBackend {
+    fn new(path: PathBuf, tokio: Handle) -> Self {
+        Self {
+            inner: Arc::new(Inner {
+                path,
+                store: OnceCell::new(),
+                cache: Mutex::new(Cache::default()),
+                last: Mutex::new(None),
+                turn: tokio::sync::Mutex::new(()),
+                cold_reads: AtomicUsize::new(0),
+                reading: AtomicUsize::new(0),
+                most_at_once: AtomicUsize::new(0),
+            }),
+            tokio,
+            changes: OnceLock::new(),
+        }
+    }
 }
 
 /// Watches the database for commits by any other connection (the
@@ -225,8 +252,9 @@ impl Inner {
                         format!("cannot create {}", dir.display())
                     })?;
                 }
-                let store =
-                    Store::open(&self.path).await.with_context(|| {
+                let store = Store::open_with(&self.path, SLOW_STATEMENT)
+                    .await
+                    .with_context(|| {
                         format!("cannot open {}", self.path.display())
                     })?;
                 // A fresh file gets SAO and the watchlist, as the daemon
@@ -335,7 +363,7 @@ impl Inner {
         &self,
         store: &Store,
         rows: &[RowSpec<'_>],
-    ) -> anyhow::Result<()> {
+    ) -> anyhow::Result<usize> {
         let stale: Vec<(FamilyId, Option<DateTime<Utc>>)> = {
             let cache = self.lock();
             rows.iter()
@@ -350,7 +378,7 @@ impl Inner {
                 .collect()
         };
         if stale.is_empty() {
-            return Ok(());
+            return Ok(0);
         }
         let ids: Vec<FamilyId> = stale.iter().map(|(id, _)| *id).collect();
         let reads = ids.chunks(ids.len().div_ceil(READERS)).map(|ids| {
@@ -361,12 +389,13 @@ impl Inner {
         for read in reads.collect::<Vec<_>>() {
             by_family.extend(read.await??);
         }
+        let read = stale.len();
         let mut cache = self.lock();
         for (id, stamp) in stale {
             let cells = by_family.remove(&id).unwrap_or_default();
             cache.latest.insert(id, (stamp, Arc::new(cells)));
         }
-        Ok(())
+        Ok(read)
     }
 
     /// A row family's latest cells: from the cache [`Inner::prefetch_cells`]
@@ -395,15 +424,15 @@ impl Inner {
     }
 
     /// Each row's price history (60 days), cached until one of its
-    /// families is checked again. The rows whose cache is stale are read
-    /// together, in one statement.
+    /// families is checked again, and how many rows were read: those
+    /// whose cache is stale are read together.
     async fn histories(
         &self,
         store: &Store,
         rows: &[RowSpec<'_>],
         settings: &Settings,
         now: DateTime<Utc>,
-    ) -> anyhow::Result<HashMap<RowKey, Arc<History>>> {
+    ) -> anyhow::Result<(HashMap<RowKey, Arc<History>>, usize)> {
         let mut out = HashMap::new();
         let mut stale: Vec<(&RowSpec<'_>, Option<DateTime<Utc>>)> = Vec::new();
         {
@@ -419,7 +448,7 @@ impl Inner {
             }
         }
         if stale.is_empty() {
-            return Ok(out);
+            return Ok((out, 0));
         }
         let mut owner: HashMap<FamilyId, (usize, FamilyKind)> = HashMap::new();
         for (i, (row, _)) in stale.iter().enumerate() {
@@ -447,6 +476,7 @@ impl Inner {
                 }
             }
         }
+        let read = stale.len();
         let mut cache = self.lock();
         for ((row, stamp), cells) in stale.into_iter().zip(cells) {
             let h = Arc::new(history::history(
@@ -457,7 +487,7 @@ impl Inner {
             cache.history.insert(row.key, (stamp, h.clone()));
             out.insert(row.key, h);
         }
-        Ok(out)
+        Ok((out, read))
     }
 }
 
@@ -1165,6 +1195,7 @@ async fn reselect(
                 ctx.now,
             )
             .await?
+            .0
             .remove(&spec.key)
             .context("a row without its history")?;
         snapshot.detail =
@@ -1173,14 +1204,65 @@ async fn reselect(
     Ok(snapshot)
 }
 
-/// A snapshot for `query`. `changes` is the change watcher's count of
-/// notices, when it is watching: while it has not moved, a query that
-/// only changes the selection reuses the last snapshot's rows.
+/// What a snapshot read, for its log line.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Read {
+    /// The last snapshot's rows, and the selection's detail.
+    Selection,
+    /// Every row: the cells of `cells` families and the histories of
+    /// `histories` rows from the database (checked since they were
+    /// cached), the rest from the cache.
+    Rows { cells: usize, histories: usize },
+}
+
+/// A snapshot for `query`, one at a time: a refresh asked for while
+/// another snapshot is being read waits for it, then finds what it
+/// read cached, instead of reading the same cells and histories again
+/// alongside it (the first open's reads take a while, and the daemon
+/// writes meanwhile).
 async fn snapshot(
     inner: &Inner,
     query: SnapshotQuery,
     changes: Option<u64>,
 ) -> anyhow::Result<Snapshot> {
+    let _turn = inner.turn.lock().await;
+    let started = std::time::Instant::now();
+    let at_once = inner.reading.fetch_add(1, Ordering::Relaxed) + 1;
+    inner.most_at_once.fetch_max(at_once, Ordering::Relaxed);
+    let result = read_snapshot(inner, query, changes).await;
+    inner.reading.fetch_sub(1, Ordering::Relaxed);
+    let (snapshot, read) = result?;
+    let ms = started.elapsed().as_millis();
+    let rows = snapshot.rows.len();
+    match read {
+        Read::Selection => {
+            tracing::info!("snapshot: selection, {ms} ms, {rows} rows reused");
+        }
+        Read::Rows {
+            cells: 0,
+            histories: 0,
+        } => tracing::info!("snapshot: warm, {ms} ms, {rows} rows"),
+        Read::Rows { cells, histories } => tracing::info!(
+            "snapshot: cold, {ms} ms, {rows} rows ({cells} families' \
+             cells, {histories} histories read)"
+        ),
+    }
+    if let Read::Rows { cells, .. } = read
+        && cells > 0
+    {
+        inner.cold_reads.fetch_add(1, Ordering::Relaxed);
+    }
+    Ok(snapshot)
+}
+
+/// A snapshot for `query`. `changes` is the change watcher's count of
+/// notices, when it is watching: while it has not moved, a query that
+/// only changes the selection reuses the last snapshot's rows.
+async fn read_snapshot(
+    inner: &Inner,
+    query: SnapshotQuery,
+    changes: Option<u64>,
+) -> anyhow::Result<(Snapshot, Read)> {
     if let Some(changes) = changes
         && let Some(last) = inner.reusable(&query, changes)
     {
@@ -1192,7 +1274,7 @@ async fn snapshot(
             pricing: last.pricing.clone(),
             snapshot: snapshot.clone(),
         });
-        return Ok(snapshot);
+        return Ok((snapshot, Read::Selection));
     }
     let started = std::time::Instant::now();
     let store = inner.store().await?;
@@ -1257,8 +1339,8 @@ async fn snapshot(
         inner.prefetch_cells(store, &specs),
         inner.histories(store, &specs, &ctx.settings, now),
     );
-    cells?;
-    let histories = histories?;
+    let read_cells = cells?;
+    let (histories, read_histories) = histories?;
     let mut rows = Vec::new();
     let mut detail = None;
     for spec in &specs {
@@ -1415,7 +1497,11 @@ async fn snapshot(
             snapshot: snapshot.clone(),
         });
     }
-    Ok(snapshot)
+    let read = Read::Rows {
+        cells: read_cells,
+        histories: read_histories,
+    };
+    Ok((snapshot, read))
 }
 
 /// The watched destinations, and which of them the user starred (0094).
@@ -2589,6 +2675,38 @@ mod tests {
         let _ = std::fs::remove_dir_all(dir);
     }
 
+    /// Two snapshots asked for at once (the first open, and a refresh
+    /// for a write meanwhile) read the cells once: the second waits for
+    /// the first and finds them cached.
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn snapshots_take_turns() {
+        let dir = dir();
+        let path = dir.join("tm.db");
+        let daemon = Store::open(&path).await.expect("open");
+        daemon.seed_defaults().await.expect("seed");
+        price_mia(&daemon, Utc::now() - Duration::hours(1), 2000, true).await;
+        let backend = Arc::new(StoreBackend::new(path, Handle::current()));
+        let (a, b) = tokio::join!(
+            backend.snapshot(SnapshotQuery::default()),
+            backend.snapshot(SnapshotQuery::default()),
+        );
+        let (a, b) = (a.expect("reads"), b.expect("reads"));
+        assert_eq!(a.rows, b.rows);
+        assert_eq!(backend.inner.most_at_once.load(Ordering::Relaxed), 1);
+        assert_eq!(backend.inner.cold_reads.load(Ordering::Relaxed), 1);
+
+        // A check makes the next one read again.
+        price_mia(&daemon, Utc::now(), 1000, true).await;
+        backend
+            .snapshot(SnapshotQuery::default())
+            .await
+            .expect("reads");
+        assert_eq!(backend.inner.cold_reads.load(Ordering::Relaxed), 2);
+        daemon.close().await;
+        drop(backend);
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
     /// Times snapshots against a copy of a real database:
     /// `TM_BENCH_DB=<copy> cargo test --release -p tm-app --bin tm --
     /// --ignored bench_snapshot --nocapture`. Never point it at the live
@@ -2612,6 +2730,15 @@ mod tests {
             );
             s
         };
+        // The first open with a refresh asked for meanwhile.
+        let twice = super::backend(PathBuf::from(&path), Handle::current());
+        let started = std::time::Instant::now();
+        let (a, b) = tokio::join!(
+            twice.snapshot(SnapshotQuery::default()),
+            twice.snapshot(SnapshotQuery::default()),
+        );
+        a.and(b).expect("snapshots");
+        eprintln!("two at once, cold: {:?}", started.elapsed());
         let s = time("cold", SnapshotQuery::default()).await;
         for _ in 0..3 {
             time("warm", SnapshotQuery::default()).await;
