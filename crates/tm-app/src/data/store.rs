@@ -6,7 +6,12 @@
 //! is opened on first use: a missing or locked file shows as an error
 //! in the window, retried with every refresh. Leg and history reads are
 //! cached per family and only re-read when the family was checked
-//! again.
+//! again; those that are stale are read together, one statement for
+//! all the latest cells and one for all the histories.
+//!
+//! A query that only selects another row (or departure, or trip
+//! length) while the watcher below has noticed no write since the last
+//! snapshot reuses that snapshot's rows and prices only the detail.
 //!
 //! Changes (0057): a task on the same runtime keeps one connection of
 //! its own ([`tm_store::ChangeWatch`], not from the pool) and reads
@@ -79,6 +84,7 @@ use super::{
     NewPos,
     Request,
     Role,
+    RouteDetail,
     RouteRow,
     RowKey,
     RowStatus,
@@ -120,6 +126,7 @@ struct Inner {
     path: PathBuf,
     store: OnceCell<Store>,
     cache: Mutex<Cache>,
+    last: Mutex<Option<Arc<Last>>>,
 }
 
 pub struct StoreBackend {
@@ -142,6 +149,7 @@ pub fn backend(path: PathBuf, tokio: Handle) -> SharedBackend {
             path,
             store: OnceCell::new(),
             cache: Mutex::new(Cache::default()),
+            last: Mutex::new(None),
         }),
         tokio,
         changes: OnceLock::new(),
@@ -227,6 +235,35 @@ impl Inner {
 
     fn lock(&self) -> std::sync::MutexGuard<'_, Cache> {
         self.cache.lock().unwrap_or_else(|e| e.into_inner())
+    }
+
+    /// The last snapshot, when `query` can be answered from its rows:
+    /// no change notice since it was read (`changes`), the same origin
+    /// and day, not long ago, and a different query (asking the same
+    /// again, as the fallback refresh does, reads everything).
+    fn reusable(
+        &self,
+        query: &SnapshotQuery,
+        changes: u64,
+    ) -> Option<Arc<Last>> {
+        let last = self
+            .last
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .clone()?;
+        let same_origin = query.origin == last.query.origin
+            || query.origin == last.snapshot.origin;
+        (last.changes == changes
+            && same_origin
+            && *query != last.query
+            && last.at.elapsed() < REUSE_FOR
+            && Utc::now().date_naive() == last.pricing.today)
+            .then_some(last)
+    }
+
+    fn keep(&self, last: Last) {
+        *self.last.lock().unwrap_or_else(|e| e.into_inner()) =
+            Some(Arc::new(last));
     }
 
     async fn cells(
@@ -789,10 +826,325 @@ fn seller_rows(
     (best, direct)
 }
 
+/// What every row of a snapshot is priced against, read once per
+/// snapshot and kept with it for selections ([`Last`]).
+struct Pricing {
+    now: DateTime<Utc>,
+    today: NaiveDate,
+    settings: Settings,
+    points_of_sale: Vec<PointOfSale>,
+    home: Option<PosId>,
+    pos_names: HashMap<PosId, CountryCode>,
+    rates: HashMap<String, f64>,
+    routes: Vec<Route>,
+    families: Vec<FamilyRecord>,
+    deals: Vec<Deal>,
+    miles: Vec<MilesRow>,
+}
+
+/// The last full snapshot, the change notices it had seen and what it
+/// was priced against.
+struct Last {
+    query: SnapshotQuery,
+    changes: u64,
+    at: std::time::Instant,
+    pricing: Arc<Pricing>,
+    snapshot: Snapshot,
+}
+
+/// How long the last snapshot's rows may serve selections. Writes end
+/// it sooner (the change watcher's notices); this bounds a watcher that
+/// stopped noticing.
+const REUSE_FOR: StdDuration = StdDuration::from_secs(30);
+
+/// One row of the list, and the detail when it is `query`'s selection.
+async fn price_row(
+    inner: &Inner,
+    store: &Store,
+    ctx: &Pricing,
+    spec: &RowSpec<'_>,
+    hist: Arc<History>,
+    query: &SnapshotQuery,
+) -> anyhow::Result<(RouteRow, Option<RouteDetail>)> {
+    let (route, key, discount) = (spec.route, spec.key, spec.discount);
+    let cabin = key.cabin;
+    let fams = &spec.families;
+    let horizon_end =
+        ctx.today + Duration::days(i64::from(ctx.settings.horizon_days));
+    let days = query
+        .calendar_days
+        .unwrap_or(ctx.settings.trips.round_trip_days);
+    let mut detail = None;
+    let mut cells: Vec<(FamilyKind, Arc<Vec<Observation>>)> = Vec::new();
+    for f in fams {
+        cells.push((f.key.kind, inner.cells(store, f).await?));
+    }
+    let inputs: TripInputs = history::trip_inputs(
+        cells
+            .iter()
+            .flat_map(|(k, obs)| obs.iter().map(move |o| (*k, o))),
+        discount,
+    );
+    let baselines = Baselines {
+        by_departure: history::baselines_by_departure(
+            &hist.points,
+            ctx.now,
+            ctx.settings.horizon_days,
+        ),
+    };
+    // The newest live cash deal of this row: confirmed, or
+    // waiting. Award deals are their own series (0023).
+    let deal = ctx.deals.iter().find(|d| {
+        d.series == tm_domain::Series::Cash
+            && d.return_date.is_some()
+            && d.route == route.id
+            && d.cabin == cabin
+            && d.departure >= ctx.today
+            && matches!(d.status, DealStatus::Confirmed | DealStatus::Candidate)
+    });
+    let carrier_of = |dep: NaiveDate| {
+        cells
+            .iter()
+            .flat_map(|(_, obs)| obs.iter())
+            .find(|o| o.departure == dep && o.carrier.is_some())
+    };
+    let best = match deal.and_then(|d| Some((d, d.return_date?))) {
+        Some((d, return_date)) => Some(Trip {
+            departure: d.departure,
+            return_date,
+            price: d.effective_brl.clone(),
+            carrier: d.carrier.clone(),
+            stops: carrier_of(d.departure).and_then(|o| o.stops),
+            duration_minutes: carrier_of(d.departure)
+                .and_then(|o| o.duration_minutes),
+            estimated: d.estimated,
+        }),
+        None => history::best_trip(
+            &inputs,
+            ctx.today,
+            horizon_end,
+            ctx.settings.trips,
+        )
+        .map(|(dep, n, p)| {
+            let cell = carrier_of(dep);
+            Trip {
+                departure: dep,
+                return_date: dep + Duration::days(i64::from(n)),
+                price: Money::new(p.minor, tm_domain::Currency::brl()),
+                carrier: cell.and_then(|o| o.carrier.clone()),
+                stops: cell.and_then(|o| o.stops),
+                duration_minutes: cell.and_then(|o| o.duration_minutes),
+                estimated: !p.confirmed,
+            }
+        }),
+    };
+    let baseline = match deal {
+        Some(d) => d.baseline.clone(),
+        None => best
+            .as_ref()
+            .and_then(|t| baselines.at(t.departure))
+            .map(|m| Money::new(m, tm_domain::Currency::brl())),
+    };
+    let change = match (deal.and_then(|d| d.change), &best, &baseline) {
+        (Some(c), _, _) => Some(c),
+        (None, Some(t), Some(b)) if b.minor > 0 => {
+            Some(t.price.minor as f64 / b.minor as f64 - 1.0)
+        }
+        _ => None,
+    };
+    // The first program with awards on this route leads (0083).
+    let mut award_read = None;
+    for program in leading_programs(&ctx.miles) {
+        if let Some(read) = read_awards(
+            inner,
+            store,
+            &ctx.families,
+            route,
+            cabin,
+            &program.program,
+            ctx.home,
+            ctx.settings.trips.round_trip_days,
+            ctx.now,
+        )
+        .await?
+        {
+            award_read = Some((program, read));
+            break;
+        }
+    }
+    let award_inputs = award_read.as_ref().map(|(program, read)| {
+        let series = Series::Award {
+            program: program.program.clone(),
+        };
+        AwardInputs {
+            program,
+            cabin,
+            outbound: &read.outbound,
+            inbound: &read.inbound,
+            round_trip: &read.round_trip,
+            other_cabins: &read.others,
+            history: &read.history,
+            deal: ctx.deals.iter().find(|d| {
+                d.series == series
+                    && d.route == route.id
+                    && d.cabin == cabin
+                    && d.departure >= ctx.today
+                    && matches!(
+                        d.status,
+                        DealStatus::Confirmed | DealStatus::Candidate
+                    )
+            }),
+            checked_at: read.checked_at,
+        }
+    });
+    let award = award_inputs.as_ref().and_then(|a| {
+        summary(a, &inputs.legs, best.as_ref(), &ctx.settings, ctx.now)
+    });
+    let row = RouteRow {
+        award,
+        route: route.clone(),
+        cabin,
+        status: match deal.map(|d| d.status) {
+            Some(DealStatus::Confirmed) => RowStatus::Deal,
+            Some(DealStatus::Candidate) => RowStatus::Confirming,
+            _ => RowStatus::Watching,
+        },
+        best: best.clone(),
+        baseline,
+        change,
+        history: hist.daily_min.clone(),
+        last_checked: fams.iter().filter_map(|f| f.state.last_check).max(),
+        deal: deal.and_then(|d| d.id),
+        found_at: deal.map(|d| d.confirmed_at.unwrap_or(d.found_at)),
+    };
+    if query.selected == Some(key) {
+        let (sellers, airline_direct) = deal
+            .map(|d| {
+                seller_rows(d, &ctx.points_of_sale, &ctx.rates, &ctx.settings)
+            })
+            .unwrap_or_default();
+        let url = deal.and_then(|d| d.url.clone()).or_else(|| {
+            best.as_ref().map(|t| {
+                search_url(
+                    route,
+                    cabin,
+                    &ctx.settings,
+                    t.departure,
+                    t.return_date,
+                )
+            })
+        });
+        // Learned changes per day, from the outbound leg's
+        // Gamma posterior (per hour).
+        let change_rate = fams
+            .iter()
+            .find(|f| {
+                matches!(f.key.kind, FamilyKind::Leg { leg: Leg::Outbound })
+            })
+            .filter(|f| f.state.chg_b > 0.0)
+            .map(|f| f.state.chg_a / f.state.chg_b * 24.0);
+        let checks = store.recent_queries(400).await?;
+        let inputs = DetailInputs {
+            trip: best.clone(),
+            deal: row.status == RowStatus::Deal,
+            trips: inputs.clone(),
+            baselines,
+            sellers,
+            airline_direct,
+            url,
+            lowest_ever: hist.lowest.map(|(m, day)| {
+                (
+                    Money::new(m, tm_domain::Currency::brl()),
+                    day,
+                    "60 days".to_owned(),
+                )
+            }),
+            change_rate,
+            recent_checks: checks
+                .iter()
+                .filter(|q| q.key.route == route.id && q.key.cabin == cabin)
+                .take(8)
+                .map(|q| activity_row(q, &ctx.pos_names))
+                .collect(),
+            next_check: None,
+            awards: award_inputs.as_ref().map(|a| {
+                route_awards(
+                    a,
+                    &inputs.legs,
+                    query.departure.or(best.as_ref().map(|t| t.departure)),
+                    days,
+                    &ctx.settings,
+                    ctx.now,
+                )
+            }),
+            award_marks: award_inputs.as_ref().map(AwardMarks::of),
+            favorite: route.favorite,
+        };
+        detail = Some(assemble(
+            key,
+            inputs,
+            &ctx.settings,
+            ctx.today,
+            days,
+            query.departure,
+        ));
+    }
+    Ok((row, detail))
+}
+
+/// A snapshot for `query` from `last`'s rows: nothing was written since
+/// it was read, and `query` only picks another row, departure or trip
+/// length, so only the detail is priced (DECISIONS.md 0057: the app
+/// re-reads on the daemon's change notices).
+async fn reselect(
+    inner: &Inner,
+    last: &Last,
+    query: SnapshotQuery,
+) -> anyhow::Result<Snapshot> {
+    let store = inner.store().await?;
+    let ctx = &last.pricing;
+    let mut snapshot = last.snapshot.clone();
+    snapshot.detail = None;
+    let specs = row_specs(&ctx.routes, &ctx.families, ctx.home);
+    if let Some(spec) = specs.iter().find(|s| Some(s.key) == query.selected) {
+        let hist = inner
+            .histories(
+                store,
+                std::slice::from_ref(spec),
+                &ctx.settings,
+                ctx.now,
+            )
+            .await?
+            .remove(&spec.key)
+            .context("a row without its history")?;
+        snapshot.detail =
+            price_row(inner, store, ctx, spec, hist, &query).await?.1;
+    }
+    Ok(snapshot)
+}
+
+/// A snapshot for `query`. `changes` is the change watcher's count of
+/// notices, when it is watching: while it has not moved, a query that
+/// only changes the selection reuses the last snapshot's rows.
 async fn snapshot(
     inner: &Inner,
     query: SnapshotQuery,
+    changes: Option<u64>,
 ) -> anyhow::Result<Snapshot> {
+    if let Some(changes) = changes
+        && let Some(last) = inner.reusable(&query, changes)
+    {
+        let snapshot = reselect(inner, &last, query).await?;
+        inner.keep(Last {
+            query,
+            changes,
+            at: last.at,
+            pricing: last.pricing.clone(),
+            snapshot: snapshot.clone(),
+        });
+        return Ok(snapshot);
+    }
+    let started = std::time::Instant::now();
     let store = inner.store().await?;
     let now = Utc::now();
     let today = now.date_naive();
@@ -835,260 +1187,43 @@ async fn snapshot(
             limit: Some(500),
         })
         .await?;
-    let horizon_end = today + Duration::days(i64::from(settings.horizon_days));
     let miles = miles_rows(store, now).await?;
-    let days = query
-        .calendar_days
-        .unwrap_or(settings.trips.round_trip_days);
+    let ctx = Arc::new(Pricing {
+        now,
+        today,
+        settings,
+        points_of_sale,
+        home,
+        pos_names,
+        rates,
+        routes,
+        families,
+        deals,
+        miles,
+    });
 
-    let specs = row_specs(&routes, &families, home);
+    let specs = row_specs(&ctx.routes, &ctx.families, ctx.home);
     inner.prefetch_cells(store, &specs).await?;
-    let histories = inner.histories(store, &specs, &settings, now).await?;
+    let histories = inner.histories(store, &specs, &ctx.settings, now).await?;
     let mut rows = Vec::new();
     let mut detail = None;
     for spec in &specs {
-        let (route, key, discount) = (spec.route, spec.key, spec.discount);
-        let cabin = key.cabin;
-        let fams = &spec.families;
-        {
-            let mut cells: Vec<(FamilyKind, Arc<Vec<Observation>>)> =
-                Vec::new();
-            for f in fams {
-                cells.push((f.key.kind, inner.cells(store, f).await?));
-            }
-            let inputs: TripInputs = history::trip_inputs(
-                cells
-                    .iter()
-                    .flat_map(|(k, obs)| obs.iter().map(move |o| (*k, o))),
-                discount,
-            );
-            let hist = histories
-                .get(&key)
-                .cloned()
-                .context("a row without its history")?;
-            let baselines = Baselines {
-                by_departure: history::baselines_by_departure(
-                    &hist.points,
-                    now,
-                    settings.horizon_days,
-                ),
-            };
-            // The newest live cash deal of this row: confirmed, or
-            // waiting. Award deals are their own series (0023).
-            let deal = deals.iter().find(|d| {
-                d.series == tm_domain::Series::Cash
-                    && d.return_date.is_some()
-                    && d.route == route.id
-                    && d.cabin == cabin
-                    && d.departure >= today
-                    && matches!(
-                        d.status,
-                        DealStatus::Confirmed | DealStatus::Candidate
-                    )
-            });
-            let carrier_of = |dep: NaiveDate| {
-                cells
-                    .iter()
-                    .flat_map(|(_, obs)| obs.iter())
-                    .find(|o| o.departure == dep && o.carrier.is_some())
-            };
-            let best = match deal.and_then(|d| Some((d, d.return_date?))) {
-                Some((d, return_date)) => Some(Trip {
-                    departure: d.departure,
-                    return_date,
-                    price: d.effective_brl.clone(),
-                    carrier: d.carrier.clone(),
-                    stops: carrier_of(d.departure).and_then(|o| o.stops),
-                    duration_minutes: carrier_of(d.departure)
-                        .and_then(|o| o.duration_minutes),
-                    estimated: d.estimated,
-                }),
-                None => history::best_trip(
-                    &inputs,
-                    today,
-                    horizon_end,
-                    settings.trips,
-                )
-                .map(|(dep, n, p)| {
-                    let cell = carrier_of(dep);
-                    Trip {
-                        departure: dep,
-                        return_date: dep + Duration::days(i64::from(n)),
-                        price: Money::new(p.minor, tm_domain::Currency::brl()),
-                        carrier: cell.and_then(|o| o.carrier.clone()),
-                        stops: cell.and_then(|o| o.stops),
-                        duration_minutes: cell.and_then(|o| o.duration_minutes),
-                        estimated: !p.confirmed,
-                    }
-                }),
-            };
-            let baseline = match deal {
-                Some(d) => d.baseline.clone(),
-                None => best
-                    .as_ref()
-                    .and_then(|t| baselines.at(t.departure))
-                    .map(|m| Money::new(m, tm_domain::Currency::brl())),
-            };
-            let change = match (deal.and_then(|d| d.change), &best, &baseline) {
-                (Some(c), _, _) => Some(c),
-                (None, Some(t), Some(b)) if b.minor > 0 => {
-                    Some(t.price.minor as f64 / b.minor as f64 - 1.0)
-                }
-                _ => None,
-            };
-            // The first program with awards on this route leads (0083).
-            let mut award_read = None;
-            for program in leading_programs(&miles) {
-                if let Some(read) = read_awards(
-                    inner,
-                    store,
-                    &families,
-                    route,
-                    cabin,
-                    &program.program,
-                    home,
-                    settings.trips.round_trip_days,
-                    now,
-                )
-                .await?
-                {
-                    award_read = Some((program, read));
-                    break;
-                }
-            }
-            let award_inputs = award_read.as_ref().map(|(program, read)| {
-                let series = Series::Award {
-                    program: program.program.clone(),
-                };
-                AwardInputs {
-                    program,
-                    cabin,
-                    outbound: &read.outbound,
-                    inbound: &read.inbound,
-                    round_trip: &read.round_trip,
-                    other_cabins: &read.others,
-                    history: &read.history,
-                    deal: deals.iter().find(|d| {
-                        d.series == series
-                            && d.route == route.id
-                            && d.cabin == cabin
-                            && d.departure >= today
-                            && matches!(
-                                d.status,
-                                DealStatus::Confirmed | DealStatus::Candidate
-                            )
-                    }),
-                    checked_at: read.checked_at,
-                }
-            });
-            let award = award_inputs.as_ref().and_then(|a| {
-                summary(a, &inputs.legs, best.as_ref(), &settings, now)
-            });
-            let row = RouteRow {
-                award,
-                route: route.clone(),
-                cabin,
-                status: match deal.map(|d| d.status) {
-                    Some(DealStatus::Confirmed) => RowStatus::Deal,
-                    Some(DealStatus::Candidate) => RowStatus::Confirming,
-                    _ => RowStatus::Watching,
-                },
-                best: best.clone(),
-                baseline,
-                change,
-                history: hist.daily_min.clone(),
-                last_checked: fams
-                    .iter()
-                    .filter_map(|f| f.state.last_check)
-                    .max(),
-                deal: deal.and_then(|d| d.id),
-                found_at: deal.map(|d| d.confirmed_at.unwrap_or(d.found_at)),
-            };
-            if query.selected == Some(key) {
-                let (sellers, airline_direct) = deal
-                    .map(|d| seller_rows(d, &points_of_sale, &rates, &settings))
-                    .unwrap_or_default();
-                let url = deal.and_then(|d| d.url.clone()).or_else(|| {
-                    best.as_ref().map(|t| {
-                        search_url(
-                            route,
-                            cabin,
-                            &settings,
-                            t.departure,
-                            t.return_date,
-                        )
-                    })
-                });
-                // Learned changes per day, from the outbound leg's
-                // Gamma posterior (per hour).
-                let change_rate = fams
-                    .iter()
-                    .find(|f| {
-                        matches!(
-                            f.key.kind,
-                            FamilyKind::Leg { leg: Leg::Outbound }
-                        )
-                    })
-                    .filter(|f| f.state.chg_b > 0.0)
-                    .map(|f| f.state.chg_a / f.state.chg_b * 24.0);
-                let checks = store.recent_queries(400).await?;
-                let inputs = DetailInputs {
-                    trip: best.clone(),
-                    deal: row.status == RowStatus::Deal,
-                    trips: inputs.clone(),
-                    baselines,
-                    sellers,
-                    airline_direct,
-                    url,
-                    lowest_ever: hist.lowest.map(|(m, day)| {
-                        (
-                            Money::new(m, tm_domain::Currency::brl()),
-                            day,
-                            "60 days".to_owned(),
-                        )
-                    }),
-                    change_rate,
-                    recent_checks: checks
-                        .iter()
-                        .filter(|q| {
-                            q.key.route == route.id && q.key.cabin == cabin
-                        })
-                        .take(8)
-                        .map(|q| activity_row(q, &pos_names))
-                        .collect(),
-                    next_check: None,
-                    awards: award_inputs.as_ref().map(|a| {
-                        route_awards(
-                            a,
-                            &inputs.legs,
-                            query
-                                .departure
-                                .or(best.as_ref().map(|t| t.departure)),
-                            days,
-                            &settings,
-                            now,
-                        )
-                    }),
-                    award_marks: award_inputs.as_ref().map(AwardMarks::of),
-                    favorite: route.favorite,
-                };
-                detail = Some(assemble(
-                    key,
-                    inputs,
-                    &settings,
-                    today,
-                    days,
-                    query.departure,
-                ));
-            }
-            rows.push(row);
+        let hist = histories
+            .get(&spec.key)
+            .cloned()
+            .context("a row without its history")?;
+        let (row, d) =
+            price_row(inner, store, &ctx, spec, hist, &query).await?;
+        if d.is_some() {
+            detail = d;
         }
+        rows.push(row);
     }
 
     let queries = store.recent_queries(80).await?;
     let activity: Vec<ActivityRow> = queries
         .iter()
-        .map(|q| activity_row(q, &pos_names))
+        .map(|q| activity_row(q, &ctx.pos_names))
         .collect();
     let blocks: Vec<BlockRow> = store
         .blocks_since(now - Duration::days(7))
@@ -1104,20 +1239,26 @@ async fn snapshot(
         .collect();
     let blocks_today =
         blocks.iter().filter(|b| b.at.date_naive() == today).count() as u32;
-    let daemon =
-        daemon_status(store, &settings, blocks_today, today, &pos_names)
-            .await?;
+    let daemon = daemon_status(
+        store,
+        &ctx.settings,
+        blocks_today,
+        today,
+        &ctx.pos_names,
+    )
+    .await?;
     let sweep = queries
         .iter()
         .find(|q| q.sweep && matches!(q.outcome, Some(QueryOutcome::Ok)));
-    let finds = inner.finds(store, &settings, now).await?;
+    let finds = inner.finds(store, &ctx.settings, now).await?;
     let explore = ExploreSummary {
         last_sweep: sweep.map(|q| q.finished_at.unwrap_or(q.started_at)),
         destinations: sweep.map_or(0, |q| q.cells),
         found: found::found_rows(&finds, origin.as_ref().map(|o| o.id)),
     };
     let all_routes = store.list_routes(false).await?;
-    let mut feed: Vec<FeedItem> = deals
+    let mut feed: Vec<FeedItem> = ctx
+        .deals
         .iter()
         .take(20)
         .filter_map(|d| {
@@ -1186,16 +1327,16 @@ async fn snapshot(
     }));
     feed.sort_by_key(|f| std::cmp::Reverse(f.at));
     feed.truncate(8);
-    Ok(Snapshot {
+    let snapshot = Snapshot {
         taken_at: now,
         today,
         origin: origin.map(|o| o.id),
         origins,
         destinations,
         favorites,
-        points_of_sale,
-        settings,
-        miles,
+        points_of_sale: ctx.points_of_sale.clone(),
+        settings: ctx.settings.clone(),
+        miles: ctx.miles.clone(),
         rows,
         daemon,
         activity,
@@ -1203,7 +1344,17 @@ async fn snapshot(
         feed,
         explore,
         detail,
-    })
+    };
+    if let Some(changes) = changes {
+        inner.keep(Last {
+            query,
+            changes,
+            at: started,
+            pricing: ctx,
+            snapshot: snapshot.clone(),
+        });
+    }
+    Ok(snapshot)
 }
 
 /// The watched destinations, and which of them the user starred (0094).
@@ -1464,8 +1615,11 @@ fn to_store_place(p: &NewPlace) -> tm_store::NewPlace {
 #[async_trait]
 impl Backend for StoreBackend {
     async fn snapshot(&self, query: SnapshotQuery) -> anyhow::Result<Snapshot> {
-        self.run(move |inner| async move { snapshot(&inner, query).await })
-            .await
+        let changes = self.changes.get().map(ChangeSender::count);
+        self.run(
+            move |inner| async move { snapshot(&inner, query, changes).await },
+        )
+        .await
     }
 
     fn changes(&self) -> Changes {
@@ -2307,6 +2461,73 @@ mod tests {
         let _ = std::fs::remove_dir_all(dir);
     }
 
+    /// While the watcher has noticed no write, a query that only picks
+    /// another row reuses the last snapshot's rows and prices just the
+    /// detail; a noticed write, or the same query asked again, reads
+    /// everything.
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn selections_reuse_rows_until_a_write() {
+        let dir = dir();
+        let path = dir.join("tm.db");
+        let daemon = Store::open(&path).await.expect("open");
+        daemon.seed_defaults().await.expect("seed");
+        let yesterday = Utc::now() - Duration::days(1);
+        price_mia(&daemon, yesterday, 2000, true).await;
+        let backend = backend(path, Handle::current());
+        let mut changes = backend.changes();
+        let notice = async |changes: &mut Changes| {
+            tokio::time::timeout(StdDuration::from_secs(5), changes.next())
+                .await
+                .expect("a notice in time")
+        };
+        assert!(notice(&mut changes).await, "the watcher opened");
+
+        let all = backend
+            .snapshot(SnapshotQuery::default())
+            .await
+            .expect("reads");
+        let mia = all
+            .rows
+            .iter()
+            .find(|r| r.code() == "MIA" && r.cabin == Cabin::Economy)
+            .expect("MIA")
+            .key();
+        let lis = all
+            .rows
+            .iter()
+            .find(|r| r.code() == "LIS")
+            .expect("LIS")
+            .key();
+        let select = |key| SnapshotQuery {
+            origin: all.origin,
+            selected: Some(key),
+            ..Default::default()
+        };
+        let reused = backend.snapshot(select(mia)).await.expect("reads");
+        assert_eq!(reused.taken_at, all.taken_at, "the rows were reused");
+        assert_eq!(reused.rows, all.rows);
+        let detail = reused.detail.as_ref().expect("the detail");
+        assert_eq!(detail.key, mia);
+        assert_eq!(detail.trip.as_ref().map(|t| t.price.whole()), Some(4000));
+
+        // The same query again (the fallback refresh) reads everything.
+        let again = backend.snapshot(select(mia)).await.expect("reads");
+        assert!(again.taken_at > all.taken_at);
+        assert_eq!(again.detail, reused.detail);
+
+        // A noticed write ends the reuse.
+        price_mia(&daemon, Utc::now(), 1000, true).await;
+        assert!(notice(&mut changes).await, "the write was noticed");
+        let read = backend.snapshot(select(lis)).await.expect("reads");
+        assert!(read.taken_at > again.taken_at);
+        let row = read.row(mia).expect("MIA");
+        assert_eq!(row.best.as_ref().map(|t| t.price.whole()), Some(2000));
+        assert_eq!(read.detail.map(|d| d.key), Some(lis));
+        daemon.close().await;
+        drop(backend);
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
     /// Times snapshots against a copy of a real database:
     /// `TM_BENCH_DB=<copy> cargo test --release -p tm-app --bin tm --
     /// --ignored bench_snapshot --nocapture`. Never point it at the live
@@ -2317,7 +2538,9 @@ mod tests {
         let Some(path) = std::env::var_os("TM_BENCH_DB") else {
             return;
         };
-        let backend = backend(PathBuf::from(path), Handle::current());
+        let watched = backend(PathBuf::from(&path), Handle::current());
+        let full = backend(PathBuf::from(&path), Handle::current());
+        let backend = watched;
         let time = async |label: &str, query: SnapshotQuery| {
             let started = std::time::Instant::now();
             let s = backend.snapshot(query).await.expect("snapshot");
@@ -2332,12 +2555,22 @@ mod tests {
         for _ in 0..3 {
             time("warm", SnapshotQuery::default()).await;
         }
+        let select = |row: &RouteRow| SnapshotQuery {
+            selected: Some(row.key()),
+            ..Default::default()
+        };
         for row in s.rows.iter().take(3) {
-            let query = SnapshotQuery {
-                selected: Some(row.key()),
-                ..Default::default()
-            };
-            time("selected", query).await;
+            time("selected, not watching", select(row)).await;
+        }
+        // Watching: selections reuse the rows until a write is noticed.
+        let mut changes = backend.changes();
+        assert!(changes.next().await, "the watcher opened");
+        time("warm, watching", SnapshotQuery::default()).await;
+        for row in s.rows.iter().skip(5).step_by(50) {
+            let fast = time("selected, watching", select(row)).await;
+            let read = full.snapshot(select(row)).await.expect("snapshot");
+            assert_eq!(fast.detail, read.detail);
+            assert_eq!(fast.rows, read.rows);
         }
     }
 }

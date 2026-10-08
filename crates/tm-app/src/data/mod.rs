@@ -862,6 +862,11 @@ impl ChangeSender {
         self.0.send_modify(|n| *n = n.wrapping_add(1));
     }
 
+    /// How many notices were sent: it moves with every write noticed.
+    pub fn count(&self) -> u64 {
+        *self.0.borrow()
+    }
+
     pub fn subscribe(&self) -> Changes {
         Changes(self.0.subscribe())
     }
