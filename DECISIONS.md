@@ -1497,3 +1497,15 @@ overshoot, Fitts's-law timing, off-centre held clicks, wheel scrolling,
 and idle wandering while pages load. This deliberately departs from
 0052's "no disguise" for LATAM only, at the user's request; the user
 accepts the risk to their own account. Other sites keep CDP input.
+
+## 0092: One LATAM round trip runs by hand under --latam-round-trips
+
+- Date: 2026-10-07
+- Refines [0090](#0090-latam-award-dates-are-read-with-page-loads-the-strip-is-off).
+
+LATAM's clicks (the date strip, a round trip's outbound fare) go
+through the moving mouse of 0091, and a page is looked over for a few
+seconds before anything is read or clicked. With `--latam-round-trips`,
+a `check_family` request may run one LATAM round trip; the scheduler
+still never picks one until a live run shows the click works and the
+default changes.
