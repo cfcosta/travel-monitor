@@ -2,6 +2,8 @@
 //! length, coloured against the usual price, the selected departure's
 //! sellers, and the route's recent checks.
 
+use std::rc::Rc;
+
 use chrono::Duration;
 use gpui::{
     AnyElement,
@@ -10,6 +12,7 @@ use gpui::{
     FontWeight,
     SharedString,
     div,
+    list,
     prelude::*,
     px,
 };
@@ -31,6 +34,7 @@ use crate::{
         RouteAwards,
         RouteDetail,
         RouteRow,
+        RowKey,
         Snapshot,
     },
     format,
@@ -79,7 +83,7 @@ impl TravelMonitor {
             .flex()
             .size_full()
             .min_h_0()
-            .child(self.render_rail(fonts, s, cx))
+            .child(self.render_rail(s, cx))
             .child(
                 div()
                     .id("detail-main")
@@ -93,7 +97,6 @@ impl TravelMonitor {
 
     fn render_rail(
         &self,
-        fonts: &Fonts,
         s: &Snapshot,
         cx: &mut Context<Self>,
     ) -> impl IntoElement {
@@ -103,19 +106,54 @@ impl TravelMonitor {
             super::Sort::BiggestDrop,
             super::PayWith::Both,
         );
+        let keys: Rc<Vec<RowKey>> =
+            Rc::new(rows.iter().map(|r| r.key()).collect());
+        let state = self
+            .rail_rows
+            .sync(keys.len(), super::fingerprint((s.taken_at, &*keys)));
         div()
             .id("rail")
             .w(px(220.))
             .flex_none()
-            .overflow_y_scroll()
+            .flex()
+            .flex_col()
             .py(px(10.))
             .border_r_1()
             .border_color(color(theme::BORDER))
             .bg(color(theme::PANEL))
-            .children(rows.into_iter().map(|r| {
+            .child(
+                list(
+                    state,
+                    cx.processor(move |this, ix: usize, _, cx| {
+                        let fonts = theme::fonts(cx);
+                        let row = keys
+                            .get(ix)
+                            .and_then(|k| this.snapshot.as_ref()?.row(*k));
+                        match row {
+                            Some(r) => this
+                                .render_rail_row(&fonts, r, cx)
+                                .into_any_element(),
+                            None => div().into_any_element(),
+                        }
+                    }),
+                )
+                .flex_1()
+                .min_h_0(),
+            )
+    }
+
+    fn render_rail_row(
+        &self,
+        fonts: &Fonts,
+        r: &RouteRow,
+        cx: &mut Context<Self>,
+    ) -> impl IntoElement + use<> {
+        {
+            {
                 let key = r.key();
                 let on = self.selected == Some(key);
                 div()
+                    .w_full()
                     .id(SharedString::from(format!(
                         "rail-{}-{}",
                         key.route,
@@ -196,7 +234,8 @@ impl TravelMonitor {
                     .on_click(
                         cx.listener(move |this, _, _, cx| this.select(key, cx)),
                     )
-            }))
+            }
+        }
     }
 
     fn render_detail_main(

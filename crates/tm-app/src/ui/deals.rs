@@ -2,6 +2,8 @@
 //! routes on the left, the night map on the right, and a card for the
 //! selected row over the map.
 
+use std::rc::Rc;
+
 use chrono::{Datelike, NaiveDate};
 use gpui::{
     AnyElement,
@@ -12,6 +14,7 @@ use gpui::{
     Stateful,
     Window,
     div,
+    list,
     prelude::*,
     px,
     relative,
@@ -30,7 +33,7 @@ use super::{
     widgets::{self, mono},
 };
 use crate::{
-    data::{AwardSummary, Login, RouteDetail, RouteRow, Trip},
+    data::{AwardSummary, Login, RouteDetail, RouteRow, RowKey, Trip},
     format,
     geo::Region,
     grid::{AwardMark, CalendarDay, Tone as CalendarTone},
@@ -230,10 +233,34 @@ impl TravelMonitor {
                     (_, ListTab::All) => "No routes match. Add destinations in Settings.".to_owned(),
                 })
         });
-        let items: Vec<_> = rows
-            .iter()
-            .map(|row| self.render_row(fonts, row, cx).into_any_element())
-            .collect();
+        let keys: Rc<Vec<RowKey>> =
+            Rc::new(rows.iter().map(|r| r.key()).collect());
+        let content = super::fingerprint((
+            s.taken_at,
+            pay,
+            self.list_tab,
+            self.cabin,
+            self.sort,
+            self.favorites_only,
+            &*keys,
+        ));
+        let state = self.deals_rows.sync(keys.len(), content);
+        let items = list(
+            state,
+            cx.processor(move |this, ix: usize, _, cx| {
+                let fonts = theme::fonts(cx);
+                let row =
+                    keys.get(ix).and_then(|k| this.snapshot.as_ref()?.row(*k));
+                match row {
+                    Some(row) => {
+                        this.render_row(&fonts, row, cx).into_any_element()
+                    }
+                    None => div().into_any_element(),
+                }
+            }),
+        )
+        .flex_1()
+        .min_h_0();
         div()
             .flex()
             .flex_col()
@@ -274,11 +301,10 @@ impl TravelMonitor {
                     .id("rows")
                     .flex_1()
                     .min_h_0()
-                    .overflow_y_scroll()
                     .flex()
                     .flex_col()
                     .children(empty)
-                    .children(items),
+                    .child(items),
             )
     }
 
@@ -413,6 +439,7 @@ impl TravelMonitor {
             None => row.history.clone(),
         };
         let item = div()
+            .w_full()
             .id(SharedString::from(format!(
                 "row-{}-{}",
                 key.route,

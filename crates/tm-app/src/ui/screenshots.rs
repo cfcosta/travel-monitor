@@ -148,3 +148,204 @@ fn screenshots() -> anyhow::Result<()> {
     }
     Ok(())
 }
+
+/// A backend that answers every query with one snapshot.
+struct Fixed(crate::data::Snapshot);
+
+#[async_trait::async_trait]
+impl crate::data::Backend for Fixed {
+    async fn snapshot(
+        &self,
+        _: crate::data::SnapshotQuery,
+    ) -> anyhow::Result<crate::data::Snapshot> {
+        Ok(self.0.clone())
+    }
+
+    fn changes(&self) -> crate::data::Changes {
+        crate::data::Changes::channel().1
+    }
+
+    async fn enqueue(
+        &self,
+        _: crate::data::Request,
+    ) -> anyhow::Result<crate::data::Ticket> {
+        anyhow::bail!("read only")
+    }
+
+    async fn ticket(
+        &self,
+        _: crate::data::Ticket,
+    ) -> anyhow::Result<crate::data::TicketState> {
+        anyhow::bail!("read only")
+    }
+
+    async fn save_settings(
+        &self,
+        _: tm_domain::Settings,
+    ) -> anyhow::Result<()> {
+        anyhow::bail!("read only")
+    }
+
+    async fn add_place(
+        &self,
+        _: crate::data::Role,
+        _: crate::data::NewPlace,
+    ) -> anyhow::Result<()> {
+        anyhow::bail!("read only")
+    }
+
+    async fn remove_place(
+        &self,
+        _: crate::data::Role,
+        _: tm_domain::PlaceId,
+    ) -> anyhow::Result<()> {
+        anyhow::bail!("read only")
+    }
+
+    async fn set_favorite(
+        &self,
+        _: tm_domain::PlaceId,
+        _: bool,
+    ) -> anyhow::Result<()> {
+        anyhow::bail!("read only")
+    }
+
+    async fn add_pos(&self, _: crate::data::NewPos) -> anyhow::Result<()> {
+        anyhow::bail!("read only")
+    }
+
+    async fn set_pos_active(
+        &self,
+        _: tm_domain::PosId,
+        _: bool,
+    ) -> anyhow::Result<()> {
+        anyhow::bail!("read only")
+    }
+
+    async fn save_program(
+        &self,
+        _: String,
+        _: tm_domain::ProgramSettings,
+    ) -> anyhow::Result<()> {
+        anyhow::bail!("read only")
+    }
+
+    async fn set_site_limits(
+        &self,
+        _: String,
+        _: tm_domain::SiteLimits,
+    ) -> anyhow::Result<()> {
+        anyhow::bail!("read only")
+    }
+}
+
+/// Times frames (render, layout and paint, not the GPU) of each screen
+/// over a copy of a real database:
+///
+/// ```sh
+/// TM_BENCH_DB=<copy> cargo test --release -p tm-app --bin tm -- \
+///     --ignored frame_times --nocapture
+/// ```
+#[test]
+#[ignore = "needs TM_BENCH_DB, a copy of a real database"]
+#[allow(
+    clippy::disallowed_methods,
+    reason = "a test is a synchronous entry point"
+)]
+fn frame_times() -> anyhow::Result<()> {
+    let Some(path) = std::env::var_os("TM_BENCH_DB") else {
+        return Ok(());
+    };
+    let runtime = tokio::runtime::Runtime::new()?;
+    let store =
+        crate::data::store::backend(path.into(), runtime.handle().clone());
+    let mut snapshot = runtime.block_on(store.snapshot(Default::default()))?;
+    let first = snapshot.rows.first().map(|r| r.key());
+    snapshot =
+        runtime.block_on(store.snapshot(crate::data::SnapshotQuery {
+            origin: snapshot.origin,
+            selected: first,
+            ..Default::default()
+        }))?;
+    let now = snapshot.taken_at;
+    let text = Arc::new(gpui_wgpu::CosmicTextSystem::new("DejaVu Sans"));
+    let mut cx = HeadlessAppContext::with_platform(
+        text,
+        Arc::new(()),
+        gpui_platform::current_headless_renderer,
+    );
+    cx.update(|cx| {
+        crate::theme::Fonts::install(cx);
+        super::text_field::bind_keys(cx);
+        cx.set_reduce_motion(true);
+    });
+    let env = AppEnv {
+        backend: Arc::new(Fixed(snapshot)),
+        login: LoginConfig::resolve(None, None),
+        tokio: None,
+        refresh_every: Duration::from_secs(600),
+        debounce: crate::live::Debounce::default(),
+        clock: crate::live::Clock::From(now),
+    };
+    let window = cx.open_window(size(px(1440.), px(900.)), |_, cx| {
+        cx.new(|cx| TravelMonitor::new(env, cx))
+    })?;
+    let view = cx.update(|cx| window.root(cx))?;
+    cx.run_until_parked();
+    let frames = |cx: &mut HeadlessAppContext,
+                  label: &str,
+                  change: &dyn Fn(&mut TravelMonitor, usize)|
+     -> anyhow::Result<()> {
+        let mut times = Vec::new();
+        for i in 0..30 {
+            let took = cx.update_window(window.into(), |_, window, cx| {
+                view.update(cx, |tm, cx| {
+                    change(tm, i);
+                    cx.notify();
+                });
+                let started = std::time::Instant::now();
+                window.draw(cx).clear(cx);
+                started.elapsed()
+            })?;
+            times.push(took);
+        }
+        times.sort();
+        eprintln!(
+            "{label}: median {:?}, p90 {:?}",
+            times[times.len() / 2],
+            times[times.len() * 9 / 10]
+        );
+        Ok(())
+    };
+    let screens = [
+        ("deals, deals tab", Screen::Deals, super::ListTab::Deals),
+        ("deals, all routes", Screen::Deals, super::ListTab::All),
+        ("routes", Screen::Routes, super::ListTab::Deals),
+        ("detail", Screen::Detail, super::ListTab::Deals),
+        ("activity", Screen::Activity, super::ListTab::Deals),
+    ];
+    for (label, screen, tab) in screens {
+        cx.update_window(window.into(), |_, window, cx| {
+            view.update(cx, |tm, cx| {
+                tm.list_tab = tab;
+                tm.navigate(screen, window, cx);
+            });
+        })?;
+        cx.run_until_parked();
+        frames(&mut cx, label, &|_, _| {})?;
+    }
+    cx.update_window(window.into(), |_, window, cx| {
+        view.update(cx, |tm, cx| {
+            tm.list_tab = super::ListTab::All;
+            tm.navigate(Screen::Deals, window, cx);
+        });
+    })?;
+    frames(&mut cx, "deals, all routes, turning the globe", &|tm, i| {
+        tm.deals_map.set_view(crate::geo::GlobeView {
+            lon: -47.0 + i as f32,
+            lat: -10.0,
+            zoom: 1.5,
+        });
+    })?;
+    Ok(())
+}

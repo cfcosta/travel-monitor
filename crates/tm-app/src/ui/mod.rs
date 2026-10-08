@@ -32,6 +32,8 @@ use gpui::{
     Entity,
     FocusHandle,
     Focusable,
+    ListAlignment,
+    ListState,
     SharedString,
     Task,
     Window,
@@ -81,13 +83,13 @@ impl Screen {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ListTab {
     Deals,
     All,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Sort {
     BiggestDrop,
     LowestPrice,
@@ -118,7 +120,7 @@ impl Sort {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum RoutesFilter {
     All,
     Deals,
@@ -150,6 +152,50 @@ pub enum Menu {
     Origin,
     Cabin,
     Sort,
+}
+
+/// A long list drawn as a gpui [`ListState`]: only the rows on screen
+/// (and a margin) are laid out and painted each frame, so scrolling,
+/// hovering and the clock's ticks do not redraw hundreds of rows.
+pub(crate) struct Rows {
+    state: ListState,
+    /// What the rows were last measured for.
+    drawn: std::cell::Cell<Option<u64>>,
+}
+
+impl Rows {
+    pub fn new() -> Self {
+        Self {
+            state: ListState::new(0, ListAlignment::Top, px(600.)),
+            drawn: std::cell::Cell::new(None),
+        }
+    }
+
+    /// The state for a list of `count` rows, measured again when
+    /// `content` (a fingerprint of what they show) changed. The scroll
+    /// position stays, as it did on a scrolling div.
+    pub fn sync(&self, count: usize, content: u64) -> ListState {
+        let old = self.state.item_count();
+        if old == 0 {
+            // Splicing rows in before the scroll anchor would move it to
+            // the end.
+            self.state.reset(count);
+        } else if old != count {
+            let kept = old.min(count);
+            self.state.splice(kept..old, count - kept);
+            self.state.remeasure_items(0..kept);
+        } else if self.drawn.get() != Some(content) {
+            self.state.remeasure_items(0..count);
+        }
+        self.drawn.set(Some(content));
+        self.state.clone()
+    }
+}
+
+/// A fingerprint of what a list shows, for [`Rows::sync`].
+pub(crate) fn fingerprint(parts: impl std::hash::Hash) -> u64 {
+    use std::hash::{BuildHasher, BuildHasherDefault, DefaultHasher};
+    BuildHasherDefault::<DefaultHasher>::default().hash_one(parts)
 }
 
 /// What the app was started with.
@@ -192,6 +238,10 @@ pub struct TravelMonitor {
     pub(crate) logins: HashSet<String>,
     /// The Deals map's zoom and pan (0073).
     pub(crate) deals_map: map::MapState,
+    /// The Deals list, the routes table and the detail screen's rail.
+    deals_rows: Rows,
+    routes_rows: Rows,
+    rail_rows: Rows,
     generation: u64,
     /// The wall clock, moved every second (0057).
     pub(crate) now: DateTime<Utc>,
@@ -235,6 +285,9 @@ impl TravelMonitor {
             settings_form: None,
             logins: HashSet::new(),
             deals_map: map::MapState::default(),
+            deals_rows: Rows::new(),
+            routes_rows: Rows::new(),
+            rail_rows: Rows::new(),
             generation: 0,
             now,
             opened_at,
@@ -736,7 +789,7 @@ impl Render for TravelMonitor {
         let body: AnyElement = match (&self.snapshot, self.screen) {
             (None, _) => self.render_loading(),
             (Some(_), Screen::Deals) => self.render_deals(&fonts, window, cx),
-            (Some(_), Screen::Routes) => self.render_routes(&fonts, cx),
+            (Some(_), Screen::Routes) => self.render_routes(cx),
             (Some(_), Screen::Detail) => self.render_detail(&fonts, cx),
             (Some(_), Screen::Activity) => self.render_activity(&fonts, cx),
             (Some(_), Screen::Settings) => self.render_settings(&fonts, cx),

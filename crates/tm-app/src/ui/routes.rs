@@ -1,6 +1,8 @@
 //! The routes overview ("H"): today's numbers, a small map, the activity
 //! feed, and every route with its change against the usual price.
 
+use std::rc::Rc;
+
 use gpui::{
     AnyElement,
     Context,
@@ -8,6 +10,7 @@ use gpui::{
     FontWeight,
     SharedString,
     div,
+    list,
     prelude::*,
     px,
 };
@@ -22,7 +25,7 @@ use super::{
     widgets::{self, mono},
 };
 use crate::{
-    data::{NewPlace, Role, RouteRow, RowStatus, Snapshot, Tone},
+    data::{NewPlace, Role, RouteRow, RowKey, RowStatus, Snapshot, Tone},
     format,
     geo::Region,
     theme::{self, Fonts, color},
@@ -156,21 +159,51 @@ pub(super) fn small_map(
 impl TravelMonitor {
     pub(super) fn render_routes(
         &mut self,
-        fonts: &Fonts,
         cx: &mut Context<Self>,
     ) -> AnyElement {
         let Some(s) = &self.snapshot else {
             return div().into_any_element();
         };
+        // The page is one list: its head (today, Explore's finds, the
+        // table's top), the table's rows, and the bottom margin.
+        let keys: Rc<Vec<RowKey>> =
+            Rc::new(self.routes_table(s).iter().map(|r| r.key()).collect());
+        let content =
+            super::fingerprint((s.taken_at, self.routes_filter, &*keys));
+        let state = self.routes_rows.sync(keys.len() + 2, content);
         div()
             .id("routes-screen")
             .size_full()
-            .overflow_y_scroll()
             .flex()
             .flex_col()
-            .child(self.render_today(fonts, s))
-            .children(self.render_found(fonts, s, cx))
-            .child(self.render_routes_table(fonts, s, cx))
+            .child(
+                list(
+                    state,
+                    cx.processor(move |this, ix: usize, _, cx| {
+                        let fonts = theme::fonts(cx);
+                        let Some(s) = &this.snapshot else {
+                            return div().into_any_element();
+                        };
+                        if ix == 0 {
+                            return this
+                                .render_routes_head(&fonts, s, cx)
+                                .into_any_element();
+                        }
+                        match keys.get(ix - 1).and_then(|k| s.row(*k)) {
+                            Some(r) => this
+                                .render_route_line(
+                                    &fonts,
+                                    r,
+                                    ix == keys.len(),
+                                    cx,
+                                )
+                                .into_any_element(),
+                            None => div().h(px(24.)).into_any_element(),
+                        }
+                    }),
+                )
+                .size_full(),
+            )
             .into_any_element()
     }
 
@@ -599,12 +632,8 @@ impl TravelMonitor {
         );
     }
 
-    fn render_routes_table(
-        &self,
-        fonts: &Fonts,
-        s: &Snapshot,
-        cx: &mut Context<Self>,
-    ) -> Div {
+    /// The routes table's rows, filtered, biggest drop first.
+    fn routes_table<'a>(&self, s: &'a Snapshot) -> Vec<&'a RouteRow> {
         let filter = self.routes_filter;
         let mut rows: Vec<&RouteRow> = s
             .rows
@@ -617,6 +646,19 @@ impl TravelMonitor {
             })
             .collect();
         sort_rows(&mut rows, Sort::BiggestDrop, super::PayWith::Cash);
+        rows
+    }
+
+    /// The routes page above the table's rows: today, Explore's finds,
+    /// the heading with the filters, and the table's top with its
+    /// column names.
+    fn render_routes_head(
+        &self,
+        fonts: &Fonts,
+        s: &Snapshot,
+        cx: &mut Context<Self>,
+    ) -> Div {
+        let filter = self.routes_filter;
         let filters = widgets::segments().children(
             RoutesFilter::ALL.into_iter().map(|f| {
                 widgets::segment(
@@ -655,8 +697,71 @@ impl TravelMonitor {
             .child(head("Best dates", COLS[4]))
             .child(head("Checked", COLS[5]))
             .child(head("Status", COLS[6]));
+        div()
+            .w_full()
+            .flex()
+            .flex_col()
+            .child(self.render_today(fonts, s))
+            .children(self.render_found(fonts, s, cx))
+            .child(
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(12.))
+                    .px(px(24.))
+                    .pt(px(18.))
+                    .child(
+                        div()
+                            .flex()
+                            .items_center()
+                            .gap(px(10.))
+                            .child(widgets::heading("Routes", 18.))
+                            .child(filters)
+                            .child(
+                                widgets::ghost_button(
+                                    "add-route",
+                                    "+ Add route",
+                                )
+                                .ml_auto()
+                                .py(px(7.))
+                                .on_click(
+                                    cx.listener(|this, _, window, cx| {
+                                        this.navigate(
+                                            Screen::Settings,
+                                            window,
+                                            cx,
+                                        )
+                                    }),
+                                ),
+                            ),
+                    )
+                    .child(
+                        div()
+                            .border_t_1()
+                            .border_x_1()
+                            .border_color(color(theme::BORDER))
+                            .rounded_t(px(12.))
+                            .overflow_hidden()
+                            // No rows below to close the table.
+                            .when(self.routes_table(s).is_empty(), |d| {
+                                d.border_b_1().rounded_b(px(12.))
+                            })
+                            .child(header),
+                    ),
+            )
+    }
+
+    /// A row of the routes table, between the table's sides; the last
+    /// one closes it.
+    fn render_route_line(
+        &self,
+        fonts: &Fonts,
+        r: &RouteRow,
+        last: bool,
+        cx: &mut Context<Self>,
+    ) -> impl IntoElement {
         let now = self.now;
-        let body = rows.into_iter().map(|r| {
+        let line = {
             let key = r.key();
             let deal = r.status.is_deal();
             let status = match r.status {
@@ -765,40 +870,14 @@ impl TravelMonitor {
                     this.select(key, cx);
                     this.navigate(Screen::Detail, window, cx);
                 }))
-        });
-        div()
-            .flex()
-            .flex_col()
-            .gap(px(12.))
-            .px(px(24.))
-            .pt(px(18.))
-            .pb(px(24.))
-            .child(
-                div()
-                    .flex()
-                    .items_center()
-                    .gap(px(10.))
-                    .child(widgets::heading("Routes", 18.))
-                    .child(filters)
-                    .child(
-                        widgets::ghost_button("add-route", "+ Add route")
-                            .ml_auto()
-                            .py(px(7.))
-                            .on_click(cx.listener(|this, _, window, cx| {
-                                this.navigate(Screen::Settings, window, cx)
-                            })),
-                    ),
-            )
-            .child(
-                div()
-                    .flex()
-                    .flex_col()
-                    .border_1()
-                    .border_color(color(theme::BORDER))
-                    .rounded(px(12.))
-                    .overflow_hidden()
-                    .child(header)
-                    .children(body),
-            )
+        };
+        div().w_full().px(px(24.)).child(
+            div()
+                .border_x_1()
+                .border_color(color(theme::BORDER))
+                .overflow_hidden()
+                .when(last, |d| d.border_b_1().rounded_b(px(12.)))
+                .child(line),
+        )
     }
 }

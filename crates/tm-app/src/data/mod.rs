@@ -110,7 +110,7 @@ impl Trip {
 
 /// How the list and the card pay (0083): cash, miles, or both, each
 /// series with its own "% vs usual" (0023).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum PayWith {
     #[default]
     Both,
