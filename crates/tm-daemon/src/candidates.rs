@@ -114,6 +114,10 @@ pub struct Context {
     /// Miles programs without a live login (logged out, or a session
     /// that ended): their award families wait for the user (0024, 0085).
     pub logged_out: HashSet<String>,
+    /// Whether LATAM's round trips may run: only for a manual check of
+    /// one family under `--latam-round-trips`, never for the scheduler
+    /// (0090).
+    pub latam_round_trips: bool,
 }
 
 /// Why a family is not a candidate.
@@ -160,7 +164,13 @@ pub fn eligibility(family: &FamilyRecord, cx: &Context) -> Result<(), Skip> {
     {
         return Err(Skip::Unprobed);
     }
-    if sites::unsupported(&family.key, &cx.passengers).is_some() {
+    if sites::unsupported_unless(
+        &family.key,
+        &cx.passengers,
+        cx.latam_round_trips,
+    )
+    .is_some()
+    {
         return Err(Skip::Unsupported);
     }
     if let Source::Miles { program } = &family.key.source

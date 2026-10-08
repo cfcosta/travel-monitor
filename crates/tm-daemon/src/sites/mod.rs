@@ -107,15 +107,25 @@ pub fn unsupported(
     key: &FamilyKey,
     passengers: &Passengers,
 ) -> Option<&'static str> {
+    unsupported_unless(key, passengers, false)
+}
+
+/// [`unsupported`], with LATAM's round trips allowed when
+/// `latam_round_trips` is set ([`latam::unsupported_unless`]).
+pub fn unsupported_unless(
+    key: &FamilyKey,
+    passengers: &Passengers,
+    latam_round_trips: bool,
+) -> Option<&'static str> {
     match &key.source {
         Source::Airline { code } if code == tap::CODE => {
             tap::unsupported(key.kind, passengers)
         }
         Source::Airline { code } if code == latam::CODE => {
-            latam::unsupported(key.kind, passengers)
+            latam::unsupported_unless(key.kind, passengers, latam_round_trips)
         }
         Source::Miles { program } if program == latam::PROGRAM => {
-            latam::unsupported(key.kind, passengers)
+            latam::unsupported_unless(key.kind, passengers, latam_round_trips)
         }
         _ => None,
     }

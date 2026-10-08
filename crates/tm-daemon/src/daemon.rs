@@ -674,6 +674,9 @@ impl<S: Sources + 'static> Daemon<S> {
                 let mut cx = self.manual_context(&world).await?;
                 // Manual checks ignore the debugging restriction.
                 cx.only = Only::default();
+                // One family, by hand: a LATAM round trip may run under
+                // `--latam-round-trips` (0090).
+                cx.latam_round_trips = self.config.jobs.latam_round_trips;
                 let ids: Vec<FamilyId> = world
                     .families
                     .iter()

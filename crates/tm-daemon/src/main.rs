@@ -77,6 +77,7 @@ async fn run(cli: Cli) -> anyhow::Result<()> {
             max_graph_pages: cli.max_graph_pages,
             origin_override: cli.google_origin.clone(),
             latam_base: cli.latam_origin.clone(),
+            latam_round_trips: cli.latam_round_trips,
             ..JobOptions::default()
         },
         budget: cli.budget,

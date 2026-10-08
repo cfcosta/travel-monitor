@@ -120,6 +120,14 @@ pub struct Cli {
     /// default: a search a strip click made got Akamai's 403 (0090).
     #[arg(long)]
     pub latam_strip: bool,
+
+    /// Let a manual check of one LATAM round-trip family run (a
+    /// `check_family` request): it chooses an outbound fare with a click
+    /// to price the return. Off by default, and the scheduler never
+    /// picks LATAM round trips: a live run must first show the click is
+    /// not denied (DECISIONS.md 0090).
+    #[arg(long)]
+    pub latam_round_trips: bool,
 }
 
 fn parse_site_budget(text: &str) -> Result<(String, SiteLimits), String> {
@@ -261,6 +269,7 @@ mod tests {
         assert_eq!(cli.parallel, 3);
         assert!(!cli.no_notify);
         assert!(!cli.latam_strip, "the strip is off by default (0090)");
+        assert!(!cli.latam_round_trips, "round trips wait (0090)");
     }
 
     /// Headless: the module leaves `--headed` out.
@@ -293,6 +302,7 @@ mod tests {
             "1",
             "--no-notify",
             "--latam-strip",
+            "--latam-round-trips",
         ])
         .expect("parses");
         assert!(!cli.headed);
@@ -305,6 +315,7 @@ mod tests {
         assert_eq!(cli.parallel, 1);
         assert!(cli.no_notify);
         assert!(cli.latam_strip);
+        assert!(cli.latam_round_trips);
     }
 
     #[test]

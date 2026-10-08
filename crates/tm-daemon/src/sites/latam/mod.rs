@@ -87,7 +87,8 @@ pub enum LatamError {
 ///   one-way searches are no stand-in: an award round trip cost 36%
 ///   less than its one-ways (latam-pass.md, "Measuring cash against
 ///   miles" §3). The reader keeps its round-trip code for when a live
-///   run shows the click is not denied.
+///   run shows the click is not denied ([`unsupported_unless`] lifts
+///   this for that run).
 /// - Parties other than one adult: the page prices each passenger
 ///   (latam.md §4), and storing per-person prices for a party would
 ///   break 0036; multiplying them would be a guess, as for TAP (0053).
@@ -95,9 +96,20 @@ pub fn unsupported(
     kind: FamilyKind,
     passengers: &Passengers,
 ) -> Option<&'static str> {
+    unsupported_unless(kind, passengers, false)
+}
+
+/// [`unsupported`], except that round trips may run when `round_trips`
+/// is set: a manual check under `--latam-round-trips`, the live run that
+/// verifies the outbound click (0090).
+pub fn unsupported_unless(
+    kind: FamilyKind,
+    passengers: &Passengers,
+    round_trips: bool,
+) -> Option<&'static str> {
     match kind {
         FamilyKind::Explore => Some("LATAM has no Explore"),
-        FamilyKind::RoundTrip { .. } => Some(
+        FamilyKind::RoundTrip { .. } if !round_trips => Some(
             "LATAM prices a round trip only after a click on an outbound fare, which Akamai probably denies: off until a live run verifies it (0090)",
         ),
         _ if *passengers != Passengers::default() => {
@@ -1230,6 +1242,11 @@ mod tests {
         assert!(unsupported(FamilyKind::Explore, &one).is_some());
         let two = Passengers { adults: 2, ..one };
         assert!(unsupported(leg, &two).is_some());
+        // Lifted for the live run, a round trip still prices one adult.
+        let round = FamilyKind::RoundTrip { days: 7 };
+        assert_eq!(unsupported_unless(round, &one, true), None);
+        assert!(unsupported_unless(round, &two, true).is_some());
+        assert!(unsupported_unless(FamilyKind::Explore, &one, true).is_some());
         assert_eq!(airport("SAO"), "GRU");
         assert_eq!(airport("ORL"), "MCO");
         assert_eq!(airport("HOU"), "IAH");

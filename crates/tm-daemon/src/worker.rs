@@ -433,6 +433,7 @@ pub fn context(
         passengers: settings.passengers,
         no_flights: world.no_flights.clone(),
         logged_out: world.logged_out.clone(),
+        latam_round_trips: false,
     }
 }
 

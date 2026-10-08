@@ -2160,7 +2160,78 @@ async fn latam_round_trips_wait_for_a_verified_click() {
         .run_check(award, QueryReason::Manual)
         .await
         .expect("checks");
+    // Nor does a check asked for by hand, without `--latam-round-trips`.
+    let check = store
+        .enqueue(&RequestKind::CheckFamily { family: award })
+        .await
+        .expect("enqueues");
+    h.daemon.process_requests().await.expect("processes");
+    h.daemon.run_manual().await;
+    let r = store.request(check).await.expect("reads").expect("exists");
+    assert_eq!(r.status, RequestStatus::Failed);
     assert!(h.log().latam.is_empty(), "{:?}", h.log().latam);
+}
+
+/// Under `--latam-round-trips`, a manual check of one LATAM round-trip
+/// family runs, for the live run that verifies the outbound click
+/// (0090); the scheduler still skips them.
+#[tokio::test]
+async fn one_latam_round_trip_runs_by_hand_under_the_flag() {
+    let mut config = test_config(Only::default());
+    config.jobs.latam_round_trips = true;
+    let mut h = harness_with(config, |a| {
+        a.latam = Box::new(|job| {
+            Fetch::ok(
+                LatamFound {
+                    cells: latam_cells(job),
+                    ..LatamFound::default()
+                },
+                2,
+            )
+        });
+    })
+    .await;
+    let store = h.store().clone();
+    log_in(&store).await;
+    let round = FamilyKind::RoundTrip { days: 7 };
+    let award = latam_family(&store, "MIA", pass(), round).await;
+    let world = h.daemon.world().await.expect("loads");
+    let cx = h.daemon.context(&world, Utc::now()).await.expect("builds");
+    let f = world
+        .families
+        .iter()
+        .find(|f| f.id == award)
+        .expect("family");
+    assert_eq!(
+        tm_daemon::candidates::eligibility(f, &cx),
+        Err(tm_daemon::candidates::Skip::Unsupported)
+    );
+    h.daemon.tick().await.expect("ticks");
+    assert!(
+        h.log().latam.iter().all(|j| j.return_date.is_none()),
+        "{:?}",
+        h.log().latam
+    );
+    let check = store
+        .enqueue(&RequestKind::CheckFamily { family: award })
+        .await
+        .expect("enqueues");
+    h.daemon.process_requests().await.expect("processes");
+    h.daemon.run_manual().await;
+    let r = store.request(check).await.expect("reads").expect("exists");
+    assert_eq!(r.status, RequestStatus::Done, "{r:?}");
+    let trips: Vec<LatamJob> = h
+        .log()
+        .latam
+        .iter()
+        .filter(|j| j.return_date.is_some())
+        .cloned()
+        .collect();
+    assert_eq!(trips.len(), 1, "{trips:?}");
+    let trip = &trips[0];
+    assert!(trip.award);
+    assert_eq!(trip.return_date, Some(trip.departure + Days::new(7)));
+    assert_eq!(trip.strip.max_clicks, 0);
 }
 
 /// An award check reads one date, one page load (0090): the cheapest

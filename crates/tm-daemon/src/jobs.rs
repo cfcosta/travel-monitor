@@ -90,6 +90,9 @@ pub struct JobOptions {
     /// What a LATAM check reads; without it, the date a TAP search
     /// without a calendar would price, and no strip.
     pub latam: Option<LatamDates>,
+    /// Build LATAM round trips (`--latam-round-trips`): only a manual
+    /// check of one family asks for one (0090).
+    pub latam_round_trips: bool,
 }
 
 /// The `hl`/`gl`/`curr` of a point of sale.
@@ -291,7 +294,11 @@ fn latam_job(
     today: NaiveDate,
     options: &JobOptions,
 ) -> Result<LatamJob, JobError> {
-    if let Some(why) = sites::unsupported(key, &settings.passengers) {
+    if let Some(why) = sites::unsupported_unless(
+        key,
+        &settings.passengers,
+        options.latam_round_trips,
+    ) {
         return Err(JobError::Unsupported(why));
     }
     let (from, to, days) = match kind {
