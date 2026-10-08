@@ -988,6 +988,43 @@ fn the_favorites_filter_lists_starred_places(cx: &mut TestAppContext) {
     assert_eq!(codes(&mut cx).len(), 17);
 }
 
+/// The Deals globe shows the destinations the list shows: its dots follow
+/// the tab, Pay with, cabin and Places filters.
+#[gpui::test]
+fn the_globe_follows_the_list_filters(cx: &mut TestAppContext) {
+    let Opened { view, mut cx, .. } = open(cx, FakeBackend::at(now()));
+    let check = |cx: &mut VisualTestContext| {
+        view.read_with(cx, |tm, _| {
+            let mut listed: Vec<String> = tm
+                .visible_rows()
+                .iter()
+                .map(|r| r.code().to_owned())
+                .collect();
+            listed.sort();
+            listed.dedup();
+            let mut dots: Vec<String> = tm
+                .map_destinations(None)
+                .0
+                .iter()
+                .map(|d| d.place.code.to_string())
+                .collect();
+            dots.sort();
+            assert_eq!(dots, listed);
+            dots
+        })
+    };
+    let deals = check(&mut cx);
+    click(&mut cx, "places-favorites");
+    assert_eq!(check(&mut cx), ["LIS"]);
+    view.update(&mut cx, |tm, _| {
+        tm.list_tab = ListTab::All;
+        tm.favorites_only = false;
+    });
+    assert!(check(&mut cx).len() > deals.len());
+    view.update(&mut cx, |tm, _| tm.cabin = Some(Cabin::Business));
+    check(&mut cx);
+}
+
 /// A row's star makes its place a favorite through the configuration
 /// write (the daemon is asked to reload) without selecting the row; the
 /// card, the route page and the settings' destinations have one too.

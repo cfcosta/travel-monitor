@@ -538,25 +538,18 @@ impl TravelMonitor {
         }
     }
 
-    fn render_map_pane(
+    /// The globe's dots: one per destination of the rows the list shows,
+    /// so the sidebar's filters (tab, Pay with, cabin, Places) apply to
+    /// the map too. A deal in any listed cabin makes the dot yellow, in
+    /// the series Pay with shows (0083). Each dot's key is the row a
+    /// click selects.
+    pub(crate) fn map_destinations(
         &self,
-        fonts: &Fonts,
-        cx: &mut Context<Self>,
-    ) -> Stateful<Div> {
-        let Some(s) = &self.snapshot else {
-            return div().id("deals-map-pane");
-        };
-        let home = s.origin_place().map(|p| p.country.0.as_str());
-        let origin = s.origin_place().map(|p| MapPlace {
-            code: p.code.clone().into(),
-            lon: p.lon as f32,
-            lat: p.lat as f32,
-        });
-        // One dot per destination: a deal in any cabin makes it yellow,
-        // in the series Pay with shows (0083).
+        home: Option<&str>,
+    ) -> (Vec<MapDest>, Vec<RowKey>) {
         let mut dests: Vec<MapDest> = Vec::new();
         let mut keys = Vec::new();
-        for row in &s.rows {
+        for row in self.visible_rows() {
             let d = &row.route.destination;
             let selected = self.selected == Some(row.key());
             if let Some(i) =
@@ -581,6 +574,24 @@ impl TravelMonitor {
             });
             keys.push(row.key());
         }
+        (dests, keys)
+    }
+
+    fn render_map_pane(
+        &self,
+        fonts: &Fonts,
+        cx: &mut Context<Self>,
+    ) -> Stateful<Div> {
+        let Some(s) = &self.snapshot else {
+            return div().id("deals-map-pane");
+        };
+        let home = s.origin_place().map(|p| p.country.0.as_str());
+        let origin = s.origin_place().map(|p| MapPlace {
+            code: p.code.clone().into(),
+            lon: p.lon as f32,
+            lat: p.lat as f32,
+        });
+        let (dests, keys) = self.map_destinations(home);
         let model = MapModel {
             origin,
             destinations: dests,
